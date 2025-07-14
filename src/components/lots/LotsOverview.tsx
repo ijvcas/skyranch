@@ -56,9 +56,6 @@ const LotsOverview: React.FC<LotsOverviewProps> = ({
 
       {/* Status Card and Action Buttons */}
       <div className="space-y-4">
-        <SyncStatusCard 
-          propiedadParcelsCount={propiedadParcelsCount}
-        />
         
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <LotStatistics lots={lots} polygonData={polygonData} propiedadParcelsCount={propiedadParcelsCount} />
