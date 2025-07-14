@@ -13,9 +13,8 @@ const LotMapView: React.FC<LotMapViewProps> = ({ lots, onLotSelect }) => {
     <div className="space-y-4">
       <div className="bg-white p-4 rounded-lg border">
         <h2 className="text-lg font-semibold mb-2">Mapa de Lotes</h2>
-        <p className="text-gray-600 text-sm mb-4">
-          Visualiza y gestiona los polígonos de tus lotes de pastoreo. 
-          Los lotes auto-generados aparecen en gris claro como referencia.
+        <p className="text-gray-500 mb-4">
+          Dibuja y gestiona tus lotes de pastoreo.
         </p>
       </div>
       
