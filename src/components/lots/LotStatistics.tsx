@@ -30,7 +30,7 @@ const LotStatistics = ({ lots, polygonData = [], propiedadParcelsCount }: LotSta
     if (areaHectares < 0.01) {
       return `${(areaHectares * 10000).toFixed(0)} m²`;
     }
-    return `${areaHectares.toFixed(1)} ha`;
+    return `${areaHectares.toFixed(1)}`;
   };
 
   return (
