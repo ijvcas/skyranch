@@ -127,7 +127,7 @@ const Breeding: React.FC = () => {
             </Button>
             <Dialog open={showForm} onOpenChange={setShowForm}>
               <DialogTrigger asChild>
-                <Button size="sm" className="w-full md:w-auto">
+                <Button size="sm" className="w-full md:w-auto bg-gradient-blue-green hover:opacity-90 text-white border-0">
                   <Plus className="w-4 h-4 mr-2" />
                   Nuevo Apareamiento
                 </Button>
