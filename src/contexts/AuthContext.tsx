@@ -146,8 +146,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (email: string) => {
     console.log('🔑 Sending password reset for:', email);
     
-    // Use the correct Lovable project URL instead of localhost
-    const redirectUrl = 'https://ahwhtxygyzoadsmdrwwg.lovableproject.com/reset-password';
+    // Use the correct Lovable project URL for password reset
+    const redirectUrl = `${window.location.origin}/reset-password`;
     
     console.log('📧 Using redirect URL:', redirectUrl);
     
