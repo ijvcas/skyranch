@@ -61,7 +61,7 @@ const LotsOverview: React.FC<LotsOverviewProps> = ({
         />
         
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <LotStatistics lots={lots} />
+          <LotStatistics lots={lots} polygonData={polygonData} propiedadParcelsCount={propiedadParcelsCount} />
           <div className="flex flex-col gap-3">
             <Button 
               onClick={onCreateLot} 
