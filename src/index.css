@@ -43,6 +43,9 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Blue/Green gradient for calendar elements */
+    --gradient-blue-green: linear-gradient(135deg, #3B82F6, #10B981);
   }
 
   .dark {
@@ -73,6 +76,9 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Blue/Green gradient for calendar elements */
+    --gradient-blue-green: linear-gradient(135deg, #3B82F6, #10B981);
   }
 }
 

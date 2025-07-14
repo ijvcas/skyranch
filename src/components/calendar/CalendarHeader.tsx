@@ -36,7 +36,7 @@ const CalendarHeader = ({
         <div className="flex gap-2">
           <Dialog open={isDialogOpen} onOpenChange={(open) => open ? onOpenDialog() : onCloseDialog()}>
             <DialogTrigger asChild>
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-gradient-blue-green hover:opacity-90 text-white border-0">
                 <Plus className="w-4 h-4 mr-2" />
                 Nuevo Evento
               </Button>
