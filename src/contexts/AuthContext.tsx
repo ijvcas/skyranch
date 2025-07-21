@@ -1,5 +1,3 @@
-
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -60,6 +58,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state changed:', event, session?.user?.email || 'No user');
+        
+        // Handle password recovery specifically
+        if (event === 'PASSWORD_RECOVERY') {
+          console.log('🔑 Password recovery event detected - redirecting to reset form');
+          // Don't set the session immediately, let the reset form handle it
+          setLoading(false);
+          return;
+        }
         
         // Clear any corrupted session data on sign out
         if (event === 'SIGNED_OUT') {
@@ -146,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (email: string) => {
     console.log('🔑 Sending password reset for:', email);
     
-    // Use the correct Lovable project URL for password reset
+    // Use recovery flow with proper redirect
     const redirectUrl = `${window.location.origin}/reset-password`;
     
     console.log('📧 Using redirect URL:', redirectUrl);
@@ -271,4 +277,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
-
