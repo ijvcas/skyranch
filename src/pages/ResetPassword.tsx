@@ -36,7 +36,8 @@ const ResetPassword = () => {
         type 
       });
       
-      if (!accessToken || !refreshToken || type !== 'recovery') {
+      // Handle both explicit recovery type and magic link scenario
+      if (!accessToken || !refreshToken) {
         console.log('❌ Invalid or missing recovery tokens');
         toast({
           title: "Link Inválido",
