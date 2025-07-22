@@ -10,10 +10,12 @@ const config: CapacitorConfig = {
   },
   bundledWebRuntime: false,
   ios: {
-    contentInset: 'automatic'
+    contentInset: 'automatic',
+    scheme: 'skyranch'
   },
   android: {
-    allowMixedContent: true
+    allowMixedContent: true,
+    scheme: 'skyranch'
   },
   plugins: {
     SplashScreen: {
