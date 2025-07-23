@@ -1,3 +1,4 @@
+
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
@@ -5,7 +6,7 @@ const config: CapacitorConfig = {
   appName: 'SkyRanch Management',
   webDir: 'dist',
   server: {
-    url: 'https://4851015c-86a1-4ff3-9df4-bdfbbabf459a.lovableproject.com?forceHideBadge=true',
+    url: 'https://skyranch.lovable.app?forceHideBadge=true',
     cleartext: true
   },
   bundledWebRuntime: false,
