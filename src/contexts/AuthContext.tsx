@@ -31,23 +31,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🔄 Setting up auth state listener...');
+    console.log('🔄 [AUTH CONTEXT] Setting up auth state listener...');
     
     // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        console.log('📋 Initial session check:', session?.user?.email || 'No session');
+        console.log('📋 [AUTH CONTEXT] Initial session check:', session?.user?.email || 'No session');
         
         if (error) {
-          console.error('❌ Error getting initial session:', error);
+          console.error('❌ [AUTH CONTEXT] Error getting initial session:', error);
         }
         
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       } catch (error) {
-        console.error('❌ Exception getting initial session:', error);
+        console.error('❌ [AUTH CONTEXT] Exception getting initial session:', error);
         setLoading(false);
       }
     };
@@ -57,11 +57,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event, session?.user?.email || 'No user');
+        console.log('🔄 [AUTH CONTEXT] Auth state changed:', event, session?.user?.email || 'No user');
         
         // Handle password recovery specifically
         if (event === 'PASSWORD_RECOVERY') {
-          console.log('🔑 Password recovery event detected - redirecting to reset form');
+          console.log('🔑 [AUTH CONTEXT] Password recovery event detected');
           // Don't set the session immediately, let the reset form handle it
           setLoading(false);
           return;
@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Clear any corrupted session data on sign out
         if (event === 'SIGNED_OUT') {
-          console.log('🧹 Clearing session data...');
+          console.log('🧹 [AUTH CONTEXT] Clearing session data...');
           localStorage.removeItem('supabase.auth.token');
           sessionStorage.clear();
         }
@@ -81,13 +81,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     return () => {
-      console.log('🧹 Cleaning up auth subscription');
+      console.log('🧹 [AUTH CONTEXT] Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    console.log('📝 Attempting sign up for:', email);
+    console.log('📝 [AUTH CONTEXT] Attempting sign up for:', email);
     
     const redirectUrl = `${window.location.origin}/dashboard`;
     
@@ -103,20 +103,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     
     if (error) {
-      console.error('❌ Sign up error:', error);
+      console.error('❌ [AUTH CONTEXT] Sign up error:', error);
     } else {
-      console.log('✅ Sign up successful for:', email);
+      console.log('✅ [AUTH CONTEXT] Sign up successful for:', email);
     }
     
     return { error };
   };
 
   const signIn = async (email: string, password: string) => {
-    console.log('🔐 Attempting sign in for:', email);
+    console.log('🔐 [AUTH CONTEXT] Attempting sign in for:', email);
     
     // Special handling for problematic user
     if (email === 'jvcas@mac.com') {
-      console.log('🧹 Special handling for jvcas@mac.com - clearing corrupted session first');
+      console.log('🧹 [AUTH CONTEXT] Special handling for jvcas@mac.com - clearing corrupted session first');
       await clearCorruptedSession();
       // Wait a moment for cleanup to complete
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -128,21 +128,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     
     if (error) {
-      console.error('❌ Sign in error for', email, ':', error);
-      console.error('❌ Error details:', {
+      console.error('❌ [AUTH CONTEXT] Sign in error for', email, ':', error);
+      console.error('❌ [AUTH CONTEXT] Error details:', {
         message: error.message,
         status: error.status,
         name: error.name
       });
     } else {
-      console.log('✅ Sign in successful for:', email);
+      console.log('✅ [AUTH CONTEXT] Sign in successful for:', email);
     }
     
     return { error };
   };
 
   const signOut = async () => {
-    console.log('🚪 Signing out...');
+    console.log('🚪 [AUTH CONTEXT] Signing out...');
     await supabase.auth.signOut();
     // Clear all session data
     localStorage.removeItem('supabase.auth.token');
@@ -150,37 +150,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetPassword = async (email: string) => {
-    console.log('🔑 Sending password reset for:', email);
+    console.log('🔑 [AUTH CONTEXT] Sending password reset for:', email);
     
-    // Use recovery flow with proper redirect
-    const redirectUrl = `${window.location.origin}/reset-password`;
+    // Use the production URL for reset with enhanced logging
+    const redirectUrl = `https://skyranch.lovable.app/reset-password`;
     
-    console.log('📧 Using redirect URL:', redirectUrl);
+    console.log('📧 [AUTH CONTEXT] Using redirect URL:', redirectUrl);
+    console.log('📧 [AUTH CONTEXT] Current window origin:', window.location.origin);
+    console.log('📧 [AUTH CONTEXT] Current window URL:', window.location.href);
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl
     });
     
     if (error) {
-      console.error('❌ Password reset error:', error);
+      console.error('❌ [AUTH CONTEXT] Password reset error:', error);
+      console.error('❌ [AUTH CONTEXT] Reset error details:', {
+        message: error.message,
+        status: error.status,
+        name: error.name,
+        code: error.code
+      });
     } else {
-      console.log('✅ Password reset email sent to:', email);
+      console.log('✅ [AUTH CONTEXT] Password reset email sent to:', email);
+      console.log('✅ [AUTH CONTEXT] Reset email should contain link to:', redirectUrl);
     }
     
     return { error };
   };
 
   const updatePassword = async (newPassword: string) => {
-    console.log('🔑 Updating password for current user');
+    console.log('🔑 [AUTH CONTEXT] Updating password for current user');
+    
+    // Enhanced session verification
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) {
+      console.error('❌ [AUTH CONTEXT] Session verification error:', sessionError);
+      return { error: sessionError };
+    }
+    
+    if (!session) {
+      console.error('❌ [AUTH CONTEXT] No active session for password update');
+      return { error: { message: 'No active session found' } };
+    }
+    
+    console.log('✅ [AUTH CONTEXT] Session verified for password update:', session.user.email);
     
     const { error } = await supabase.auth.updateUser({
       password: newPassword
     });
     
     if (error) {
-      console.error('❌ Password update error:', error);
+      console.error('❌ [AUTH CONTEXT] Password update error:', error);
+      console.error('❌ [AUTH CONTEXT] Update error details:', {
+        message: error.message,
+        status: error.status,
+        name: error.name,
+        code: error.code
+      });
     } else {
-      console.log('✅ Password updated successfully');
+      console.log('✅ [AUTH CONTEXT] Password updated successfully');
     }
     
     return { error };
