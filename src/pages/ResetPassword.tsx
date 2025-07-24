@@ -21,6 +21,7 @@ const ResetPassword = () => {
   const [hasValidTokens, setHasValidTokens] = useState(false);
   const [isProcessingTokens, setIsProcessingTokens] = useState(true);
   const [tokenInfo, setTokenInfo] = useState<any>(null);
+  const [recoveryMethod, setRecoveryMethod] = useState<'otp' | 'session' | null>(null);
 
   useEffect(() => {
     const handlePasswordRecovery = async () => {
@@ -33,125 +34,154 @@ const ResetPassword = () => {
       }
       console.log('🔍 [RESET PASSWORD] All URL parameters:', allParams);
       
-      // Check for recovery tokens in URL
+      // Check for new recovery format (token_hash + type)
+      const tokenHash = searchParams.get('token_hash');
+      const type = searchParams.get('type');
+      
+      // Check for legacy format (access_token + refresh_token)
       const accessToken = searchParams.get('access_token');
       const refreshToken = searchParams.get('refresh_token');
-      const type = searchParams.get('type');
-      const tokenHash = searchParams.get('token_hash');
-      const tokenType = searchParams.get('token_type');
       
       console.log('🔑 [RESET PASSWORD] Token analysis:', { 
+        hasTokenHash: !!tokenHash,
         hasAccessToken: !!accessToken, 
         hasRefreshToken: !!refreshToken, 
         type,
-        tokenHash: tokenHash ? `${tokenHash.substring(0, 10)}...` : null,
-        tokenType,
+        tokenHashLength: tokenHash?.length,
         accessTokenLength: accessToken?.length,
         refreshTokenLength: refreshToken?.length,
         fullURL: window.location.href
       });
       
       setTokenInfo({
+        tokenHash: tokenHash ? `${tokenHash.substring(0, 20)}...` : null,
         accessToken: accessToken ? `${accessToken.substring(0, 20)}...` : null,
         refreshToken: refreshToken ? `${refreshToken.substring(0, 20)}...` : null,
         type,
-        tokenHash: tokenHash ? `${tokenHash.substring(0, 20)}...` : null,
-        tokenType,
-        urlLength: window.location.href.length
+        urlLength: window.location.href.length,
+        method: tokenHash ? 'OTP (token_hash)' : accessToken ? 'Session (access_token)' : 'Unknown'
       });
-      
-      // Handle missing tokens
-      if (!accessToken || !refreshToken) {
-        console.log('❌ [RESET PASSWORD] Missing required tokens');
-        console.log('❌ [RESET PASSWORD] Expected: access_token and refresh_token');
-        console.log('❌ [RESET PASSWORD] Received:', { accessToken: !!accessToken, refreshToken: !!refreshToken });
-        
-        toast({
-          title: "Link Inválido",
-          description: "Este link de reset no es válido o ha expirado. Por favor, solicita un nuevo reset de contraseña.",
-          variant: "destructive"
-        });
-        setIsProcessingTokens(false);
-        setTimeout(() => navigate('/forgot-password'), 3000);
-        return;
-      }
 
       try {
-        console.log('🔄 [RESET PASSWORD] Setting session for password recovery...');
-        console.log('🔄 [RESET PASSWORD] Token validation checks...');
-        
-        // Additional token validation
-        if (accessToken.length < 20 || refreshToken.length < 20) {
-          console.log('❌ [RESET PASSWORD] Tokens appear to be too short');
-          throw new Error('Tokens appear to be invalid (too short)');
-        }
-        
-        // Check if tokens contain expected JWT structure
-        const accessTokenParts = accessToken.split('.');
-        const refreshTokenParts = refreshToken.split('.');
-        
-        console.log('🔍 [RESET PASSWORD] Token structure analysis:', {
-          accessTokenParts: accessTokenParts.length,
-          refreshTokenParts: refreshTokenParts.length,
-          accessTokenIsJWT: accessTokenParts.length === 3,
-          refreshTokenIsJWT: refreshTokenParts.length === 3
-        });
-        
-        // Set the session with recovery tokens
-        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        });
-        
-        console.log('🔄 [RESET PASSWORD] Session establishment result:', {
-          hasSession: !!sessionData.session,
-          hasUser: !!sessionData.session?.user,
-          userEmail: sessionData.session?.user?.email,
-          sessionError: sessionError?.message,
-          sessionErrorCode: sessionError?.name
-        });
-        
-        if (sessionError) {
-          console.error('❌ [RESET PASSWORD] Session error details:', {
-            message: sessionError.message,
-            name: sessionError.name,
-            status: sessionError.status,
-            code: sessionError.code
+        // Handle new OTP-based recovery (recommended approach)
+        if (tokenHash && type === 'recovery') {
+          console.log('🔄 [RESET PASSWORD] Using OTP recovery method with token_hash');
+          setRecoveryMethod('otp');
+          
+          // Verify the OTP token
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: 'recovery'
           });
-          throw new Error(`Failed to establish recovery session: ${sessionError.message}`);
+          
+          console.log('🔄 [RESET PASSWORD] OTP verification result:', {
+            hasSession: !!data.session,
+            hasUser: !!data.user,
+            userEmail: data.user?.email,
+            error: error?.message
+          });
+          
+          if (error) {
+            console.error('❌ [RESET PASSWORD] OTP verification error:', error);
+            throw new Error(`OTP verification failed: ${error.message}`);
+          }
+          
+          if (!data.session || !data.user) {
+            console.error('❌ [RESET PASSWORD] No session or user from OTP verification');
+            throw new Error('Invalid recovery token - no session established');
+          }
+          
+          console.log('✅ [RESET PASSWORD] OTP verification successful');
+          console.log('✅ [RESET PASSWORD] Recovery session established for:', data.user.email);
+          
+          setHasValidTokens(true);
+          setIsProcessingTokens(false);
+          
+          toast({
+            title: "Link Válido",
+            description: "Token de recuperación verificado. Ahora puedes cambiar tu contraseña.",
+          });
+          
+          return;
         }
         
-        if (!sessionData.session) {
-          console.error('❌ [RESET PASSWORD] No session data returned');
-          throw new Error('No session data returned from Supabase');
+        // Handle legacy session-based recovery (fallback)
+        if (accessToken && refreshToken) {
+          console.log('🔄 [RESET PASSWORD] Using legacy session recovery method');
+          setRecoveryMethod('session');
+          
+          // Validate token format
+          if (accessToken.length < 20 || refreshToken.length < 20) {
+            console.log('❌ [RESET PASSWORD] Tokens appear to be too short');
+            throw new Error('Tokens appear to be invalid (too short)');
+          }
+          
+          // Set the session with recovery tokens
+          const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          console.log('🔄 [RESET PASSWORD] Session establishment result:', {
+            hasSession: !!sessionData.session,
+            hasUser: !!sessionData.session?.user,
+            userEmail: sessionData.session?.user?.email,
+            sessionError: sessionError?.message
+          });
+          
+          if (sessionError) {
+            console.error('❌ [RESET PASSWORD] Session error:', sessionError);
+            throw new Error(`Failed to establish recovery session: ${sessionError.message}`);
+          }
+          
+          if (!sessionData.session) {
+            console.error('❌ [RESET PASSWORD] No session data returned');
+            throw new Error('No session data returned from Supabase');
+          }
+          
+          console.log('✅ [RESET PASSWORD] Legacy recovery session established successfully');
+          console.log('✅ [RESET PASSWORD] User authenticated:', sessionData.session.user.email);
+          
+          setHasValidTokens(true);
+          setIsProcessingTokens(false);
+          
+          toast({
+            title: "Link Válido",
+            description: "Sesión de recuperación establecida. Ahora puedes cambiar tu contraseña.",
+          });
+          
+          return;
         }
         
-        console.log('✅ [RESET PASSWORD] Recovery session established successfully');
-        console.log('✅ [RESET PASSWORD] User authenticated:', sessionData.session.user.email);
-        
-        setHasValidTokens(true);
-        setIsProcessingTokens(false);
-        
-        toast({
-          title: "Link Válido",
-          description: "Ahora puedes cambiar tu contraseña.",
+        // No valid tokens found
+        console.log('❌ [RESET PASSWORD] No valid recovery tokens found');
+        console.log('❌ [RESET PASSWORD] Expected: token_hash + type=recovery OR access_token + refresh_token');
+        console.log('❌ [RESET PASSWORD] Received:', { 
+          tokenHash: !!tokenHash, 
+          type, 
+          accessToken: !!accessToken, 
+          refreshToken: !!refreshToken 
         });
+        
+        throw new Error('No valid recovery tokens found in URL');
         
       } catch (error) {
-        console.error('❌ [RESET PASSWORD] Comprehensive error details:', {
+        console.error('❌ [RESET PASSWORD] Recovery processing failed:', {
           errorMessage: error.message,
           errorName: error.name,
-          errorStack: error.stack,
-          accessTokenPresent: !!accessToken,
-          refreshTokenPresent: !!refreshToken,
+          tokenHash: !!tokenHash,
+          type,
+          accessToken: !!accessToken,
+          refreshToken: !!refreshToken,
           urlParams: Object.fromEntries(searchParams.entries())
         });
         
         toast({
-          title: "Error de Sesión",
+          title: "Link Inválido",
           description: `Error al procesar el link de reset: ${error.message}`,
           variant: "destructive"
         });
+        
         setIsProcessingTokens(false);
         setTimeout(() => navigate('/forgot-password'), 3000);
       }
@@ -193,7 +223,7 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('🔑 [RESET PASSWORD] Updating password...');
+      console.log('🔑 [RESET PASSWORD] Updating password using method:', recoveryMethod);
       
       const { error } = await updatePassword(password);
       
@@ -241,9 +271,10 @@ const ResetPassword = () => {
             <p className="text-gray-600 mb-2">Procesando link de reset...</p>
             {tokenInfo && (
               <div className="text-xs text-gray-500 text-left bg-gray-50 p-2 rounded">
-                <p>🔍 Debug Info:</p>
-                <p>Access Token: {tokenInfo.accessToken || 'Missing'}</p>
-                <p>Refresh Token: {tokenInfo.refreshToken || 'Missing'}</p>
+                <p>🔍 Token Analysis:</p>
+                <p>Method: {tokenInfo.method}</p>
+                <p>Token Hash: {tokenInfo.tokenHash || 'Not present'}</p>
+                <p>Access Token: {tokenInfo.accessToken || 'Not present'}</p>
                 <p>Type: {tokenInfo.type || 'Not specified'}</p>
                 <p>URL Length: {tokenInfo.urlLength}</p>
               </div>
@@ -268,11 +299,11 @@ const ResetPassword = () => {
             {tokenInfo && (
               <div className="text-xs text-gray-500 text-left bg-red-50 p-2 rounded mb-4">
                 <p>🔍 Token Debug Info:</p>
+                <p>Method: {tokenInfo.method}</p>
+                <p>Token Hash: {tokenInfo.tokenHash || 'Missing'}</p>
                 <p>Access Token: {tokenInfo.accessToken || 'Missing'}</p>
                 <p>Refresh Token: {tokenInfo.refreshToken || 'Missing'}</p>
                 <p>Type: {tokenInfo.type || 'Not specified'}</p>
-                <p>Token Hash: {tokenInfo.tokenHash || 'Not present'}</p>
-                <p>Token Type: {tokenInfo.tokenType || 'Not specified'}</p>
               </div>
             )}
             
@@ -353,17 +384,18 @@ const ResetPassword = () => {
               <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-green-800">
                 <p className="font-medium mb-1">Link válido confirmado</p>
-                <p>Tu sesión de reset está activa. Cambia tu contraseña y podrás hacer login normalmente.</p>
+                <p>Token de recuperación verificado usando método: <strong>{recoveryMethod === 'otp' ? 'OTP (Recomendado)' : 'Session (Legacy)'}</strong></p>
               </div>
             </div>
           </div>
           
           {tokenInfo && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs text-blue-800 font-medium mb-2">🔍 Session Debug Info:</p>
+              <p className="text-xs text-blue-800 font-medium mb-2">🔍 Recovery Debug Info:</p>
               <div className="text-xs text-blue-700 space-y-1">
-                <p>✅ Access Token: Present ({tokenInfo.accessToken})</p>
-                <p>✅ Refresh Token: Present ({tokenInfo.refreshToken})</p>
+                <p>✅ Method: {tokenInfo.method}</p>
+                {tokenInfo.tokenHash && <p>✅ Token Hash: Present ({tokenInfo.tokenHash})</p>}
+                {tokenInfo.accessToken && <p>✅ Access Token: Present ({tokenInfo.accessToken})</p>}
                 <p>✅ Type: {tokenInfo.type || 'recovery'}</p>
               </div>
             </div>
