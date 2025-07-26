@@ -34,8 +34,8 @@ const ResetPassword = () => {
       }
       console.log('🔍 [RESET PASSWORD] All URL parameters:', allParams);
       
-      // Check for new recovery format (token_hash + type)
-      const tokenHash = searchParams.get('token_hash');
+      // Check for new recovery format (token_hash + type) OR (token + type)
+      const tokenHash = searchParams.get('token_hash') || searchParams.get('token');
       const type = searchParams.get('type');
       
       // Check for legacy format (access_token + refresh_token)
