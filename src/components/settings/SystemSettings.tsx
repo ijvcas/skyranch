@@ -27,6 +27,7 @@ const SystemSettings = () => {
   const [lastValidated, setLastValidated] = useState<string | null>(null);
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
   useEffect(() => {
     if (weatherSettings) {
       const name = weatherSettings.display_name || weatherSettings.location_query;
@@ -42,7 +43,7 @@ const SystemSettings = () => {
     if (!trimmed || settingsLoading) { setPredictions([]); setShowSuggestions(false); return; }
     setValid(null); // don't show red while typing
     const t = setTimeout(async () => {
-      setValidating(true);
+      setSuggesting(true);
       try {
         const sugg = await suggestPlaces(trimmed, weatherSettings?.language || 'es');
         setPredictions(sugg);
@@ -52,7 +53,7 @@ const SystemSettings = () => {
         setPredictions([]);
         setShowSuggestions(false);
       } finally {
-        setValidating(false);
+        setSuggesting(false);
       }
     }, 300);
     return () => clearTimeout(t);
@@ -163,6 +164,8 @@ const SystemSettings = () => {
                         } else {
                           handleValidateFreeText();
                         }
+                      } else if (e.key === 'Escape') {
+                        setShowSuggestions(false);
                       }
                     }}
                     onBlur={() => {
@@ -199,7 +202,7 @@ const SystemSettings = () => {
                     </div>
                   )}
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {validating || saving ? (
+                    {(validating || saving || suggesting) ? (
                       <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                     ) : valid === true ? (
                       <CheckCircle2 className="w-5 h-5 text-green-600" />
