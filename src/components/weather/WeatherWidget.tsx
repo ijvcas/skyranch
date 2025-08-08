@@ -61,29 +61,30 @@ const WeatherWidget: React.FC = () => {
 
   const getWeatherCondition = () => {
     if (profileLoading || isLoading) return "Cargando…";
-    if (!hasCoordinates || !weather?.conditionText) return "Condición aproximada";
+    if (!hasCoordinates) return "Sin ubicación";
+    if (!weather?.conditionText) return "Conectando...";
     return weather.conditionText;
   };
 
   return (
-    <section aria-label="Clima actual" className="w-full">
+    <section aria-label="Clima actual" className="w-full max-w-sm mx-auto">
       <Card className="bg-card text-card-foreground">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <TempIcon className="h-7 w-7 text-muted-foreground" aria-hidden />
-            <div className="flex-1">
+        <CardContent className="p-3">
+          <div className="flex items-center gap-2">
+            <TempIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" aria-hidden />
+            <div className="flex-1 min-w-0">
               {/* Temperature and condition in one line like picture 2 */}
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl font-bold">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold">
                   {profileLoading || isLoading ? "—" :
                     typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
                 </span>
-                <span className="text-lg text-muted-foreground">
+                <span className="text-sm text-muted-foreground truncate">
                   {getWeatherCondition()}
                 </span>
               </div>
               {/* Location below like picture 2 */}
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs text-muted-foreground truncate">
                 {formatLocation()}
               </div>
             </div>
