@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind } from "lucide-react";
-import { useWeatherSettings } from "@/hooks/useWeatherSettings";
-import { useOpenWeatherAPI } from "@/hooks/useOpenWeatherAPI";
+import { useFarmProfile } from "@/hooks/useFarmProfile";
+import { useFarmWeather } from "@/hooks/useFarmWeather";
 
 function pickIcon(text?: string | null) {
   const t = (text || "").toLowerCase();
@@ -15,25 +15,31 @@ function pickIcon(text?: string | null) {
 }
 
 const WeatherWidget: React.FC = () => {
-  const { data: settings, isLoading: settingsLoading } = useWeatherSettings();
-  const lat = settings?.lat;
-  const lng = settings?.lng;
-  const displayName = settings?.display_name || "Ubicación";
-  const unitSystem = (settings?.unit_system as "metric" | "imperial") || "metric";
-
-  const { data: weather, isLoading } = useOpenWeatherAPI(
-    lat,
-    lng,
-    {
-      locationKey: displayName || (typeof lat === "number" && typeof lng === "number" ? `${lat},${lng}` : undefined),
-      language: settings?.language || "es",
-      unitSystem,
+  const { data: farmProfile, isLoading: profileLoading } = useFarmProfile();
+  
+  // Parse coordinates from farm profile
+  let lat: number | undefined;
+  let lng: number | undefined;
+  
+  if (farmProfile?.location_coordinates) {
+    try {
+      const coords = farmProfile.location_coordinates.split(',').map(c => parseFloat(c.trim()));
+      if (coords.length === 2 && coords.every(c => !isNaN(c))) {
+        lat = coords[0];
+        lng = coords[1];
+      }
+    } catch (e) {
+      console.warn('Failed to parse farm coordinates:', e);
     }
-  );
+  }
+  
+  const displayName = farmProfile?.location_name || farmProfile?.farm_name || "Ubicación";
+
+  const { data: weather, isLoading } = useFarmWeather(lat, lng);
 
   const TempIcon = pickIcon(weather?.conditionText);
-  const tempValue = unitSystem === "metric" ? weather?.temperatureC : weather?.temperatureF;
-  const tempUnit = unitSystem === "metric" ? "°C" : "°F";
+  const tempValue = weather?.temperatureC; // Always use Celsius
+  const tempUnit = "°C";
 
   return (
     <section aria-label="Clima actual" className="w-full">
@@ -48,7 +54,7 @@ const WeatherWidget: React.FC = () => {
             <TempIcon className="h-8 w-8" aria-hidden />
             <div>
               <div className="text-2xl font-semibold">
-                {settingsLoading || isLoading ? "Cargando clima…" :
+                {profileLoading || isLoading ? "Cargando clima…" :
                   typeof tempValue === "number" ? `${Math.round(tempValue)}${tempUnit}` : "—"}
               </div>
               <div className="text-sm text-muted-foreground">
