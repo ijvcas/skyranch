@@ -36,7 +36,8 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     // Use Google Weather API with correct endpoint and parameters
-    const apiUrl = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}`;
+    const units = unitSystem === "metric" ? "METRIC" : "IMPERIAL";
+    const apiUrl = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&languageCode=${encodeURIComponent(language)}&unitsSystem=${units}`;
 
     console.log("[weather-current] Fetching from Google Weather API:", apiUrl.replace(apiKey, "***"));
     const wxRes = await fetch(apiUrl, {
@@ -81,21 +82,39 @@ function safeJson(text: string): any {
 
 // Normalize Google Weather response to our standard format
 function normalizeGoogleWeatherData(data: any) {
-  // Google Weather API response structure
-  const temperatureC = data?.temperature?.degrees ? Math.round(data.temperature.degrees) : null;
-  const temperatureF = temperatureC ? Math.round((temperatureC * 9) / 5 + 32) : null;
-  
-  const conditionText = data?.weatherCondition?.description?.text || null;
-  
-  // Wind speed from m/s to km/h if available
-  const windKph = data?.wind?.speed ? Math.round(data.wind.speed * 3.6) : null;
-  
-  // Humidity as percentage
-  const humidity = data?.relativeHumidity ? Math.round(data.relativeHumidity * 100) : null;
-  
-  // Precipitation probability
-  const precipitationChance = data?.precipitationProbability ? 
-    Math.round(data.precipitationProbability * 100) : null;
+  // Temperature
+  const deg = data?.temperature?.degrees;
+  const tempUnit = data?.temperature?.unit; // 'CELSIUS' | 'FAHRENHEIT'
+  let temperatureC: number | null = null;
+  let temperatureF: number | null = null;
+  if (typeof deg === "number") {
+    if (tempUnit === "FAHRENHEIT") {
+      temperatureF = Math.round(deg);
+      temperatureC = Math.round(((deg - 32) * 5) / 9);
+    } else {
+      temperatureC = Math.round(deg);
+      temperatureF = Math.round((deg * 9) / 5 + 32);
+    }
+  }
+
+  // Condition text
+  const conditionText: string | null = data?.weatherCondition?.description?.text ?? null;
+
+  // Wind -> km/h
+  const windVal = data?.wind?.speed?.value;
+  const windUnit = data?.wind?.speed?.unit; // 'KILOMETERS_PER_HOUR' | 'MILES_PER_HOUR'
+  let windKph: number | null = null;
+  if (typeof windVal === "number") {
+    windKph = windUnit === "MILES_PER_HOUR" ? Math.round(windVal * 1.60934) : Math.round(windVal);
+  }
+
+  // Humidity (0-100 integer)
+  const humidity = typeof data?.relativeHumidity === "number" ? data.relativeHumidity : null;
+
+  // Precipitation chance (0-100)
+  const precipitationChance = typeof data?.precipitation?.probability?.percent === "number"
+    ? data.precipitation.probability.percent
+    : null;
 
   return {
     temperatureC,
