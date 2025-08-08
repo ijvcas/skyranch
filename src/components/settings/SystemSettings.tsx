@@ -14,7 +14,7 @@ import VersionControlPanel from '@/components/version-management/VersionControlP
 import VersionHistoryPanel from '@/components/version-management/VersionHistoryPanel';
 import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 
-import { geocodeCity } from '@/services/placesService';
+import { geocodeCity, suggestPlaces, getPlaceDetails, type PlacePrediction } from '@/services/placesService';
 
 const SystemSettings = () => {
   const { user } = useAuth();
@@ -25,6 +25,8 @@ const SystemSettings = () => {
   const [validating, setValidating] = useState(false);
   const [valid, setValid] = useState<boolean | null>(null);
   const [lastValidated, setLastValidated] = useState<string | null>(null);
+  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   useEffect(() => {
     if (weatherSettings) {
       const name = weatherSettings.display_name || weatherSettings.location_query;
@@ -34,44 +36,86 @@ const SystemSettings = () => {
     }
   }, [weatherSettings]);
   
-
+  // Suggestions (Places Autocomplete) on input change
   useEffect(() => {
-    if (settingsLoading) return;
     const trimmed = city.trim();
-    if (!trimmed) { setValid(null); return; }
-    if (weatherSettings && (trimmed === weatherSettings.display_name || trimmed === weatherSettings.location_query)) {
-      setValid(true);
-      return;
-    }
+    if (!trimmed || settingsLoading) { setPredictions([]); setShowSuggestions(false); return; }
+    setValid(null); // don't show red while typing
     const t = setTimeout(async () => {
       setValidating(true);
       try {
-        const res = await geocodeCity(trimmed, weatherSettings?.language || 'es');
-        if (res) {
-          setValid(true);
-          setLastValidated(trimmed);
-          if (isAdmin) {
-            await save({
-              location_query: trimmed,
-              display_name: res.display_name,
-              place_id: res.place_id,
-              lat: res.lat,
-              lng: res.lng,
-            });
-            toast({ title: 'Ubicación guardada', description: res.display_name });
-          }
-        } else {
-          setValid(false);
-        }
+        const sugg = await suggestPlaces(trimmed, weatherSettings?.language || 'es');
+        setPredictions(sugg);
+        setShowSuggestions(sugg.length > 0);
       } catch (e) {
         console.error(e);
-        setValid(false);
+        setPredictions([]);
+        setShowSuggestions(false);
       } finally {
         setValidating(false);
       }
-    }, 600);
+    }, 300);
     return () => clearTimeout(t);
-  }, [city, isAdmin, save, settingsLoading, weatherSettings, toast]);
+  }, [city, settingsLoading, weatherSettings]);
+
+  const handleValidateFreeText = async () => {
+    const trimmed = city.trim();
+    if (!trimmed) { setValid(null); return; }
+    setValidating(true);
+    try {
+      const res = await geocodeCity(trimmed, weatherSettings?.language || 'es');
+      if (res) {
+        setValid(true);
+        setLastValidated(trimmed);
+        if (isAdmin) {
+          await save({
+            location_query: trimmed,
+            display_name: res.display_name,
+            place_id: res.place_id,
+            lat: res.lat,
+            lng: res.lng,
+          });
+          toast({ title: 'Ubicación guardada', description: res.display_name });
+        }
+      } else {
+        setValid(false);
+      }
+    } catch (e) {
+      console.error(e); setValid(false);
+    } finally {
+      setValidating(false);
+    }
+  };
+
+  const handleSelectPrediction = async (p: PlacePrediction) => {
+    setCity(p.description);
+    setShowSuggestions(false);
+    setPredictions([]);
+    setValidating(true);
+    try {
+      const details = await getPlaceDetails(p.place_id, weatherSettings?.language || 'es');
+      if (details) {
+        setValid(true);
+        setLastValidated(p.description);
+        if (isAdmin) {
+          await save({
+            location_query: p.description,
+            display_name: details.display_name,
+            place_id: details.place_id,
+            lat: details.lat,
+            lng: details.lng,
+          });
+          toast({ title: 'Ubicación guardada', description: details.display_name });
+        }
+      } else {
+        setValid(false);
+      }
+    } catch (e) {
+      console.error(e); setValid(false);
+    } finally {
+      setValidating(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -104,10 +148,32 @@ const SystemSettings = () => {
                   <Input
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
+                    onBlur={() => {
+                      // If user didn't pick a suggestion, try free-text validate
+                      if (!showSuggestions) handleValidateFreeText();
+                    }}
                     placeholder="e.g. Madrid, ES"
                     aria-label="Weather location city"
                     className={`${valid === true ? 'border-green-500 focus-visible:ring-green-500' : valid === false ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                   />
+                  {showSuggestions && predictions.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full rounded-md border bg-background shadow">
+                      <ul className="max-h-60 overflow-auto">
+                        {predictions.map((p) => (
+                          <li key={p.place_id}>
+                            <button
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => handleSelectPrediction(p)}
+                              className="w-full text-left px-3 py-2 hover:bg-accent"
+                            >
+                              {p.description}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {validating || saving ? (
                       <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
@@ -118,7 +184,7 @@ const SystemSettings = () => {
                     ) : null}
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">Enter city name for local weather display on dashboard</p>
+                <p className="text-sm text-muted-foreground">Start typing to see suggestions; pick one or tab out to validate.</p>
               </>
             )}
           </CardContent>
