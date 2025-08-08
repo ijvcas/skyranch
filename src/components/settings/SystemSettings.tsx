@@ -14,7 +14,8 @@ import VersionControlPanel from '@/components/version-management/VersionControlP
 import VersionHistoryPanel from '@/components/version-management/VersionHistoryPanel';
 import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 
-import { geocodeCity, suggestPlaces, getPlaceDetails, type PlacePrediction } from '@/services/placesService';
+import { geocodeCity } from '@/services/placesService';
+import { Button } from '@/components/ui/button';
 
 const SystemSettings = () => {
   const { user } = useAuth();
@@ -24,100 +25,66 @@ const SystemSettings = () => {
   const [city, setCity] = useState('');
   const [validating, setValidating] = useState(false);
   const [valid, setValid] = useState<boolean | null>(null);
-  const [lastValidated, setLastValidated] = useState<string | null>(null);
-  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggesting, setSuggesting] = useState(false);
+
   useEffect(() => {
     if (weatherSettings) {
       const name = weatherSettings.display_name || weatherSettings.location_query;
       setCity(name);
-      setLastValidated(name);
       setValid(true);
     }
   }, [weatherSettings]);
-  
-  // Suggestions (Places Autocomplete) on input change
-  useEffect(() => {
-    const trimmed = city.trim();
-    if (!trimmed || settingsLoading) { setPredictions([]); setShowSuggestions(false); return; }
-    setValid(null); // don't show red while typing
-    const t = setTimeout(async () => {
-      setSuggesting(true);
-      try {
-        const sugg = await suggestPlaces(trimmed, weatherSettings?.language || 'es');
-        setPredictions(sugg);
-        setShowSuggestions(sugg.length > 0);
-      } catch (e) {
-        console.error(e);
-        setPredictions([]);
-        setShowSuggestions(false);
-      } finally {
-        setSuggesting(false);
-      }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [city, settingsLoading, weatherSettings]);
 
-  const handleValidateFreeText = async () => {
+  const handleValidateLocation = async () => {
     const trimmed = city.trim();
-    if (!trimmed) { setValid(null); return; }
+    if (!trimmed) {
+      setValid(null);
+      return;
+    }
+
     setValidating(true);
-    setShowSuggestions(false);
+    setValid(null);
+
     try {
-      const res = await geocodeCity(trimmed, weatherSettings?.language || 'es');
-      if (res) {
+      console.log('🌍 Validating location:', trimmed);
+      const result = await geocodeCity(trimmed, 'es');
+      console.log('🌍 Geocode result:', result);
+      
+      if (result) {
         setValid(true);
-        setLastValidated(trimmed);
         if (isAdmin) {
           await save({
             location_query: trimmed,
-            display_name: res.display_name,
-            place_id: res.place_id,
-            lat: res.lat,
-            lng: res.lng,
+            display_name: result.display_name,
+            place_id: result.place_id,
+            lat: result.lat,
+            lng: result.lng,
           });
-          toast({ title: 'Ubicación guardada', description: res.display_name });
+          toast({ 
+            title: 'Ubicación guardada', 
+            description: `${result.display_name} (${result.lat}, ${result.lng})`
+          });
         } else {
-          toast({ title: 'Ubicación validada', description: res.display_name });
-        }
-      } else {
-        setValid(false);
-        toast({ title: 'No se pudo validar la ubicación', description: 'Intenta con otro término o selecciona de la lista.', variant: 'destructive' as any });
-      }
-    } catch (e: any) {
-      console.error(e); setValid(false);
-      toast({ title: 'Error validando la ubicación', description: e?.message || String(e), variant: 'destructive' as any });
-    } finally {
-      setValidating(false);
-    }
-  };
-
-  const handleSelectPrediction = async (p: PlacePrediction) => {
-    setCity(p.description);
-    setShowSuggestions(false);
-    setPredictions([]);
-    setValidating(true);
-    try {
-      const details = await getPlaceDetails(p.place_id, weatherSettings?.language || 'es');
-      if (details) {
-        setValid(true);
-        setLastValidated(p.description);
-        if (isAdmin) {
-          await save({
-            location_query: p.description,
-            display_name: details.display_name,
-            place_id: details.place_id,
-            lat: details.lat,
-            lng: details.lng,
+          toast({ 
+            title: 'Ubicación validada', 
+            description: result.display_name 
           });
-          toast({ title: 'Ubicación guardada', description: details.display_name });
         }
       } else {
         setValid(false);
+        toast({ 
+          title: 'No se pudo validar la ubicación', 
+          description: 'Verifica que el nombre de la ciudad sea correcto e intenta nuevamente.',
+          variant: 'destructive' 
+        });
       }
-    } catch (e) {
-      console.error(e); setValid(false);
+    } catch (error: any) {
+      console.error('🌍 Error validating location:', error);
+      setValid(false);
+      toast({ 
+        title: 'Error al validar la ubicación', 
+        description: error?.message || 'Error de conexión. Verifica tu conexión a internet.',
+        variant: 'destructive' 
+      });
     } finally {
       setValidating(false);
     }
@@ -150,68 +117,47 @@ const SystemSettings = () => {
               </div>
             ) : (
               <>
-                <div className="relative">
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        const trimmed = city.trim();
-                        const first = predictions[0]?.description?.trim();
-                        if (showSuggestions && first && first.toLowerCase() === trimmed.toLowerCase()) {
-                          // auto-select exact match
-                          handleSelectPrediction(predictions[0]);
-                        } else {
-                          handleValidateFreeText();
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Input
+                      value={city}
+                      onChange={(e) => {
+                        setCity(e.target.value);
+                        setValid(null); // Reset validation when user types
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleValidateLocation();
                         }
-                      } else if (e.key === 'Escape') {
-                        setShowSuggestions(false);
-                      }
-                    }}
-                    onBlur={() => {
-                      const trimmed = city.trim();
-                      const first = predictions[0]?.description?.trim();
-                      if (showSuggestions && first && first.toLowerCase() === trimmed.toLowerCase()) {
-                        handleSelectPrediction(predictions[0]);
-                        return;
-                      }
-                      // If user didn't pick a suggestion, try free-text validate
-                      if (!showSuggestions) handleValidateFreeText();
-                    }}
-                    disabled={validating || saving}
-                    placeholder="e.g. Madrid, ES"
-                    aria-label="Weather location city"
-                    className={`${valid === true ? 'border-green-500 focus-visible:ring-green-500' : valid === false ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                  />
-                  {showSuggestions && predictions.length > 0 && (
-                    <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
-                      <ul className="max-h-60 overflow-auto">
-                        {predictions.map((p) => (
-                          <li key={p.place_id}>
-                            <button
-                              type="button"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={() => handleSelectPrediction(p)}
-                              className="w-full text-left px-3 py-2 hover:bg-accent"
-                            >
-                              {p.description}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+                      }}
+                      disabled={validating || saving}
+                      placeholder="e.g. Madrid, Spain"
+                      aria-label="Weather location city"
+                      className={`${valid === true ? 'border-green-500 focus-visible:ring-green-500' : valid === false ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {(validating || saving) ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      ) : valid === true ? (
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      ) : valid === false ? (
+                        <AlertCircle className="w-5 h-5 text-red-600" />
+                      ) : null}
                     </div>
-                  )}
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {(validating || saving || suggesting) ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                    ) : valid === true ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                    ) : valid === false ? (
-                      <AlertCircle className="w-5 h-5 text-red-600" />
-                    ) : null}
                   </div>
+                  
+                  <Button 
+                    onClick={handleValidateLocation}
+                    disabled={!city.trim() || validating || saving}
+                    className="w-full"
+                  >
+                    {validating ? 'Validando...' : 'Validar Ubicación'}
+                  </Button>
+                  
+                  <p className="text-sm text-muted-foreground">
+                    Ingresa el nombre de una ciudad y haz clic en "Validar Ubicación" para configurar el clima del dashboard.
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground">Start typing to see suggestions; pick one or tab out to validate.</p>
               </>
             )}
           </CardContent>
