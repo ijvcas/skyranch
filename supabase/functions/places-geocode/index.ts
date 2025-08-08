@@ -48,6 +48,7 @@ serve(async (req: Request): Promise<Response> => {
     url.searchParams.set("language", language);
     if (isSpanish) {
       url.searchParams.set("region", "es");
+      url.searchParams.set("components", "country:es");
     }
 
     const res = await fetch(url.toString());
@@ -91,6 +92,7 @@ serve(async (req: Request): Promise<Response> => {
     placesUrl.searchParams.set("key", apiKey);
     placesUrl.searchParams.set("language", language);
     placesUrl.searchParams.set("fields", "place_id,formatted_address,geometry,types");
+    placesUrl.searchParams.set("locationbias", "ipbias");
 
     const placesRes = await fetch(placesUrl.toString());
     const placesData = await placesRes.json();
@@ -125,6 +127,7 @@ serve(async (req: Request): Promise<Response> => {
     textUrl.searchParams.set("query", query);
     textUrl.searchParams.set("key", apiKey);
     textUrl.searchParams.set("language", language);
+    if (isSpanish) textUrl.searchParams.set("region", "es");
 
     const textRes = await fetch(textUrl.toString());
     const textData = await textRes.json();
