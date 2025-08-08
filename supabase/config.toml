@@ -1,2 +1,10 @@
-
 project_id = "ahwhtxygyzoadsmdrwwg"
+
+[functions.places-geocode]
+verify_jwt = false
+
+[functions.places-autocomplete]
+verify_jwt = false
+
+[functions.places-details]
+verify_jwt = false

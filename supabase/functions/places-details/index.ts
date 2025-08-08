@@ -45,8 +45,10 @@ serve(async (req: Request): Promise<Response> => {
     url.searchParams.set("language", language);
     url.searchParams.set("fields", "place_id,formatted_address,geometry,types,name");
 
+    console.log('[places-details] request', { place_id, language, url: url.toString() });
     const res = await fetch(url.toString());
     const data = await res.json();
+    console.log('[places-details] response', { status: res.status, google_status: data.status, error_message: data.error_message });
 
     if (!res.ok) {
       return json({ ok: false, error: `Details upstream ${res.status}`, raw: data, place_id }, 502);

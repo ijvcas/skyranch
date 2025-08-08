@@ -39,11 +39,15 @@ serve(async (req: Request): Promise<Response> => {
     url.searchParams.set("input", input);
     url.searchParams.set("key", apiKey);
     url.searchParams.set("language", language);
-    url.searchParams.set("types", "(cities)");
-    url.searchParams.set("components", isSpanish ? "country:es" : "");
+    url.searchParams.set("types", "geocode");
+    if (isSpanish) {
+      url.searchParams.set("components", "country:es");
+    }
 
+    console.log('[places-autocomplete] request', { input, language, isSpanish, url: url.toString() });
     const res = await fetch(url.toString());
     const data = await res.json();
+    console.log('[places-autocomplete] response', { status: res.status, google_status: data.status, error_message: data.error_message });
 
     if (!res.ok) {
       return json({ ok: false, error: `Autocomplete upstream ${res.status}`, raw: data, input }, 502);

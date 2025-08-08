@@ -51,8 +51,10 @@ serve(async (req: Request): Promise<Response> => {
       url.searchParams.set("components", "country:es");
     }
 
+    console.log('[places-geocode] geocode request', { query, language, isSpanish, url: url.toString() });
     const res = await fetch(url.toString());
     const data = await res.json();
+    console.log('[places-geocode] geocode response', { status: res.status, google_status: data.status, error_message: data.error_message, results: Array.isArray(data.results) ? data.results.length : undefined });
 
     if (!res.ok) {
       return json({ ok: false, error: `Geocode upstream ${res.status}` , raw: data }, 502);
@@ -94,8 +96,10 @@ serve(async (req: Request): Promise<Response> => {
     placesUrl.searchParams.set("fields", "place_id,formatted_address,geometry,types");
     placesUrl.searchParams.set("locationbias", "ipbias");
 
+    console.log('[places-geocode] findplace request', { url: placesUrl.toString() });
     const placesRes = await fetch(placesUrl.toString());
     const placesData = await placesRes.json();
+    console.log('[places-geocode] findplace response', { status: placesRes.status, google_status: placesData.status, error_message: placesData.error_message, candidates: Array.isArray(placesData.candidates) ? placesData.candidates.length : undefined });
 
     if (!placesRes.ok) {
       return json({ ok: false, error: `Places upstream ${placesRes.status}`, query, raw: { geocode: data, places: placesData } }, 502);
@@ -129,8 +133,10 @@ serve(async (req: Request): Promise<Response> => {
     textUrl.searchParams.set("language", language);
     if (isSpanish) textUrl.searchParams.set("region", "es");
 
+    console.log('[places-geocode] textsearch request', { url: textUrl.toString() });
     const textRes = await fetch(textUrl.toString());
     const textData = await textRes.json();
+    console.log('[places-geocode] textsearch response', { status: textRes.status, google_status: textData.status, error_message: textData.error_message, results: Array.isArray(textData.results) ? textData.results.length : undefined });
 
     if (!textRes.ok) {
       return json({ ok: false, error: `TextSearch upstream ${textRes.status}`, query, raw: { geocode: data, places: placesData, textsearch: textData } }, 502);
