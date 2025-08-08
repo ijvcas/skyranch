@@ -39,11 +39,16 @@ serve(async (req: Request): Promise<Response> => {
       return json({ ok: false, error: "query is required" }, 400);
     }
 
+    const isSpanish = (typeof language === "string" && language.toLowerCase().startsWith("es")) || /\b(espa(?:n|ñ)a|spain)\b/i.test(query);
+
     // Use Geocoding API to resolve free-text city into coordinates
     const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
     url.searchParams.set("address", query);
     url.searchParams.set("key", apiKey);
     url.searchParams.set("language", language);
+    if (isSpanish) {
+      url.searchParams.set("region", "es");
+    }
 
     const res = await fetch(url.toString());
     const data = await res.json();
@@ -79,7 +84,7 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    // Fallback: Google Places "Find Place From Text" to better handle typos and fuzzy matches
+    // Fallback 1: Google Places "Find Place From Text" to better handle typos and fuzzy matches
     const placesUrl = new URL("https://maps.googleapis.com/maps/api/place/findplacefromtext/json");
     placesUrl.searchParams.set("input", query);
     placesUrl.searchParams.set("inputtype", "textquery");
@@ -95,26 +100,60 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     const candidate = (placesData.candidates && placesData.candidates[0]) || null;
-    if (!candidate) {
-      return json({ ok: false, error: "No results found", query, raw: { geocode: data, places: placesData } }, 404);
+    if (candidate) {
+      const ploc = candidate.geometry?.location;
+      if (!ploc || typeof ploc.lat !== "number" || typeof ploc.lng !== "number") {
+        return json({ ok: false, error: "Invalid places result", query, raw: candidate }, 502);
+      }
+
+      return json({
+        ok: true,
+        query,
+        result: {
+          place_id: candidate.place_id || "",
+          display_name: candidate.formatted_address || query,
+          lat: ploc.lat,
+          lng: ploc.lng,
+          types: candidate.types || [],
+        },
+        raw: { geocode: data, places: placesData },
+      });
     }
 
-    const ploc = candidate.geometry?.location;
-    if (!ploc || typeof ploc.lat !== "number" || typeof ploc.lng !== "number") {
-      return json({ ok: false, error: "Invalid places result", query, raw: candidate }, 502);
+    // Fallback 2: Places Text Search for full free-text queries (e.g., with postal codes)
+    const textUrl = new URL("https://maps.googleapis.com/maps/api/place/textsearch/json");
+    textUrl.searchParams.set("query", query);
+    textUrl.searchParams.set("key", apiKey);
+    textUrl.searchParams.set("language", language);
+
+    const textRes = await fetch(textUrl.toString());
+    const textData = await textRes.json();
+
+    if (!textRes.ok) {
+      return json({ ok: false, error: `TextSearch upstream ${textRes.status}`, query, raw: { geocode: data, places: placesData, textsearch: textData } }, 502);
+    }
+
+    const t = (textData.results && textData.results[0]) || null;
+    if (!t) {
+      return json({ ok: false, error: "No results found", query, raw: { geocode: data, places: placesData, textsearch: textData } }, 404);
+    }
+
+    const tloc = t.geometry?.location;
+    if (!tloc || typeof tloc.lat !== "number" || typeof tloc.lng !== "number") {
+      return json({ ok: false, error: "Invalid textsearch result", query, raw: t }, 502);
     }
 
     return json({
       ok: true,
       query,
       result: {
-        place_id: candidate.place_id || "",
-        display_name: candidate.formatted_address || query,
-        lat: ploc.lat,
-        lng: ploc.lng,
-        types: candidate.types || [],
+        place_id: t.place_id || "",
+        display_name: t.formatted_address || t.name || query,
+        lat: tloc.lat,
+        lng: tloc.lng,
+        types: t.types || [],
       },
-      raw: { geocode: data, places: placesData },
+      raw: { geocode: data, places: placesData, textsearch: textData },
     });
   } catch (e) {
     return json({ ok: false, error: String(e) }, 500);
