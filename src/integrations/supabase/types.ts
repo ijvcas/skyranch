@@ -1149,6 +1149,45 @@ export type Database = {
         }
         Relationships: []
       }
+      weather_settings: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          language: string | null
+          lat: number
+          lng: number
+          location_query: string
+          place_id: string
+          unit_system: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          language?: string | null
+          lat: number
+          lng: number
+          location_query: string
+          place_id: string
+          unit_system?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          language?: string | null
+          lat?: number
+          lng?: number
+          location_query?: string
+          place_id?: string
+          unit_system?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

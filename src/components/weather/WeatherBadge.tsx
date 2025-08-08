@@ -1,7 +1,7 @@
 
 import React from "react";
 import { MapPin, Cloud, Sun, CloudRain, CloudSun } from "lucide-react";
-import { useFarmLocation } from "@/hooks/useFarmLocation";
+import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -14,8 +14,8 @@ const pickIcon = (text?: string | null) => {
 };
 
 const WeatherBadge: React.FC = () => {
-  const { data: farm, isLoading: locLoading } = useFarmLocation();
-  const { data: wx, isLoading: wxLoading } = useFarmWeather(farm?.lat, farm?.lng);
+  const { data: settings, isLoading: locLoading } = useWeatherSettings();
+  const { data: wx, isLoading: wxLoading } = useFarmWeather(settings?.lat, settings?.lng);
 
   if (locLoading) {
     return (
@@ -29,7 +29,7 @@ const WeatherBadge: React.FC = () => {
     );
   }
 
-  if (!farm) {
+  if (!settings) {
     return null;
   }
 
@@ -43,7 +43,7 @@ const WeatherBadge: React.FC = () => {
       <div className="flex flex-col leading-tight">
         <div className="text-sm text-gray-500 flex items-center gap-1">
           <MapPin className="w-4 h-4" />
-          <span className="truncate max-w-[160px]">{farm.name}</span>
+          <span className="truncate max-w-[160px]">{settings.display_name}</span>
         </div>
         <div className="text-base font-medium text-gray-900">
           {wxLoading ? (
