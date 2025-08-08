@@ -70,19 +70,21 @@ const WeatherWidget: React.FC = () => {
       <Card className="bg-card text-card-foreground">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <TempIcon className="h-8 w-8 text-muted-foreground" aria-hidden />
+            <TempIcon className="h-7 w-7 text-muted-foreground" aria-hidden />
             <div className="flex-1">
-              <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-3xl font-bold">
+              {/* Temperature and condition in one line like picture 2 */}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-2xl font-bold">
                   {profileLoading || isLoading ? "—" :
                     typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
                 </span>
+                <span className="text-lg text-muted-foreground">
+                  {getWeatherCondition()}
+                </span>
               </div>
+              {/* Location below like picture 2 */}
               <div className="text-sm text-muted-foreground">
                 {formatLocation()}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {getWeatherCondition()}
               </div>
             </div>
           </div>

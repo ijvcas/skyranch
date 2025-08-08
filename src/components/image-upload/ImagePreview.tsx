@@ -17,8 +17,8 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ imageUrl, disabled = false,
         <div className="relative">
           <img
             src={imageUrl}
-            alt="Animal preview"
-            className="w-full h-48 object-cover rounded-lg"
+            alt="Farm picture"
+            className="w-full h-32 object-cover rounded-lg"
           />
           {!disabled && (
             <Button
