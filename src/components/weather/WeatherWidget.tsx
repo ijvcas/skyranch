@@ -51,14 +51,19 @@ const WeatherWidget: React.FC = () => {
           </div>
 
           <div className="mt-2 flex items-center gap-3">
-            <TempIcon className="h-8 w-8" aria-hidden />
-            <div>
-              <div className="text-2xl font-semibold">
-                {profileLoading || isLoading ? "Cargando clima…" :
-                  typeof tempValue === "number" ? `${Math.round(tempValue)}${tempUnit}` : "—"}
+            <TempIcon className="h-6 w-6 text-muted-foreground" aria-hidden />
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-semibold">
+                  {profileLoading || isLoading ? "—" :
+                    typeof tempValue === "number" ? `${Math.round(tempValue)}${tempUnit}` : "—"}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {farmProfile?.location_coordinates ? displayName : "Sin ubicación"}
+                </span>
               </div>
               <div className="text-sm text-muted-foreground">
-                {isLoading ? "Obteniendo condiciones…" : (weather?.conditionText || "Condición aproximada")}
+                {isLoading ? "Cargando…" : (weather?.conditionText || "Condición aproximada")}
               </div>
             </div>
           </div>
