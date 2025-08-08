@@ -35,25 +35,25 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    // Use Google Weather API with correct endpoint
-    const apiUrl = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&languageCode=${language}&units=${unitSystem === "metric" ? "METRIC" : "IMPERIAL"}`;
+    // Use Google Weather API with correct endpoint and parameters
+    const apiUrl = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}`;
 
     console.log("[weather-current] Fetching from Google Weather API:", apiUrl.replace(apiKey, "***"));
     const wxRes = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json"
-      }
+      method: "GET"
     });
-    const data = await wxRes.json();
-
+    
     if (!wxRes.ok) {
-      console.error("[weather-current] Google Weather API error:", wxRes.status, data);
+      const errorText = await wxRes.text();
+      console.error("[weather-current] Google Weather API error:", wxRes.status, errorText);
       return new Response(
-        JSON.stringify({ error: "Weather API error", status: wxRes.status, details: data }),
+        JSON.stringify({ error: "Weather API error", status: wxRes.status, details: errorText }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    
+    const data = await wxRes.json();
+    console.log("[weather-current] Google Weather API response:", JSON.stringify(data, null, 2));
 
     // Normalize Google Weather response
     const normalized = normalizeGoogleWeatherData(data);
