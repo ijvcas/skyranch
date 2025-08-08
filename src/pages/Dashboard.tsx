@@ -198,7 +198,7 @@ const Dashboard = () => {
             onForceRefresh={handleForceRefresh}
           />
 
-          <div className="mt-4">
+          <div className="mt-6">
             <WeatherWidget />
           </div>
 
