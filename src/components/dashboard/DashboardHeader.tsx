@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import FieldReportButton from '@/components/field-reports/FieldReportButton';
+import WeatherBadge from '@/components/weather/WeatherBadge';
 
 interface DashboardHeaderProps {
   userEmail?: string;
@@ -41,6 +42,7 @@ const DashboardHeader = ({ userEmail, userName, totalAnimals, onForceRefresh }: 
       </div>
       
       <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 w-full md:w-auto">
+        <WeatherBadge />
         <div className="w-full md:w-auto">
           <FieldReportButton />
         </div>
