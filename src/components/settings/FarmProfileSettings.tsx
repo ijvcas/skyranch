@@ -5,25 +5,18 @@ import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useFarmProfile } from '@/hooks/useFarmProfile';
+import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 import { type FarmProfileFormData } from '@/services/farmProfileService';
-import { Loader2, Upload, MapPin, Building2 } from 'lucide-react';
-import { geocodeCity } from '@/services/placesService';
+import { Loader2, Upload, MapPin, Building2, Check } from 'lucide-react';
+import { searchLocations, validateLocation, type LocationSuggestion } from '@/services/locationService';
 
 const farmProfileSchema = z.object({
   farm_name: z.string().min(1, 'El nombre de la finca es requerido'),
-  description: z.string().optional(),
   location_name: z.string().optional(),
-  address: z.string().optional(),
-  contact_email: z.string().email('Email inválido').optional().or(z.literal('')),
-  contact_phone: z.string().optional(),
-  website: z.string().url('URL inválida').optional().or(z.literal('')),
-  established_year: z.number().min(1800).max(new Date().getFullYear()).optional(),
-  farm_type: z.string().optional(),
-  total_area_hectares: z.number().min(0).optional(),
+  location_coordinates: z.string().optional(),
 });
 
 
@@ -41,10 +34,13 @@ const FarmProfileSettings = () => {
     isUploadingLogo,
     isUploadingPicture 
   } = useFarmProfile();
+  
+  const { syncFromFarm } = useWeatherSettings();
 
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [pictureFile, setPictureFile] = useState<File | null>(null);
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [validatingLocation, setValidatingLocation] = useState(false);
+  const [locationValidated, setLocationValidated] = useState(false);
 
   const {
     register,
@@ -63,17 +59,11 @@ const FarmProfileSettings = () => {
     if (farmProfile) {
       const formData = {
         farm_name: farmProfile.farm_name,
-        description: farmProfile.description || undefined,
         location_name: farmProfile.location_name || undefined,
-        address: farmProfile.address || undefined,
-        contact_email: farmProfile.contact_email || undefined,
-        contact_phone: farmProfile.contact_phone || undefined,
-        website: farmProfile.website || undefined,
-        established_year: farmProfile.established_year || undefined,
-        farm_type: farmProfile.farm_type || undefined,
-        total_area_hectares: farmProfile.total_area_hectares || undefined,
+        location_coordinates: farmProfile.location_coordinates || undefined,
       };
       reset(formData);
+      setLocationValidated(!!farmProfile.location_coordinates);
     }
   }, [farmProfile, reset]);
 
@@ -142,22 +132,50 @@ const FarmProfileSettings = () => {
     }
   };
 
-  const handleValidateLocation = async () => {
-    if (!locationName?.trim()) return;
+  const handleLocationSearch = async (input: string) => {
+    if (!input || input.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
 
-    setValidatingLocation(true);
     try {
-      const result = await geocodeCity(locationName, 'es');
+      const results = await searchLocations(input, 'es');
+      setSuggestions(results);
+      setShowSuggestions(results.length > 0);
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleLocationSelect = async (suggestion: LocationSuggestion) => {
+    setValidatingLocation(true);
+    setShowSuggestions(false);
+
+    try {
+      const result = await validateLocation(suggestion.place_id, 'es');
       if (result) {
         setValue('location_name', result.display_name);
+        setValue('location_coordinates', `${result.lat},${result.lng}`);
+        setLocationValidated(true);
+        
+        // Sync weather settings with farm location
+        try {
+          await syncFromFarm();
+        } catch (error) {
+          console.warn('Failed to sync weather settings:', error);
+        }
+        
         toast({
           title: 'Ubicación validada',
-          description: `${result.display_name} encontrada correctamente.`,
+          description: `${result.display_name} seleccionada correctamente.`,
         });
       } else {
         toast({
-          title: 'Ubicación no encontrada',
-          description: 'No se pudo validar la ubicación. Verifica el nombre.',
+          title: 'Error',
+          description: 'No se pudo obtener los detalles de la ubicación.',
           variant: 'destructive',
         });
       }
@@ -197,136 +215,70 @@ const FarmProfileSettings = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="farm_name">Nombre de la Finca *</Label>
-                <Input
-                  id="farm_name"
-                  {...register('farm_name')}
-                  placeholder="Ej: Finca San José"
-                />
-                {errors.farm_name && (
-                  <p className="text-sm text-red-600 mt-1">{errors.farm_name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="farm_type">Tipo de Finca</Label>
-                <Input
-                  id="farm_type"
-                  {...register('farm_type')}
-                  placeholder="Ej: Ganadera, Agrícola, Mixta"
-                />
-              </div>
-            </div>
-
+            {/* Farm Name */}
             <div>
-              <Label htmlFor="description">Descripción</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="Descripción de la finca, actividades principales, etc."
-                rows={3}
-              />
-            </div>
-
-            {/* Location */}
-            <div>
-              <Label htmlFor="location_name">Ubicación</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="location_name"
-                  {...register('location_name')}
-                  placeholder="Ciudad, País"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleValidateLocation}
-                  disabled={!locationName?.trim() || validatingLocation}
-                >
-                  {validatingLocation ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <MapPin className="w-4 h-4" />
-                  )}
-                  Validar
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="address">Dirección</Label>
+              <Label htmlFor="farm_name">Nombre de la Finca *</Label>
               <Input
-                id="address"
-                {...register('address')}
-                placeholder="Dirección completa"
+                id="farm_name"
+                {...register('farm_name')}
+                placeholder="Ej: Finca San José"
               />
-            </div>
-
-            {/* Contact Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="contact_email">Email de Contacto</Label>
-                <Input
-                  id="contact_email"
-                  type="email"
-                  {...register('contact_email')}
-                  placeholder="info@finca.com"
-                />
-                {errors.contact_email && (
-                  <p className="text-sm text-red-600 mt-1">{errors.contact_email.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="contact_phone">Teléfono de Contacto</Label>
-                <Input
-                  id="contact_phone"
-                  {...register('contact_phone')}
-                  placeholder="+34 123 456 789"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="website">Sitio Web</Label>
-              <Input
-                id="website"
-                {...register('website')}
-                placeholder="https://www.finca.com"
-              />
-              {errors.website && (
-                <p className="text-sm text-red-600 mt-1">{errors.website.message}</p>
+              {errors.farm_name && (
+                <p className="text-sm text-red-600 mt-1">{errors.farm_name.message}</p>
               )}
             </div>
 
-            {/* Additional Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="established_year">Año de Establecimiento</Label>
-                <Input
-                  id="established_year"
-                  type="number"
-                  {...register('established_year', { valueAsNumber: true })}
-                  placeholder="2020"
-                />
-                {errors.established_year && (
-                  <p className="text-sm text-red-600 mt-1">{errors.established_year.message}</p>
-                )}
+            {/* Location with Google Maps */}
+            <div className="relative">
+              <Label htmlFor="location_name">Ubicación</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    id="location_name"
+                    {...register('location_name')}
+                    placeholder="Buscar ubicación..."
+                    onChange={(e) => {
+                      handleLocationSearch(e.target.value);
+                      setLocationValidated(false);
+                    }}
+                    className={locationValidated ? 'pr-10' : ''}
+                  />
+                  {locationValidated && (
+                    <Check className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-green-600" />
+                  )}
+                  
+                  {/* Location Suggestions */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                      {suggestions.map((suggestion, index) => (
+                        <button
+                          key={suggestion.place_id}
+                          type="button"
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                          onClick={() => handleLocationSelect(suggestion)}
+                        >
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm">{suggestion.description}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <div>
-                <Label htmlFor="total_area_hectares">Área Total (Hectáreas)</Label>
-                <Input
-                  id="total_area_hectares"
-                  type="number"
-                  step="0.01"
-                  {...register('total_area_hectares', { valueAsNumber: true })}
-                  placeholder="100.5"
-                />
-              </div>
+              {locationValidated && (
+                <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
+                  <Check className="w-3 h-3" />
+                  Ubicación validada con Google Maps
+                </p>
+              )}
+              {validatingLocation && (
+                <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Validando ubicación...
+                </p>
+              )}
             </div>
 
             <Button

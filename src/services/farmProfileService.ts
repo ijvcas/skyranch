@@ -3,18 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 export interface FarmProfile {
   id: string;
   farm_name: string;
-  description?: string;
   logo_url?: string;
   picture_url?: string;
   location_name?: string;
   location_coordinates?: string;
-  address?: string;
-  contact_email?: string;
-  contact_phone?: string;
-  website?: string;
-  established_year?: number;
-  farm_type?: string;
-  total_area_hectares?: number;
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -22,16 +14,8 @@ export interface FarmProfile {
 
 export interface FarmProfileFormData {
   farm_name: string;
-  description?: string;
   location_name?: string;
   location_coordinates?: string;
-  address?: string;
-  contact_email?: string;
-  contact_phone?: string;
-  website?: string;
-  established_year?: number;
-  farm_type?: string;
-  total_area_hectares?: number;
 }
 
 class FarmProfileService {

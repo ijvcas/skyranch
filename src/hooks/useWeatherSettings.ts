@@ -19,5 +19,18 @@ export const useWeatherSettings = () => {
     },
   });
 
-  return { ...query, save: saveMutation.mutateAsync, saving: saveMutation.isPending };
+  const syncFromFarmMutation = useMutation({
+    mutationFn: () => weatherSettingsService.syncFromFarmProfile(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: WEATHER_SETTINGS_KEY });
+    },
+  });
+
+  return { 
+    ...query, 
+    save: saveMutation.mutateAsync, 
+    saving: saveMutation.isPending,
+    syncFromFarm: syncFromFarmMutation.mutateAsync,
+    syncingFromFarm: syncFromFarmMutation.isPending
+  };
 };

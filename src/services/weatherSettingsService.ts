@@ -84,6 +84,43 @@ export class WeatherSettingsService {
       return data as WeatherSettings;
     }
   }
+
+  async syncFromFarmProfile(): Promise<WeatherSettings | null> {
+    // Get farm profile with location
+    const { data: farmProfile, error: farmError } = await supabase
+      .from('farm_profiles')
+      .select('location_name, location_coordinates')
+      .order('created_at', { ascending: false })
+      .maybeSingle();
+
+    if (farmError) {
+      console.error('Error fetching farm profile for weather sync:', farmError);
+      return null;
+    }
+
+    if (!farmProfile?.location_coordinates || !farmProfile?.location_name) {
+      return null;
+    }
+
+    // Parse coordinates
+    const [lat, lng] = farmProfile.location_coordinates.split(',').map(Number);
+    
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn('Invalid coordinates in farm profile:', farmProfile.location_coordinates);
+      return null;
+    }
+
+    // Update weather settings with farm location
+    return this.upsert({
+      lat,
+      lng,
+      location_query: farmProfile.location_name,
+      display_name: farmProfile.location_name,
+      place_id: '', // We don't store place_id in farm profile
+      language: 'es',
+      unit_system: 'metric'
+    });
+  }
 }
 
 export const weatherSettingsService = new WeatherSettingsService();
