@@ -189,7 +189,7 @@ const Dashboard = () => {
       </div>
       
       {/* Main content */}
-      <div className="bg-gradient-to-br from-green-50 to-blue-50 pt-6 md:pt-8 pb-20 min-h-screen">
+      <div className="bg-gradient-to-br from-green-50 to-blue-50 pt-2 md:pt-4 pb-20 min-h-screen">
         <div className="max-w-7xl mx-auto px-3 md:px-4">
           <DashboardHeader 
             userEmail={user?.email}
