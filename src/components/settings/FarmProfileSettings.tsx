@@ -69,14 +69,38 @@ const FarmProfileSettings = () => {
 
   const onSubmit = async (data: FarmProfileFormData) => {
     try {
+      console.log('Submitting farm profile data:', data);
+      
       if (farmProfile) {
         await updateFarmProfile({ id: farmProfile.id, data });
+        
+        // Sync weather settings after successful update if coordinates are available
+        if (data.location_coordinates) {
+          try {
+            await syncFromFarm();
+            console.log('Weather settings synced with new coordinates');
+          } catch (error) {
+            console.warn('Failed to sync weather settings:', error);
+          }
+        }
+        
         toast({
           title: 'Perfil actualizado',
           description: 'El perfil de la finca se ha actualizado correctamente.',
         });
       } else {
-        await createFarmProfile(data);
+        const newProfile = await createFarmProfile(data);
+        
+        // Sync weather settings after creation if coordinates are available
+        if (data.location_coordinates) {
+          try {
+            await syncFromFarm();
+            console.log('Weather settings synced for new profile');
+          } catch (error) {
+            console.warn('Failed to sync weather settings:', error);
+          }
+        }
+        
         toast({
           title: 'Perfil creado',
           description: 'El perfil de la finca se ha creado correctamente.',
@@ -157,20 +181,14 @@ const FarmProfileSettings = () => {
     try {
       const result = await validateLocation(suggestion.place_id, 'es');
       if (result) {
+        console.log('Location validated:', result);
         setValue('location_name', result.display_name);
         setValue('location_coordinates', `${result.lat},${result.lng}`);
         setLocationValidated(true);
         
-        // Sync weather settings with farm location
-        try {
-          await syncFromFarm();
-        } catch (error) {
-          console.warn('Failed to sync weather settings:', error);
-        }
-        
         toast({
           title: 'Ubicación validada',
-          description: `${result.display_name} seleccionada correctamente.`,
+          description: `${result.display_name} seleccionada correctamente. Guarda el perfil para activar el clima en tiempo real.`,
         });
       } else {
         toast({

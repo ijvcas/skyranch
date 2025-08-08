@@ -20,6 +20,7 @@ const WeatherWidget: React.FC = () => {
   // Parse coordinates from farm profile
   let lat: number | undefined;
   let lng: number | undefined;
+  let hasCoordinates = false;
   
   if (farmProfile?.location_coordinates) {
     try {
@@ -27,10 +28,14 @@ const WeatherWidget: React.FC = () => {
       if (coords.length === 2 && coords.every(c => !isNaN(c))) {
         lat = coords[0];
         lng = coords[1];
+        hasCoordinates = true;
+        console.log('🌍 Using farm coordinates for weather:', { lat, lng });
       }
     } catch (e) {
       console.warn('Failed to parse farm coordinates:', e);
     }
+  } else {
+    console.log('🌍 No farm coordinates available, using approximate weather data');
   }
   
   const displayName = farmProfile?.location_name || farmProfile?.farm_name || "Ubicación";
@@ -40,6 +45,13 @@ const WeatherWidget: React.FC = () => {
   const TempIcon = pickIcon(weather?.conditionText);
   const tempValue = weather?.temperatureC; // Always use Celsius
   const tempUnit = "°C";
+  
+  // Determine weather status message
+  const getWeatherStatus = () => {
+    if (profileLoading || isLoading) return "Cargando…";
+    if (!hasCoordinates) return "Datos aproximados - configura ubicación en Perfil de Finca";
+    return weather?.conditionText || "Tiempo real";
+  };
 
   return (
     <section aria-label="Clima actual" className="w-full">
@@ -57,8 +69,8 @@ const WeatherWidget: React.FC = () => {
                 {profileLoading || isLoading ? "—" :
                   typeof tempValue === "number" ? `${Math.round(tempValue)}${tempUnit}` : "—"}
               </span>
-              <span className="text-sm text-muted-foreground">
-                {isLoading ? "Cargando…" : (weather?.conditionText || "Condición aproximada")}
+              <span className={`text-sm ${!hasCoordinates && !isLoading ? 'text-orange-600' : 'text-muted-foreground'}`}>
+                {getWeatherStatus()}
               </span>
             </div>
           </div>
