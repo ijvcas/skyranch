@@ -17,6 +17,7 @@ import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions'
 import DashboardLoadingState from '@/components/dashboard/DashboardLoadingState';
 import DashboardErrorState from '@/components/dashboard/DashboardErrorState';
 import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
+import WeatherWidget from '@/components/weather/WeatherWidget';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -196,6 +197,10 @@ const Dashboard = () => {
             totalAnimals={totalAnimals}
             onForceRefresh={handleForceRefresh}
           />
+
+          <div className="mt-4">
+            <WeatherWidget />
+          </div>
 
           <DashboardStats 
             totalAnimals={totalAnimals}
