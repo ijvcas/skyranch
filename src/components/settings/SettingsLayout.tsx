@@ -51,25 +51,25 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
         <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
           <TabsList className="flex flex-col w-full gap-2 h-auto p-2">
             {availableTabs.includes('users') && (
-              <TabsTrigger value="users" className="flex items-center gap-2 w-full justify-start">
+              <TabsTrigger value="users" className="flex items-center gap-2 w-full justify-center">
                 <Users className="w-4 h-4" />
                 Usuarios
               </TabsTrigger>
             )}
             {availableTabs.includes('backup') && (
-              <TabsTrigger value="backup" className="flex items-center gap-2 w-full justify-start">
+              <TabsTrigger value="backup" className="flex items-center gap-2 w-full justify-center">
                 <Database className="w-4 h-4" />
                 Backup
               </TabsTrigger>
             )}
             {availableTabs.includes('permissions') && (
-              <TabsTrigger value="permissions" className="flex items-center gap-2 w-full justify-start">
+              <TabsTrigger value="permissions" className="flex items-center gap-2 w-full justify-center">
                 <Shield className="w-4 h-4" />
                 Permisos
               </TabsTrigger>
             )}
             {availableTabs.includes('system') && (
-              <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-start">
+              <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-center">
                 <SettingsIcon className="w-4 h-4" />
                 Sistema
               </TabsTrigger>
