@@ -53,33 +53,68 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     const result = (data.results && data.results[0]) || null;
-    if (!result) {
-      return json({ ok: false, error: "No results found", query, raw: data }, 404);
+
+    // If Geocoding finds a result, return it
+    if (result) {
+      const loc = result.geometry?.location;
+      if (!loc || typeof loc.lat !== "number" || typeof loc.lng !== "number") {
+        return json({ ok: false, error: "Invalid geocode result", query, raw: result }, 502);
+      }
+
+      const display_name = result.formatted_address || query;
+      const place_id = result.place_id || "";
+      const types: string[] = result.types || [];
+
+      return json({
+        ok: true,
+        query,
+        result: {
+          place_id,
+          display_name,
+          lat: loc.lat,
+          lng: loc.lng,
+          types,
+        },
+        raw: data,
+      });
     }
 
-    const loc = result.geometry?.location;
-    if (!loc || typeof loc.lat !== "number" || typeof loc.lng !== "number") {
-      return json({ ok: false, error: "Invalid geocode result", query, raw: result }, 502);
+    // Fallback: Google Places "Find Place From Text" to better handle typos and fuzzy matches
+    const placesUrl = new URL("https://maps.googleapis.com/maps/api/place/findplacefromtext/json");
+    placesUrl.searchParams.set("input", query);
+    placesUrl.searchParams.set("inputtype", "textquery");
+    placesUrl.searchParams.set("key", apiKey);
+    placesUrl.searchParams.set("language", language);
+    placesUrl.searchParams.set("fields", "place_id,formatted_address,geometry,types");
+
+    const placesRes = await fetch(placesUrl.toString());
+    const placesData = await placesRes.json();
+
+    if (!placesRes.ok) {
+      return json({ ok: false, error: `Places upstream ${placesRes.status}`, query, raw: { geocode: data, places: placesData } }, 502);
     }
 
-    const display_name = result.formatted_address || query;
-    const place_id = result.place_id || "";
+    const candidate = (placesData.candidates && placesData.candidates[0]) || null;
+    if (!candidate) {
+      return json({ ok: false, error: "No results found", query, raw: { geocode: data, places: placesData } }, 404);
+    }
 
-    // Optionally verify the result is city-like
-    const types: string[] = result.types || [];
-    const isCityLike = types.includes("locality") || types.includes("postal_town") || types.includes("administrative_area_level_1") || types.includes("administrative_area_level_2");
+    const ploc = candidate.geometry?.location;
+    if (!ploc || typeof ploc.lat !== "number" || typeof ploc.lng !== "number") {
+      return json({ ok: false, error: "Invalid places result", query, raw: candidate }, 502);
+    }
 
     return json({
       ok: true,
       query,
       result: {
-        place_id,
-        display_name,
-        lat: loc.lat,
-        lng: loc.lng,
-        types,
+        place_id: candidate.place_id || "",
+        display_name: candidate.formatted_address || query,
+        lat: ploc.lat,
+        lng: ploc.lng,
+        types: candidate.types || [],
       },
-      raw: data,
+      raw: { geocode: data, places: placesData },
     });
   } catch (e) {
     return json({ ok: false, error: String(e) }, 500);
