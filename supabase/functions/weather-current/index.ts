@@ -35,23 +35,38 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    // Use OpenWeatherMap API instead of Google Weather (which is not publicly available)
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric&lang=${language}`;
+    // Use Google Weather API
+    const apiUrl = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKey}`;
+    
+    const requestBody = {
+      location: {
+        latitude: lat,
+        longitude: lng
+      },
+      requestedLanguage: language,
+      units: unitSystem === "metric" ? "METRIC" : "IMPERIAL"
+    };
 
-    console.log("[weather-current] Fetching from OpenWeatherMap:", apiUrl.replace(apiKey, "***"));
-    const wxRes = await fetch(apiUrl);
+    console.log("[weather-current] Fetching from Google Weather API:", apiUrl.replace(apiKey, "***"));
+    const wxRes = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
     const data = await wxRes.json();
 
     if (!wxRes.ok) {
-      console.error("[weather-current] OpenWeatherMap error:", wxRes.status, data);
+      console.error("[weather-current] Google Weather API error:", wxRes.status, data);
       return new Response(
         JSON.stringify({ error: "Weather API error", status: wxRes.status, details: data }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Normalize OpenWeatherMap response
-    const normalized = normalizeOpenWeatherMapData(data);
+    // Normalize Google Weather response
+    const normalized = normalizeGoogleWeatherData(data);
 
     return new Response(JSON.stringify({ ...normalized, raw: data }), {
       status: 200,
@@ -74,14 +89,24 @@ function safeJson(text: string): any {
   }
 }
 
-// Normalize OpenWeatherMap response to our standard format
-function normalizeOpenWeatherMapData(data: any) {
-  const temperatureC = data?.main?.temp ? Math.round(data.main.temp) : null;
+// Normalize Google Weather response to our standard format
+function normalizeGoogleWeatherData(data: any) {
+  const conditions = data?.currentConditions;
+  
+  // Google Weather API returns temperature in the requested unit
+  const temperatureC = conditions?.temperature?.value ? Math.round(conditions.temperature.value) : null;
   const temperatureF = temperatureC ? Math.round((temperatureC * 9) / 5 + 32) : null;
-  const conditionText = data?.weather?.[0]?.description || null;
-  const windKph = data?.wind?.speed ? Math.round(data.wind.speed * 3.6) : null; // m/s to km/h
-  const humidity = data?.main?.humidity || null;
-  const precipitationChance = null; // OpenWeatherMap doesn't provide this in current weather
+  
+  const conditionText = conditions?.condition || null;
+  
+  // Wind speed conversion from m/s to km/h if needed
+  const windKph = conditions?.wind?.speed ? Math.round(conditions.wind.speed * 3.6) : null;
+  
+  const humidity = conditions?.humidity ? Math.round(conditions.humidity * 100) : null; // Convert from 0-1 to percentage
+  
+  // Google Weather API may provide precipitation probability
+  const precipitationChance = conditions?.precipitationProbability ? 
+    Math.round(conditions.precipitationProbability * 100) : null;
 
   return {
     temperatureC,
