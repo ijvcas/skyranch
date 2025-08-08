@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { CurrentWeather } from "@/services/googleWeatherService";
 
 interface Options {
-  locationKey?: string; // e.g., display name or lat,lng
+  location?: string; // Optional free-form location (e.g., "Madrid, Spain")
+  locationKey?: string; // Optional cache key override
   language?: string; // 'es' by default
   unitSystem?: "metric" | "imperial"; // default 'metric'
 }
@@ -12,15 +13,12 @@ const TRY_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 async function invokeWeatherFunction(
   name: string,
-  lat: number,
-  lng: number,
-  language: string,
-  unitSystem: string
+  body: Record<string, any>
 ): Promise<CurrentWeather | null> {
   try {
-    console.log(`🌦️ [useOpenWeatherAPI] invoking ${name}`, { lat, lng, language, unitSystem });
+    console.log(`🌦️ [useOpenWeatherAPI] invoking ${name}`, body);
     const { data, error } = await supabase.functions.invoke(name, {
-      body: { lat, lng, language, unitSystem },
+      body,
     });
     if (error) {
       console.warn(`🌦️ [useOpenWeatherAPI] ${name} error`, error);
@@ -39,14 +37,23 @@ export const useOpenWeatherAPI = (
   opts?: Options
 ) => {
   return useQuery<CurrentWeather | null>({
-    queryKey: ["open-weather", lat, lng, opts?.locationKey, opts?.language, opts?.unitSystem],
+    queryKey: [
+      "open-weather",
+      lat,
+      lng,
+      opts?.location,
+      opts?.locationKey,
+      opts?.language,
+      opts?.unitSystem,
+    ],
     queryFn: async () => {
-      const canFetch = typeof lat === "number" && typeof lng === "number";
-      if (!canFetch) return null;
+      const hasCoords = typeof lat === "number" && typeof lng === "number";
+      const hasLocation = !!opts?.location && typeof opts.location === "string";
+      if (!hasCoords && !hasLocation) return null;
 
       const language = opts?.language ?? "es";
       const unitSystem = opts?.unitSystem ?? "metric";
-      const lk = opts?.locationKey || `${lat},${lng}`;
+      const lk = opts?.locationKey || (hasLocation ? opts?.location : `${lat},${lng}`);
       const key = `weather:${lk}`;
       const now = Date.now();
 
@@ -64,14 +71,19 @@ export const useOpenWeatherAPI = (
         console.warn("🌦️ [useOpenWeatherAPI] cache read failed", e);
       }
 
-      // 2) Edge Functions: Google first, then generic fallback
+      // 2) Edge Functions: Google first, then OpenWeather fallback
       let data: CurrentWeather | null = null;
-      console.log("🌦️ [useOpenWeatherAPI] fetching from get-weather-google", { lat, lng });
-      data = await invokeWeatherFunction("get-weather-google", lat as number, lng as number, language, unitSystem);
+      const payloadBase = { language, unitSystem } as const;
+      const payload = hasLocation
+        ? { ...payloadBase, location: opts?.location }
+        : { ...payloadBase, lat, lng };
+
+      console.log("🌦️ [useOpenWeatherAPI] fetching from get-weather-google", payload);
+      data = await invokeWeatherFunction("get-weather-google", payload);
 
       if (!data) {
         console.log("🌦️ [useOpenWeatherAPI] fallback to get-weather");
-        data = await invokeWeatherFunction("get-weather", lat as number, lng as number, language, unitSystem);
+        data = await invokeWeatherFunction("get-weather", payload);
       }
 
       if (data && (data.temperatureC != null || data.conditionText != null)) {
@@ -108,7 +120,9 @@ export const useOpenWeatherAPI = (
       };
       return approx;
     },
-    enabled: typeof lat === "number" && typeof lng === "number",
+    enabled:
+      (typeof lat === "number" && typeof lng === "number") ||
+      (typeof opts?.location === "string" && opts.location.length > 0),
     staleTime: TRY_CACHE_TTL,
     retry: 1,
   });

@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind } from "lucide-react";
 import { useFarmProfile } from "@/hooks/useFarmProfile";
-import { useFarmWeather } from "@/hooks/useFarmWeather";
+import { useOpenWeatherAPI } from "@/hooks/useOpenWeatherAPI";
 
 function pickIcon(text?: string | null) {
   const t = (text || "").toLowerCase();
@@ -36,32 +36,26 @@ const WeatherWidget: React.FC = () => {
     }
   }
   
-  const { data: weather, isLoading } = useFarmWeather(lat, lng);
+  const { data: weather, isLoading } = useOpenWeatherAPI(lat, lng, { location: (farmProfile as any)?.weather_location });
 
   const TempIcon = pickIcon(weather?.conditionText);
   const tempValue = weather?.temperatureC;
   
-  // Format location like in picture 2: "28649 Rozas de Puerto Real, Madrid, Spain"
+  // Format location: prefer profile name; basic cleanup
   const formatLocation = () => {
-    if (!farmProfile?.location_name) return "Ubicación";
-    
+    if (!farmProfile?.location_name) return (farmProfile as any)?.weather_location || "Ubicación";
+
     const locationName = farmProfile.location_name;
-    // Remove "es:" prefix if present
-    const cleanName = locationName.replace(/^es:/, '');
-    // Replace underscores with spaces
-    const formattedName = cleanName.replace(/_/g, ' ');
-    
-    // Try to format like "28649 Rozas de Puerto Real, Madrid, Spain"
-    if (formattedName.toLowerCase().includes('rozas')) {
-      return "28649 Rozas de Puerto Real, Madrid, Spain";
-    }
-    
+    const cleanName = locationName.replace(/^es:/, "");
+    const formattedName = cleanName.replace(/_/g, " ");
+
     return formattedName;
   };
 
   const getWeatherCondition = () => {
-    if (profileLoading || isLoading) return "Cargando…";
-    if (!hasCoordinates) return "Sin ubicación";
+    if (profileLoading || isLoading) return "Cargando clima...";
+    const hasLocation = !!(farmProfile as any)?.weather_location || hasCoordinates;
+    if (!hasLocation) return "Sin ubicación";
     if (!weather?.conditionText) return "Conectando...";
     return weather.conditionText;
   };
