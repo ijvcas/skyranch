@@ -597,6 +597,66 @@ export type Database = {
           },
         ]
       }
+      farm_profiles: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          established_year: number | null
+          farm_name: string
+          farm_type: string | null
+          id: string
+          location_coordinates: string | null
+          location_name: string | null
+          logo_url: string | null
+          picture_url: string | null
+          total_area_hectares: number | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          established_year?: number | null
+          farm_name: string
+          farm_type?: string | null
+          id?: string
+          location_coordinates?: string | null
+          location_name?: string | null
+          logo_url?: string | null
+          picture_url?: string | null
+          total_area_hectares?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          established_year?: number | null
+          farm_name?: string
+          farm_type?: string | null
+          id?: string
+          location_coordinates?: string | null
+          location_name?: string | null
+          logo_url?: string | null
+          picture_url?: string | null
+          total_area_hectares?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       field_report_entries: {
         Row: {
           animal_id: string | null

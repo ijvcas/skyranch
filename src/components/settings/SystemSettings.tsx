@@ -13,9 +13,9 @@ import TimezoneSettings from '@/components/TimezoneSettings';
 import VersionControlPanel from '@/components/version-management/VersionControlPanel';
 import VersionHistoryPanel from '@/components/version-management/VersionHistoryPanel';
 import { useWeatherSettings } from '@/hooks/useWeatherSettings';
-
 import { geocodeCity } from '@/services/placesService';
 import { Button } from '@/components/ui/button';
+import FarmProfileSettings from './FarmProfileSettings';
 
 const SystemSettings = () => {
   const { user } = useAuth();
@@ -92,6 +92,9 @@ const SystemSettings = () => {
 
   return (
     <div className="space-y-6">
+      {/* Farm Profile Settings */}
+      <FarmProfileSettings />
+
       {/* Support Info Panel at the top */}
       <SupportInfoSettings isAdmin={isAdmin} />
 
