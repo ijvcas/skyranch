@@ -62,6 +62,7 @@ const SystemSettings = () => {
     const trimmed = city.trim();
     if (!trimmed) { setValid(null); return; }
     setValidating(true);
+    setShowSuggestions(false);
     try {
       const res = await geocodeCity(trimmed, weatherSettings?.language || 'es');
       if (res) {
@@ -76,12 +77,16 @@ const SystemSettings = () => {
             lng: res.lng,
           });
           toast({ title: 'Ubicación guardada', description: res.display_name });
+        } else {
+          toast({ title: 'Ubicación validada', description: res.display_name });
         }
       } else {
         setValid(false);
+        toast({ title: 'No se pudo validar la ubicación', description: 'Intenta con otro término o selecciona de la lista.', variant: 'destructive' as any });
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e); setValid(false);
+      toast({ title: 'Error validando la ubicación', description: e?.message || String(e), variant: 'destructive' as any });
     } finally {
       setValidating(false);
     }
@@ -148,16 +153,35 @@ const SystemSettings = () => {
                   <Input
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const trimmed = city.trim();
+                        const first = predictions[0]?.description?.trim();
+                        if (showSuggestions && first && first.toLowerCase() === trimmed.toLowerCase()) {
+                          // auto-select exact match
+                          handleSelectPrediction(predictions[0]);
+                        } else {
+                          handleValidateFreeText();
+                        }
+                      }
+                    }}
                     onBlur={() => {
+                      const trimmed = city.trim();
+                      const first = predictions[0]?.description?.trim();
+                      if (showSuggestions && first && first.toLowerCase() === trimmed.toLowerCase()) {
+                        handleSelectPrediction(predictions[0]);
+                        return;
+                      }
                       // If user didn't pick a suggestion, try free-text validate
                       if (!showSuggestions) handleValidateFreeText();
                     }}
+                    disabled={validating || saving}
                     placeholder="e.g. Madrid, ES"
                     aria-label="Weather location city"
                     className={`${valid === true ? 'border-green-500 focus-visible:ring-green-500' : valid === false ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                   />
                   {showSuggestions && predictions.length > 0 && (
-                    <div className="absolute z-10 mt-1 w-full rounded-md border bg-background shadow">
+                    <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
                       <ul className="max-h-60 overflow-auto">
                         {predictions.map((p) => (
                           <li key={p.place_id}>

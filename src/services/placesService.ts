@@ -48,7 +48,10 @@ export const suggestPlaces = async (input: string, language = 'es'): Promise<Pla
     console.error('places-autocomplete error:', error);
     return [];
   }
-  if (!data?.ok) return [];
+  if (!data?.ok) {
+    console.warn('places-autocomplete not ok', data);
+    return [];
+  }
   return (data.predictions || []) as PlacePrediction[];
 };
 
