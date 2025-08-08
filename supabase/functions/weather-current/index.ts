@@ -35,25 +35,15 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    // Use Google Weather API
-    const apiUrl = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKey}`;
-    
-    const requestBody = {
-      location: {
-        latitude: lat,
-        longitude: lng
-      },
-      requestedLanguage: language,
-      units: unitSystem === "metric" ? "METRIC" : "IMPERIAL"
-    };
+    // Use Google Weather API with correct endpoint
+    const apiUrl = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&languageCode=${language}&units=${unitSystem === "metric" ? "METRIC" : "IMPERIAL"}`;
 
     console.log("[weather-current] Fetching from Google Weather API:", apiUrl.replace(apiKey, "***"));
     const wxRes = await fetch(apiUrl, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json"
-      },
-      body: JSON.stringify(requestBody)
+      }
     });
     const data = await wxRes.json();
 
@@ -91,22 +81,21 @@ function safeJson(text: string): any {
 
 // Normalize Google Weather response to our standard format
 function normalizeGoogleWeatherData(data: any) {
-  const conditions = data?.currentConditions;
-  
-  // Google Weather API returns temperature in the requested unit
-  const temperatureC = conditions?.temperature?.value ? Math.round(conditions.temperature.value) : null;
+  // Google Weather API response structure
+  const temperatureC = data?.temperature?.degrees ? Math.round(data.temperature.degrees) : null;
   const temperatureF = temperatureC ? Math.round((temperatureC * 9) / 5 + 32) : null;
   
-  const conditionText = conditions?.condition || null;
+  const conditionText = data?.weatherCondition?.description?.text || null;
   
-  // Wind speed conversion from m/s to km/h if needed
-  const windKph = conditions?.wind?.speed ? Math.round(conditions.wind.speed * 3.6) : null;
+  // Wind speed from m/s to km/h if available
+  const windKph = data?.wind?.speed ? Math.round(data.wind.speed * 3.6) : null;
   
-  const humidity = conditions?.humidity ? Math.round(conditions.humidity * 100) : null; // Convert from 0-1 to percentage
+  // Humidity as percentage
+  const humidity = data?.relativeHumidity ? Math.round(data.relativeHumidity * 100) : null;
   
-  // Google Weather API may provide precipitation probability
-  const precipitationChance = conditions?.precipitationProbability ? 
-    Math.round(conditions.precipitationProbability * 100) : null;
+  // Precipitation probability
+  const precipitationChance = data?.precipitationProbability ? 
+    Math.round(data.precipitationProbability * 100) : null;
 
   return {
     temperatureC,
