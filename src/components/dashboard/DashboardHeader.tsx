@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import FieldReportButton from '@/components/field-reports/FieldReportButton';
 import WeatherBadge from '@/components/weather/WeatherBadge';
+import WeatherWidget from '@/components/weather/WeatherWidget';
 
 interface DashboardHeaderProps {
   userEmail?: string;
@@ -24,6 +25,10 @@ const DashboardHeader = ({ userEmail, userName, totalAnimals, onForceRefresh }: 
         <p className="text-lg text-gray-600">
           Bienvenido, {userName || userEmail}
         </p>
+        
+        <div className="mt-4">
+          <WeatherWidget />
+        </div>
         {totalAnimals === 0 && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-blue-800">

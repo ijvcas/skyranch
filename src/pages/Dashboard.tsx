@@ -198,10 +198,6 @@ const Dashboard = () => {
             onForceRefresh={handleForceRefresh}
           />
 
-          <div className="mt-6">
-            <WeatherWidget />
-          </div>
-
           <DashboardStats 
             totalAnimals={totalAnimals}
             speciesCounts={speciesCounts}
