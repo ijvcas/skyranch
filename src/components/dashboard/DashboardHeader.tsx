@@ -17,12 +17,12 @@ const DashboardHeader = ({ userEmail, userName, totalAnimals, onForceRefresh }: 
   return (
     <div className="mb-8 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
       <div className="flex-1">
-        <div className="flex items-center gap-4 mb-3">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+        <div className="text-center mb-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
             Panel de Control
           </h1>
         </div>
-        <p className="text-lg text-gray-600">
+        <p className="text-base text-gray-600 text-center">
           Bienvenido, {userName || userEmail}
         </p>
         

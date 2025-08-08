@@ -45,26 +45,21 @@ const WeatherWidget: React.FC = () => {
     <section aria-label="Clima actual" className="w-full">
       <Card className="bg-card text-card-foreground">
         <CardContent className="p-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-3">
             <MapPin className="h-4 w-4 text-muted-foreground" aria-hidden />
             <span className="text-sm text-muted-foreground">{displayName}</span>
           </div>
 
-          <div className="mt-2 flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <TempIcon className="h-6 w-6 text-muted-foreground" aria-hidden />
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-semibold">
-                  {profileLoading || isLoading ? "—" :
-                    typeof tempValue === "number" ? `${Math.round(tempValue)}${tempUnit}` : "—"}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {farmProfile?.location_coordinates ? displayName : "Sin ubicación"}
-                </span>
-              </div>
-              <div className="text-sm text-muted-foreground">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-semibold">
+                {profileLoading || isLoading ? "—" :
+                  typeof tempValue === "number" ? `${Math.round(tempValue)}${tempUnit}` : "—"}
+              </span>
+              <span className="text-sm text-muted-foreground">
                 {isLoading ? "Cargando…" : (weather?.conditionText || "Condición aproximada")}
-              </div>
+              </span>
             </div>
           </div>
         </CardContent>
