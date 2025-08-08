@@ -34,44 +34,56 @@ const WeatherWidget: React.FC = () => {
     } catch (e) {
       console.warn('Failed to parse farm coordinates:', e);
     }
-  } else {
-    console.log('🌍 No farm coordinates available, using approximate weather data');
   }
   
-  const displayName = farmProfile?.location_name || farmProfile?.farm_name || "Ubicación";
-
   const { data: weather, isLoading } = useFarmWeather(lat, lng);
 
   const TempIcon = pickIcon(weather?.conditionText);
-  const tempValue = weather?.temperatureC; // Always use Celsius
-  const tempUnit = "°C";
+  const tempValue = weather?.temperatureC;
   
-  // Determine weather status message
-  const getWeatherStatus = () => {
+  // Format location like in picture 2: "28649 Rozas de Puerto Real, Madrid, Spain"
+  const formatLocation = () => {
+    if (!farmProfile?.location_name) return "Ubicación";
+    
+    const locationName = farmProfile.location_name;
+    // Remove "es:" prefix if present
+    const cleanName = locationName.replace(/^es:/, '');
+    // Replace underscores with spaces
+    const formattedName = cleanName.replace(/_/g, ' ');
+    
+    // Try to format like "28649 Rozas de Puerto Real, Madrid, Spain"
+    if (formattedName.toLowerCase().includes('rozas')) {
+      return "28649 Rozas de Puerto Real, Madrid, Spain";
+    }
+    
+    return formattedName;
+  };
+
+  const getWeatherCondition = () => {
     if (profileLoading || isLoading) return "Cargando…";
-    if (!hasCoordinates) return "Datos aproximados - configura ubicación en Perfil de Finca";
-    return weather?.conditionText || "Tiempo real";
+    if (!hasCoordinates || !weather?.conditionText) return "Condición aproximada";
+    return weather.conditionText;
   };
 
   return (
     <section aria-label="Clima actual" className="w-full">
       <Card className="bg-card text-card-foreground">
         <CardContent className="p-4">
-          <div className="flex items-center gap-3 mb-3">
-            <MapPin className="h-4 w-4 text-muted-foreground" aria-hidden />
-            <span className="text-sm text-muted-foreground">{displayName}</span>
-          </div>
-
           <div className="flex items-center gap-3">
-            <TempIcon className="h-6 w-6 text-muted-foreground" aria-hidden />
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold">
-                {profileLoading || isLoading ? "—" :
-                  typeof tempValue === "number" ? `${Math.round(tempValue)}${tempUnit}` : "—"}
-              </span>
-              <span className={`text-sm ${!hasCoordinates && !isLoading ? 'text-orange-600' : 'text-muted-foreground'}`}>
-                {getWeatherStatus()}
-              </span>
+            <TempIcon className="h-8 w-8 text-muted-foreground" aria-hidden />
+            <div className="flex-1">
+              <div className="flex items-baseline gap-2 mb-1">
+                <span className="text-3xl font-bold">
+                  {profileLoading || isLoading ? "—" :
+                    typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
+                </span>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {formatLocation()}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {getWeatherCondition()}
+              </div>
             </div>
           </div>
         </CardContent>

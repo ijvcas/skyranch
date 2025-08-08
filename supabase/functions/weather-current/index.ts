@@ -35,30 +35,23 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    // Try Google Maps Platform Weather - Current Conditions
-    // Endpoint may evolve; we attempt a canonical form and surface error body if it fails.
-    const url = new URL("https://weather.googleapis.com/v1/currentConditions:lookup");
-    url.searchParams.set("location", `${lat},${lng}`);
-    url.searchParams.set("key", apiKey);
-    url.searchParams.set("languageCode", language);
-    // unitSystem may be 'metric' or 'imperial' depending on API; keep to pass-through
-    url.searchParams.set("unitSystem", unitSystem);
+    // Use OpenWeatherMap API instead of Google Weather (which is not publicly available)
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric&lang=${language}`;
 
-    console.log("[weather-current] Fetching:", url.toString());
-    const wxRes = await fetch(url.toString(), { method: "GET" });
-    const text = await wxRes.text();
+    console.log("[weather-current] Fetching from OpenWeatherMap:", apiUrl.replace(apiKey, "***"));
+    const wxRes = await fetch(apiUrl);
+    const data = await wxRes.json();
 
     if (!wxRes.ok) {
-      console.error("[weather-current] Upstream error:", wxRes.status, text);
+      console.error("[weather-current] OpenWeatherMap error:", wxRes.status, data);
       return new Response(
-        JSON.stringify({ error: "Weather API error", status: wxRes.status, details: safeJson(text) }),
+        JSON.stringify({ error: "Weather API error", status: wxRes.status, details: data }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const data = safeJson(text);
-    // Normalize a few common fields if present
-    const normalized = normalizeGoogleWeather(data);
+    // Normalize OpenWeatherMap response
+    const normalized = normalizeOpenWeatherMapData(data);
 
     return new Response(JSON.stringify({ ...normalized, raw: data }), {
       status: 200,
@@ -81,60 +74,14 @@ function safeJson(text: string): any {
   }
 }
 
-// Attempt to map Google Weather response to a simpler shape
-function normalizeGoogleWeather(input: any) {
-  // Common plausible shapes based on Google Weather docs (subject to change):
-  // - input.currentConditions?.temperature?.value/units
-  // - input.currentConditions?.temperatureCelsius
-  // - input.currentConditions?.weatherCode? or .summary?
-  const cc = input?.currentConditions || input?.current_conditions || input?.data || input;
-  let temperatureC: number | null = null;
-  let temperatureF: number | null = null;
-  let conditionText: string | null = null;
-  let windKph: number | null = null;
-  let humidity: number | null = null;
-  let precipitationChance: number | null = null;
-
-  // Temperature
-  if (cc?.temperature?.value != null && typeof cc?.temperature?.value === "number") {
-    const val = cc.temperature.value;
-    const units = (cc.temperature.units || "").toLowerCase();
-    if (units.includes("c")) {
-      temperatureC = val;
-      temperatureF = Math.round((val * 9) / 5 + 32);
-    } else if (units.includes("f")) {
-      temperatureF = val;
-      temperatureC = Math.round(((val - 32) * 5) / 9);
-    }
-  } else if (typeof cc?.temperatureCelsius === "number") {
-    temperatureC = cc.temperatureCelsius;
-    temperatureF = Math.round((cc.temperatureCelsius * 9) / 5 + 32);
-  }
-
-  // Condition summary string
-  conditionText = cc?.weatherDescription || cc?.summary || cc?.conditionText || cc?.weather || null;
-
-  // Humidity
-  if (typeof cc?.humidity === "number") {
-    humidity = cc.humidity; // assume %
-  }
-
-  // Wind
-  if (cc?.windSpeed?.value != null && typeof cc?.windSpeed?.value === "number") {
-    const units = (cc?.windSpeed?.units || "").toLowerCase();
-    if (units.includes("kph") || units.includes("km/h") || units.includes("kmh")) {
-      windKph = cc.windSpeed.value;
-    } else if (units.includes("m/s")) {
-      windKph = Math.round(cc.windSpeed.value * 3.6);
-    } else if (units.includes("mph")) {
-      windKph = Math.round(cc.windSpeed.value * 1.60934);
-    }
-  }
-
-  // Precipitation chance
-  if (typeof cc?.precipitationChance === "number") {
-    precipitationChance = cc.precipitationChance;
-  }
+// Normalize OpenWeatherMap response to our standard format
+function normalizeOpenWeatherMapData(data: any) {
+  const temperatureC = data?.main?.temp ? Math.round(data.main.temp) : null;
+  const temperatureF = temperatureC ? Math.round((temperatureC * 9) / 5 + 32) : null;
+  const conditionText = data?.weather?.[0]?.description || null;
+  const windKph = data?.wind?.speed ? Math.round(data.wind.speed * 3.6) : null; // m/s to km/h
+  const humidity = data?.main?.humidity || null;
+  const precipitationChance = null; // OpenWeatherMap doesn't provide this in current weather
 
   return {
     temperatureC,
