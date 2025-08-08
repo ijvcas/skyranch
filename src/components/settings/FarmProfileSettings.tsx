@@ -270,7 +270,7 @@ const FarmProfileSettings = () => {
               {locationValidated && (
                 <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
                   <Check className="w-3 h-3" />
-                  Ubicación validada con Google Maps
+                  Ubicación validada con OpenStreetMap
                 </p>
               )}
               {validatingLocation && (

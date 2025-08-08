@@ -59,8 +59,10 @@ export const searchLocations = async (input: string, language = 'es'): Promise<L
 
 export const validateLocation = async (place_id: string, language = 'es'): Promise<LocationResult | null> => {
   try {
+    console.log('🗺️ Validating location with place_id:', place_id);
+    
     const params = new URLSearchParams({
-      place_id,
+      osm_ids: place_id,
       format: 'json',
       'accept-language': language,
       addressdetails: '1'
@@ -78,11 +80,16 @@ export const validateLocation = async (place_id: string, language = 'es'): Promi
 
     const results: NominatimResult[] = await response.json();
     
+    console.log('🗺️ Validation results:', results);
+    
     if (results.length === 0) {
+      console.log('🗺️ No validation results found for place_id:', place_id);
       return null;
     }
 
     const result = results[0];
+    
+    console.log('🗺️ Validation successful:', result);
     
     return {
       place_id: result.place_id,
@@ -92,7 +99,7 @@ export const validateLocation = async (place_id: string, language = 'es'): Promi
       types: [result.class, result.type]
     };
   } catch (error) {
-    console.error('Location validation error:', error);
+    console.error('🗺️ Location validation error:', error);
     return null;
   }
 };
