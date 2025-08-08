@@ -14,25 +14,25 @@ const Settings = () => {
   return (
     <PermissionGuard permission="system_settings">
       <SettingsLayout activeTab={activeTab} onTabChange={setActiveTab}>
-        <TabsContent value="users">
+        <TabsContent value="users" className="mt-8">
           <PermissionGuard permission="users_manage">
             <UserSettings />
           </PermissionGuard>
         </TabsContent>
         
-        <TabsContent value="backup">
+        <TabsContent value="backup" className="mt-8">
           <PermissionGuard permission="system_settings">
             <BackupSettings />
           </PermissionGuard>
         </TabsContent>
         
-        <TabsContent value="permissions">
+        <TabsContent value="permissions" className="mt-8">
           <PermissionGuard permission="system_settings">
             <PermissionsSettings />
           </PermissionGuard>
         </TabsContent>
         
-        <TabsContent value="system">
+        <TabsContent value="system" className="mt-8">
           <PermissionGuard permission="system_settings">
             <SystemSettings />
           </PermissionGuard>
