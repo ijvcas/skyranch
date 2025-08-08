@@ -53,6 +53,8 @@ class FarmProfileService {
   }
 
   async updateFarmProfile(id: string, profileData: Partial<FarmProfileFormData>): Promise<FarmProfile> {
+    console.log('🔄 [FARM SERVICE] Updating farm profile:', id, 'with data:', profileData);
+    
     const { data, error } = await supabase
       .from('farm_profiles')
       .update(profileData)
@@ -61,10 +63,11 @@ class FarmProfileService {
       .single();
 
     if (error) {
-      console.error('Error updating farm profile:', error);
+      console.error('❌ [FARM SERVICE] Error updating farm profile:', error);
       throw error;
     }
 
+    console.log('✅ [FARM SERVICE] Farm profile updated successfully:', data);
     return data;
   }
 

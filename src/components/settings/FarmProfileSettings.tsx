@@ -69,19 +69,29 @@ const FarmProfileSettings = () => {
 
   const onSubmit = async (data: FarmProfileFormData) => {
     try {
-      console.log('Submitting farm profile data:', data);
+      console.log('🔄 Form submission started with data:', data);
+      console.log('🔄 Current form values:', {
+        farm_name: watch('farm_name'),
+        location_name: watch('location_name'), 
+        location_coordinates: watch('location_coordinates')
+      });
       
       if (farmProfile) {
-        await updateFarmProfile({ id: farmProfile.id, data });
+        console.log('🔄 Updating existing farm profile:', farmProfile.id);
+        const result = await updateFarmProfile({ id: farmProfile.id, data });
+        console.log('✅ Update result:', result);
         
         // Sync weather settings after successful update if coordinates are available
         if (data.location_coordinates) {
+          console.log('🌍 Syncing weather settings with coordinates:', data.location_coordinates);
           try {
             await syncFromFarm();
-            console.log('Weather settings synced with new coordinates');
+            console.log('✅ Weather settings synced with new coordinates');
           } catch (error) {
-            console.warn('Failed to sync weather settings:', error);
+            console.warn('❌ Failed to sync weather settings:', error);
           }
+        } else {
+          console.warn('⚠️ No coordinates available for weather sync');
         }
         
         toast({
@@ -89,15 +99,18 @@ const FarmProfileSettings = () => {
           description: 'El perfil de la finca se ha actualizado correctamente.',
         });
       } else {
+        console.log('🔄 Creating new farm profile');
         const newProfile = await createFarmProfile(data);
+        console.log('✅ Creation result:', newProfile);
         
         // Sync weather settings after creation if coordinates are available
         if (data.location_coordinates) {
+          console.log('🌍 Syncing weather settings for new profile');
           try {
             await syncFromFarm();
-            console.log('Weather settings synced for new profile');
+            console.log('✅ Weather settings synced for new profile');
           } catch (error) {
-            console.warn('Failed to sync weather settings:', error);
+            console.warn('❌ Failed to sync weather settings:', error);
           }
         }
         
@@ -107,7 +120,7 @@ const FarmProfileSettings = () => {
         });
       }
     } catch (error) {
-      console.error('Error saving farm profile:', error);
+      console.error('❌ Error saving farm profile:', error);
       toast({
         title: 'Error',
         description: 'Error al guardar el perfil de la finca.',
