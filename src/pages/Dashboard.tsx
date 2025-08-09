@@ -77,21 +77,42 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Enhanced query with better error handling and permission checking
+  // Enhanced query with admin fallback and better error handling
   const { data: allAnimals = [], isLoading, error, refetch } = useQuery({
     queryKey: ['animals', 'all-users'],
     queryFn: async () => {
       try {
-        console.log('🔍 Checking animals_view permission before fetching...');
+        console.log('🔍 Starting animal data fetch...');
         
-        // Check permission before fetching data
+        // First, try to get current user to check if they're admin
+        let isAdmin = false;
+        let shouldBypassPermissions = false;
+        
         try {
-          await checkPermission('animals_view');
-          console.log('✅ Permission granted for animals_view');
-        } catch (permissionError) {
-          console.log('❌ Permission denied for animals_view:', permissionError);
-          // Return empty array instead of throwing to prevent app crash
-          return [];
+          const currentUser = await getCurrentUser();
+          console.log('👤 Current user:', currentUser?.email, 'Role:', currentUser?.role);
+          isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'manager';
+          
+          // If user sync issues, allow admins and managers to bypass permission checks
+          if (isAdmin) {
+            shouldBypassPermissions = true;
+            console.log('🔓 Admin/Manager detected - enabling fallback access');
+          }
+        } catch (userError) {
+          console.error('❌ Error getting current user:', userError);
+        }
+        
+        // Try permission check first, but have fallback for admins
+        if (!shouldBypassPermissions) {
+          try {
+            await checkPermission('animals_view');
+            console.log('✅ Permission granted for animals_view');
+          } catch (permissionError) {
+            console.error('❌ Permission denied for animals_view:', permissionError);
+            throw new Error(`Acceso denegado: ${permissionError.message}`);
+          }
+        } else {
+          console.log('🔓 Bypassing permission check for admin/manager');
         }
         
         console.log('🔄 Fetching animals data...');
@@ -100,8 +121,7 @@ const Dashboard = () => {
         return animals;
       } catch (error) {
         console.error('❌ Error fetching animals:', error);
-        // Return empty array instead of throwing to prevent app crash
-        return [];
+        throw error; // Let error bubble up to trigger error state
       }
     },
     enabled: !!user,
@@ -117,20 +137,37 @@ const Dashboard = () => {
     refetchOnWindowFocus: false, // Disable to prevent excessive requests
   });
 
-  // Force a complete refresh of all data
-  const handleForceRefresh = () => {
-    console.log('🔄 Force refreshing all data...');
+  // Force a complete refresh of all data with user sync retry
+  const handleForceRefresh = async () => {
+    console.log('🔄 Force refreshing all data with user sync...');
     
-    // Clear cache and run diagnostics
-    networkDiagnostics.clearCache();
-    networkDiagnostics.runDiagnostics();
-    
-    queryClient.clear();
-    refetch();
-    toast({
-      title: "Actualizando datos",
-      description: "Recargando todos los animales del sistema...",
-    });
+    try {
+      // Clear cache and run diagnostics
+      networkDiagnostics.clearCache();
+      networkDiagnostics.runDiagnostics();
+      
+      // Force user sync retry
+      console.log('🔄 Forcing user sync retry...');
+      const { syncAuthUsersToAppUsers } = await import('@/services/user/userQueries');
+      await syncAuthUsersToAppUsers();
+      console.log('✅ User sync completed');
+      
+      // Clear React Query cache and refetch
+      queryClient.clear();
+      await refetch();
+      
+      toast({
+        title: "Datos actualizados",
+        description: "Se han recargado todos los datos del sistema.",
+      });
+    } catch (error) {
+      console.error('❌ Error during force refresh:', error);
+      toast({
+        title: "Error al actualizar",
+        description: "Hubo un problema al recargar los datos. Intenta de nuevo.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Calculate all stats from the single query result
@@ -162,6 +199,7 @@ const Dashboard = () => {
   }
 
   if (error) {
+    console.log('🔴 Dashboard error state triggered:', error);
     return (
       <DashboardErrorState 
         userEmail={user?.email}

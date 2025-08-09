@@ -112,7 +112,7 @@ export const syncAuthUsersToAppUsers = async (): Promise<void> => {
   }
 };
 
-// Get current authenticated user info
+// Get current authenticated user info with enhanced sync retry
 export const getCurrentUser = async (): Promise<AppUser | null> => {
   try {
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
@@ -127,21 +127,62 @@ export const getCurrentUser = async (): Promise<AppUser | null> => {
       return null;
     }
 
-    // Try to sync user (but don't fail if it errors)
-    try {
-      await syncAuthUsersToAppUsers();
-    } catch (syncError) {
-      console.warn('⚠️ Sync warning for current user (continuing anyway):', syncError);
-    }
+    console.log('🔍 Looking for user in app_users with ID:', authUser.id);
 
-    const { data: appUser, error: dbError } = await supabase
+    // First, try to find the user in app_users
+    let { data: appUser, error: dbError } = await supabase
       .from('app_users')
       .select('*')
       .eq('id', authUser.id)
       .single();
 
-    if (dbError) {
-      console.error('❌ Database error:', dbError);
+    // If not found by ID, try by email as fallback
+    if (dbError && authUser.email) {
+      console.log('⚠️ User not found by ID, trying by email:', authUser.email);
+      const { data: userByEmail, error: emailError } = await supabase
+        .from('app_users')
+        .select('*')
+        .eq('email', authUser.email)
+        .single();
+        
+      if (!emailError && userByEmail) {
+        appUser = userByEmail;
+        dbError = null;
+        console.log('✅ Found user by email, will sync ID');
+        
+        // Update the user record with correct auth ID
+        await supabase
+          .from('app_users')
+          .update({ id: authUser.id })
+          .eq('email', authUser.email);
+      }
+    }
+
+    // If still not found, try to sync and create the user
+    if (dbError || !appUser) {
+      console.log('⚠️ User not found in app_users, attempting sync...');
+      try {
+        await syncAuthUsersToAppUsers();
+        
+        // Try again after sync
+        const { data: syncedUser, error: syncError } = await supabase
+          .from('app_users')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+          
+        if (!syncError && syncedUser) {
+          appUser = syncedUser;
+          dbError = null;
+          console.log('✅ User found after sync');
+        }
+      } catch (syncError) {
+        console.error('❌ Sync failed:', syncError);
+      }
+    }
+
+    if (dbError || !appUser) {
+      console.error('❌ Database error or user not found:', dbError);
       return null;
     }
 
