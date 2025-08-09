@@ -41,22 +41,23 @@ const WeatherWidget: React.FC = () => {
   return (
     <section aria-label="Clima actual" className="w-full max-w-sm mx-auto">
       <Card className="bg-card text-card-foreground">
-        <CardContent className="p-3">
-          <div className="flex items-center gap-2">
-            <TempIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" aria-hidden />
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <TempIcon className="h-8 w-8 text-yellow-500 mt-1 flex-shrink-0" aria-hidden />
             <div className="flex-1 min-w-0">
-              {/* Temperature and condition in one line like picture 2 */}
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold">
-                  {settingsLoading || isLoading ? "—" :
-                    typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
-                </span>
-                <span className="text-sm text-muted-foreground truncate">
-                  {getWeatherCondition()}
-                </span>
+              {/* Temperature - large and prominent */}
+              <div className="text-2xl font-bold text-foreground mb-1">
+                {settingsLoading || isLoading ? "—" :
+                  typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
               </div>
-              {/* Location below like picture 2 */}
-              <div className="text-xs text-muted-foreground truncate">
+              
+              {/* Weather condition - detailed text like "Cielo Claro" */}
+              <div className="text-base text-muted-foreground mb-2">
+                {getWeatherCondition()}
+              </div>
+              
+              {/* Location - smaller text below */}
+              <div className="text-sm text-muted-foreground truncate">
                 {formatLocation()}
               </div>
             </div>
