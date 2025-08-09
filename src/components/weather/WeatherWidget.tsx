@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind } from "lucide-react";
-import { useFarmProfile } from "@/hooks/useFarmProfile";
-import { useOpenWeatherAPI } from "@/hooks/useOpenWeatherAPI";
+import { useWeatherSettings } from "@/hooks/useWeatherSettings";
+import { useGoogleWeatherAPI } from "@/hooks/useGoogleWeatherAPI";
 
 function pickIcon(text?: string | null) {
   const t = (text || "").toLowerCase();
@@ -15,47 +15,19 @@ function pickIcon(text?: string | null) {
 }
 
 const WeatherWidget: React.FC = () => {
-  const { data: farmProfile, isLoading: profileLoading } = useFarmProfile();
-  
-  // Parse coordinates from farm profile
-  let lat: number | undefined;
-  let lng: number | undefined;
-  let hasCoordinates = false;
-  
-  if (farmProfile?.location_coordinates) {
-    try {
-      const coords = farmProfile.location_coordinates.split(',').map(c => parseFloat(c.trim()));
-      if (coords.length === 2 && coords.every(c => !isNaN(c))) {
-        lat = coords[0];
-        lng = coords[1];
-        hasCoordinates = true;
-        console.log('🌍 Using farm coordinates for weather:', { lat, lng });
-      }
-    } catch (e) {
-      console.warn('Failed to parse farm coordinates:', e);
-    }
-  }
-  
-  const { data: weather, isLoading } = useOpenWeatherAPI(lat, lng, { location: (farmProfile as any)?.weather_location });
+  const { data: weatherSettings, isLoading: settingsLoading } = useWeatherSettings();
+  const { data: weather, isLoading } = useGoogleWeatherAPI(weatherSettings?.location_query || undefined);
 
   const TempIcon = pickIcon(weather?.conditionText);
   const tempValue = weather?.temperatureC;
   
-  // Format location: prefer profile name; basic cleanup
   const formatLocation = () => {
-    if (!farmProfile?.location_name) return (farmProfile as any)?.weather_location || "Ubicación";
-
-    const locationName = farmProfile.location_name;
-    const cleanName = locationName.replace(/^es:/, "");
-    const formattedName = cleanName.replace(/_/g, " ");
-
-    return formattedName;
+    return weatherSettings?.display_name || "Ubicación";
   };
 
   const getWeatherCondition = () => {
-    if (profileLoading || isLoading) return "Cargando clima...";
-    const hasLocation = !!(farmProfile as any)?.weather_location || hasCoordinates;
-    if (!hasLocation) return "Sin ubicación";
+    if (settingsLoading || isLoading) return "Cargando clima...";
+    if (!weatherSettings?.location_query) return "Sin ubicación";
     if (!weather?.conditionText) return "Conectando...";
     return weather.conditionText;
   };
@@ -70,7 +42,7 @@ const WeatherWidget: React.FC = () => {
               {/* Temperature and condition in one line like picture 2 */}
               <div className="flex items-center gap-2">
                 <span className="text-xl font-bold">
-                  {profileLoading || isLoading ? "—" :
+                  {settingsLoading || isLoading ? "—" :
                     typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
                 </span>
                 <span className="text-sm text-muted-foreground truncate">
