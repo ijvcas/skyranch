@@ -173,18 +173,16 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Full-width banner matching System Settings layout */}
-      <div className="w-full px-3 md:px-4 py-4 md:py-6 bg-gradient-to-br from-green-50 to-blue-50">
+      {/* Full-width banner without white frame and more top spacing */}
+      <div className="w-full px-3 md:px-4 pt-8 md:pt-12 pb-4 md:pb-6 bg-gradient-to-br from-green-50 to-blue-50">
         <div className="max-w-7xl mx-auto">
-          <Card>
-            <CardContent className="p-3 md:p-4">
-              <ImageUpload
-                currentImage={bannerImage}
-                onImageChange={() => {}} // Read-only mode
-                disabled={true}
-              />
-            </CardContent>
-          </Card>
+          <div className="rounded-lg overflow-hidden">
+            <ImageUpload
+              currentImage={bannerImage}
+              onImageChange={() => {}} // Read-only mode
+              disabled={true}
+            />
+          </div>
         </div>
       </div>
       
