@@ -16,7 +16,13 @@ function pickIcon(text?: string | null) {
 
 const WeatherWidget: React.FC = () => {
   const { data: weatherSettings, isLoading: settingsLoading } = useWeatherSettings();
-  const { data: weather, isLoading } = useGoogleWeatherAPI(weatherSettings?.location_query || undefined);
+  console.log("🌤️ [WeatherWidget] Weather settings:", weatherSettings);
+  console.log("🌤️ [WeatherWidget] Settings loading:", settingsLoading);
+  
+  const { data: weather, isLoading, error } = useGoogleWeatherAPI(weatherSettings?.location_query || undefined);
+  console.log("🌤️ [WeatherWidget] Weather data:", weather);
+  console.log("🌤️ [WeatherWidget] Weather loading:", isLoading);
+  console.log("🌤️ [WeatherWidget] Weather error:", error);
 
   const TempIcon = pickIcon(weather?.conditionText);
   const tempValue = weather?.temperatureC;

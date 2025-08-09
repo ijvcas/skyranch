@@ -82,21 +82,32 @@ function normalizeGoogleWeatherData(data: any) {
 }
 
 Deno.serve(async (req: Request) => {
+  console.log(`[get-weather-google] ${req.method} request received`);
+  
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
+    console.log("[get-weather-google] Handling CORS preflight");
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log("[get-weather-google] Processing POST request");
+    
     const apiKeyWeather = Deno.env.get("GOOGLE_WEATHER_API_KEY");
     const apiKeyMaps = Deno.env.get("GOOGLE_MAPS_API_KEY");
+    
+    console.log("[get-weather-google] API Keys status:", {
+      weather: apiKeyWeather ? "✓ Present" : "✗ Missing",
+      maps: apiKeyMaps ? "✓ Present" : "✗ Missing"
+    });
 
     if (!apiKeyWeather) {
-      console.warn("[get-weather-google] Missing GOOGLE_WEATHER_API_KEY");
-      return jsonResponse({ error: "Missing config" }, 200);
+      console.error("[get-weather-google] CRITICAL: Missing GOOGLE_WEATHER_API_KEY");
+      return jsonResponse({ error: "Missing weather API key" }, 500);
     }
 
     const body = (await req.json().catch(() => ({}))) as RequestBody;
+    console.log("[get-weather-google] Request body:", body);
     const language = body.language || "es";
     const unitSystem = (body.unitSystem || "metric").toLowerCase() as "metric" | "imperial";
 
@@ -124,28 +135,38 @@ Deno.serve(async (req: Request) => {
     }
 
     if (typeof lat !== "number" || typeof lng !== "number") {
-      console.warn("[get-weather-google] No valid coordinates");
-      return jsonResponse(null, 200);
+      console.error("[get-weather-google] No valid coordinates after geocoding:", { lat, lng });
+      return jsonResponse({ error: "No valid coordinates" }, 400);
     }
+
+    console.log("[get-weather-google] Using coordinates:", { lat, lng });
 
     const units = unitSystem === "metric" ? "METRIC" : "IMPERIAL";
     const apiUrl = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKeyWeather}&location.latitude=${lat}&location.longitude=${lng}&languageCode=${encodeURIComponent(
       language
     )}&unitsSystem=${units}`;
 
-    console.log("[get-weather-google] Fetch:", apiUrl.replace(apiKeyWeather, "***"));
+    console.log("[get-weather-google] Making Google Weather API call:", apiUrl.replace(apiKeyWeather, "***"));
+    
     const wxRes = await fetch(apiUrl, {
       headers: { Accept: "application/json" },
     });
+    
+    console.log("[get-weather-google] Google Weather API response status:", wxRes.status);
+    
     if (!wxRes.ok) {
       const txt = await wxRes.text();
-      console.warn("[get-weather-google] Google weather non-200", wxRes.status, txt);
-      return jsonResponse(null, 200);
+      console.error("[get-weather-google] Google Weather API error:", wxRes.status, txt);
+      return jsonResponse({ error: `Weather API error: ${wxRes.status}` }, 500);
     }
 
     const raw = await wxRes.json();
+    console.log("[get-weather-google] Raw weather data:", JSON.stringify(raw, null, 2));
+    
     const normalized = normalizeGoogleWeatherData(raw);
+    console.log("[get-weather-google] Normalized weather data:", normalized);
 
+    console.log("[get-weather-google] Success! Returning weather data");
     return jsonResponse({ ...normalized, raw });
   } catch (err) {
     console.error("[get-weather-google] Unhandled error", err);

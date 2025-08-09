@@ -5,10 +5,15 @@ import type { CurrentWeather } from "@/services/googleWeatherService";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 export const useGoogleWeatherAPI = (location?: string) => {
+  console.log("🌤️ [useGoogleWeatherAPI] Hook called with location:", location);
+  
   return useQuery<CurrentWeather | null>({
     queryKey: ["google-weather", location],
     queryFn: async () => {
+      console.log("🌤️ [useGoogleWeatherAPI] Query function executing for:", location);
+      
       if (!location || typeof location !== "string" || location.trim().length === 0) {
+        console.log("🌤️ [useGoogleWeatherAPI] Invalid location, returning null");
         return null;
       }
 
@@ -30,9 +35,15 @@ export const useGoogleWeatherAPI = (location?: string) => {
       }
 
       // 2) Fetch from Google Weather Edge Function
-      console.log("🌤️ [useGoogleWeatherAPI] fetching from get-weather-google", { location });
+      console.log("🌤️ [useGoogleWeatherAPI] Calling get-weather-google with:", { 
+        location: location.trim(),
+        language: "es", 
+        unitSystem: "metric" 
+      });
+      
       let data: CurrentWeather | null = null;
       try {
+        console.log("🌤️ [useGoogleWeatherAPI] Invoking supabase.functions.invoke...");
         const { data: functionData, error } = await supabase.functions.invoke("get-weather-google", {
           body: { 
             location: location.trim(),
@@ -41,13 +52,16 @@ export const useGoogleWeatherAPI = (location?: string) => {
           },
         });
         
+        console.log("🌤️ [useGoogleWeatherAPI] Edge function response:", { functionData, error });
+        
         if (error) {
           console.warn("🌤️ [useGoogleWeatherAPI] get-weather-google error", error);
         } else {
           data = functionData as CurrentWeather;
+          console.log("🌤️ [useGoogleWeatherAPI] Parsed weather data:", data);
         }
       } catch (err) {
-        console.error("🌤️ [useGoogleWeatherAPI] get-weather-google threw", err);
+        console.error("🌤️ [useGoogleWeatherAPI] get-weather-google threw exception:", err);
       }
 
       if (data && (data.temperatureC != null || data.conditionText != null)) {
