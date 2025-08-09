@@ -3,6 +3,7 @@
 // - Geocodes location with Google Maps Geocoding API when needed
 // - Fetches current weather from Google Weather API
 // - Returns normalized weather data with CORS enabled
+// Force redeploy: Updated 2025-08-09
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
