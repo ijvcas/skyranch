@@ -39,26 +39,24 @@ const WeatherWidget: React.FC = () => {
   };
 
   return (
-    <section aria-label="Clima actual" className="w-full max-w-sm mx-auto">
-      <div className="p-3">
-        <div className="flex items-start gap-2">
-          <TempIcon className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" aria-hidden />
-          <div className="flex-1 min-w-0">
-            {/* Temperature - smaller, no bold */}
-            <div className="text-lg text-foreground mb-0.5">
-              {settingsLoading || isLoading ? "—" :
-                typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
-            </div>
-            
-            {/* Weather condition - smaller text */}
-            <div className="text-sm text-muted-foreground mb-1">
-              {getWeatherCondition()}
-            </div>
-            
-            {/* Location - smaller text below */}
-            <div className="text-xs text-muted-foreground truncate">
-              {formatLocation()}
-            </div>
+    <section aria-label="Clima actual" className="w-full">
+      <div className="flex items-start gap-3">
+        <TempIcon className="h-6 w-6 text-yellow-500 mt-1 flex-shrink-0" aria-hidden />
+        <div className="flex-1 min-w-0">
+          {/* Temperature - medium size, no bold */}
+          <div className="text-xl text-foreground">
+            {settingsLoading || isLoading ? "—" :
+              typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
+          </div>
+          
+          {/* Weather condition - smaller text below */}
+          <div className="text-sm text-muted-foreground">
+            {getWeatherCondition()}
+          </div>
+          
+          {/* Location - smallest text below */}
+          <div className="text-xs text-muted-foreground">
+            {formatLocation()}
           </div>
         </div>
       </div>
