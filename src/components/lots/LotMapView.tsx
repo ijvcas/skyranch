@@ -12,7 +12,7 @@ const LotMapView: React.FC<LotMapViewProps> = ({ lots, onLotSelect }) => {
   return (
     <div className="space-y-4">
       <div className="bg-white p-4 rounded-lg border">
-        <h2 className="text-lg font-semibold mb-2">Mapa de Lotes</h2>
+        <h2 className="text-lg font-semibold mb-2">Potreros</h2>
         <p className="text-gray-500 mb-4">
           Dibuja y gestiona tus lotes de pastoreo.
         </p>

@@ -25,7 +25,7 @@ export const useDrawingManager = ({ lots, getLotColor, onPolygonComplete }: UseD
         fillOpacity: 0.35,
         strokeWeight: 2,
         clickable: true,
-        editable: true,
+        editable: false,
       }
     });
 
@@ -84,7 +84,7 @@ export const useDrawingManager = ({ lots, getLotColor, onPolygonComplete }: UseD
         strokeWeight: 2,
         strokeOpacity: 0.9,
         clickable: true,
-        editable: true,
+        editable: false,
       }
     });
 

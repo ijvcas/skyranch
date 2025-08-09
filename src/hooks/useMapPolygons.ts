@@ -57,7 +57,7 @@ export const useMapPolygons = ({ lots, onLotSelect }: UseMapPolygonsOptions) => 
             fillOpacity: 0.3,
             strokeWeight: 2,
             strokeColor: getLotColor(lot),
-            editable: true,
+            editable: false,
             draggable: false,
           });
 

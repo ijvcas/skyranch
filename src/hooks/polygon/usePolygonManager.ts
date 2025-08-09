@@ -45,7 +45,7 @@ export const usePolygonManager = (
           strokeColor: '#059669',
           strokeWeight: 2,
           strokeOpacity: 0.9,
-          editable: true,
+          editable: false,
           clickable: true
         });
 
@@ -128,7 +128,7 @@ export const usePolygonManager = (
             strokeColor: '#059669',
             strokeWeight: 2,
             strokeOpacity: 0.9,
-            editable: true,
+            editable: false,
             clickable: true
           });
 

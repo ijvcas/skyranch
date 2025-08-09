@@ -120,7 +120,7 @@ const Lots = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 flex flex-col sm:flex-row w-full sm:w-auto">
             <TabsTrigger value="overview" className="w-full sm:w-auto">Resumen</TabsTrigger>
-            <TabsTrigger value="map" className="w-full sm:w-auto">Mapa de Lotes</TabsTrigger>
+            <TabsTrigger value="map" className="w-full sm:w-auto">Potreros</TabsTrigger>
             <TabsTrigger value="cadastral" className="w-full sm:w-auto">Mapa Catastral</TabsTrigger>
             {selectedLot && <TabsTrigger value="detail" className="w-full sm:w-auto">Detalle</TabsTrigger>}
           </TabsList>
