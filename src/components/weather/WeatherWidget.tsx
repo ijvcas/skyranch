@@ -45,17 +45,17 @@ const WeatherWidget: React.FC = () => {
         
         {/* Temperature and condition grouped */}
         <div className="flex-shrink-0">
-          <div className="text-lg text-foreground">
+          <div className="text-base text-foreground">
             {settingsLoading || isLoading ? "—" :
               typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             {getWeatherCondition()}
           </div>
         </div>
         
         {/* Location on the right */}
-        <div className="text-sm text-muted-foreground flex-1">
+        <div className="text-xs text-muted-foreground flex-1">
           {formatLocation()}
         </div>
       </div>

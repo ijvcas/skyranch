@@ -14,14 +14,21 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ userEmail, userName, totalAnimals, onForceRefresh }: DashboardHeaderProps) => {
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Buenos días";
+    if (hour < 18) return "Buenas tardes";
+    return "Buenas noches";
+  };
+
   return (
-    <div className="mb-8 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+    <div className="mb-4 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
       <div className="flex-1">
         <p className="text-base text-gray-600 text-center">
-          Bienvenido, {userName || userEmail}
+          {getTimeBasedGreeting()}, {userName || userEmail}
         </p>
         
-        <div className="mt-4">
+        <div className="mt-2">
           <WeatherWidget />
         </div>
         {totalAnimals === 0 && (
