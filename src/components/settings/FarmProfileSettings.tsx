@@ -11,7 +11,7 @@ import { useFarmProfile } from '@/hooks/useFarmProfile';
 import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 import { type FarmProfileFormData } from '@/services/farmProfileService';
 import { Loader2, Upload, MapPin, Building2, Check } from 'lucide-react';
-import { searchLocations, validateLocation, type LocationSuggestion } from '@/services/locationService';
+import { suggestPlaces, getPlaceDetails, type PlacePrediction } from '@/services/placesService';
 
 const farmProfileSchema = z.object({
   farm_name: z.string().min(1, 'El nombre de la finca es requerido'),
@@ -37,7 +37,7 @@ const FarmProfileSettings = () => {
   
   const { syncFromFarm } = useWeatherSettings();
 
-  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<PlacePrediction[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [validatingLocation, setValidatingLocation] = useState(false);
   const [locationValidated, setLocationValidated] = useState(false);
@@ -177,7 +177,7 @@ const FarmProfileSettings = () => {
     }
 
     try {
-      const results = await searchLocations(input, 'es');
+      const results = await suggestPlaces(input, 'es');
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
     } catch (error) {
@@ -187,12 +187,12 @@ const FarmProfileSettings = () => {
     }
   };
 
-  const handleLocationSelect = async (suggestion: LocationSuggestion) => {
+  const handleLocationSelect = async (suggestion: PlacePrediction) => {
     setValidatingLocation(true);
     setShowSuggestions(false);
 
     try {
-      const result = await validateLocation(suggestion.place_id, 'es');
+      const result = await getPlaceDetails(suggestion.place_id, 'es');
       if (result) {
         console.log('Location validated:', result);
         setValue('location_name', result.display_name);
@@ -301,7 +301,7 @@ const FarmProfileSettings = () => {
               {locationValidated && (
                 <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
                   <Check className="w-3 h-3" />
-                  Ubicación validada con OpenStreetMap
+                  Ubicación validada con Google Places
                 </p>
               )}
               {validatingLocation && (
