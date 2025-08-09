@@ -41,22 +41,26 @@ const WeatherWidget: React.FC = () => {
   return (
     <section aria-label="Clima actual" className="w-full">
       <div className="flex items-start gap-3">
-        <TempIcon className="h-6 w-6 text-yellow-500 mt-1 flex-shrink-0" aria-hidden />
+        <TempIcon className="h-6 w-6 text-yellow-500 flex-shrink-0" aria-hidden />
         <div className="flex-1 min-w-0">
-          {/* Temperature - medium size, no bold */}
-          <div className="text-xl text-foreground">
-            {settingsLoading || isLoading ? "—" :
-              typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
-          </div>
-          
-          {/* Weather condition - smaller text below */}
-          <div className="text-sm text-muted-foreground">
-            {getWeatherCondition()}
-          </div>
-          
-          {/* Location - smallest text below */}
-          <div className="text-xs text-muted-foreground">
-            {formatLocation()}
+          <div className="flex items-start gap-4">
+            {/* Temperature - largest text */}
+            <div className="text-2xl text-foreground">
+              {settingsLoading || isLoading ? "—" :
+                typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
+            </div>
+            
+            <div className="flex-1">
+              {/* Weather condition - medium text */}
+              <div className="text-base text-muted-foreground">
+                {getWeatherCondition()}
+              </div>
+              
+              {/* Location - smaller text below */}
+              <div className="text-sm text-muted-foreground">
+                {formatLocation()}
+              </div>
+            </div>
           </div>
         </div>
       </div>
