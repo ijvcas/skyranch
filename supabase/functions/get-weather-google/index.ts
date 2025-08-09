@@ -10,6 +10,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Enhanced logging for debugging
+const log = (message: string, data?: any) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] [get-weather-google] ${message}`, data ? JSON.stringify(data, null, 2) : '');
+};
+
 interface RequestBody {
   location?: string;
   lat?: number;

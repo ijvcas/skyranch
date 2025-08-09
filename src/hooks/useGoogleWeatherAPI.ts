@@ -42,6 +42,8 @@ export const useGoogleWeatherAPI = (location?: string) => {
       });
       
       let data: CurrentWeather | null = null;
+      
+      // First attempt: Using Supabase client
       try {
         console.log("🌤️ [useGoogleWeatherAPI] Invoking supabase.functions.invoke...");
         const { data: functionData, error } = await supabase.functions.invoke("get-weather-google", {
@@ -55,13 +57,50 @@ export const useGoogleWeatherAPI = (location?: string) => {
         console.log("🌤️ [useGoogleWeatherAPI] Edge function response:", { functionData, error });
         
         if (error) {
-          console.warn("🌤️ [useGoogleWeatherAPI] get-weather-google error", error);
-        } else {
+          console.error("🌤️ [useGoogleWeatherAPI] Supabase invoke error:", error);
+          throw new Error(`Supabase invoke failed: ${error.message}`);
+        } else if (functionData) {
           data = functionData as CurrentWeather;
-          console.log("🌤️ [useGoogleWeatherAPI] Parsed weather data:", data);
+          console.log("🌤️ [useGoogleWeatherAPI] SUCCESS: Got real weather data:", data);
         }
-      } catch (err) {
-        console.error("🌤️ [useGoogleWeatherAPI] get-weather-google threw exception:", err);
+      } catch (supabaseError) {
+        console.error("🌤️ [useGoogleWeatherAPI] Supabase call failed, trying direct HTTP:", supabaseError);
+        
+        // Second attempt: Direct HTTP call to Edge Function
+        try {
+          const directUrl = `https://ahwhtxygyzoadsmdrwwg.supabase.co/functions/v1/get-weather-google`;
+          console.log("🌤️ [useGoogleWeatherAPI] Attempting direct HTTP call to:", directUrl);
+          
+          const response = await fetch(directUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFod2h0eHlneXpvYWRzbWRyd3dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMjIxNzMsImV4cCI6MjA2NDY5ODE3M30.rffEqABIU3U7e7qdPXLvNMQfqU2sNIJHrfP_A_5GrlI`,
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFod2h0eHlneXpvYWRzbWRyd3dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMjIxNzMsImV4cCI6MjA2NDY5ODE3M30.rffEqABIU3U7e7qdPXLvNMQfqU2sNIJHrfP_A_5GrlI'
+            },
+            body: JSON.stringify({ 
+              location: location.trim(),
+              language: "es", 
+              unitSystem: "metric" 
+            }),
+          });
+          
+          console.log("🌤️ [useGoogleWeatherAPI] Direct HTTP response status:", response.status);
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("🌤️ [useGoogleWeatherAPI] Direct HTTP error:", errorText);
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          }
+          
+          const directData = await response.json();
+          console.log("🌤️ [useGoogleWeatherAPI] Direct HTTP SUCCESS:", directData);
+          data = directData as CurrentWeather;
+          
+        } catch (httpError) {
+          console.error("🌤️ [useGoogleWeatherAPI] BOTH methods failed:", httpError);
+          throw httpError;
+        }
       }
 
       if (data && (data.temperatureC != null || data.conditionText != null)) {
@@ -70,7 +109,7 @@ export const useGoogleWeatherAPI = (location?: string) => {
         } catch (e) {
           console.warn("🌤️ [useGoogleWeatherAPI] cache write failed", e);
         }
-        console.log("🌤️ [useGoogleWeatherAPI] fetch success, cached");
+        console.log("🌤️ [useGoogleWeatherAPI] fetch success, cached and returning REAL weather data");
         return data;
       }
 
@@ -86,17 +125,9 @@ export const useGoogleWeatherAPI = (location?: string) => {
         }
       } catch (_) {}
 
-      // 4) Final fallback: realistic mock to keep UI consistent
-      console.warn("🌤️ [useGoogleWeatherAPI] using realistic weather fallback");
-      const fallback: CurrentWeather = {
-        temperatureC: 22,
-        temperatureF: 72,
-        conditionText: "Soleado",
-        windKph: 8,
-        humidity: 60,
-        precipitationChance: 10,
-      };
-      return fallback;
+      // 4) NO MORE MOCK FALLBACK - FORCE THE ERROR TO BE VISIBLE
+      console.error("🌤️ [useGoogleWeatherAPI] CRITICAL: All weather data sources failed - no mock fallback");
+      throw new Error("Failed to fetch weather data from all sources. Check API keys and network connectivity.");
     },
     enabled: typeof location === "string" && location.trim().length > 0,
     staleTime: CACHE_TTL,
