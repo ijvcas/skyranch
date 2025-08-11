@@ -6,6 +6,7 @@ import { ParcelStatus } from '@/utils/cadastral/types';
 import { ParcelRenderer } from './cadastral-map/ParcelRenderer';
 import { loadGoogleMapsAPI } from '@/hooks/polygon/useGoogleMapsLoader';
 import FitBoundsButton from '@/components/common/FitBoundsButton';
+import MapContainer from '@/components/common/MapContainer';
 
 interface CadastralMapProps {
   isLoaded: boolean;
@@ -130,11 +131,15 @@ useEffect(() => {
   return (
     <Card>
       <CardContent className="p-0 relative">
-        <div 
-          id="cadastral-map" 
-          className="w-full rounded-lg"
-          style={{ height: 'calc(100vh - 8rem)' }}
-        />
+        <MapContainer>
+          <div 
+            id="cadastral-map" 
+            className="w-full h-full rounded-lg"
+          />
+          {isMapInitialized && (
+            <FitBoundsButton onClick={() => parcelRendererRef.current?.fitMapToAllParcels()} />
+          )}
+        </MapContainer>
       </CardContent>
     </Card>
   );

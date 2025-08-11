@@ -5,6 +5,8 @@ import { useSimplePolygonDrawing } from '@/hooks/useSimplePolygonDrawing';
 import SimplifiedPolygonControls from './controls/SimplifiedPolygonControls';
 import MapLotLabelsControl from './controls/MapLotLabelsControl';
 import { toast } from 'sonner';
+import MapContainer from '@/components/common/MapContainer';
+import FitBoundsButton from '@/components/common/FitBoundsButton';
 
 interface WorkingGoogleMapDrawingProps {
   lots: Lot[];
@@ -244,6 +246,19 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
   // Calculate polygon count from Map
   const polygonCount = polygons.size;
 
+  // Fit map to all rendered polygons
+  const handleFitBounds = () => {
+    if (!isMapReady || !mapInstance || polygons.size === 0) return;
+    const bounds = new google.maps.LatLngBounds();
+    polygons.forEach((polygon) => {
+      const path = polygon.getPath();
+      if (path) {
+        path.forEach((latLng: google.maps.LatLng) => bounds.extend(latLng));
+      }
+    });
+    mapInstance.fitBounds(bounds);
+  };
+
   // Debug polygon rendering
   useEffect(() => {
     if (isMapReady && polygons.size > 0) {
@@ -258,7 +273,7 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
   }, [isMapReady, polygons, lots]);
 
   return (
-    <div className="relative w-full h-[calc(100vh-8rem)] rounded-lg overflow-hidden bg-gray-100">
+    <MapContainer>
       {/* Loading overlay */}
       {!isMapReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
@@ -276,6 +291,11 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
         className="w-full h-full" 
         style={{ touchAction: isMobile ? 'manipulation' : 'auto' }}
       />
+
+      {/* Fit bounds control */}
+      {isMapReady && (
+        <FitBoundsButton onClick={handleFitBounds} />
+      )}
       
       {/* Mobile notice */}
       {isMapReady && isMobile && (
@@ -317,7 +337,7 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
           />
         </>
       )}
-    </div>
+    </MapContainer>
   );
 };
 

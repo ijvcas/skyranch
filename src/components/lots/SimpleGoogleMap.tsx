@@ -5,6 +5,8 @@ import MapDrawingControls from './MapDrawingControls';
 import { useGoogleMap } from '@/hooks/useGoogleMap';
 import { useMapPolygons } from '@/hooks/useMapPolygons';
 import { useMapDrawing } from '@/hooks/useMapDrawing';
+import MapContainer from '@/components/common/MapContainer';
+import FitBoundsButton from '@/components/common/FitBoundsButton';
 
 interface SimpleGoogleMapProps {
   lots: Lot[];
@@ -31,19 +33,35 @@ const SimpleGoogleMap = ({ lots, onLotSelect }: SimpleGoogleMapProps) => {
     }
   });
 
-  // Start drawing
-  const handleStartDrawing = (lotId: string) => {
-    startDrawing(drawingManager, lotId);
-  };
+// Start drawing
+const handleStartDrawing = (lotId: string) => {
+  startDrawing(drawingManager, lotId);
+};
 
-  // Cancel drawing
-  const handleCancelDrawing = () => {
-    cancelDrawing(drawingManager);
-  };
+// Cancel drawing
+const handleCancelDrawing = () => {
+  cancelDrawing(drawingManager);
+};
+
+// Fit map to all polygons
+const handleFitBounds = () => {
+  if (!lotPolygons.length) return;
+  const bounds = new google.maps.LatLngBounds();
+  lotPolygons.forEach(({ polygon }) => {
+    const path = polygon.getPath();
+    if (path) {
+      path.forEach((latLng: google.maps.LatLng) => bounds.extend(latLng));
+    }
+  });
+  const map = lotPolygons[0]?.polygon.getMap();
+  if (map) map.fitBounds(bounds);
+};
 
   return (
-    <div className="relative w-full h-[48rem] rounded-lg overflow-hidden">
+    <MapContainer>
       <div ref={mapRef} className="w-full h-full z-10" />
+
+      <FitBoundsButton onClick={handleFitBounds} />
       
       <MapDrawingControls
         lots={lots}
@@ -55,7 +73,7 @@ const SimpleGoogleMap = ({ lots, onLotSelect }: SimpleGoogleMapProps) => {
         onCancelDrawing={handleCancelDrawing}
         onLotSelect={setSelectedLotId}
       />
-    </div>
+    </MapContainer>
   );
 };
 

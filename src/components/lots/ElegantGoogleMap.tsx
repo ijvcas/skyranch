@@ -4,6 +4,8 @@ import { type Lot } from '@/stores/lotStore';
 import { useElegantGoogleMap } from '@/hooks/useElegantGoogleMap';
 import { usePolygonManager } from '@/hooks/usePolygonManager';
 import ElegantPolygonControls from './controls/ElegantPolygonControls';
+import MapContainer from '@/components/common/MapContainer';
+import FitBoundsButton from '@/components/common/FitBoundsButton';
 
 interface ElegantGoogleMapProps {
   lots: Lot[];
@@ -29,7 +31,7 @@ const ElegantGoogleMap = ({ lots, onLotSelect }: ElegantGoogleMapProps) => {
     }
   });
 
-  const { mapRef, isMapReady } = useElegantGoogleMap({
+  const { mapRef, isMapReady, map } = useElegantGoogleMap({
     onMapReady: (map) => {
       console.log('Elegant Google Map initialized');
       initializeWithMap(map);
@@ -42,8 +44,21 @@ const ElegantGoogleMap = ({ lots, onLotSelect }: ElegantGoogleMapProps) => {
     // Don't call onLotSelect here - this is just for internal selection
   };
 
+  // Fit map to all polygons
+  const handleFitBounds = () => {
+    if (!polygons.length || !map) return;
+    const bounds = new google.maps.LatLngBounds();
+    polygons.forEach(p => {
+      const path = p.polygon.getPath();
+      if (path) {
+        path.forEach((latLng: google.maps.LatLng) => bounds.extend(latLng));
+      }
+    });
+    map.fitBounds(bounds);
+  };
+
   return (
-    <div className="relative w-full h-[48rem] rounded-lg overflow-hidden bg-gray-100">
+    <MapContainer>
       {/* Loading overlay */}
       {!isMapReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
@@ -57,6 +72,11 @@ const ElegantGoogleMap = ({ lots, onLotSelect }: ElegantGoogleMapProps) => {
       
       {/* Map container */}
       <div ref={mapRef} className="w-full h-full" />
+
+      {/* Fit bounds control */}
+      {isMapReady && (
+        <FitBoundsButton onClick={handleFitBounds} />
+      )}
       
       {/* Elegant controls overlay - positioned within the map container */}
       {isMapReady && (
@@ -76,7 +96,7 @@ const ElegantGoogleMap = ({ lots, onLotSelect }: ElegantGoogleMapProps) => {
           </div>
         </div>
       )}
-    </div>
+    </MapContainer>
   );
 };
 
