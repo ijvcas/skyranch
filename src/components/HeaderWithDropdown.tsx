@@ -60,7 +60,7 @@ const HeaderWithDropdown = () => {
                 <img 
                   src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
                   alt="SkyRanch"
-                  className="h-8 w-8 rounded flex-shrink-0"
+                  className="h-10 w-10 sm:h-11 sm:w-11 rounded flex-shrink-0"
                   loading="lazy"
                   decoding="async"
                 />
