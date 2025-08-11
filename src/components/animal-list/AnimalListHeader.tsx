@@ -28,7 +28,7 @@ const AnimalListHeader = ({ userEmail, totalAnimals, onRefresh }: AnimalListHead
         <div className="flex flex-col md:flex-row gap-3 md:gap-2 mt-4 md:mt-0 w-full md:w-auto">
           <Button 
             onClick={() => navigate('/animals/new')}
-            className="bg-green-600 hover:bg-green-700 text-white w-full md:w-auto flex items-center justify-center gap-2"
+            className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white w-full md:w-auto flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Agregar Animal
