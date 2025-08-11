@@ -117,10 +117,8 @@ const Lots = () => {
   return (
     <div className="page-with-logo">
       <div className="container mx-auto pb-6 px-2 md:px-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Mapas</h1>
-          </div>
+        <div className="flex items-center justify-center mb-6">
+          <h1 className="text-2xl font-bold tracking-tight text-center">Mapas</h1>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>

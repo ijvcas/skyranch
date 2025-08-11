@@ -31,19 +31,17 @@ const CadastralMapControls: React.FC<CadastralMapControlsProps> = ({
   parcels = []
 }) => {
 
-  return (
+  return showUpload ? (
     <Card>
       <CardContent>
-        {showUpload && (
-          <CadastralFileUpload
-            propertyId={selectedPropertyId}
-            onSuccess={onFileUploadSuccess}
-            onCancel={onCancelUpload}
-          />
-        )}
+        <CadastralFileUpload
+          propertyId={selectedPropertyId}
+          onSuccess={onFileUploadSuccess}
+          onCancel={onCancelUpload}
+        />
       </CardContent>
     </Card>
-  );
+  ) : null;
 };
 
 export default CadastralMapControls;
