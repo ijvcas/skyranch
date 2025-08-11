@@ -95,11 +95,6 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
           </Dialog>
           
           <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon" aria-label="Editar lote">
-                <Edit className="w-4 h-4" />
-              </Button>
-            </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Editar Lote</DialogTitle>
