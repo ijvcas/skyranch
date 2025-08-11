@@ -109,15 +109,6 @@ const CadastralMapView: React.FC = () => {
       {/* Financial Summary - Show when there are parcels with financial data */}
       <FinancialSummaryCard parcels={parcels} />
 
-      {/* Filter Controls - positioned between Financial Summary and Map */}
-      <CadastralFilterControls
-        properties={properties}
-        selectedPropertyId={selectedPropertyId}
-        onPropertyChange={handlePropertyChange}
-        isLoading={isLoading}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-      />
 
       <div className="space-y-6">
         <div>
