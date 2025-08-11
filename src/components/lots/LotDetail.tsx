@@ -76,7 +76,7 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{lot.name}</h1>
             {lot.description && (
-              <p className="text-gray-600 mt-1">{lot.description}</p>
+              <p className="text-sm text-gray-600 mt-1">{lot.description}</p>
             )}
           </div>
         </div>
@@ -96,12 +96,11 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
           
           <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
             <DialogTrigger asChild>
-              <Button variant="outline">
-                <Edit className="w-4 h-4 mr-2" />
-                Editar
+              <Button variant="outline" size="icon" aria-label="Editar lote">
+                <Edit className="w-4 h-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Editar Lote</DialogTitle>
               </DialogHeader>
@@ -149,7 +148,7 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
               {lot.sizeHectares && (
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Tamaño</span>
-                  <span className="text-sm">{lot.sizeHectares} hectáreas</span>
+                  <span className="text-sm">{Number(lot.sizeHectares).toFixed(4)} ha</span>
                 </div>
               )}
               
