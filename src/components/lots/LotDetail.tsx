@@ -32,13 +32,19 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
     return { ...assignment, animal };
   }).filter(item => item.animal);
 
+  // Grazing metrics
+  const capacity = lot.capacity ?? 0;
+  const occupancy = capacity > 0 ? assignedAnimals.length / capacity : 0;
+  const estimatedGrazingDays = capacity > 0 && assignedAnimals.length > 0
+    ? Math.max(1, Math.round((capacity / assignedAnimals.length) * 7))
+    : null;
+
   const handleRemoveAnimal = async (animalId: string) => {
     const success = await removeAnimal(animalId, lot.id);
     if (success) {
       loadAssignments(lot.id);
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
@@ -77,12 +83,6 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
         
         <div className="flex space-x-2">
           <Dialog open={showAssignForm} onOpenChange={setShowAssignForm}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Asignar Animal
-              </Button>
-            </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Asignar Animal al Lote</DialogTitle>
@@ -115,11 +115,19 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
         {/* Lot Information */}
         <div className="lg:col-span-1 space-y-6">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex items-center justify-between">
               <CardTitle className="flex items-center">
                 <MapPin className="w-5 h-5 mr-2" />
                 Información del Lote
               </CardTitle>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                aria-label="Editar lote" 
+                onClick={() => setShowEditForm(true)}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
@@ -193,6 +201,12 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Tiempo de pastoreo estimado</span>
+                <span className="text-sm">
+                  {estimatedGrazingDays ? `≈ ${estimatedGrazingDays} días` : 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Machos</span>
                 <span className="text-sm">
                   {assignedAnimals.filter(a => a.animal?.gender === 'male').length}
@@ -235,6 +249,7 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
                   <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                   <p>No hay animales asignados a este lote</p>
                   <Button 
+                    variant="gradient"
                     className="mt-4" 
                     onClick={() => setShowAssignForm(true)}
                   >
