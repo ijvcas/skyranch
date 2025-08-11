@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GoogleMapsLoaderState {
   isAPILoaded: boolean;
@@ -13,7 +14,19 @@ const loaderState: GoogleMapsLoaderState = {
   loadingCallbacks: []
 };
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyBo7e7hBrnCCtJDSaftXEFHP4qi-KiKXzI';
+// Fetch Google Maps API key from a Supabase Edge Function
+const fetchGoogleMapsApiKey = async (): Promise<string> => {
+  const { data, error } = await supabase.functions.invoke('maps-key');
+  if (error) {
+    console.error('Failed to retrieve Google Maps API key:', error);
+    throw new Error(error.message || 'Failed to retrieve Google Maps API key');
+  }
+  const apiKey = (data as any)?.apiKey;
+  if (!apiKey) {
+    throw new Error('Google Maps API key not returned by edge function');
+  }
+  return apiKey;
+};
 
 export const loadGoogleMapsAPI = (): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -28,26 +41,35 @@ export const loadGoogleMapsAPI = (): Promise<void> => {
     }
 
     loaderState.isAPILoading = true;
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=drawing,geometry&callback=initSimpleDrawing`;
-    script.async = true;
-    
-    (window as any).initSimpleDrawing = () => {
-      console.log('Google Maps Drawing and Geometry API loaded successfully');
-      loaderState.isAPILoaded = true;
-      loaderState.isAPILoading = false;
-      resolve();
-      loaderState.loadingCallbacks.forEach(cb => cb());
-      loaderState.loadingCallbacks.length = 0;
-    };
 
-    script.onerror = () => {
-      console.error('Failed to load Google Maps API');
-      loaderState.isAPILoading = false;
-      reject(new Error('Failed to load Google Maps API'));
-    };
+    // Retrieve API key first, then inject the script
+    fetchGoogleMapsApiKey()
+      .then((API_KEY) => {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=drawing,geometry&callback=initSimpleDrawing`;
+        script.async = true;
 
-    document.head.appendChild(script);
+        (window as any).initSimpleDrawing = () => {
+          console.log('Google Maps Drawing and Geometry API loaded successfully');
+          loaderState.isAPILoaded = true;
+          loaderState.isAPILoading = false;
+          resolve();
+          loaderState.loadingCallbacks.forEach(cb => cb());
+          loaderState.loadingCallbacks.length = 0;
+        };
+
+        script.onerror = () => {
+          console.error('Failed to load Google Maps API');
+          loaderState.isAPILoading = false;
+          reject(new Error('Failed to load Google Maps API'));
+        };
+
+        document.head.appendChild(script);
+      })
+      .catch((err) => {
+        loaderState.isAPILoading = false;
+        reject(err);
+      });
   });
 };
 
@@ -74,3 +96,4 @@ export const useGoogleMapsLoader = () => {
 
   return { isLoaded, loadError };
 };
+
