@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getPolygonDataForLots, syncAllLotAreasWithPolygons } from '@/services/lotPolygonService';
-import { applySEO } from '@/utils/seo';
+import { applySEO, injectJSONLD } from '@/utils/seo';
 
 const Lots = () => {
   const { lots, loadLots, deleteLot, isLoading, setSelectedLot } = useLotStore();

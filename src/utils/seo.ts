@@ -1,4 +1,4 @@
-// Simple SEO helper to manage title, description, and canonical tag
+// Simple SEO helper to manage title, description, canonical and JSON-LD
 export interface SEOOptions {
   title: string;
   description?: string;
@@ -28,4 +28,16 @@ export const applySEO = ({ title, description, canonical }: SEOOptions) => {
     }
     link.setAttribute('href', canonicalUrl);
   }
+};
+
+export const injectJSONLD = (data: Record<string, any>) => {
+  const scriptId = 'jsonld-dynamic';
+  let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+  if (!script) {
+    script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = scriptId;
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(data);
 };

@@ -17,7 +17,7 @@ import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions'
 import DashboardLoadingState from '@/components/dashboard/DashboardLoadingState';
 import DashboardErrorState from '@/components/dashboard/DashboardErrorState';
 import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
-import { applySEO } from '@/utils/seo';
+import { applySEO, injectJSONLD } from '@/utils/seo';
 
 
 const Dashboard = () => {
@@ -33,6 +33,14 @@ const Dashboard = () => {
       title: 'SKYRANCH Dashboard — Farm management',
       description: 'Gestiona animales, lotes y rotaciones en tiempo real en SKYRANCH.',
       canonical: window.location.href
+    });
+    
+    injectJSONLD({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'SKYRANCH',
+      url: window.location.origin,
+      description: 'Gestión moderna de granjas: animales, lotes y rotaciones.'
     });
   }, []);
   
