@@ -17,9 +17,9 @@ const LotsGrid: React.FC<LotsGridProps> = ({
   polygonData = []
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 -mx-2 md:-mx-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 -mx-4 md:-mx-6">
       {lots.map((lot) => (
-        <div key={lot.id} className="px-2 md:px-3">
+        <div key={lot.id} className="px-1.5 md:px-2.5">
           <LotCard
             lot={{
               ...lot,
