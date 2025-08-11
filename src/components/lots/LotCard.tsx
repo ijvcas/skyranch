@@ -98,10 +98,10 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onSelect, onDelete, polygonData 
             </div>
           )}
           
-          {lot.grassType && (
+          {typeof lot.capacity === 'number' && lot.capacity > 0 && (
             <div className="flex items-center gap-1">
-              <Leaf className="w-3 h-3" />
-              <span>Pasto: {lot.grassType}</span>
+              <Users className="w-3 h-3" />
+              <span>Ocupación: {Math.round(((lot.currentAnimals || 0) / lot.capacity) * 100)}%</span>
             </div>
           )}
           
