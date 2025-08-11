@@ -112,7 +112,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
           />
 
           <div className="flex gap-3">
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white">
               {isLoading ? 'Agregando...' : 'Agregar Usuario'}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>

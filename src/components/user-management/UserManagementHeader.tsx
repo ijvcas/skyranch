@@ -21,7 +21,7 @@ const UserManagementHeader: React.FC<UserManagementHeaderProps> = ({
       </div>
       <Button
         onClick={onToggleAddForm}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
         size="sm"
       >
         <UserPlus className="w-4 h-4" />

@@ -12,8 +12,13 @@ export const deleteUserComplete = async (userId: string): Promise<CompleteUserDe
   try {
     console.log('🗑️ Starting complete user deletion:', userId);
 
+    // Ensure we send the auth token explicitly to the Edge Function
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
     const { data, error } = await supabase.functions.invoke('delete-user-complete', {
-      body: { userId }
+      body: { userId },
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     });
 
     if (error) {
