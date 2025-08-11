@@ -10,7 +10,7 @@ interface LotMapViewProps {
 
 const LotMapView: React.FC<LotMapViewProps> = ({ lots, onLotSelect }) => {
   return (
-    <div className="fixed inset-0 top-[60px] z-10">
+    <div className="px-2 pb-4">
       <WorkingGoogleMapDrawing 
         lots={lots}
         onLotSelect={onLotSelect}

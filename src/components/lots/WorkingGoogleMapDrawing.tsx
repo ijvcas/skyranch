@@ -258,7 +258,7 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
   }, [isMapReady, polygons, lots]);
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-gray-100">
+    <div className="relative w-full h-[calc(100vh-8rem)] rounded-lg overflow-hidden bg-gray-100">
       {/* Loading overlay */}
       {!isMapReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
