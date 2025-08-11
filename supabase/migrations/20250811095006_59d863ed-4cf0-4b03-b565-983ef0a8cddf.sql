@@ -1,0 +1,14 @@
+-- Performance indexes for common filters and joins
+CREATE INDEX IF NOT EXISTS idx_lots_user_id ON public.lots(user_id);
+CREATE INDEX IF NOT EXISTS idx_lot_polygons_lot_id ON public.lot_polygons(lot_id);
+CREATE INDEX IF NOT EXISTS idx_lot_polygons_property_id ON public.lot_polygons(property_id);
+CREATE INDEX IF NOT EXISTS idx_animals_user_id ON public.animals(user_id);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_user_id ON public.calendar_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_field_reports_user_id ON public.field_reports(user_id);
+CREATE INDEX IF NOT EXISTS idx_field_report_entries_field_report_id ON public.field_report_entries(field_report_id);
+CREATE INDEX IF NOT EXISTS idx_breeding_records_user_id ON public.breeding_records(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_animal_lot_assignments_user_id ON public.animal_lot_assignments(user_id);
+CREATE INDEX IF NOT EXISTS idx_animal_lot_assignments_animal_id ON public.animal_lot_assignments(animal_id);
+CREATE INDEX IF NOT EXISTS idx_event_notifications_event_id ON public.event_notifications(event_id);
+CREATE INDEX IF NOT EXISTS idx_cadastral_parcels_property_id ON public.cadastral_parcels(property_id);
