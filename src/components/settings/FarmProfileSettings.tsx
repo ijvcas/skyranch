@@ -28,11 +28,9 @@ const FarmProfileSettings = () => {
     createFarmProfile, 
     updateFarmProfile,
     uploadLogo,
-    uploadPicture,
     isCreating,
     isUpdating,
-    isUploadingLogo,
-    isUploadingPicture 
+    isUploadingLogo 
   } = useFarmProfile();
   
   const { syncFromFarm } = useWeatherSettings();
@@ -149,25 +147,6 @@ const FarmProfileSettings = () => {
     }
   };
 
-  const handlePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !farmProfile) return;
-
-    try {
-      await uploadPicture({ id: farmProfile.id, file });
-      toast({
-        title: 'Imagen actualizada',
-        description: 'La imagen de la finca se ha actualizada correctamente.',
-      });
-    } catch (error) {
-      console.error('Error uploading picture:', error);
-      toast({
-        title: 'Error',
-        description: 'Error al subir la imagen.',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const handleLocationSearch = async (input: string) => {
     if (!input || input.length < 3) {
@@ -241,7 +220,7 @@ const FarmProfileSettings = () => {
             Perfil de la Finca
           </CardTitle>
           <CardDescription>
-            Configura la información básica de tu finca, incluyendo logo, imagen y ubicación.
+            Configura la información básica de tu finca, incluyendo logo y ubicación.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -371,49 +350,6 @@ const FarmProfileSettings = () => {
             </CardContent>
           </Card>
 
-          {/* Picture Upload */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Imagen de la Finca</CardTitle>
-              <CardDescription>
-                Sube una imagen representativa de tu finca (paisaje, instalaciones, etc.)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {farmProfile.picture_url && (
-                <div className="mb-4">
-                  <img
-                    src={farmProfile.picture_url}
-                    alt="Imagen de la finca"
-                    className="w-full h-32 object-cover border rounded-lg"
-                  />
-                </div>
-              )}
-              <div className="relative">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePictureUpload}
-                  disabled={isUploadingPicture}
-                  className="hidden"
-                  id="picture-upload"
-                />
-                <Label
-                  htmlFor="picture-upload"
-                  className="flex items-center justify-center gap-2 w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
-                >
-                  {isUploadingPicture ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      <Upload className="w-6 h-6" />
-                      <span>Subir Imagen</span>
-                    </>
-                  )}
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       )}
     </div>
