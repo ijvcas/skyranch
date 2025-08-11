@@ -72,10 +72,11 @@ const ElegantGoogleMap = ({ lots, onLotSelect }: ElegantGoogleMapProps) => {
       
       {/* Map container */}
       <div ref={mapRef} className="w-full h-full" />
-
       {/* Fit bounds control */}
       {isMapReady && (
-        <FitBoundsButton onClick={handleFitBounds} />
+        <div className="absolute right-4 top-24 z-20">
+          <FitBoundsButton onClick={handleFitBounds} />
+        </div>
       )}
       
       {/* Elegant controls overlay - positioned within the map container */}

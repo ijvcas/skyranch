@@ -294,7 +294,9 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
 
       {/* Fit bounds control */}
       {isMapReady && (
-        <FitBoundsButton onClick={handleFitBounds} />
+        <div className="absolute right-4 top-24 z-20">
+          <FitBoundsButton onClick={handleFitBounds} />
+        </div>
       )}
       
       {/* Mobile notice */}

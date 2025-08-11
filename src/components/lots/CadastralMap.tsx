@@ -137,7 +137,9 @@ useEffect(() => {
             className="w-full h-full rounded-lg"
           />
           {isMapInitialized && (
-            <FitBoundsButton onClick={() => parcelRendererRef.current?.fitMapToAllParcels()} />
+            <div className="absolute right-4 top-24 z-20">
+              <FitBoundsButton onClick={() => parcelRendererRef.current?.fitMapToAllParcels()} />
+            </div>
           )}
         </MapContainer>
       </CardContent>
