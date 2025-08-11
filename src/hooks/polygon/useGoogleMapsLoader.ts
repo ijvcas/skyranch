@@ -16,16 +16,32 @@ const loaderState: GoogleMapsLoaderState = {
 
 // Fetch Google Maps API key from a Supabase Edge Function
 const fetchGoogleMapsApiKey = async (): Promise<string> => {
-  const { data, error } = await supabase.functions.invoke('maps-key');
-  if (error) {
+  // 1) Try standard Supabase invoke
+  try {
+    const { data, error } = await supabase.functions.invoke('maps-key');
+    if (error) throw error;
+    const apiKey = (data as any)?.apiKey;
+    if (apiKey) return apiKey;
+  } catch (err) {
+    console.warn('maps-key invoke failed, attempting direct fetch fallback...', err);
+  }
+
+  // 2) Fallback: direct fetch to Edge Functions URL
+  try {
+    const url = `https://ahwhtxygyzoadsmdrwwg.supabase.co/functions/v1/maps-key`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if (!res.ok) throw new Error(`maps-key HTTP ${res.status}`);
+    const json = await res.json();
+    if (!json.apiKey) throw new Error('maps-key: no apiKey in response');
+    return json.apiKey as string;
+  } catch (error: any) {
     console.error('Failed to retrieve Google Maps API key:', error);
-    throw new Error(error.message || 'Failed to retrieve Google Maps API key');
+    throw new Error(error?.message || 'Failed to retrieve Google Maps API key');
   }
-  const apiKey = (data as any)?.apiKey;
-  if (!apiKey) {
-    throw new Error('Google Maps API key not returned by edge function');
-  }
-  return apiKey;
 };
 
 export const loadGoogleMapsAPI = (): Promise<void> => {
