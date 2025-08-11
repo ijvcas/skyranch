@@ -32,7 +32,8 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
   
   const [showPropertyLots, setShowPropertyLots] = useState(true);
   const [showPastureLots, setShowPastureLots] = useState(true);
-  const [showPropertyName, setShowPropertyName] = useState(true);
+  // Property name label should be hidden by default on Potreros map
+  const [showPropertyName, setShowPropertyName] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const labelsRef = useRef<{[key: string]: google.maps.Marker}>({});
   const propertyLabelRef = useRef<google.maps.Marker | null>(null);
