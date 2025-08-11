@@ -303,7 +303,7 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
       {/* Controls overlay - thin lot count banner at top-center */}
       {isMapReady && (
         <>
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="absolute left-4 top-16 z-20">
             <SimplifiedPolygonControls
               onClearAll={handleClearPastureLots}
               selectedLotId={selectedLotId}
