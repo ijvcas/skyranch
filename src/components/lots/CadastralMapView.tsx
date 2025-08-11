@@ -7,6 +7,7 @@ import CadastralFilterControls from './CadastralFilterControls';
 import CadastralMap from './CadastralMap';
 import EditableParcelsList from './EditableParcelsList';
 import FinancialSummaryCard from './FinancialSummaryCard';
+import CadastralSettingsDropdown from './CadastralSettingsDropdown';
 import { getAllProperties, getCadastralParcels, updateCadastralParcel, type CadastralParcel } from '@/services/cadastralService';
 import type { ParcelStatus } from '@/utils/cadastral/types';
 
@@ -111,16 +112,24 @@ const CadastralMapView: React.FC = () => {
 
 
       <div className="space-y-6">
-        <div>
+        <div className="relative">
           {selectedProperty && (
-            <CadastralMap
-              isLoaded={true}
-              selectedProperty={selectedProperty}
-              cadastralParcels={filteredParcels}
-              statusFilter={statusFilter}
-              onMapReady={() => {}}
-              onParcelClick={handleParcelClick}
-            />
+            <>
+              <CadastralMap
+                isLoaded={true}
+                selectedProperty={selectedProperty}
+                cadastralParcels={filteredParcels}
+                statusFilter={statusFilter}
+                onMapReady={() => {}}
+                onParcelClick={handleParcelClick}
+              />
+              <div className="absolute top-4 left-4 z-20 pointer-events-auto">
+                <CadastralSettingsDropdown
+                  onToggleUpload={handleToggleUpload}
+                  onParcelsDeleted={handleParcelsDeleted}
+                />
+              </div>
+            </>
           )}
         </div>
         
