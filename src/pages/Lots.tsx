@@ -20,6 +20,7 @@ import { AlertTriangle, Plus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getPolygonDataForLots, syncAllLotAreasWithPolygons } from '@/services/lotPolygonService';
 import { applySEO } from '@/utils/seo';
+import { syncCadastralParcelsToLots } from '@/services/cadastralLotSyncService';
 
 const Lots = () => {
   const { lots, loadLots, deleteLot, isLoading, setSelectedLot } = useLotStore();
@@ -39,11 +40,23 @@ const Lots = () => {
     });
   }, []);
 
-  // Load lots and polygon data
+// Load lots and polygon data + ensure property lots are synced for this user
   useEffect(() => {
     console.log('🔄 Loading lots and polygon data...');
-    loadLots();
-    loadPolygonData();
+
+    // Ensure visibility by syncing auto-generados (per-user) antes de cargar
+    syncCadastralParcelsToLots()
+      .then(() => {
+        console.log('✅ Cadastral sync complete, reloading lots...');
+        loadLots();
+        loadPolygonData();
+      })
+      .catch((e) => {
+        console.warn('⚠️ Cadastral sync skipped/failed:', e);
+        // Fallback: still try to load data
+        loadLots();
+        loadPolygonData();
+      });
     
     // Sync polygon areas with lot sizes to ensure consistency
     syncAllLotAreasWithPolygons().then(success => {
