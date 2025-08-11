@@ -33,8 +33,8 @@ const Lots = () => {
   // SEO metadata for Lots page
   useEffect(() => {
     applySEO({
-      title: 'Potreros — SKYRANCH',
-      description: 'Gestiona potreros, dibuja polígonos y consulta el mapa catastral en SKYRANCH.',
+      title: 'Mapas — SKYRANCH',
+      description: 'Mapas de potreros y catastral en SKYRANCH.',
       canonical: window.location.href
     });
   }, []);
@@ -119,8 +119,7 @@ const Lots = () => {
       <div className="container mx-auto pb-6 px-2 md:px-4">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Potreros</h1>
-            <p className="text-gray-500">Administra tus potreros y datos catastrales</p>
+            <h1 className="text-2xl font-bold tracking-tight">Mapas</h1>
           </div>
         </div>
 
