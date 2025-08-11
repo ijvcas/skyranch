@@ -194,15 +194,6 @@ const LotForm = ({ onClose, lot }: LotFormProps) => {
           />
         </div>
         
-        <div>
-          <Label htmlFor="locationCoordinates">Coordenadas</Label>
-          <Input
-            id="locationCoordinates"
-            value={formData.locationCoordinates}
-            onChange={(e) => handleInputChange('locationCoordinates', e.target.value)}
-            placeholder="Lat, Lng"
-          />
-        </div>
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
