@@ -909,12 +909,16 @@ export type Database = {
           description: string | null
           grass_condition: string | null
           grass_type: string | null
+          grazing_start_date: string | null
           id: string
+          last_grazing_end_date: string | null
           last_rotation_date: string | null
           location_coordinates: string | null
           lot_type: string | null
+          max_grazing_days: number | null
           name: string
           next_rotation_date: string | null
+          rest_days_required: number | null
           size_hectares: number | null
           source_parcel_id: string | null
           status: string
@@ -928,12 +932,16 @@ export type Database = {
           description?: string | null
           grass_condition?: string | null
           grass_type?: string | null
+          grazing_start_date?: string | null
           id?: string
+          last_grazing_end_date?: string | null
           last_rotation_date?: string | null
           location_coordinates?: string | null
           lot_type?: string | null
+          max_grazing_days?: number | null
           name: string
           next_rotation_date?: string | null
+          rest_days_required?: number | null
           size_hectares?: number | null
           source_parcel_id?: string | null
           status?: string
@@ -947,12 +955,16 @@ export type Database = {
           description?: string | null
           grass_condition?: string | null
           grass_type?: string | null
+          grazing_start_date?: string | null
           id?: string
+          last_grazing_end_date?: string | null
           last_rotation_date?: string | null
           location_coordinates?: string | null
           lot_type?: string | null
+          max_grazing_days?: number | null
           name?: string
           next_rotation_date?: string | null
+          rest_days_required?: number | null
           size_hectares?: number | null
           source_parcel_id?: string | null
           status?: string
