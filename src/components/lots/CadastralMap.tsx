@@ -163,22 +163,6 @@ const CadastralMap: React.FC<CadastralMapProps> = ({
           className="w-full rounded-lg"
           style={{ height: 'calc(100vh - 8rem)' }}
         />
-        {/* Status indicator */}
-        {isMapInitialized && (
-          <div className="absolute bottom-4 left-4 bg-white p-2 rounded shadow text-sm">
-            {!isGoogleMapsLoaded ? (
-              <span className="text-blue-600">🔄 Cargando Google Maps...</span>
-            ) : !isMapInitialized ? (
-              <span className="text-orange-600">🗺️ Inicializando mapa...</span>
-            ) : parcelsRendered ? (
-              <span className="text-green-600">
-                ✅ {cadastralParcels.length} parcelas cargadas
-              </span>
-            ) : (
-              <span className="text-orange-600">⏳ Cargando parcelas...</span>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   );
