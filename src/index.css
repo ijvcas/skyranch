@@ -46,6 +46,10 @@
     
     /* Blue/Green gradient for calendar elements */
     --gradient-blue-green: linear-gradient(135deg, #3B82F6, #10B981);
+    /* Brand gradient tokens (HSL) */
+    --brand-blue: 217 91% 60%;
+    --brand-green: 160 84% 39%;
+    --gradient-primary: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-green)));
   }
 
   .dark {
@@ -79,6 +83,10 @@
     
     /* Blue/Green gradient for calendar elements */
     --gradient-blue-green: linear-gradient(135deg, #3B82F6, #10B981);
+    /* Brand gradient tokens (HSL) */
+    --brand-blue: 217 91% 60%;
+    --brand-green: 160 84% 39%;
+    --gradient-primary: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-green)));
   }
 }
 
@@ -146,6 +154,9 @@
       line-height: 1.25rem;
     }
   }
+
+  /* Gradient button utility */
+  .btn-gradient { background-image: var(--gradient-primary); }
 
   /* Background logo watermark */
   .page-with-logo {

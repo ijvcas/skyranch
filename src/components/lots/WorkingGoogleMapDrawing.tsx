@@ -299,14 +299,6 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
         </div>
       )}
       
-      {/* Mobile notice */}
-      {isMapReady && isMobile && (
-        <div className="absolute top-2 left-2 right-2 bg-white p-2 rounded-md shadow-md z-10 text-sm text-center">
-          <p className="font-medium text-gray-700">
-            Usa dos dedos para mover el mapa y pellizcar para zoom
-          </p>
-        </div>
-      )}
       
       {/* Controls overlay - thin lot count banner at top-center */}
       {isMapReady && (

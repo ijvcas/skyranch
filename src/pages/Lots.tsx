@@ -134,8 +134,8 @@ const Lots = () => {
           
           
           <TabsContent value="map">
-            <div className="flex items-center justify-between mb-4">
-              <Button onClick={handleCreateLot}>Nuevo Potrero</Button>
+            <div className="flex justify-center mb-4">
+              <Button variant="gradient" onClick={handleCreateLot}>Nuevo Potrero</Button>
             </div>
             <LotMapView 
               lots={lots}
