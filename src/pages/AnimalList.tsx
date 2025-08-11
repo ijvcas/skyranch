@@ -135,6 +135,17 @@ const AnimalList = () => {
                   onDeleteAnimal={handleDeleteClick}
                 />
               ))}
+            {hasNextPage && (
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="px-4 py-2 rounded-md bg-primary text-primary-foreground"
+                >
+                  {isFetchingNextPage ? 'Cargando...' : 'Cargar más'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
