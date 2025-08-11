@@ -1251,6 +1251,10 @@ export type Database = {
           created_at: string
         }[]
       }
+      get_current_app_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       sync_auth_users_to_app_users: {
         Args: Record<PropertyKey, never>
         Returns: undefined

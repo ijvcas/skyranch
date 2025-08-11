@@ -14,11 +14,11 @@ export const tokenStorage = {
       const expiresAt = Date.now() + ((tokenData.expiresIn || 3600) * 1000);
       const data: TokenData = {
         accessToken: tokenData.accessToken,
-        expiresAt,
-        refreshToken: tokenData.refreshToken
+        expiresAt
+        // Note: We intentionally do NOT persist refreshToken on the client
       };
-      localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(data));
-      console.log('🔐 [TOKEN STORAGE] Token saved with expiry:', new Date(expiresAt).toISOString());
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(data));
+      console.log('🔐 [TOKEN STORAGE] Token saved with expiry (session):', new Date(expiresAt).toISOString());
     } catch (error) {
       console.error('🔐 [TOKEN STORAGE] Error saving token:', error);
     }
@@ -26,7 +26,7 @@ export const tokenStorage = {
 
   get: (): string | null => {
     try {
-      const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
+      const stored = sessionStorage.getItem(TOKEN_STORAGE_KEY);
       if (!stored) {
         console.log('🔐 [TOKEN STORAGE] No stored token found');
         return null;
@@ -37,7 +37,7 @@ export const tokenStorage = {
       
       if (now >= (data.expiresAt - TOKEN_EXPIRY_BUFFER)) {
         console.log('🔐 [TOKEN STORAGE] Token expired or about to expire, removing from storage');
-        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
         return null;
       }
 
@@ -47,14 +47,14 @@ export const tokenStorage = {
     } catch (error) {
       console.error('🔐 [TOKEN STORAGE] Error retrieving token:', error);
       // Clear corrupted data
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       return null;
     }
   },
 
   clear: () => {
     try {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       console.log('🔐 [TOKEN STORAGE] Token cleared from storage');
     } catch (error) {
       console.error('🔐 [TOKEN STORAGE] Error clearing token:', error);
@@ -68,7 +68,7 @@ export const tokenStorage = {
   // Get the raw token data for debugging
   getRaw: (): TokenData | null => {
     try {
-      const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
+      const stored = sessionStorage.getItem(TOKEN_STORAGE_KEY);
       if (!stored) return null;
       return JSON.parse(stored);
     } catch (error) {
