@@ -71,18 +71,19 @@ const EditableParcelsList: React.FC<EditableParcelProps> = ({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {parcels.map((parcel) => (
-              <ParcelCard
-                key={parcel.id}
-                parcel={parcel}
-                isEditing={editingParcel === parcel.id}
-                editValues={editValues}
-                onEditValuesChange={setEditValues}
-                onParcelClick={onParcelClick}
-                onStartEdit={handleStartEdit}
-                onSaveEdit={handleSaveEdit}
-                onCancelEdit={handleCancelEdit}
-                onDetailEdit={handleDetailEdit}
-              />
+              <div id={`parcel-card-${parcel.id}`} key={parcel.id}>
+                <ParcelCard
+                  parcel={parcel}
+                  isEditing={editingParcel === parcel.id}
+                  editValues={editValues}
+                  onEditValuesChange={setEditValues}
+                  onParcelClick={onParcelClick}
+                  onStartEdit={handleStartEdit}
+                  onSaveEdit={handleSaveEdit}
+                  onCancelEdit={handleCancelEdit}
+                  onDetailEdit={handleDetailEdit}
+                />
+              </div>
             ))}
           </div>
         </CardContent>

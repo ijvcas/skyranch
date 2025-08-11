@@ -79,7 +79,16 @@ const CadastralMapView: React.FC = () => {
 
   const handleParcelClick = (parcel: CadastralParcel) => {
     console.log('Parcel clicked:', parcel);
-    // Future implementation for parcel detail view
+    const el = document.getElementById(`parcel-card-${parcel.id}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const originalBoxShadow = (el as HTMLElement).style.boxShadow;
+      (el as HTMLElement).style.transition = 'box-shadow 0.3s ease';
+      (el as HTMLElement).style.boxShadow = '0 0 0 3px rgba(16,185,129,0.6)';
+      setTimeout(() => {
+        (el as HTMLElement).style.boxShadow = originalBoxShadow || '';
+      }, 1500);
+    }
   };
 
   const handleParcelsDeleted = () => {

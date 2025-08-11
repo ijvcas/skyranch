@@ -93,10 +93,16 @@ export class ParcelRenderer {
       bounds.extend(new google.maps.LatLng(coord.lat, coord.lng));
     });
 
-    // Add click listener
+    // Add click listener and hover effects
     polygon.addListener('click', () => {
       console.log(`🖱️ Clicked parcel: ${parcel.parcelId} (${displayNumber})`);
       this.onParcelClick(parcel);
+    });
+    polygon.addListener('mouseover', () => {
+      polygon.setOptions({ strokeWeight: 3, fillOpacity: 0.55 });
+    });
+    polygon.addListener('mouseout', () => {
+      polygon.setOptions({ strokeWeight: 2, fillOpacity: 0.4 });
     });
 
     // Create label with correct parcel number and smaller font size
