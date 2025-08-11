@@ -38,14 +38,16 @@ const ImageViewerCanvas: React.FC<ImageViewerCanvasProps> = ({
       onWheel={onWheel}
       ref={containerRef}
     >
-      <img
-        ref={imageRef}
-        src={src}
-        alt={alt}
-        className="max-w-full max-h-full object-contain select-none"
-        style={imageStyle}
-        draggable={false}
-      />
+        <img
+          ref={imageRef}
+          src={src}
+          alt={alt}
+          className="max-w-full max-h-full object-contain select-none"
+          style={imageStyle}
+          draggable={false}
+          loading="lazy"
+          decoding="async"
+        />
     </div>
   );
 };
