@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getPolygonDataForLots, syncAllLotAreasWithPolygons } from '@/services/lotPolygonService';
+import { applySEO } from '@/utils/seo';
 
 const Lots = () => {
   const { lots, loadLots, deleteLot, isLoading, setSelectedLot } = useLotStore();
@@ -28,6 +29,15 @@ const Lots = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [lotToDelete, setLotToDelete] = useState<string | null>(null);
+
+  // SEO metadata for Lots page
+  useEffect(() => {
+    applySEO({
+      title: 'Lotes y Mapa Catastral — SKYRANCH',
+      description: 'Gestiona lotes, dibuja potreros y consulta el mapa catastral en SKYRANCH.',
+      canonical: window.location.href
+    });
+  }, []);
 
   // Load lots and polygon data
   useEffect(() => {
