@@ -123,7 +123,7 @@ const CadastralMapView: React.FC = () => {
                 onMapReady={() => {}}
                 onParcelClick={handleParcelClick}
               />
-              <div className="absolute left-4 bottom-20 z-20 pointer-events-auto">
+              <div className="absolute left-4 bottom-10 z-20 pointer-events-auto">
                 <CadastralSettingsDropdown
                   onToggleUpload={handleToggleUpload}
                   onParcelsDeleted={handleParcelsDeleted}
