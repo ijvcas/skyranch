@@ -172,36 +172,35 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <Button
                         onClick={() => onEditUser(user)}
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 w-8 h-8 p-0"
+                        title="Editar usuario"
                       >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Editar
+                        <Edit className="w-4 h-4" />
                       </Button>
                       <Button
                         onClick={() => onDeleteUser(user.id, user.name)}
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         disabled={currentUser?.id === user.id || isDeleting}
-                        className="flex-1 text-orange-600 border-orange-200 hover:bg-orange-50"
+                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 w-8 h-8 p-0"
+                        title="Eliminar de la app (puede reaparecer)"
                       >
-                        <UserMinus className="w-4 h-4 mr-2" />
-                        Eliminar
+                        <UserMinus className="w-4 h-4" />
                       </Button>
                       <Button
                         onClick={() => handleCompleteDeleteClick(user.id, user.name)}
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         disabled={currentUser?.id === user.id || isCompleteDeleting}
-                        className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 w-8 h-8 p-0"
+                        title="Eliminar completamente (permanente)"
                       >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Eliminar Permanente
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
