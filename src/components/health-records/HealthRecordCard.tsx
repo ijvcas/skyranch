@@ -56,6 +56,8 @@ const HealthRecordCard: React.FC<HealthRecordCardProps> = ({
               size="sm"
               onClick={() => onToggleExpanded(record.id)}
               className="h-8 w-8 p-0"
+              aria-label={isExpanded ? 'Contraer detalles' : 'Ver detalles'}
+              title={isExpanded ? 'Contraer detalles' : 'Ver detalles'}
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
@@ -64,6 +66,8 @@ const HealthRecordCard: React.FC<HealthRecordCardProps> = ({
               size="sm"
               onClick={() => onEdit(record)}
               className="h-8 w-8 p-0"
+              aria-label={`Editar registro: ${record.title}`}
+              title={`Editar registro: ${record.title}`}
             >
               <Edit className="w-4 h-4" />
             </Button>
@@ -72,6 +76,8 @@ const HealthRecordCard: React.FC<HealthRecordCardProps> = ({
               size="sm"
               onClick={() => onDelete(record)}
               className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+              aria-label={`Eliminar registro: ${record.title}`}
+              title={`Eliminar registro: ${record.title}`}
             >
               <Trash2 className="w-4 h-4" />
             </Button>

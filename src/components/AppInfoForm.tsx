@@ -81,6 +81,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 onClick={() => setIsEditingApp(!isEditingApp)}
                 className="ml-auto bg-blue-50 hover:bg-blue-100"
                 title="Editar información de la aplicación"
+                aria-label={isEditingApp ? 'Cerrar edición de la aplicación' : 'Editar información de la aplicación'}
               >
                 {isEditingApp ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
               </Button>
@@ -176,6 +177,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 onClick={() => setIsEditingSupport(!isEditingSupport)}
                 className="ml-auto bg-orange-50 hover:bg-orange-100"
                 title="Editar información de soporte técnico"
+                aria-label={isEditingSupport ? 'Cerrar edición de soporte técnico' : 'Editar información de soporte técnico'}
               >
                 {isEditingSupport ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
               </Button>
