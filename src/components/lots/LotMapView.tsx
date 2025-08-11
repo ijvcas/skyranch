@@ -18,10 +18,12 @@ const LotMapView: React.FC<LotMapViewProps> = ({ lots, onLotSelect }) => {
         </p>
       </div>
       
-      <WorkingGoogleMapDrawing 
-        lots={lots}
-        onLotSelect={onLotSelect}
-      />
+      <div className="w-full -mx-4 px-4">
+        <WorkingGoogleMapDrawing 
+          lots={lots}
+          onLotSelect={onLotSelect}
+        />
+      </div>
     </div>
   );
 };

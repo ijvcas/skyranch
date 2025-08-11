@@ -119,7 +119,7 @@ const Lots = () => {
 
   return (
     <div className="page-with-logo">
-      <div className="container mx-auto pb-6">
+      <div className="container mx-auto pb-6 px-2 md:px-4">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Gestión de Lotes</h1>
