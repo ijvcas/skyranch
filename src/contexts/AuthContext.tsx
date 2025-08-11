@@ -31,54 +31,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🔄 [AUTH CONTEXT] Setting up auth state listener...');
-    
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        console.log('📋 [AUTH CONTEXT] Initial session check:', session?.user?.email || 'No session');
-        
-        if (error) {
-          console.error('❌ [AUTH CONTEXT] Error getting initial session:', error);
-        }
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      } catch (error) {
-        console.error('❌ [AUTH CONTEXT] Exception getting initial session:', error);
-        setLoading(false);
-      }
-    };
+    console.log('🔄 [AUTH CONTEXT] Initializing auth...');
 
-    getInitialSession();
-
-    // Set up auth state listener
+    // 1) Set up auth state listener FIRST (no async inside callback)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('🔄 [AUTH CONTEXT] Auth state changed:', event, session?.user?.email || 'No user');
-        
-        // Handle password recovery specifically
+
         if (event === 'PASSWORD_RECOVERY') {
-          console.log('🔑 [AUTH CONTEXT] Password recovery event detected');
-          // Don't set the session immediately, let the reset form handle it
           setLoading(false);
           return;
         }
-        
-        // Clear any corrupted session data on sign out
+
         if (event === 'SIGNED_OUT') {
-          console.log('🧹 [AUTH CONTEXT] Clearing session data...');
-          localStorage.removeItem('supabase.auth.token');
-          sessionStorage.clear();
+          try {
+            localStorage.removeItem('supabase.auth.token');
+            sessionStorage.clear();
+          } catch (e) {
+            console.warn('⚠️ [AUTH CONTEXT] Storage clear failed', e);
+          }
         }
-        
+
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       }
     );
+
+    // 2) THEN check for existing session
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        console.log('📋 [AUTH CONTEXT] Initial session check:', session?.user?.email || 'No session');
+        if (error) {
+          console.error('❌ [AUTH CONTEXT] Error getting initial session:', error);
+        }
+        setSession(session);
+        setUser(session?.user ?? null);
+      })
+      .catch((error) => {
+        console.error('❌ [AUTH CONTEXT] Exception getting initial session:', error);
+      })
+      .finally(() => setLoading(false));
 
     return () => {
       console.log('🧹 [AUTH CONTEXT] Cleaning up auth subscription');
