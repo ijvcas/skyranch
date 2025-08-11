@@ -16,7 +16,7 @@ import {
   DialogClose
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Plus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getPolygonDataForLots, syncAllLotAreasWithPolygons } from '@/services/lotPolygonService';
 import { applySEO } from '@/utils/seo';
@@ -132,7 +132,10 @@ const Lots = () => {
           
           <TabsContent value="map">
             <div className="flex justify-center mb-4">
-              <Button variant="gradient" onClick={handleCreateLot}>Nuevo Potrero</Button>
+              <Button variant="gradient" onClick={handleCreateLot}>
+                <Plus className="w-4 h-4" />
+                Nuevo Potrero
+              </Button>
             </div>
             <LotMapView 
               lots={lots}
