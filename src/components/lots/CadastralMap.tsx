@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Property, CadastralParcel } from '@/services/cadastralService';
 import { ParcelStatus } from '@/utils/cadastral/types';
 import { ParcelRenderer } from './cadastral-map/ParcelRenderer';
+import { loadGoogleMapsAPI } from '@/hooks/polygon/useGoogleMapsLoader';
+import FitBoundsButton from '@/components/common/FitBoundsButton';
 
 interface CadastralMapProps {
   isLoaded: boolean;
@@ -14,36 +16,6 @@ interface CadastralMapProps {
   onParcelClick: (parcel: CadastralParcel) => void;
 }
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyBo7e7hBrnCCtJDSaftXEFHP4qi-KiKXzI';
-
-const loadGoogleMapsScript = (): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    // Check if Google Maps is already loaded
-    if (window.google?.maps) {
-      resolve();
-      return;
-    }
-
-    // Check if script is already being loaded
-    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-    if (existingScript) {
-      existingScript.addEventListener('load', () => resolve());
-      existingScript.addEventListener('error', reject);
-      return;
-    }
-
-    // Create and load the script
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=geometry`;
-    script.async = true;
-    script.defer = true;
-    
-    script.onload = () => resolve();
-    script.onerror = reject;
-    
-    document.head.appendChild(script);
-  });
-};
 
 const CadastralMap: React.FC<CadastralMapProps> = ({
   isLoaded,
@@ -60,16 +32,16 @@ const CadastralMap: React.FC<CadastralMapProps> = ({
   const [parcelsRendered, setParcelsRendered] = useState(false);
 
   // Load Google Maps API
-  useEffect(() => {
-    loadGoogleMapsScript()
-      .then(() => {
-        console.log('✅ Google Maps API loaded successfully');
-        setIsGoogleMapsLoaded(true);
-      })
-      .catch((error) => {
-        console.error('❌ Failed to load Google Maps API:', error);
-      });
-  }, []);
+useEffect(() => {
+  loadGoogleMapsAPI()
+    .then(() => {
+      console.log('✅ Google Maps API loaded successfully');
+      setIsGoogleMapsLoaded(true);
+    })
+    .catch((error) => {
+      console.error('❌ Failed to load Google Maps API:', error);
+    });
+}, []);
 
   // Initialize map once Google Maps is loaded and we have a property
   useEffect(() => {

@@ -1,67 +1,14 @@
 
 import { useEffect, useRef, useState } from 'react';
+import { loadGoogleMapsAPI } from '@/hooks/polygon/useGoogleMapsLoader';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyBo7e7hBrnCCtJDSaftXEFHP4qi-KiKXzI';
+// GOOGLE_MAPS_API_KEY moved to secure loader
 const SKYRANCH_CENTER = { lat: 40.31764444, lng: -4.47409722 };
 
 interface UseElegantGoogleMapOptions {
   onMapReady?: (map: google.maps.Map) => void;
 }
 
-// Global state for API loading
-let isAPILoaded = false;
-let isAPILoading = false;
-const loadingCallbacks: (() => void)[] = [];
-
-const loadGoogleMapsAPI = (): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    if (isAPILoaded && window.google?.maps?.drawing) {
-      resolve();
-      return;
-    }
-
-    if (isAPILoading) {
-      loadingCallbacks.push(resolve);
-      return;
-    }
-
-    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-    if (existingScript) {
-      const checkAPI = () => {
-        if (window.google?.maps?.drawing) {
-          isAPILoaded = true;
-          resolve();
-          loadingCallbacks.forEach(cb => cb());
-          loadingCallbacks.length = 0;
-        } else {
-          setTimeout(checkAPI, 100);
-        }
-      };
-      checkAPI();
-      return;
-    }
-
-    isAPILoading = true;
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=drawing&callback=initElegantGoogleMaps`;
-    script.async = true;
-    
-    (window as any).initElegantGoogleMaps = () => {
-      isAPILoaded = true;
-      isAPILoading = false;
-      resolve();
-      loadingCallbacks.forEach(cb => cb());
-      loadingCallbacks.length = 0;
-    };
-
-    script.onerror = () => {
-      isAPILoading = false;
-      reject(new Error('Failed to load Google Maps API'));
-    };
-
-    document.head.appendChild(script);
-  });
-};
 
 export const useElegantGoogleMap = ({ onMapReady }: UseElegantGoogleMapOptions = {}) => {
   const mapRef = useRef<HTMLDivElement>(null);

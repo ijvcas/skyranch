@@ -1,80 +1,14 @@
 
 import { useEffect, useRef } from 'react';
+import { loadGoogleMapsAPI } from '@/hooks/polygon/useGoogleMapsLoader';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyBo7e7hBrnCCtJDSaftXEFHP4qi-KiKXzI';
+// GOOGLE_MAPS_API_KEY moved to secure loader
 const SKYRANCH_CENTER = { lat: 40.31764444, lng: -4.47409722 };
 
 interface UseGoogleMapOptions {
   onMapReady?: (map: google.maps.Map, drawingManager: google.maps.drawing.DrawingManager) => void;
 }
 
-// Global flag to prevent multiple API loads
-let isGoogleMapsLoaded = false;
-let isGoogleMapsLoading = false;
-const loadingCallbacks: (() => void)[] = [];
-
-const loadGoogleMapsAPI = (): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    // If already loaded, resolve immediately
-    if (isGoogleMapsLoaded && window.google?.maps?.drawing) {
-      console.log('Google Maps API already loaded');
-      resolve();
-      return;
-    }
-
-    // If currently loading, add to callback queue
-    if (isGoogleMapsLoading) {
-      console.log('Google Maps API is loading, adding to queue');
-      loadingCallbacks.push(resolve);
-      return;
-    }
-
-    // Check if script already exists
-    const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`);
-    if (existingScript) {
-      console.log('Google Maps script exists, waiting for drawing library...');
-      // Wait for the drawing library to be available
-      const checkDrawing = () => {
-        if (window.google?.maps?.drawing) {
-          console.log('Drawing library is now available');
-          isGoogleMapsLoaded = true;
-          resolve();
-        } else {
-          setTimeout(checkDrawing, 100);
-        }
-      };
-      checkDrawing();
-      return;
-    }
-
-    console.log('Loading Google Maps API...');
-    isGoogleMapsLoading = true;
-
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=drawing&callback=initGoogleMaps`;
-    script.async = true;
-    
-    // Create global callback for Google Maps
-    (window as any).initGoogleMaps = () => {
-      console.log('Google Maps API callback executed');
-      isGoogleMapsLoaded = true;
-      isGoogleMapsLoading = false;
-      resolve();
-      
-      // Execute all pending callbacks
-      loadingCallbacks.forEach(callback => callback());
-      loadingCallbacks.length = 0;
-    };
-
-    script.onerror = () => {
-      console.error('Failed to load Google Maps script');
-      isGoogleMapsLoading = false;
-      reject(new Error('Failed to load Google Maps API'));
-    };
-
-    document.head.appendChild(script);
-  });
-};
 
 export const useGoogleMap = ({ onMapReady }: UseGoogleMapOptions = {}) => {
   const mapRef = useRef<HTMLDivElement>(null);
