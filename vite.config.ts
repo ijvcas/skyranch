@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
+    exclude: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
     esbuildOptions: {
       define: {
         global: 'globalThis'
