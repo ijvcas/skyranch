@@ -160,8 +160,8 @@ const CadastralMap: React.FC<CadastralMapProps> = ({
       <CardContent className="p-0 relative">
         <div 
           id="cadastral-map" 
-          className="w-full h-96 rounded-lg"
-          style={{ minHeight: '600px' }}
+          className="w-full rounded-lg"
+          style={{ height: 'calc(100vh - 8rem)' }}
         />
         {/* Status indicator */}
         {isMapInitialized && (
