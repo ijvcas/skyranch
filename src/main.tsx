@@ -5,8 +5,8 @@ import './index.css'
 
 createRoot(document.getElementById("root")!).render(<App />);
 
-// Register service worker for PWA functionality
-if ('serviceWorker' in navigator) {
+// Register service worker only in production to avoid dev caching issues
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
@@ -16,4 +16,10 @@ if ('serviceWorker' in navigator) {
         console.log('SW registration failed: ', registrationError);
       });
   });
+} else if ('serviceWorker' in navigator) {
+  // In development, make sure any existing SW is unregistered to prevent module duplication
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    regs.forEach((reg) => reg.unregister());
+  }).catch(() => {/* ignore */});
 }
+
