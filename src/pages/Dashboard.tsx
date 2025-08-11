@@ -17,6 +17,7 @@ import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions'
 import DashboardLoadingState from '@/components/dashboard/DashboardLoadingState';
 import DashboardErrorState from '@/components/dashboard/DashboardErrorState';
 import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
+import { applySEO } from '@/utils/seo';
 
 
 const Dashboard = () => {
@@ -26,6 +27,14 @@ const Dashboard = () => {
   const queryClient = useQueryClient();
   const [bannerImage, setBannerImage] = useState<string>('/lovable-uploads/d3c33c19-f7cd-441e-884f-371ed6481179.png');
   const [userName, setUserName] = useState<string>('');
+  // SEO metadata
+  useEffect(() => {
+    applySEO({
+      title: 'SKYRANCH Dashboard — Farm management',
+      description: 'Gestiona animales, lotes y rotaciones en tiempo real en SKYRANCH.',
+      canonical: window.location.href
+    });
+  }, []);
   
   // Load banner image and user data
   useEffect(() => {

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useGoogleMapsLoader } from '@/hooks/polygon/useGoogleMapsLoader';
+import { useGoogleMapsLoader, loadGoogleMapsAPI } from '@/hooks/polygon/useGoogleMapsLoader';
 import { usePolygonManager } from '@/hooks/polygon/usePolygonManager';
 import { useDrawingManager } from '@/hooks/polygon/useDrawingManager';
 import { type Lot } from '@/stores/lotStore';
@@ -124,7 +124,13 @@ const CleanGoogleMapWithDrawing: React.FC<CleanGoogleMapWithDrawingProps> = ({
       <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
         <div className="text-center">
           <p className="text-red-600 font-medium">Error loading Google Maps</p>
-          <p className="text-gray-600 text-sm mt-1">Please check your internet connection</p>
+          <p className="text-gray-600 text-sm mt-1">Comprueba tu conexión o reintenta cargar el mapa.</p>
+          <button
+            onClick={() => loadGoogleMapsAPI()}
+            className="mt-3 inline-flex items-center px-3 py-1.5 rounded-md bg-blue-600 text-white text-sm"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
