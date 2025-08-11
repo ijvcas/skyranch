@@ -60,7 +60,7 @@ const handleFitBounds = () => {
   return (
     <MapContainer>
       <div ref={mapRef} className="w-full h-full z-10" />
-      <div className="absolute right-4 top-24 z-20">
+      <div className="absolute right-4 top-16 z-20">
         <FitBoundsButton onClick={handleFitBounds} />
       </div>
       

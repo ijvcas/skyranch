@@ -74,7 +74,7 @@ const ElegantGoogleMap = ({ lots, onLotSelect }: ElegantGoogleMapProps) => {
       <div ref={mapRef} className="w-full h-full" />
       {/* Fit bounds control */}
       {isMapReady && (
-        <div className="absolute right-4 top-24 z-20">
+        <div className="absolute right-4 top-16 z-20">
           <FitBoundsButton onClick={handleFitBounds} />
         </div>
       )}
