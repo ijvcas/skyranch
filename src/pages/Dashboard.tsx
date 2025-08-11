@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAllAnimals } from '@/services/animalService';
+import { getAnimalsLean } from '@/services/animalService';
 import { checkPermission } from '@/services/permissionService';
 import { getCurrentUser } from '@/services/userService';
 import { dashboardBannerService } from '@/services/dashboardBannerService';
@@ -193,7 +193,7 @@ const Dashboard = () => {
     counts[animal.species] = (counts[animal.species] || 0) + 1;
     return counts;
   }, {} as Record<string, number>);
-  
+
   const handleSignOut = async () => {
     try {
       await signOut();

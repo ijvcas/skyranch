@@ -1,12 +1,9 @@
 
 import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAllAnimals } from '@/services/animal/animalQueries';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useAnimalFiltering } from '@/hooks/useAnimalFiltering';
-import { networkDiagnostics } from '@/utils/networkDiagnostics';
-import { mockAnimals } from '@/data/mockAnimals';
 import PageLayout from '@/components/ui/page-layout';
 import LoadingState from '@/components/ui/loading-state';
 import ErrorState from '@/components/ui/error-state';
@@ -16,6 +13,7 @@ import AnimalSpeciesGroup from '@/components/animal-list/AnimalSpeciesGroup';
 import AnimalListEmptyState from '@/components/animal-list/AnimalListEmptyState';
 import AnimalListStats from '@/components/animal-list/AnimalListStats';
 import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
+import { useInfiniteAnimals } from '@/hooks/useInfiniteAnimals';
 
 const AnimalList = () => {
   console.log('🔧 AnimalList component starting...');
@@ -35,37 +33,17 @@ const AnimalList = () => {
   
   const [useMockData, setUseMockData] = useState(false);
   
-  // Updated query key to reflect farm-wide animals instead of user-specific
-  const { data: animals = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['animals', 'farm-wide'],
-    queryFn: async () => {
-      // Run network diagnostics first
-      const { network, supabase } = await networkDiagnostics.runDiagnostics();
-      
-      if (!network || !supabase) {
-        console.warn('🟡 Network issues detected, using mock data');
-        setUseMockData(true);
-        return mockAnimals;
-      }
-      
-      try {
-        const result = await getAllAnimals();
-        setUseMockData(false);
-        return result;
-      } catch (error) {
-        console.error('🔴 Failed to load animals, falling back to mock data:', error);
-        setUseMockData(true);
-        return mockAnimals;
-      }
-    },
-    enabled: !!user,
-    staleTime: 0,
-    gcTime: 0,
-    retry: 2,
-    retryDelay: 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  });
+  // Infinite animals with lightweight pages
+  const {
+    animals = [],
+    isLoading,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    clearAndRefetch,
+    isUsingMock,
+  } = useInfiniteAnimals();
 
   console.log('🔧 About to call useAnimalFiltering with animals:', animals?.length);
   const {
@@ -80,16 +58,11 @@ const AnimalList = () => {
 
   const handleForceRefresh = () => {
     console.log('🔄 Force refreshing animal list...');
-    
-    // Clear cache and run diagnostics
-    networkDiagnostics.clearCache();
     setUseMockData(false);
-    
-    queryClient.clear();
-    refetch();
+    clearAndRefetch();
     toast({
       title: "Actualizando lista",
-      description: "Recargando todos los animales...",
+      description: "Recargando animales...",
     });
   };
 
@@ -121,14 +94,14 @@ const AnimalList = () => {
   return (
     <PageLayout className="p-4 pb-20 md:pb-4">
       <div className="max-w-7xl mx-auto">
-        {useMockData && (
+        {(useMockData || isUsingMock) && (
           <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <p className="text-orange-800 text-sm">
               ⚠️ Modo de demostración activo - Mostrando datos de ejemplo debido a problemas de conexión
             </p>
           </div>
         )}
-        
+
         <AnimalListHeader
           userEmail={user?.email}
           totalAnimals={animals.length}

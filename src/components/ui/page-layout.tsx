@@ -12,6 +12,10 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
       <div className="absolute inset-0 opacity-5">
         <img 
           src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
+          alt="SkyRanch watermark"
+          loading="lazy"
+          decoding="async"
+        />
           alt="" 
           className="w-full h-full object-cover"
         />

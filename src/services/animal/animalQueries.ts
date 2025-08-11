@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Animal } from '@/stores/animalStore';
 
+// Fetch full animals (legacy, used in several areas)
 export const getAllAnimals = async (): Promise<Animal[]> => {
   try {
     console.log('🔍 Fetching all animals...');
@@ -12,7 +13,6 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
       return [];
     }
 
-    // Remove user_id filter - all authenticated users can see all animals
     const { data, error } = await supabase
       .from('animals')
       .select('*')
@@ -56,6 +56,81 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
     }));
   } catch (error) {
     console.error('❌ Unexpected error in getAllAnimals:', error);
+    return [];
+  }
+};
+
+// Lean fetch for Dashboard stats: only id and species
+export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'species'>>> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('animals')
+      .select('id,species')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('❌ Error in getAnimalsLean:', error);
+      return [];
+    }
+
+    return (data || []).map(a => ({ id: a.id, species: a.species }));
+  } catch (e) {
+    console.error('❌ Unexpected error in getAnimalsLean:', e);
+    return [];
+  }
+};
+
+// Paged fetch for Animals list with minimal columns needed for the cards
+export const getAnimalsPage = async (limit = 50, offset = 0): Promise<Animal[]> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('animals')
+      .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('❌ Error in getAnimalsPage:', error);
+      return [];
+    }
+
+    return (data || []).map(animal => ({
+      id: animal.id,
+      name: animal.name || '',
+      tag: animal.tag || '',
+      species: animal.species || 'bovino',
+      breed: animal.breed || '',
+      birthDate: animal.birth_date || '',
+      gender: animal.gender || '',
+      weight: animal.weight?.toString() || '',
+      color: animal.color || '',
+      motherId: '',
+      fatherId: '',
+      maternalGrandmotherId: '',
+      maternalGrandfatherId: '',
+      paternalGrandmotherId: '',
+      paternalGrandfatherId: '',
+      maternalGreatGrandmotherMaternalId: '',
+      maternalGreatGrandfatherMaternalId: '',
+      maternalGreatGrandmotherPaternalId: '',
+      maternalGreatGrandfatherPaternalId: '',
+      paternalGreatGrandmotherMaternalId: '',
+      paternalGreatGrandfatherMaternalId: '',
+      paternalGreatGrandmotherPaternalId: '',
+      paternalGreatGrandfatherPaternalId: '',
+      healthStatus: animal.health_status || 'healthy',
+      notes: '',
+      image: animal.image_url || null,
+      current_lot_id: undefined,
+    }));
+  } catch (e) {
+    console.error('❌ Unexpected error in getAnimalsPage:', e);
     return [];
   }
 };

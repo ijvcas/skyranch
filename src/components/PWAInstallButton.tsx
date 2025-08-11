@@ -52,6 +52,10 @@ const PWAInstallButton = () => {
           <div className="flex items-center space-x-3 mb-2">
             <img 
               src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
+              alt="SkyRanch logo"
+              loading="lazy"
+              decoding="async"
+            />
               alt="SkyRanch" 
               className="w-10 h-10 rounded"
             />

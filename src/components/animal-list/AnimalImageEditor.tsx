@@ -45,7 +45,7 @@ const AnimalImageEditor: React.FC<AnimalImageEditorProps> = ({
         onTransformChange={onImageTransform}
         initialTransform={displayTransform}
       />
-      
+
       {!isEditMode && (
         <div className="absolute top-2 right-2">
           <Button

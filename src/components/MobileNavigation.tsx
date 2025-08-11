@@ -33,6 +33,10 @@ const MobileNavigation = () => {
           <div className="flex items-center flex-shrink-0 min-w-0 mr-3 h-full">
             <img 
               src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
+              alt="SkyRanch logo"
+              loading="lazy"
+              decoding="async"
+            />
               alt="SkyRanch" 
               className="h-8 w-8 flex-shrink-0"
             />

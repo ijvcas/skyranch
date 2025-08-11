@@ -77,12 +77,13 @@ const DashboardPWAPrompt = () => {
       <div className="bg-white border-2 border-green-200 rounded-lg shadow-2xl p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0">
-              <img 
-                src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
-                alt="SkyRanch" 
-                className="w-12 h-12 rounded"
-              />
+            <img 
+              src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
+              alt="SkyRanch"
+              className="w-12 h-12 rounded"
+              loading="lazy"
+              decoding="async"
+            />
             </div>
             <div>
               <h3 className="font-bold text-gray-900 text-lg">Instala SkyRanch</h3>
