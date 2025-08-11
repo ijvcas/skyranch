@@ -132,9 +132,9 @@ const Dashboard = () => {
           console.log('🔓 Bypassing permission check for admin/manager');
         }
         
-        console.log('🔄 Fetching animals data...');
-        const animals = await getAllAnimals();
-        console.log('✅ Animals fetched successfully:', animals.length);
+        console.log('🔄 Fetching animals (lean) data...');
+        const animals = await getAnimalsLean();
+        console.log('✅ Animals (lean) fetched successfully:', animals.length);
         return animals;
       } catch (error) {
         console.error('❌ Error fetching animals:', error);
