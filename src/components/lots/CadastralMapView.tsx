@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import CadastralMapControls from './CadastralMapControls';
 import CadastralFilterControls from './CadastralFilterControls';
-import CadastralMap from './CadastralMap';
+const CadastralMap = lazy(() => import('./CadastralMap'));
 import EditableParcelsList from './EditableParcelsList';
 import FinancialSummaryCard from './FinancialSummaryCard';
 import CadastralSettingsDropdown from './CadastralSettingsDropdown';
@@ -124,14 +124,16 @@ const CadastralMapView: React.FC = () => {
         <div className="relative">
           {selectedProperty && (
             <>
-              <CadastralMap
-                isLoaded={true}
-                selectedProperty={selectedProperty}
-                cadastralParcels={filteredParcels}
-                statusFilter={statusFilter}
-                onMapReady={() => {}}
-                onParcelClick={handleParcelClick}
-              />
+              <Suspense fallback={<div className="h-[420px] rounded-lg border" aria-busy="true" aria-label="Cargando mapa..." />}> 
+                <CadastralMap
+                  isLoaded={true}
+                  selectedProperty={selectedProperty}
+                  cadastralParcels={filteredParcels}
+                  statusFilter={statusFilter}
+                  onMapReady={() => {}}
+                  onParcelClick={handleParcelClick}
+                />
+              </Suspense>
               <div className="absolute left-4 bottom-10 z-20 pointer-events-auto">
                 <CadastralSettingsDropdown
                   onToggleUpload={handleToggleUpload}

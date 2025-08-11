@@ -42,6 +42,8 @@ const AnimalCardActions: React.FC<AnimalCardActionsProps> = ({
         size="sm"
         onClick={() => onDelete(animalId, animalName)}
         className="flex-1 text-red-600 hover:text-red-700"
+        aria-label={`Eliminar ${animalName}`}
+        title={`Eliminar ${animalName}`}
       >
         <Trash2 className="w-4 h-4" />
       </Button>

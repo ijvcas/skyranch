@@ -79,6 +79,8 @@ const HealthRecordsList: React.FC<HealthRecordsListProps> = ({ records, onEdit, 
                     variant="ghost"
                     size="sm"
                     onClick={() => onEdit(record)}
+                    aria-label={`Editar registro: ${record.title}`}
+                    title={`Editar registro: ${record.title}`}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -88,6 +90,8 @@ const HealthRecordsList: React.FC<HealthRecordsListProps> = ({ records, onEdit, 
                     variant="ghost"
                     size="sm"
                     onClick={() => onDelete(record.id)}
+                    aria-label={`Eliminar registro: ${record.title}`}
+                    title={`Eliminar registro: ${record.title}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

@@ -1,60 +1,100 @@
-const CACHE_NAME = 'skyranch-v1';
-const urlsToCache = [
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `skyranch-${CACHE_VERSION}`;
+const ASSET_CACHE = `skyranch-assets-${CACHE_VERSION}`;
+
+const CORE_ASSETS = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
+  '/index.html',
   '/manifest.json',
   '/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png'
 ];
 
-// Install event - cache resources
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
   );
 });
 
-// Fetch event - serve from cache when offline
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-  );
-});
-
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.map((key) => {
+          if (!key.includes(CACHE_VERSION)) {
+            return caches.delete(key);
           }
         })
       );
-    })
+      await self.clients.claim();
+    })()
   );
 });
 
-// Background sync for offline data
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'background-sync') {
-    event.waitUntil(syncData());
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  const url = new URL(req.url);
+
+  // Only handle GET
+  if (req.method !== 'GET') return;
+
+  // SPA navigation fallback to index.html when offline
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req).catch(() => caches.match('/index.html'))
+    );
+    return;
   }
+
+  // Cache static assets (Vite outputs under /assets/) with stale-while-revalidate
+  if (url.origin === self.location.origin && url.pathname.startsWith('/assets/')) {
+    event.respondWith(staleWhileRevalidate(req, ASSET_CACHE));
+    return;
+  }
+
+  // Default: try cache first then network, and cache successful responses
+  event.respondWith(cacheFirst(req, CACHE_NAME));
 });
 
-async function syncData() {
-  // Sync offline data when connection is restored
-  console.log('Syncing data...');
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  const networkFetch = fetch(request).then((response) => {
+    if (response && response.status === 200) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  }).catch(() => cached);
+
+  return cached || networkFetch;
 }
+
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(request);
+    if (response && response.status === 200 && request.url.startsWith(self.location.origin)) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (e) {
+    return cached || Promise.reject(e);
+  }
+}
+
+// Background sync for offline data (placeholder)
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'background-sync') {
+    event.waitUntil((async () => {
+      // Implement your sync logic here
+      console.log('Syncing data...');
+    })());
+  }
+});
 
 // Push notifications
 self.addEventListener('push', (event) => {
@@ -63,21 +103,13 @@ self.addEventListener('push', (event) => {
     icon: '/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png',
     badge: '/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png',
     vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    }
+    data: { dateOfArrival: Date.now(), primaryKey: 1 },
   };
 
-  event.waitUntil(
-    self.registration.showNotification('SkyRanch', options)
-  );
+  event.waitUntil(self.registration.showNotification('SkyRanch', options));
 });
 
-// Notification click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
+  event.waitUntil(clients.openWindow('/'));
 });
