@@ -91,27 +91,42 @@ Deno.serve(async (req) => {
 
     console.log('✅ Deleted from app_users table')
 
+    // Step 1b: Also delete profile if exists
+    const { error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .delete()
+      .eq('id', userId)
+    if (profileErr) {
+      console.warn('⚠️ Error deleting profile (continuing):', profileErr)
+    }
+
     // Step 2: Delete from auth.users using admin client
     const { error: authUserError } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
     if (authUserError) {
       console.error('❌ Error deleting from auth.users:', authUserError)
-      
-      // If auth deletion fails, we should log it but not fail completely
-      // since the user is already removed from app_users
-      console.log('⚠️ Auth user deletion failed, but app_users deletion succeeded')
-      
+
+      const msg = (authUserError as any)?.message?.toString().toLowerCase() || ''
+      const status = (authUserError as any)?.status
+      // Treat "not found" as success: nothing to delete in auth
+      if (status === 404 || msg.includes('not found') || msg.includes('no user')) {
+        console.log('ℹ️ Auth user not found; treated as fully deleted in app')
+        return new Response(
+          JSON.stringify({ success: true, message: 'App records removed; auth user not found' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+        )
+      }
+
+      // Otherwise return success with warning so UI can inform
       return new Response(
         JSON.stringify({ 
           success: true, 
-          warning: 'User removed from app but auth deletion failed. User may reappear on next sync.' 
+          warning: `Auth deletion failed: ${(authUserError as any)?.message || 'Unknown error'}`
         }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
-        }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       )
     }
+
 
     console.log('✅ Deleted from auth.users table')
     console.log(`🎉 Complete deletion successful for user: ${userId}`)

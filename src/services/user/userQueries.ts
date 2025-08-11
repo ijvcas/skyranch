@@ -39,73 +39,20 @@ export const getAllUsers = async (): Promise<AppUser[]> => {
   }
 };
 
-// Sync all auth users to app_users table with improved error handling
+// Sync all auth users to app_users table via secure RPC (server-side rules)
 export const syncAuthUsersToAppUsers = async (): Promise<void> => {
   try {
-    console.log('🔄 Syncing auth users to app_users...');
-    
-    // Get all auth users first
-    const { data: authUsers, error: authError } = await supabase.rpc('get_auth_users');
-    
-    if (authError) {
-      console.error('❌ Error getting auth users:', authError);
-      throw authError;
+    console.log('🔄 Syncing auth users to app_users via RPC...');
+
+    // Use the database function which handles confirmed emails and conflicts safely
+    const { error } = await supabase.rpc('sync_auth_users_to_app_users');
+
+    if (error) {
+      console.error('❌ RPC sync error:', error);
+      throw error;
     }
 
-    console.log('📋 Found auth users to sync:', authUsers?.length || 0);
-
-    // Get existing app users to avoid duplicates
-    const { data: existingAppUsers, error: existingError } = await supabase
-      .from('app_users')
-      .select('id, email');
-
-    if (existingError) {
-      console.error('❌ Error getting existing app users:', existingError);
-      throw existingError;
-    }
-
-    const existingEmails = new Set(existingAppUsers?.map(u => u.email) || []);
-    const existingIds = new Set(existingAppUsers?.map(u => u.id) || []);
-
-    // Filter out users that already exist by ID or email
-    const usersToInsert = authUsers?.filter(authUser => 
-      !existingIds.has(authUser.id) && 
-      !existingEmails.has(authUser.email) &&
-      authUser.email
-    ) || [];
-
-    console.log('➕ Users to insert:', usersToInsert.length);
-
-    if (usersToInsert.length === 0) {
-      console.log('✅ No new users to sync');
-      return;
-    }
-
-    // Prepare users for insertion with proper type handling
-    const usersForInsertion = usersToInsert.map(authUser => {
-      const metadata = authUser.raw_user_meta_data as any;
-      return {
-        id: authUser.id,
-        name: metadata?.full_name || authUser.email?.split('@')[0] || 'Usuario',
-        email: authUser.email,
-        role: 'worker' as const,
-        is_active: true,
-        created_by: authUser.id,
-        phone: metadata?.phone || ''
-      };
-    });
-
-    // Insert new users
-    const { error: insertError } = await supabase
-      .from('app_users')
-      .insert(usersForInsertion);
-
-    if (insertError) {
-      console.error('❌ Error inserting new users:', insertError);
-      throw insertError;
-    }
-    
-    console.log('✅ Successfully synced auth users to app_users');
+    console.log('✅ Successfully synced auth users to app_users via RPC');
   } catch (error) {
     console.error('❌ Error in syncAuthUsersToAppUsers:', error);
     throw error;
