@@ -14,22 +14,28 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create admin client for auth operations
+    // Resolve env vars once and validate
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
+    const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+
+    if (!SUPABASE_URL) throw new Error('Missing SUPABASE_URL secret')
+    if (!SERVICE_ROLE_KEY) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY secret')
+    if (!ANON_KEY) throw new Error('Missing SUPABASE_ANON_KEY secret')
+
+    // Create admin client for privileged operations
     const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      SUPABASE_URL,
+      SERVICE_ROLE_KEY,
       {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
+        auth: { autoRefreshToken: false, persistSession: false }
       }
     )
 
-    // Create regular client for app operations  
+    // Create client for auth token inspection only
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      SUPABASE_URL,
+      ANON_KEY
     )
 
     const { userId } = await req.json()
@@ -55,7 +61,7 @@ Deno.serve(async (req) => {
     }
 
     // Verify current user is admin
-    const { data: currentAppUser, error: roleError } = await supabase
+    const { data: currentAppUser, error: roleError } = await supabaseAdmin
       .from('app_users')
       .select('role')
       .eq('id', currentUser.id)
@@ -73,7 +79,7 @@ Deno.serve(async (req) => {
     console.log(`✅ Admin verification passed for user: ${currentUser.id}`)
 
     // Step 1: Delete from app_users table first
-    const { error: appUserError } = await supabase
+    const { error: appUserError } = await supabaseAdmin
       .from('app_users')
       .delete()
       .eq('id', userId)
