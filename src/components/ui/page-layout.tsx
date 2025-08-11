@@ -13,11 +13,9 @@ const PageLayout = ({ children, className = "" }: PageLayoutProps) => {
         <img 
           src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
           alt="SkyRanch watermark"
+          className="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
-        />
-          alt="" 
-          className="w-full h-full object-cover"
         />
       </div>
       <div className="relative z-10">

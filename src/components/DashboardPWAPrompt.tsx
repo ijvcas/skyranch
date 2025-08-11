@@ -132,8 +132,7 @@ const DashboardPWAPrompt = () => {
           />
         )}
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-export default DashboardPWAPrompt;
+  export default DashboardPWAPrompt;

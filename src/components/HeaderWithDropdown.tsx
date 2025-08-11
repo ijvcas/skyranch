@@ -56,14 +56,13 @@ const HeaderWithDropdown = () => {
           {/* Logo with Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <img 
-                src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
-                alt="SkyRanch logo"
-                loading="lazy"
-                decoding="async"
-              />
-                  alt="SkyRanch" 
-                  className="h-16 w-16 flex-shrink-0"
+              <Button variant="ghost" className="flex items-center space-x-3 hover:bg-green-50 h-14 px-3">
+                <img 
+                  src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
+                  alt="SkyRanch"
+                  className="h-8 w-8 rounded flex-shrink-0"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="flex items-center">
                   <span className="text-2xl font-bold text-gray-900 whitespace-nowrap uppercase leading-none">SkyRanch</span>
