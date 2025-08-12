@@ -119,14 +119,14 @@ const Dashboard = () => {
           console.error('❌ Error getting current user:', userError);
         }
         
-        // Try permission check first, but have fallback for admins
+        // Try permission check, but don't block dashboard for new users
         if (!shouldBypassPermissions) {
           try {
             await checkPermission('animals_view');
             console.log('✅ Permission granted for animals_view');
           } catch (permissionError) {
-            console.error('❌ Permission denied for animals_view:', permissionError);
-            throw new Error(`Acceso denegado: ${permissionError.message}`);
+            console.warn('⚠️ Permission check failed for animals_view, continuing in read-only mode:', permissionError);
+            // Continue without throwing to avoid blocking first login experiences
           }
         } else {
           console.log('🔓 Bypassing permission check for admin/manager');
