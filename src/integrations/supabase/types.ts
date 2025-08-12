@@ -1206,6 +1206,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_connection_logs: {
+        Row: {
+          browser: string | null
+          created_at: string
+          device: string | null
+          error_code: string | null
+          error_message: string | null
+          event: string
+          id: string
+          ip: string | null
+          metadata: Json | null
+          method: string | null
+          os: string | null
+          path: string | null
+          referrer: string | null
+          success: boolean | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          browser?: string | null
+          created_at?: string
+          device?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          event: string
+          id?: string
+          ip?: string | null
+          metadata?: Json | null
+          method?: string | null
+          os?: string | null
+          path?: string | null
+          referrer?: string | null
+          success?: boolean | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          browser?: string | null
+          created_at?: string
+          device?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          event?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json | null
+          method?: string | null
+          os?: string | null
+          path?: string | null
+          referrer?: string | null
+          success?: boolean | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       weather_settings: {
         Row: {
           created_at: string
