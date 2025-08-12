@@ -13,9 +13,10 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
       return [];
     }
 
-    const { data, error } = await supabase
-      .from('animals')
+    const { data, error } = await (supabase
+      .from('animals') as any)
       .select('*')
+      .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -52,7 +53,10 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
       healthStatus: animal.health_status || 'healthy',
       notes: animal.notes || '',
       image: animal.image_url,
-      current_lot_id: animal.current_lot_id
+      current_lot_id: animal.current_lot_id,
+      lifecycleStatus: animal.lifecycle_status || 'active',
+      dateOfDeath: animal.date_of_death || '',
+      causeOfDeath: animal.cause_of_death || ''
     }));
   } catch (error) {
     console.error('❌ Unexpected error in getAllAnimals:', error);
@@ -69,6 +73,7 @@ export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'speci
     const { data, error } = await supabase
       .from('animals')
       .select('id,species')
+      .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -91,7 +96,8 @@ export const getAnimalsPage = async (limit = 50, offset = 0): Promise<Animal[]> 
 
     const { data, error } = await supabase
       .from('animals')
-      .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url')
+      .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url,lifecycle_status')
+      .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -128,6 +134,7 @@ export const getAnimalsPage = async (limit = 50, offset = 0): Promise<Animal[]> 
       notes: '',
       image: animal.image_url || null,
       current_lot_id: undefined,
+      lifecycleStatus: animal.lifecycle_status || 'active',
     }));
   } catch (e) {
     console.error('❌ Unexpected error in getAnimalsPage:', e);
@@ -191,7 +198,10 @@ export const getAnimal = async (id: string): Promise<Animal | null> => {
       healthStatus: data.health_status || 'healthy',
       notes: data.notes || '',
       image: data.image_url,
-      current_lot_id: data.current_lot_id
+      current_lot_id: data.current_lot_id,
+      lifecycleStatus: data.lifecycle_status || 'active',
+      dateOfDeath: data.date_of_death || '',
+      causeOfDeath: data.cause_of_death || ''
     };
   } catch (error) {
     console.error('❌ Unexpected error in getAnimal:', error);

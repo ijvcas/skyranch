@@ -29,6 +29,9 @@ export interface Animal {
   notes: string;
   image: string | null;
   current_lot_id?: string;
+  lifecycleStatus?: string;
+  dateOfDeath?: string;
+  causeOfDeath?: string;
 }
 
 interface AnimalStore {

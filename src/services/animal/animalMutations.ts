@@ -195,9 +195,12 @@ export const updateAnimal = async (id: string, animal: Omit<Animal, 'id'>): Prom
     paternal_great_grandfather_maternal_id: paternalGreatGrandfatherMaternalId,
     paternal_great_grandmother_paternal_id: paternalGreatGrandmotherPaternalId,
     paternal_great_grandfather_paternal_id: paternalGreatGrandfatherPaternalId,
-  };
+  } as any;
 
-  console.log('🔄 Final update data:', updateData);
+  // If animal marked as deceased, clear lot assignment
+  if (animal.lifecycleStatus && animal.lifecycleStatus.toLowerCase() === 'deceased') {
+    updateData.current_lot_id = null;
+  }
 
   const { error } = await supabase
     .from('animals')

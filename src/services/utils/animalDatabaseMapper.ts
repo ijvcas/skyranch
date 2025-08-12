@@ -15,6 +15,9 @@ export const mapAnimalToDatabase = (animal: Omit<Animal, 'id'>, userId: string) 
     health_status: animal.healthStatus,
     notes: animal.notes,
     image_url: animal.image,
+    lifecycle_status: animal.lifecycleStatus || 'active',
+    date_of_death: animal.dateOfDeath || null,
+    cause_of_death: animal.causeOfDeath || null,
     user_id: userId,
   };
 };
@@ -33,6 +36,9 @@ export const createUpdateObject = (animal: Omit<Animal, 'id'>) => {
     health_status: animal.healthStatus,
     notes: animal.notes,
     image_url: animal.image,
+    lifecycle_status: animal.lifecycleStatus || 'active',
+    date_of_death: animal.dateOfDeath || null,
+    cause_of_death: animal.causeOfDeath || null,
   };
 };
 
@@ -51,6 +57,9 @@ export const fromDatabase = (dbAnimal: any): Animal => {
     healthStatus: dbAnimal.health_status,
     notes: dbAnimal.notes || '',
     image: dbAnimal.image_url || '',
+    lifecycleStatus: dbAnimal.lifecycle_status || 'active',
+    dateOfDeath: dbAnimal.date_of_death || '',
+    causeOfDeath: dbAnimal.cause_of_death || '',
     fatherId: dbAnimal.father_id || '',
     motherId: dbAnimal.mother_id || '',
     paternalGrandfatherId: dbAnimal.paternal_grandfather_id || '',
