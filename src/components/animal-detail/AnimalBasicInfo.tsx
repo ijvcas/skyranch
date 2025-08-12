@@ -103,6 +103,18 @@ const formatBirthDate = (birthDate: string) => {
             <label className="text-sm font-medium text-gray-600">Fecha de Nacimiento</label>
             <p className="text-gray-900">{formatBirthDate(animal.birthDate)}</p>
           </div>
+          {animal.lifecycleStatus === 'deceased' && (
+            <>
+              <div>
+                <label className="text-sm font-medium text-gray-600">Fecha de Fallecimiento</label>
+                <p className="text-gray-900">{animal.dateOfDeath ? formatBirthDate(animal.dateOfDeath) : 'No registrada'}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">Causa</label>
+                <p className="text-gray-900">{animal.causeOfDeath || 'No registrada'}</p>
+              </div>
+            </>
+          )}
           <div>
             <label className="text-sm font-medium text-gray-600">Peso</label>
             <p className="text-gray-900">{animal.weight} kg</p>
