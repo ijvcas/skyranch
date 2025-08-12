@@ -138,7 +138,8 @@ const Dashboard = () => {
         return animals;
       } catch (error) {
         console.error('❌ Error fetching animals:', error);
-        throw error; // Let error bubble up to trigger error state
+        // Don’t break the dashboard for transient or permission issues
+        return [];
       }
     },
     enabled: !!user,

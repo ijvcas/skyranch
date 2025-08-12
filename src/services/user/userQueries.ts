@@ -81,7 +81,7 @@ export const getCurrentUser = async (): Promise<AppUser | null> => {
       .from('app_users')
       .select('*')
       .eq('id', authUser.id)
-      .single();
+      .maybeSingle();
 
     // If not found by ID, try by email as fallback
     if (dbError && authUser.email) {
@@ -90,7 +90,7 @@ export const getCurrentUser = async (): Promise<AppUser | null> => {
         .from('app_users')
         .select('*')
         .eq('email', authUser.email)
-        .single();
+        .maybeSingle();
         
       if (!emailError && userByEmail) {
         appUser = userByEmail;
@@ -116,7 +116,7 @@ export const getCurrentUser = async (): Promise<AppUser | null> => {
           .from('app_users')
           .select('*')
           .eq('id', authUser.id)
-          .single();
+          .maybeSingle();
           
         if (!syncError && syncedUser) {
           appUser = syncedUser;
