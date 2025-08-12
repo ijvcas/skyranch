@@ -48,7 +48,7 @@ export async function logConnection(event: string, details: ConnectionDetails = 
       metadata: details.metadata ?? null,
     };
 
-    const { error } = await supabase.from('user_connection_logs').insert(payload);
+    const { error } = await (supabase as any).from('user_connection_logs').insert(payload as any);
     if (error) {
       console.error('[connectionLogger] Insert log error:', error);
     } else {
