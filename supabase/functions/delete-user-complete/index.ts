@@ -78,6 +78,22 @@ Deno.serve(async (req) => {
 
     console.log(`✅ Admin verification passed for user: ${currentUser.id}`)
 
+    // Pre-step: Clear FK references that may block auth deletion
+    try {
+      console.log('🔗 Clearing FK references to auth.users (app_version.created_by)...')
+      const { error: fkErr } = await supabaseAdmin
+        .from('app_version')
+        .update({ created_by: null })
+        .eq('created_by', userId)
+      if (fkErr) {
+        console.warn('⚠️ Could not clear app_version.created_by FK:', fkErr)
+      } else {
+        console.log('✅ Cleared app_version.created_by references (if any)')
+      }
+    } catch (fkCatchErr) {
+      console.warn('⚠️ Exception clearing FK references:', fkCatchErr)
+    }
+
     // Step 1: Delete from auth.users FIRST using admin client
     console.log('🧹 Deleting from auth.users first...')
     const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
