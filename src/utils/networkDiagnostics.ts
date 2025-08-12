@@ -15,18 +15,19 @@ export const networkDiagnostics = {
     }
   },
 
-  // Test Supabase connectivity
+  // Test Supabase connectivity (database, not Edge Functions)
   async testSupabaseConnectivity(): Promise<boolean> {
     try {
-      // Use a lightweight, authenticated Edge Function call via the Supabase client
-      const { data, error } = await supabase.functions.invoke("maps-key", { body: {} });
+      // Call a lightweight Postgres RPC to verify DB + RLS path
+      const { data, error } = await supabase.rpc('is_active_user');
       if (error) {
-        console.warn('🟠 Supabase reachable but function error:', error);
+        console.warn('🟠 Supabase reachable but RPC error:', error);
         return false;
       }
-      return !!data;
+      // If we got a boolean response, DB connectivity is fine
+      return typeof data === 'boolean';
     } catch (error) {
-      console.error('🔴 Supabase connectivity failed:', error);
+      console.error('🔴 Supabase connectivity (DB) failed:', error);
       return false;
     }
   },
