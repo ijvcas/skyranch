@@ -44,35 +44,37 @@ const AnimalListFilters = ({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
-            <Select value={selectedSpecies} onValueChange={onSpeciesChange}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Especie" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las especies</SelectItem>
-                <SelectItem value="bovino">Bovino</SelectItem>
-                <SelectItem value="ovino">Ovino</SelectItem>
-                <SelectItem value="caprino">Caprino</SelectItem>
-                <SelectItem value="porcino">Porcino</SelectItem>
-                <SelectItem value="equino">Equino</SelectItem>
-                <SelectItem value="aviar">Aviar</SelectItem>
-                <SelectItem value="canine">Canino</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={onStatusChange}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="healthy">Saludable</SelectItem>
-                <SelectItem value="sick">Enfermo</SelectItem>
-                <SelectItem value="pregnant">Gestante</SelectItem>
-                <SelectItem value="pregnant-healthy">Gestante Saludable</SelectItem>
-                <SelectItem value="pregnant-sick">Gestante Enferma</SelectItem>
-                <SelectItem value="treatment">En Tratamiento</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 gap-2 w-full md:w-auto">
+              <Select value={selectedSpecies} onValueChange={onSpeciesChange}>
+                <SelectTrigger className="w-full md:w-40">
+                  <SelectValue placeholder="Razas" />
+                </SelectTrigger>
+                <SelectContent className="z-50">
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="bovino">Bovino</SelectItem>
+                  <SelectItem value="ovino">Ovino</SelectItem>
+                  <SelectItem value="caprino">Caprino</SelectItem>
+                  <SelectItem value="porcino">Porcino</SelectItem>
+                  <SelectItem value="equino">Equino</SelectItem>
+                  <SelectItem value="aviar">Aviar</SelectItem>
+                  <SelectItem value="canine">Canino</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={selectedStatus} onValueChange={onStatusChange}>
+                <SelectTrigger className="w-full md:w-40">
+                  <SelectValue placeholder="Estados" />
+                </SelectTrigger>
+                <SelectContent className="z-50">
+                  <SelectItem value="all">Estados</SelectItem>
+                  <SelectItem value="healthy">Saludable</SelectItem>
+                  <SelectItem value="sick">Enfermo</SelectItem>
+                  <SelectItem value="pregnant">Gestante</SelectItem>
+                  <SelectItem value="pregnant-healthy">Gestante Saludable</SelectItem>
+                  <SelectItem value="pregnant-sick">Gestante Enferma</SelectItem>
+                  <SelectItem value="treatment">En Tratamiento</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex items-center gap-2 pl-2">
               <Switch checked={includeDeceased} onCheckedChange={onIncludeDeceasedChange} id="include-deceased" />
               <Label htmlFor="include-deceased" className="text-sm leading-tight whitespace-normal break-words">Mostrar fallecidos</Label>
