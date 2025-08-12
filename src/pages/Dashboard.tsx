@@ -217,15 +217,10 @@ const Dashboard = () => {
   }
 
   if (error) {
-    console.log('🔴 Dashboard error state triggered:', error);
-    return (
-      <DashboardErrorState 
-        userEmail={user?.email}
-        onForceRefresh={handleForceRefresh}
-        onSignOut={handleSignOut}
-      />
-    );
+    console.warn('⚠️ Non-blocking dashboard error:', error);
+    // Continue rendering with whatever data we have (may be empty)
   }
+
 
   return (
     <div className="min-h-screen">
