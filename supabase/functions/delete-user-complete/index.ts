@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const corsHeaders = {
@@ -78,48 +77,15 @@ Deno.serve(async (req) => {
 
     console.log(`✅ Admin verification passed for user: ${currentUser.id}`)
 
-    // Pre-step: Clear FK references that may block auth deletion
-    try {
-      console.log('🔗 Clearing FK references to auth.users (app_version.created_by)...')
-      const { error: fkErr } = await supabaseAdmin
-        .from('app_version')
-        .update({ created_by: null })
-        .eq('created_by', userId)
-      if (fkErr) {
-        console.warn('⚠️ Could not clear app_version.created_by FK:', fkErr)
-      } else {
-        console.log('✅ Cleared app_version.created_by references (if any)')
-      }
-    } catch (fkCatchErr) {
-      console.warn('⚠️ Exception clearing FK references:', fkCatchErr)
-    }
-
-    // Step 1: Delete from auth.users FIRST using admin client
-    console.log('🧹 Deleting from auth.users first...')
-    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
-
-    if (authDeleteError) {
-      console.error('❌ Error deleting from auth.users:', authDeleteError)
-      const msg = (authDeleteError as any)?.message?.toString().toLowerCase() || ''
-      const status = (authDeleteError as any)?.status
-      // Treat "not found" as already deleted; proceed with app cleanup
-      const notFound = status === 404 || msg.includes('not found') || msg.includes('no user')
-      if (!notFound) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: `Auth deletion failed: ${(authDeleteError as any)?.message || 'Unknown error'}`
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-        )
-      }
-      console.log('ℹ️ Auth user not found; proceeding with application cleanup')
-    }
-
-    // Step 2: Clean up user-specific artifacts in app schema (no farm-owned data)
-    const counts: Record<string, number> = {}
+    // Helper utilities
     const warnings: string[] = []
+    const counts: Record<string, number> = {}
 
+    const safeUpdate = async (table: string, values: Record<string, any>, filter: Record<string, any>) => {
+      const { error } = await supabaseAdmin.from(table).update(values).match(filter)
+      if (error) warnings.push(`${table}(update): ${error.message}`)
+      return !error
+    }
     const deleteAndCount = async (table: string, filter: Record<string, any>) => {
       const { data, error } = await supabaseAdmin
         .from(table)
@@ -127,27 +93,33 @@ Deno.serve(async (req) => {
         .match(filter)
         .select('id')
       if (error) {
-        console.warn(`⚠️ Error deleting from ${table}:`, error)
-        warnings.push(`${table}: ${error.message}`)
+        warnings.push(`${table}(delete): ${error.message}`)
         return 0
       }
       return (data?.length ?? 0)
     }
 
-    // Delete direct user-owned records
+    // Step 0: Clear FK references that may block auth deletion
+    try {
+      console.log('🔗 Reassigning app_version.created_by references to current admin...')
+      await safeUpdate('app_version', { created_by: currentUser.id }, { created_by: userId })
+    } catch (fkCatchErr) {
+      console.warn('⚠️ Exception clearing FK references:', fkCatchErr)
+    }
+
+    // Step 0b: Remove app-side records first (avoid FKs from public -> auth)
+    console.log('🧹 Deleting app-side user artifacts (logs, notifications, reports, backups, events)...')
     counts.user_connection_logs = await deleteAndCount('user_connection_logs', { user_id: userId })
     counts.notifications = await deleteAndCount('notifications', { user_id: userId })
     counts.reports = await deleteAndCount('reports', { user_id: userId })
     counts.backup_metadata = await deleteAndCount('backup_metadata', { user_id: userId })
 
     // Calendar events and related notifications
-    console.log('🧹 Deleting calendar events and related notifications...')
     const { data: userEvents, error: eventsQueryErr } = await supabaseAdmin
       .from('calendar_events')
       .select('id')
       .eq('user_id', userId)
     if (eventsQueryErr) {
-      console.warn('⚠️ Error fetching calendar events:', eventsQueryErr)
       warnings.push(`calendar_events(select): ${eventsQueryErr.message}`)
     } else {
       const eventIds = (userEvents ?? []).map((e: any) => e.id)
@@ -158,7 +130,6 @@ Deno.serve(async (req) => {
           .in('event_id', eventIds)
           .select('id')
         if (enErr) {
-          console.warn('⚠️ Error deleting related event_notifications:', enErr)
           warnings.push(`event_notifications(by event_id): ${enErr.message}`)
           counts.event_notifications_related = 0
         } else {
@@ -166,39 +137,46 @@ Deno.serve(async (req) => {
         }
       }
     }
-    // Also delete event notifications directly tied to the user
     counts.event_notifications_user = await deleteAndCount('event_notifications', { user_id: userId })
-
-    // Delete calendar events themselves
     counts.calendar_events = await deleteAndCount('calendar_events', { user_id: userId })
 
-    // Step 3: Delete profile and app_user last
-    console.log('🧹 Deleting profile and app_user...')
+    // Remove profile and app_user BEFORE deleting auth user
+    console.log('🧹 Deleting profile and app_user before auth deletion...')
     counts.profiles = await deleteAndCount('profiles', { id: userId })
     counts.app_users = await deleteAndCount('app_users', { id: userId })
 
-    console.log('✅ Cleanup completed for user:', userId, counts)
+    // Step 1: Delete from auth.users using admin client
+    console.log('🧹 Deleting from auth.users now...')
+    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
-    const payload: Record<string, any> = {
-      success: true,
-      message: 'User completely deleted',
-      counts,
+    if (authDeleteError) {
+      console.error('❌ Error deleting from auth.users:', authDeleteError)
+      const msg = (authDeleteError as any)?.message?.toString().toLowerCase() || ''
+      const status = (authDeleteError as any)?.status
+      const notFound = status === 404 || msg.includes('not found') || msg.includes('no user')
+      if (!notFound) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: `Auth deletion failed: ${(authDeleteError as any)?.message || 'Unknown error'}`
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        )
+      }
+      console.log('ℹ️ Auth user not found; continuing')
     }
-    if (warnings.length > 0) {
-      payload.warning = warnings.join(' | ')
-    }
+
+    console.log('✅ Complete cleanup finished for user', userId, counts)
+    const payload: Record<string, any> = { success: true, message: 'User completely deleted', counts }
+    if (warnings.length > 0) payload.warning = warnings.join(' | ')
 
     return new Response(
       JSON.stringify(payload),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
 
   } catch (error) {
     console.error('❌ Complete user deletion error:', error)
-    
     return new Response(
       JSON.stringify({ 
         success: false, 
