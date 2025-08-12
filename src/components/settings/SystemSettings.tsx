@@ -7,6 +7,7 @@ import TimezoneSettings from '@/components/TimezoneSettings';
 import VersionControlPanel from '@/components/version-management/VersionControlPanel';
 import VersionHistoryPanel from '@/components/version-management/VersionHistoryPanel';
 import FarmProfileSettings from './FarmProfileSettings';
+import UserActivityLogs from './UserActivityLogs';
 
 const SystemSettings = () => {
   const { user } = useAuth();
@@ -14,12 +15,19 @@ const SystemSettings = () => {
 
   return (
     <div className="space-y-6">
+      {/* User Activity Logs */}
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Sistema</h3>
+        {/* User activity under System */}
+        {/* We keep sections modular to avoid bloating this file */}
+        <UserActivityLogs />
+      </div>
+
       {/* Farm Profile Settings */}
       <FarmProfileSettings />
 
       {/* Support Info Panel at the top */}
       <SupportInfoSettings isAdmin={isAdmin} />
-
 
       {/* Dashboard Banner Settings */}
       <DashboardBannerSettings />
