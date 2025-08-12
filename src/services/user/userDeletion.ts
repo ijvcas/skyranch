@@ -44,9 +44,17 @@ export const deleteUserComplete = async (userId: string): Promise<CompleteUserDe
       });
 
       if (!res.ok) {
-        const txt = await res.text().catch(() => '');
-        console.error('❌ Edge function HTTP error:', res.status, txt);
-        throw new Error(`Edge Function HTTP ${res.status}`);
+        // Try to parse JSON error to surface precise reason
+        let errorMessage = `Edge Function HTTP ${res.status}`;
+        try {
+          const body = await res.json();
+          errorMessage = (body?.error || body?.message || errorMessage) as string;
+        } catch (e) {
+          const txt = await res.text().catch(() => '');
+          if (txt) errorMessage = `${errorMessage} - ${txt}`;
+        }
+        console.error('❌ Edge function HTTP error:', res.status, errorMessage);
+        throw new Error(errorMessage);
       }
 
       const json = (await res.json()) as CompleteUserDeletionResult;
