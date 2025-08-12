@@ -108,14 +108,17 @@ export type Database = {
         Row: {
           birth_date: string | null
           breed: string | null
+          cause_of_death: string | null
           color: string | null
           created_at: string | null
           current_lot_id: string | null
+          date_of_death: string | null
           father_id: string | null
           gender: string | null
           health_status: string | null
           id: string
           image_url: string | null
+          lifecycle_status: string
           maternal_grandfather_id: string | null
           maternal_grandmother_id: string | null
           maternal_great_grandfather_maternal_id: string | null
@@ -140,14 +143,17 @@ export type Database = {
         Insert: {
           birth_date?: string | null
           breed?: string | null
+          cause_of_death?: string | null
           color?: string | null
           created_at?: string | null
           current_lot_id?: string | null
+          date_of_death?: string | null
           father_id?: string | null
           gender?: string | null
           health_status?: string | null
           id?: string
           image_url?: string | null
+          lifecycle_status?: string
           maternal_grandfather_id?: string | null
           maternal_grandmother_id?: string | null
           maternal_great_grandfather_maternal_id?: string | null
@@ -172,14 +178,17 @@ export type Database = {
         Update: {
           birth_date?: string | null
           breed?: string | null
+          cause_of_death?: string | null
           color?: string | null
           created_at?: string | null
           current_lot_id?: string | null
+          date_of_death?: string | null
           father_id?: string | null
           gender?: string | null
           health_status?: string | null
           id?: string
           image_url?: string | null
+          lifecycle_status?: string
           maternal_grandfather_id?: string | null
           maternal_grandmother_id?: string | null
           maternal_great_grandfather_maternal_id?: string | null
