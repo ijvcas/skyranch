@@ -94,7 +94,7 @@ const AnimalList = () => {
   }
 
   return (
-    <PageLayout className="p-4 pb-20 md:pb-4">
+    <PageLayout className="px-2 pt-4 pb-20 md:pb-4">
       <div className="max-w-7xl mx-auto">
         {(useMockData || isUsingMock) && (
           <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">

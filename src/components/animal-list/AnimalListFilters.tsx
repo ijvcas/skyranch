@@ -31,7 +31,7 @@ const AnimalListFilters = ({
   return (
     <Card className="shadow-lg">
       <CardContent className="p-4">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -43,7 +43,7 @@ const AnimalListFilters = ({
               />
             </div>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center">
             <Select value={selectedSpecies} onValueChange={onSpeciesChange}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Especie" />
@@ -75,7 +75,7 @@ const AnimalListFilters = ({
             </Select>
             <div className="flex items-center gap-2 pl-2">
               <Switch checked={includeDeceased} onCheckedChange={onIncludeDeceasedChange} id="include-deceased" />
-              <Label htmlFor="include-deceased">Mostrar fallecidos</Label>
+              <Label htmlFor="include-deceased" className="text-sm leading-tight whitespace-normal break-words">Mostrar fallecidos</Label>
             </div>
           </div>
         </div>
