@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface AnimalListFiltersProps {
   searchTerm: string;
@@ -12,6 +14,8 @@ interface AnimalListFiltersProps {
   onSpeciesChange: (value: string) => void;
   selectedStatus: string;
   onStatusChange: (value: string) => void;
+  includeDeceased: boolean;
+  onIncludeDeceasedChange: (value: boolean) => void;
 }
 
 const AnimalListFilters = ({
@@ -20,7 +24,9 @@ const AnimalListFilters = ({
   selectedSpecies,
   onSpeciesChange,
   selectedStatus,
-  onStatusChange
+  onStatusChange,
+  includeDeceased,
+  onIncludeDeceasedChange
 }: AnimalListFiltersProps) => {
   return (
     <Card className="shadow-lg">
@@ -37,7 +43,7 @@ const AnimalListFilters = ({
               />
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <Select value={selectedSpecies} onValueChange={onSpeciesChange}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Especie" />
@@ -67,6 +73,10 @@ const AnimalListFilters = ({
                 <SelectItem value="treatment">En Tratamiento</SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex items-center gap-2 pl-2">
+              <Switch checked={includeDeceased} onCheckedChange={onIncludeDeceasedChange} id="include-deceased" />
+              <Label htmlFor="include-deceased">Mostrar fallecidos</Label>
+            </div>
           </div>
         </div>
       </CardContent>

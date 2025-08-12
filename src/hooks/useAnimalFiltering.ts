@@ -8,6 +8,7 @@ export const useAnimalFiltering = (animals: Animal[]) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecies, setSelectedSpecies] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [includeDeceased, setIncludeDeceased] = useState(false);
 
   // Fetch breeding records to determine pregnancy status
   const { data: breedingRecords = [] } = useQuery({
@@ -53,6 +54,10 @@ export const useAnimalFiltering = (animals: Animal[]) => {
       
       const matchesSpecies = selectedSpecies === 'all' || animal.species === selectedSpecies;
       
+      // Exclude deceased by default unless explicitly included
+      const isDeceased = animal.lifecycleStatus === 'deceased';
+      if (!includeDeceased && isDeceased) return false;
+      
       // Enhanced status matching with pregnancy computation
       const computedStatus = getComputedStatus(animal);
       const matchesStatus = selectedStatus === 'all' || 
@@ -79,7 +84,7 @@ export const useAnimalFiltering = (animals: Animal[]) => {
     });
 
     return grouped;
-  }, [animals, searchTerm, selectedSpecies, selectedStatus, breedingRecords]);
+  }, [animals, searchTerm, selectedSpecies, selectedStatus, breedingRecords, includeDeceased]);
 
   return {
     searchTerm,
@@ -88,6 +93,8 @@ export const useAnimalFiltering = (animals: Animal[]) => {
     setSelectedSpecies,
     selectedStatus,
     setSelectedStatus,
+    includeDeceased,
+    setIncludeDeceased,
     groupedAnimals
   };
 };

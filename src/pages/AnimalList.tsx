@@ -53,6 +53,8 @@ const AnimalList = () => {
     setSelectedSpecies,
     selectedStatus,
     setSelectedStatus,
+    includeDeceased,
+    setIncludeDeceased,
     groupedAnimals
   } = useAnimalFiltering(animals);
 
@@ -115,6 +117,8 @@ const AnimalList = () => {
           onSpeciesChange={setSelectedSpecies}
           selectedStatus={selectedStatus}
           onStatusChange={setSelectedStatus}
+          includeDeceased={includeDeceased}
+          onIncludeDeceasedChange={setIncludeDeceased}
         />
 
         {Object.keys(groupedAnimals).length === 0 ? (
