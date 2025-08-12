@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useDeepLinking } from '@/hooks/useDeepLinking';
@@ -10,6 +10,7 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
+import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
 import AnimalDetail from '@/pages/AnimalDetail';
 import AnimalEdit from '@/pages/AnimalEdit';
@@ -37,6 +38,14 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   useDeepLinking();
+  const { user, loading } = useAuth();
+
+  // Log an "app_open" when a user has an active session (once per tab)
+  React.useEffect(() => {
+    if (!loading && user) {
+      logAppOpenOncePerSession();
+    }
+  }, [loading, user]);
   
   return (
     <div className="App">

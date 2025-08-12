@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { validatePasswordStrength } from '@/utils/passwordPolicy';
+import { logConnection, logTokenRefreshedThrottled } from '@/utils/connectionLogger';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -33,7 +34,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log('🔄 [AUTH CONTEXT] Initializing auth...');
 
-    // 1) Set up auth state listener FIRST (no async inside callback)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('🔄 [AUTH CONTEXT] Auth state changed:', event, session?.user?.email || 'No user');
@@ -41,6 +41,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'PASSWORD_RECOVERY') {
           setLoading(false);
           return;
+        }
+
+        if (event === 'TOKEN_REFRESHED') {
+          // Throttled to avoid noise
+          logTokenRefreshedThrottled().catch((e) => console.warn('[AUTH CONTEXT] token refresh log failed', e));
         }
 
         if (event === 'SIGNED_OUT') {
@@ -58,7 +63,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    // 2) THEN check for existing session
     supabase.auth.getSession()
       .then(({ data: { session }, error }) => {
         console.log('📋 [AUTH CONTEXT] Initial session check:', session?.user?.email || 'No session');
@@ -80,7 +84,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    console.log('📝 [AUTH CONTEXT] Attempting sign up for:', email);
     
     const redirectUrl = `${window.location.origin}/dashboard`;
     
@@ -116,12 +119,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     console.log('🔐 [AUTH CONTEXT] Attempting sign in for:', email);
-    
-    // Special handling for problematic user
+
     if (email === 'jvcas@mac.com') {
       console.log('🧹 [AUTH CONTEXT] Special handling for jvcas@mac.com - clearing corrupted session first');
       await clearCorruptedSession();
-      // Wait a moment for cleanup to complete
       await new Promise(resolve => setTimeout(resolve, 500));
     }
     
@@ -137,8 +138,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         status: error.status,
         name: error.name
       });
+      // Note: cannot log failed sign-ins via table due to RLS (no user session yet).
     } else {
       console.log('✅ [AUTH CONTEXT] Sign in successful for:', email);
+      // Lightweight connection log
+      await logConnection('signed_in', { method: 'password' });
       try {
         const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
         if (syncError) {
@@ -156,8 +160,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     console.log('🚪 [AUTH CONTEXT] Signing out...');
+    // Log before signing out so RLS still allows insert
+    await logConnection('signed_out');
     await supabase.auth.signOut();
-    // Clear all session data
     localStorage.removeItem('supabase.auth.token');
     sessionStorage.clear();
   };
