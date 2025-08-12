@@ -1276,6 +1276,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      is_active_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       sync_auth_users_to_app_users: {
         Args: Record<PropertyKey, never>
         Returns: undefined
