@@ -4,20 +4,26 @@ import type { CurrentWeather } from "@/services/googleWeatherService";
 
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-export const useGoogleWeatherAPI = (location?: string) => {
-  console.log("🌤️ [useGoogleWeatherAPI] Hook called with location:", location);
+export const useGoogleWeatherAPI = (location?: string, coords?: { lat?: number; lng?: number }) => {
+  console.log("🌤️ [useGoogleWeatherAPI] Hook called with location:", location, "coords:", coords);
   
   return useQuery<CurrentWeather | null>({
-    queryKey: ["google-weather", location],
+    queryKey: ["google-weather", location, coords?.lat, coords?.lng],
     queryFn: async () => {
-      console.log("🌤️ [useGoogleWeatherAPI] Query function executing for:", location);
+      console.log("🌤️ [useGoogleWeatherAPI] Query function executing for:", location, "coords:", coords);
       
-      if (!location || typeof location !== "string" || location.trim().length === 0) {
-        console.log("🌤️ [useGoogleWeatherAPI] Invalid location, returning null");
+      if ((!location || typeof location !== "string" || location.trim().length === 0) &&
+          !(typeof coords?.lat === "number" && typeof coords?.lng === "number")) {
+        console.log("🌤️ [useGoogleWeatherAPI] No valid location or coords, returning null");
         return null;
       }
 
-      const key = `weather:${location}`;
+      const keyBase = (location && typeof location === "string" && location.trim().length > 0)
+        ? location.trim()
+        : (typeof coords?.lat === "number" && typeof coords?.lng === "number")
+        ? `lat:${coords.lat},lng:${coords.lng}`
+        : "unknown";
+      const key = `weather:${keyBase}`;
       const now = Date.now();
 
       // 1) Try fresh cache first
@@ -36,7 +42,8 @@ export const useGoogleWeatherAPI = (location?: string) => {
 
       // 2) Fetch from Google Weather Edge Function
       console.log("🌤️ [useGoogleWeatherAPI] Calling get-weather-google with:", { 
-        location: location.trim(),
+        location: location?.trim(),
+        coords,
         language: "es", 
         unitSystem: "metric" 
       });
@@ -48,7 +55,8 @@ export const useGoogleWeatherAPI = (location?: string) => {
         console.log("🌤️ [useGoogleWeatherAPI] Invoking supabase.functions.invoke...");
         const { data: functionData, error } = await supabase.functions.invoke("get-weather-google", {
           body: { 
-            location: location.trim(),
+            ...(location?.trim() ? { location: location.trim() } : {}),
+            ...(typeof coords?.lat === "number" && typeof coords?.lng === "number" ? { lat: coords.lat, lng: coords.lng } : {}),
             language: "es", 
             unitSystem: "metric" 
           },
@@ -94,7 +102,8 @@ export const useGoogleWeatherAPI = (location?: string) => {
       console.error("🌤️ [useGoogleWeatherAPI] CRITICAL: All weather data sources failed - no mock fallback");
       throw new Error("Failed to fetch weather data from all sources. Check API keys and network connectivity.");
     },
-    enabled: typeof location === "string" && location.trim().length > 0,
+    enabled: (typeof location === "string" && location.trim().length > 0) ||
+      (typeof coords?.lat === "number" && typeof coords?.lng === "number"),
     staleTime: CACHE_TTL,
     retry: 1,
   });

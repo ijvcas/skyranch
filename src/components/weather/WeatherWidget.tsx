@@ -19,7 +19,10 @@ const WeatherWidget: React.FC = () => {
   console.log("🌤️ [WeatherWidget] Weather settings:", weatherSettings);
   console.log("🌤️ [WeatherWidget] Settings loading:", settingsLoading);
   
-  const { data: weather, isLoading, error } = useGoogleWeatherAPI(weatherSettings?.location_query || undefined);
+  const { data: weather, isLoading, error } = useGoogleWeatherAPI(
+    weatherSettings?.location_query || undefined,
+    weatherSettings ? { lat: weatherSettings.lat, lng: weatherSettings.lng } : undefined
+  );
   console.log("🌤️ [WeatherWidget] Weather data:", weather);
   console.log("🌤️ [WeatherWidget] Weather loading:", isLoading);
   console.log("🌤️ [WeatherWidget] Weather error:", error);

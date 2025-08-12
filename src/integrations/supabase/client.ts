@@ -12,11 +12,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   auth: {
     persistSession: true,
     detectSessionInUrl: true
-  },
-  global: {
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
   }
 });
 
