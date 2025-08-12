@@ -5,6 +5,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAnimal, updateAnimal } from '@/services/animalService';
 import { checkPermission } from '@/services/permissionService';
+import { useAnimalNames } from '@/hooks/useAnimalNames';
+import { format } from 'date-fns';
 
 export const useAnimalEditLogic = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,6 +44,8 @@ export const useAnimalEditLogic = () => {
     paternalGreatGrandfatherPaternalId: ''
   });
 
+  const { getNameOnly, getDisplayName, animalNamesMap } = useAnimalNames();
+
   const { data: animal, isLoading, error } = useQuery({
     queryKey: ['animal', id],
     queryFn: () => getAnimal(id!),
@@ -50,6 +54,26 @@ export const useAnimalEditLogic = () => {
 
   useEffect(() => {
     if (animal) {
+      // Compute friendly display for parents if they are registered UUIDs
+      const motherDisplay = getNameOnly(animal.motherId) || animal.motherId || '';
+      const fatherDisplay = getNameOnly(animal.fatherId) || animal.fatherId || '';
+
+      // Derive a human-friendly note if it came from a breeding record
+      const rawNotes = animal.notes || '';
+      let derivedNotes = rawNotes;
+      if (rawNotes.toLowerCase().includes('registro de apareamiento')) {
+        const motherName = motherDisplay || 'madre desconocida';
+        let dateStr = '';
+        if (animal.birthDate) {
+          try {
+            dateStr = format(new Date(animal.birthDate), 'dd/MM/yyyy');
+          } catch {
+            dateStr = String(animal.birthDate);
+          }
+        }
+        derivedNotes = `Creado automáticamente desde parto de ${motherName}${dateStr ? ' el ' + dateStr : ''}`;
+      }
+
       setFormData({
         name: animal.name || '',
         species: animal.species || '',
@@ -60,10 +84,10 @@ export const useAnimalEditLogic = () => {
         weight: animal.weight?.toString() || '',
         color: animal.color || '',
         healthStatus: animal.healthStatus || 'healthy',
-        notes: animal.notes || '',
+        notes: derivedNotes,
         image: animal.image || null,
-        motherId: animal.motherId || '',
-        fatherId: animal.fatherId || '',
+        motherId: motherDisplay,
+        fatherId: fatherDisplay,
         maternalGrandmotherId: animal.maternalGrandmotherId || '',
         maternalGrandfatherId: animal.maternalGrandfatherId || '',
         paternalGrandmotherId: animal.paternalGrandmotherId || '',
@@ -78,7 +102,7 @@ export const useAnimalEditLogic = () => {
         paternalGreatGrandfatherPaternalId: animal.paternalGreatGrandfatherPaternalId || ''
       });
     }
-  }, [animal]);
+  }, [animal, getNameOnly, getDisplayName, animalNamesMap]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {

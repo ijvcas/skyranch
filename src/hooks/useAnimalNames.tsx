@@ -18,21 +18,26 @@ export const useAnimalNames = () => {
     return nameMap;
   }, [allAnimals]);
 
-  // Simple function to get display name - if it's a UUID and registered, show the name, otherwise show as-is
+  // Returns "Name (TAG)" for registered animals; otherwise returns the value as-is
   const getDisplayName = (parentId: string | undefined): string | null => {
     if (!parentId) return null;
-    
-    // Check if it's a registered animal
     if (animalNamesMap[parentId]) {
       return animalNamesMap[parentId];
     }
-    
-    // Otherwise, it's a text name, return as-is
+    return parentId;
+  };
+
+  // Returns just the name for registered animals; otherwise returns the value as-is
+  const getNameOnly = (parentId: string | undefined): string | null => {
+    if (!parentId) return null;
+    const found = allAnimals.find(a => a.id === parentId);
+    if (found) return found.name;
     return parentId;
   };
 
   return {
     getDisplayName,
+    getNameOnly,
     animalNamesMap
   };
 };
