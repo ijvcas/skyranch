@@ -70,8 +70,8 @@ export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'speci
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
-      .from('animals')
+    const { data, error } = await (supabase
+      .from('animals') as any)
       .select('id,species')
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
@@ -94,8 +94,8 @@ export const getAnimalsPage = async (limit = 50, offset = 0): Promise<Animal[]> 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
-      .from('animals')
+    const { data, error } = await (supabase
+      .from('animals') as any)
       .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url,lifecycle_status')
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false })
@@ -153,8 +153,8 @@ export const getAnimal = async (id: string): Promise<Animal | null> => {
     }
 
     // Remove user_id filter - all authenticated users can see all animals
-    const { data, error } = await supabase
-      .from('animals')
+    const { data, error } = await (supabase
+      .from('animals') as any)
       .select('*')
       .eq('id', id)
       .single();
