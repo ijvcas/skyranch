@@ -1,4 +1,5 @@
 // Network diagnostics utility for troubleshooting CORS and connection issues
+import { supabase } from "@/integrations/supabase/client";
 export const networkDiagnostics = {
   // Test basic network connectivity
   async testNetworkConnectivity(): Promise<boolean> {
@@ -17,13 +18,13 @@ export const networkDiagnostics = {
   // Test Supabase connectivity
   async testSupabaseConnectivity(): Promise<boolean> {
     try {
-      const response = await fetch('https://ahwhtxygyzoadsmdrwwg.supabase.co/rest/v1/', {
-        method: 'HEAD',
-        headers: {
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFod2h0eHlneXpvYWRzbWRyd3dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMjIxNzMsImV4cCI6MjA2NDY5ODE3M30.rffEqABIU3U7e7qdPXLvNMQfqU2sNIJHrfP_A_5GrlI'
-        }
-      });
-      return response.ok;
+      // Use a lightweight, authenticated Edge Function call via the Supabase client
+      const { data, error } = await supabase.functions.invoke("maps-key", { body: {} });
+      if (error) {
+        console.warn('🟠 Supabase reachable but function error:', error);
+        return false;
+      }
+      return !!data;
     } catch (error) {
       console.error('🔴 Supabase connectivity failed:', error);
       return false;

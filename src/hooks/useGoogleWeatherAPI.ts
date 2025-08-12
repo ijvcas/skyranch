@@ -64,43 +64,8 @@ export const useGoogleWeatherAPI = (location?: string) => {
           console.log("🌤️ [useGoogleWeatherAPI] SUCCESS: Got real weather data:", data);
         }
       } catch (supabaseError) {
-        console.error("🌤️ [useGoogleWeatherAPI] Supabase call failed, trying direct HTTP:", supabaseError);
-        
-        // Second attempt: Direct HTTP call to Edge Function
-        try {
-          const directUrl = `https://ahwhtxygyzoadsmdrwwg.supabase.co/functions/v1/get-weather-google`;
-          console.log("🌤️ [useGoogleWeatherAPI] Attempting direct HTTP call to:", directUrl);
-          
-          const response = await fetch(directUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFod2h0eHlneXpvYWRzbWRyd3dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMjIxNzMsImV4cCI6MjA2NDY5ODE3M30.rffEqABIU3U7e7qdPXLvNMQfqU2sNIJHrfP_A_5GrlI`,
-              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFod2h0eHlneXpvYWRzbWRyd3dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMjIxNzMsImV4cCI6MjA2NDY5ODE3M30.rffEqABIU3U7e7qdPXLvNMQfqU2sNIJHrfP_A_5GrlI'
-            },
-            body: JSON.stringify({ 
-              location: location.trim(),
-              language: "es", 
-              unitSystem: "metric" 
-            }),
-          });
-          
-          console.log("🌤️ [useGoogleWeatherAPI] Direct HTTP response status:", response.status);
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error("🌤️ [useGoogleWeatherAPI] Direct HTTP error:", errorText);
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-          }
-          
-          const directData = await response.json();
-          console.log("🌤️ [useGoogleWeatherAPI] Direct HTTP SUCCESS:", directData);
-          data = directData as CurrentWeather;
-          
-        } catch (httpError) {
-          console.error("🌤️ [useGoogleWeatherAPI] BOTH methods failed:", httpError);
-          throw httpError;
-        }
+        console.error("🌤️ [useGoogleWeatherAPI] Supabase call failed:", supabaseError);
+        throw supabaseError;
       }
 
       if (data && (data.temperatureC != null || data.conditionText != null)) {
