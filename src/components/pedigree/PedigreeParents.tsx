@@ -26,7 +26,7 @@ const PedigreeParents = ({ formData, onInputChange, disabled = false }: Pedigree
             id="motherId"
             name={`mother-name-${Math.random()}`}
             type="text"
-            value={formData.motherId || ''}
+            value={motherValue}
             onChange={(e) => onInputChange('motherId', e.target.value)}
             placeholder="Nombre de la madre"
             className="mt-1"
@@ -50,7 +50,7 @@ const PedigreeParents = ({ formData, onInputChange, disabled = false }: Pedigree
             id="fatherId"
             name={`father-name-${Math.random()}`}
             type="text"
-            value={formData.fatherId || ''}
+            value={fatherValue}
             onChange={(e) => onInputChange('fatherId', e.target.value)}
             placeholder="Nombre del padre"
             className="mt-1"

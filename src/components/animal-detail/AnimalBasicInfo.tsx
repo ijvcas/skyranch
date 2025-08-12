@@ -6,6 +6,8 @@ import { getStatusColor, getStatusText } from '@/utils/animalStatus';
 import { useImageTransform } from '@/components/animal-list/hooks/useImageTransform';
 import { useTimezone } from '@/hooks/useTimezone';
 import AnimalImageEditor from '@/components/animal-list/AnimalImageEditor';
+import { useAnimalNames } from '@/hooks/useAnimalNames';
+import { format } from 'date-fns';
 import type { Animal } from '@/stores/animalStore';
 
 interface AnimalBasicInfoProps {
@@ -36,13 +38,29 @@ const AnimalBasicInfo: React.FC<AnimalBasicInfoProps> = ({ animal }) => {
       .trim();
   };
 
-  const filteredNotes = getFilteredNotes(animal.notes);
+const filteredNotes = getFilteredNotes(animal.notes);
 
-  // Format the birth date using the timezone settings
-  const formatBirthDate = (birthDate: string) => {
-    if (!birthDate) return 'No especificada';
-    return formatDateInput(birthDate);
-  };
+const { getDisplayName } = useAnimalNames();
+const computeDerivedNotes = () => {
+  const raw = filteredNotes;
+  if (!raw) return '';
+  if (raw.toLowerCase().includes('registro de apareamiento')) {
+    const motherName = getDisplayName(animal.motherId) || animal.motherId || 'madre desconocida';
+    let dateStr = '';
+    if (animal.birthDate) {
+      try { dateStr = format(new Date(animal.birthDate), 'dd/MM/yyyy'); } catch { dateStr = String(animal.birthDate); }
+    }
+    return `Creado automáticamente desde parto de ${motherName}${dateStr ? ' el ' + dateStr : ''}`;
+  }
+  return raw;
+};
+const finalNotes = computeDerivedNotes();
+
+// Format the birth date using the timezone settings
+const formatBirthDate = (birthDate: string) => {
+  if (!birthDate) return 'No especificada';
+  return formatDateInput(birthDate);
+};
 
   return (
     <Card className="shadow-lg">
@@ -95,10 +113,10 @@ const AnimalBasicInfo: React.FC<AnimalBasicInfoProps> = ({ animal }) => {
           </div>
         </div>
 
-        {filteredNotes && (
+{finalNotes && (
           <div className="mt-6">
             <label className="text-sm font-medium text-gray-600">Notas</label>
-            <p className="text-gray-700 whitespace-pre-wrap mt-1">{filteredNotes}</p>
+            <p className="text-gray-700 whitespace-pre-wrap mt-1">{finalNotes}</p>
           </div>
         )}
       </CardContent>
