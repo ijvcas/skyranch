@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-
+import { validatePasswordStrength } from '@/utils/passwordPolicy';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -189,6 +189,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     
     console.log('✅ [AUTH CONTEXT] Session verified for password update:', session.user.email);
+    
+    // Enforce strong password policy (client-side guard)
+    const check = validatePasswordStrength(newPassword, session.user.email || undefined);
+    if (!check.valid) {
+      console.error('❌ [AUTH CONTEXT] Weak password per policy:', check.errors);
+      return { error: { message: check.errors[0] } } as any;
+    }
     
     const { error } = await supabase.auth.updateUser({
       password: newPassword
