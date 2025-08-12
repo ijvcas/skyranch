@@ -2,6 +2,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAnimalNames } from '@/hooks/useAnimalNames';
 
 interface PedigreeParentsProps {
   formData: any;
@@ -10,6 +11,11 @@ interface PedigreeParentsProps {
 }
 
 const PedigreeParents = ({ formData, onInputChange, disabled = false }: PedigreeParentsProps) => {
+  const { getDisplayName, getNameOnly } = useAnimalNames();
+  const motherFriendly = getDisplayName(formData.motherId);
+  const fatherFriendly = getDisplayName(formData.fatherId);
+  const motherValue = getNameOnly(formData.motherId) || formData.motherId || '';
+  const fatherValue = getNameOnly(formData.fatherId) || formData.fatherId || '';
   return (
     <div>
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Padres (1ra Generación)</h3>
@@ -32,9 +38,11 @@ const PedigreeParents = ({ formData, onInputChange, disabled = false }: Pedigree
             data-form-type="other"
             spellCheck="false"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Acepta cualquier nombre (registrado o externo)
-          </p>
+{motherFriendly && motherFriendly !== formData.motherId ? (
+            <p className="text-xs text-gray-500 mt-1">Registrado: {motherFriendly}</p>
+          ) : (
+            <p className="text-xs text-gray-500 mt-1">Acepta cualquier nombre (registrado o externo)</p>
+          )}
         </div>
         <div>
           <Label htmlFor="fatherId">Padre</Label>
@@ -54,9 +62,11 @@ const PedigreeParents = ({ formData, onInputChange, disabled = false }: Pedigree
             data-form-type="other"
             spellCheck="false"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Acepta cualquier nombre (registrado o externo)
-          </p>
+{fatherFriendly && fatherFriendly !== formData.fatherId ? (
+            <p className="text-xs text-gray-500 mt-1">Registrado: {fatherFriendly}</p>
+          ) : (
+            <p className="text-xs text-gray-500 mt-1">Acepta cualquier nombre (registrado o externo)</p>
+          )}
         </div>
       </div>
     </div>

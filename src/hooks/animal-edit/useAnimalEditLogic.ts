@@ -62,7 +62,7 @@ export const useAnimalEditLogic = () => {
       const rawNotes = animal.notes || '';
       let derivedNotes = rawNotes;
       if (rawNotes.toLowerCase().includes('registro de apareamiento')) {
-        const motherName = motherDisplay || 'madre desconocida';
+        const motherName = getDisplayName(animal.motherId) || motherDisplay || 'madre desconocida';
         let dateStr = '';
         if (animal.birthDate) {
           try {
@@ -86,8 +86,8 @@ export const useAnimalEditLogic = () => {
         healthStatus: animal.healthStatus || 'healthy',
         notes: derivedNotes,
         image: animal.image || null,
-        motherId: motherDisplay,
-        fatherId: fatherDisplay,
+        motherId: animal.motherId || '',
+        fatherId: animal.fatherId || '',
         maternalGrandmotherId: animal.maternalGrandmotherId || '',
         maternalGrandfatherId: animal.maternalGrandfatherId || '',
         paternalGrandmotherId: animal.paternalGrandmotherId || '',
