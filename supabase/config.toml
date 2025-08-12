@@ -1,26 +1,28 @@
 project_id = "ahwhtxygyzoadsmdrwwg"
 
 [functions.places-geocode]
-verify_jwt = false
+verify_jwt = true
 
 [functions.places-autocomplete]
-verify_jwt = false
+verify_jwt = true
 
 [functions.places-details]
-verify_jwt = false
+verify_jwt = true
 
 [functions.weather-current]
-verify_jwt = false
+verify_jwt = true
 
 [functions.get-weather-google]
-verify_jwt = false
+verify_jwt = true
 
 [functions.get-weather]
-verify_jwt = false
+verify_jwt = true
 
 [functions.delete-user-complete]
 verify_jwt = true
 
 [functions.maps-key]
-verify_jwt = false
+verify_jwt = true
 
+[functions.send-email]
+verify_jwt = true
