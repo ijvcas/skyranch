@@ -99,6 +99,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('❌ [AUTH CONTEXT] Sign up error:', error);
     } else {
       console.log('✅ [AUTH CONTEXT] Sign up successful for:', email);
+      try {
+        const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
+        if (syncError) {
+          console.warn('⚠️ [AUTH CONTEXT] Post-signup sync failed:', syncError);
+        } else {
+          console.log('🔄 [AUTH CONTEXT] Post-signup sync completed');
+        }
+      } catch (e) {
+        console.warn('⚠️ [AUTH CONTEXT] Post-signup sync exception:', e);
+      }
     }
     
     return { error };
@@ -129,6 +139,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
     } else {
       console.log('✅ [AUTH CONTEXT] Sign in successful for:', email);
+      try {
+        const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
+        if (syncError) {
+          console.warn('⚠️ [AUTH CONTEXT] Post-signin sync failed:', syncError);
+        } else {
+          console.log('🔄 [AUTH CONTEXT] Post-signin sync completed');
+        }
+      } catch (e) {
+        console.warn('⚠️ [AUTH CONTEXT] Post-signin sync exception:', e);
+      }
     }
     
     return { error };
