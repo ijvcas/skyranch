@@ -128,6 +128,26 @@ export const useSimplePolygonDrawing = ({ lots, onLotSelect }: UseSimplePolygonD
     loadPolygons();
   }, [isMapReady, lots.length]); // Only depend on map readiness and lot count
 
+  // Update polygon colors when lot status changes (animals assigned/removed)
+  useEffect(() => {
+    if (!isMapReady || !mapInstance.current || lots.length === 0) return;
+
+    console.log('🎨 Updating polygon colors based on lot status changes...');
+    
+    lots.forEach(lot => {
+      const polygon = polygons.get(lot.id);
+      if (polygon) {
+        const newColor = getLotColor(lot);
+        console.log(`🎯 Updating color for lot ${lot.name}: ${newColor} (animals: ${lot.currentAnimals || 0}, status: ${lot.status})`);
+        
+        polygon.setOptions({
+          fillColor: newColor,
+          strokeColor: newColor
+        });
+      }
+    });
+  }, [lots, getLotColor, isMapReady]); // Trigger when lots data changes
+
   return {
     mapRef,
     mapInstance: mapInstance.current,
