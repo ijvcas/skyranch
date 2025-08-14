@@ -323,8 +323,7 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
             />
           </div>
           
-          <div className="absolute left-4 top-56 z-20">
-            <MapLotLabelsControl
+          <MapLotLabelsControl
               showLabels={showPropertyLots || showPastureLots}
               onToggleLabels={() => {}} // Not used anymore, replaced by individual toggles
               showPropertyName={showPropertyName}
@@ -332,9 +331,8 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
               showPropertyLots={showPropertyLots}
               onTogglePropertyLots={setShowPropertyLots}
               showPastureLots={showPastureLots}
-              onTogglePastureLots={setShowPastureLots}
-            />
-          </div>
+            onTogglePastureLots={setShowPastureLots}
+          />
         </>
       )}
     </MapContainer>

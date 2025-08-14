@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ChevronDown, ChevronUp, Minimize2, MapPin, Layers, Building, Leaf } from 'lucide-react';
+import { ChevronDown, ChevronUp, Minimize2, MapPin, Layers, Building, Leaf, Move } from 'lucide-react';
 
 interface MapLotLabelsControlProps {
   showLabels: boolean;
@@ -29,10 +29,50 @@ const MapLotLabelsControl = ({
 }: MapLotLabelsControlProps) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isMinimized, setIsMinimized] = useState(true);
+  const [position, setPosition] = useState({ x: 16, y: 16 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragStart]);
 
   if (isMinimized) {
     return (
-      <div className="absolute top-4 left-4 z-20">
+      <div 
+        className="absolute z-20 cursor-move"
+        style={{ left: position.x, top: position.y }}
+        onMouseDown={handleMouseDown}
+      >
         <Button
           onClick={() => setIsMinimized(false)}
           variant="outline"
@@ -47,10 +87,18 @@ const MapLotLabelsControl = ({
   }
 
   return (
-    <Card className="absolute top-4 left-4 w-48 z-20 shadow-lg bg-white/95 backdrop-blur-sm">
+    <Card 
+      ref={cardRef}
+      className="absolute w-48 z-20 shadow-lg bg-white/95 backdrop-blur-sm"
+      style={{ left: position.x, top: position.y }}
+    >
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center justify-between">
-          <div className="flex items-center">
+          <div 
+            className="flex items-center cursor-move"
+            onMouseDown={handleMouseDown}
+          >
+            <Move className="w-3 h-3 mr-1 text-gray-400" />
             <Layers className="w-4 h-4 mr-1" />
             Etiquetas
           </div>
