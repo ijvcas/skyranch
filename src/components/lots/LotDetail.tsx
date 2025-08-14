@@ -17,7 +17,7 @@ interface LotDetailProps {
 }
 
 const LotDetail = ({ lot, onBack }: LotDetailProps) => {
-  const { loadAssignments, assignments, removeAnimal, loadGrazingMetrics, getGrazingMetrics } = useLotStore();
+  const { assignments, loadAssignments, removeAnimal, grazingMetrics, loadGrazingMetrics, getGrazingMetrics, loadLots } = useLotStore();
   const { animals, loadAnimals } = useAnimalStore();
   const [showEditForm, setShowEditForm] = useState(false);
   const [showAssignForm, setShowAssignForm] = useState(false);
@@ -45,14 +45,19 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
   const handleRemoveAnimal = async (animalId: string) => {
     const success = await removeAnimal(animalId, lot.id);
     if (success) {
-      loadAssignments(lot.id);
+      await loadAssignments(lot.id);
+      await loadGrazingMetrics(lot.id);
+      await loadLots(); // Refresh lot data to update metrics
+      toast.success('Animal removido del lote exitosamente');
+    } else {
+      toast.error('Error al remover el animal del lote');
     }
   };
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
+      case 'active': return 'bg-blue-100 text-blue-800';
       case 'resting': return 'bg-yellow-100 text-yellow-800';
-      case 'maintenance': return 'bg-red-100 text-red-800';
+      case 'available': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -213,7 +218,7 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
               
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Animales Actuales</span>
-                <span className="text-sm">{grazingMetrics?.currentAnimalsCount || assignedAnimals.length}</span>
+                <span className="font-medium">{assignedAnimals.length}</span>
               </div>
               
               {grazingMetrics?.entryDate && (
@@ -225,8 +230,8 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
               
               {grazingMetrics?.expectedExitDate && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Salida Recomendada</span>
-                  <span className="text-sm font-medium text-orange-600">
+                  <span className="text-sm text-gray-600">Fecha de Salida Sugerida</span>
+                  <span className="font-medium text-orange-600">
                     {formatDate(grazingMetrics.expectedExitDate)}
                   </span>
                 </div>

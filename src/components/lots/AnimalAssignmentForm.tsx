@@ -16,8 +16,8 @@ interface AnimalAssignmentFormProps {
 }
 
 const AnimalAssignmentForm = ({ lotId, onClose }: AnimalAssignmentFormProps) => {
-  const { assignAnimal } = useLotStore();
   const { animals, loadAnimals } = useAnimalStore();
+  const { assignAnimal, loadLots } = useLotStore();
   
   const [selectedAnimalIds, setSelectedAnimalIds] = useState<string[]>([]);
   const [reason, setReason] = useState('');
@@ -69,6 +69,9 @@ const AnimalAssignmentForm = ({ lotId, onClose }: AnimalAssignmentFormProps) => 
           errorCount++;
         }
       }
+
+      // Refresh lot data after assignments
+      await loadLots();
 
       if (successCount > 0) {
         toast.success(
