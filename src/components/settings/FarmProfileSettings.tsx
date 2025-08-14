@@ -10,8 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useFarmProfile } from '@/hooks/useFarmProfile';
 import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 import { type FarmProfileFormData } from '@/services/farmProfileService';
-import { Loader2, Upload, MapPin, Building2, Check } from 'lucide-react';
+import { Loader2, MapPin, Building2, Check } from 'lucide-react';
 import { suggestPlaces, getPlaceDetails, type PlacePrediction } from '@/services/placesService';
+import ImageUpload from '@/components/ImageUpload';
 
 const farmProfileSchema = z.object({
   farm_name: z.string().min(1, 'El nombre de la finca es requerido'),
@@ -127,11 +128,15 @@ const FarmProfileSettings = () => {
     }
   };
 
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !farmProfile) return;
+  const handleLogoChange = async (imageUrl: string | null) => {
+    if (!imageUrl || !farmProfile) return;
 
+    // Convert data URL to file
     try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'logo.png', { type: blob.type });
+      
       await uploadLogo({ id: farmProfile.id, file });
       toast({
         title: 'Logo actualizado',
@@ -315,38 +320,11 @@ const FarmProfileSettings = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {farmProfile.logo_url && (
-                <div className="mb-4">
-                  <img
-                    src={farmProfile.logo_url}
-                    alt="Logo de la finca"
-                    className="w-32 h-32 object-contain border rounded-lg"
-                  />
-                </div>
-              )}
-              <div className="relative">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  disabled={isUploadingLogo}
-                  className="hidden"
-                  id="logo-upload"
-                />
-                <Label
-                  htmlFor="logo-upload"
-                  className="flex items-center justify-center gap-2 w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors"
-                >
-                  {isUploadingLogo ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      <Upload className="w-6 h-6" />
-                      <span>Subir Logo</span>
-                    </>
-                  )}
-                </Label>
-              </div>
+              <ImageUpload
+                currentImage={farmProfile.logo_url || null}
+                onImageChange={handleLogoChange}
+                disabled={isUploadingLogo}
+              />
             </CardContent>
           </Card>
 
