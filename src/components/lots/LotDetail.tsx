@@ -236,10 +236,10 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
                 </div>
               )}
               
-              {grazingMetrics?.daysInLot !== null && grazingMetrics.daysInLot !== undefined && (
+              {grazingMetrics?.daysInLot !== null && grazingMetrics?.daysInLot !== undefined && (
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Días en Potrero</span>
-                  <span className="text-sm">{grazingMetrics.daysInLot} días</span>
+                  <span className="text-sm">{grazingMetrics?.daysInLot || 0} días</span>
                 </div>
               )}
               
@@ -283,11 +283,11 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
                 </div>
               )}
               
-              {grazingMetrics?.daysInLot !== null && grazingMetrics?.expectedExitDate && (
+              {grazingMetrics?.daysInLot !== null && grazingMetrics?.daysInLot !== undefined && grazingMetrics?.expectedExitDate && (
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Días Restantes</span>
                   <span className="text-sm font-medium">
-                    {getDaysRemaining(grazingMetrics.expectedExitDate)} días
+                    {grazingMetrics?.expectedExitDate ? getDaysRemaining(grazingMetrics.expectedExitDate) || 0 : 0} días
                   </span>
                 </div>
               )}
@@ -376,10 +376,10 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
                           <span className="text-gray-600">Asignado:</span>
                           <span>{new Date(assignment.assignedDate).toLocaleDateString('es-ES')}</span>
                         </div>
-                        {grazingMetrics?.entryDate && (
+                        {grazingMetrics?.entryDate && grazingMetrics?.daysInLot !== null && grazingMetrics?.daysInLot !== undefined && (
                           <div className="flex justify-between">
                             <span className="text-gray-600">Días en lote:</span>
-                            <span>{grazingMetrics.daysInLot || 0} días</span>
+                            <span>{grazingMetrics?.daysInLot || 0} días</span>
                           </div>
                         )}
                         {assignment.assignmentReason && (

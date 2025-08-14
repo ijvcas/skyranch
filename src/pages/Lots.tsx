@@ -183,11 +183,13 @@ const Lots = () => {
 
         {/* Create Lot Dialog */}
         <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Crear Nuevo Lote Manual</DialogTitle>
             </DialogHeader>
-            <LotForm onClose={handleFormClose} />
+            <div className="max-h-[70vh] overflow-y-auto">
+              <LotForm onClose={handleFormClose} />
+            </div>
           </DialogContent>
         </Dialog>
         
