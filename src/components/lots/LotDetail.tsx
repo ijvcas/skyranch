@@ -176,14 +176,12 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Estado</span>
-                <div className="flex items-center">
-                  <Badge className={getStatusColor(grazingMetrics?.lotStatus || lot.status)}>
-                    {(grazingMetrics?.lotStatus || lot.status) === 'active' ? 'Activo' : 
-                     (grazingMetrics?.lotStatus || lot.status) === 'resting' ? 'Descanso' : 
-                     (grazingMetrics?.lotStatus || lot.status) === 'available' ? 'Disponible' : 'Mantenimiento'}
-                  </Badge>
-                  {getRotationStatusBadge()}
-                </div>
+                <Badge className={getStatusColor(grazingMetrics?.lotStatus || lot.status)}>
+                  {(grazingMetrics?.lotStatus || lot.status) === 'active' && currentAnimals.length < (lot.capacity || 0) ? 'Disponible' : 
+                   (grazingMetrics?.lotStatus || lot.status) === 'active' && currentAnimals.length >= (lot.capacity || 0) ? 'Ocupado' :
+                   (grazingMetrics?.lotStatus || lot.status) === 'resting' ? 'Descanso' : 
+                   (grazingMetrics?.lotStatus || lot.status) === 'available' ? 'Disponible' : 'Mantenimiento'}
+                </Badge>
               </div>
               
               <div className="flex justify-between items-center">

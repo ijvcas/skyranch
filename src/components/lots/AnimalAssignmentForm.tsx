@@ -99,7 +99,7 @@ const AnimalAssignmentForm = ({ lotId, onClose }: AnimalAssignmentFormProps) => 
         <Checkbox 
           id="selectMultiple" 
           checked={selectMultiple}
-          onCheckedChange={setSelectMultiple}
+          onCheckedChange={(checked) => setSelectMultiple(checked === true)}
         />
         <Label htmlFor="selectMultiple">Seleccionar múltiples animales</Label>
       </div>

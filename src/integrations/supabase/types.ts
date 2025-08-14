@@ -1368,6 +1368,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      update_single_lot_status: {
+        Args: { target_lot_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
