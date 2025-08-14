@@ -1368,6 +1368,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      trigger_daily_grazing_notifications: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       update_single_lot_status: {
         Args: { target_lot_id: string }
         Returns: undefined

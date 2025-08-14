@@ -7,7 +7,7 @@ import { ArrowLeft, Edit, Users, MapPin, Activity, Calendar, Plus, Clock, AlertT
 import { useLotStore, type Lot } from '@/stores/lotStore';
 import { useAnimalStore } from '@/stores/animalStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import LotForm from './LotForm';
 import AnimalAssignmentForm from './AnimalAssignmentForm';
 
@@ -17,11 +17,10 @@ interface LotDetailProps {
 }
 
 const LotDetail = ({ lot, onBack }: LotDetailProps) => {
-  const { assignments, loadAssignments, removeAnimal, grazingMetrics, loadGrazingMetrics, getGrazingMetrics, loadLots } = useLotStore();
+  const { assignments, loadAssignments, removeAnimal, loadGrazingMetrics, getGrazingMetrics, loadLots } = useLotStore();
   const { animals, loadAnimals } = useAnimalStore();
   const [showEditForm, setShowEditForm] = useState(false);
   const [showAssignForm, setShowAssignForm] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     loadAssignments(lot.id);
@@ -181,7 +180,7 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Estado</span>
-                <Badge className={getStatusColor(grazingMetrics?.lotStatus || (assignedAnimals.length > 0 ? 'active' : 'available'))}>
+                <Badge className={getStatusColor(assignedAnimals.length > 0 ? 'active' : 'available')}>
                   {assignedAnimals.length > 0 ? 'En Uso' : 
                    (grazingMetrics?.lotStatus || lot.status) === 'resting' ? 'En Descanso' : 'Disponible'}
                 </Badge>
