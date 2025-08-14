@@ -16,14 +16,20 @@ interface UseMapPolygonsOptions {
 export const useMapPolygons = ({ lots, onLotSelect }: UseMapPolygonsOptions) => {
   const [lotPolygons, setLotPolygons] = useState<LotPolygon[]>([]);
 
-  // Get color based on lot status
+  // Get color based on lot status and animal presence
   const getLotColor = (lot: Lot) => {
-    switch (lot.status) {
-      case 'active': return '#22c55e'; // green
-      case 'resting': return '#eab308'; // yellow  
-      case 'maintenance': return '#ef4444'; // red
-      default: return '#6b7280'; // gray
+    // Check if lot has animals (En Uso)
+    if (lot.currentAnimals && lot.currentAnimals > 0) {
+      return '#3b82f6'; // Blue for "En Uso"
     }
+    
+    // Check for resting status (En Descanso)
+    if (lot.status === 'resting') {
+      return '#f59e0b'; // Amber/Yellow for "En Descanso"
+    }
+    
+    // Default to available (Disponible)
+    return '#10b981'; // Green for "Disponible"
   };
 
   // Save polygons to localStorage

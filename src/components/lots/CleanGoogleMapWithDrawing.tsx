@@ -49,13 +49,20 @@ const CleanGoogleMapWithDrawing: React.FC<CleanGoogleMapWithDrawingProps> = ({
   };
 
   // Get color based on lot status
+  // Get color based on lot status and animal presence
   const getLotColor = (lot: Lot) => {
-    switch (lot.status) {
-      case 'active': return '#10b981';
-      case 'resting': return '#f59e0b';
-      case 'maintenance': return '#ef4444';
-      default: return '#6b7280';
+    // Check if lot has animals (En Uso)
+    if (lot.currentAnimals && lot.currentAnimals > 0) {
+      return '#3b82f6'; // Blue for "En Uso"
     }
+    
+    // Check for resting status (En Descanso)
+    if (lot.status === 'resting') {
+      return '#f59e0b'; // Amber/Yellow for "En Descanso"
+    }
+    
+    // Default to available (Disponible)
+    return '#10b981'; // Green for "Disponible"
   };
 
   // Use drawing manager - only enable in pasture modes

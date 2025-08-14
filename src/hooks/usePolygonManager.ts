@@ -32,14 +32,20 @@ export const usePolygonManager = ({ lots, onLotSelect }: UsePolygonManagerOption
   const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null);
   const polygonCompleteListenerRef = useRef<google.maps.MapsEventListener | null>(null);
 
-  // Get color based on lot status with enhanced color scheme
+  // Get color based on lot status and animal presence
   const getLotColor = useCallback((lot: Lot) => {
-    switch (lot.status) {
-      case 'active': return '#10b981'; // emerald-500
-      case 'resting': return '#f59e0b'; // amber-500  
-      case 'maintenance': return '#ef4444'; // red-500
-      default: return '#6b7280'; // gray-500
+    // Check if lot has animals (En Uso)
+    if (lot.currentAnimals && lot.currentAnimals > 0) {
+      return '#3b82f6'; // Blue for "En Uso"
     }
+    
+    // Check for resting status (En Descanso)
+    if (lot.status === 'resting') {
+      return '#f59e0b'; // Amber/Yellow for "En Descanso"
+    }
+    
+    // Default to available (Disponible)
+    return '#10b981'; // Green for "Disponible"
   }, []);
 
   // Force crosshair cursor on map
