@@ -310,6 +310,78 @@ export const removeAnimalFromLot = async (animalId: string, lotId: string): Prom
   }
 };
 
+// Grazing management functions
+export interface GrazingMetrics {
+  currentAnimalsCount: number;
+  occupancyPercentage: number;
+  entryDate: string | null;
+  expectedExitDate: string | null;
+  daysInLot: number | null;
+  recommendedExitDate: string | null;
+  nextAvailableDate: string | null;
+  lotStatus: string;
+  isOverdue: boolean;
+}
+
+export const getLotGrazingMetrics = async (lotId: string): Promise<GrazingMetrics | null> => {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_lot_grazing_metrics', { lot_id_param: lotId })
+      .single();
+
+    if (error) {
+      console.error('Error fetching grazing metrics:', error);
+      return null;
+    }
+
+    if (!data) return null;
+
+    return {
+      currentAnimalsCount: data.current_animals_count || 0,
+      occupancyPercentage: data.occupancy_percentage || 0,
+      entryDate: data.entry_date,
+      expectedExitDate: data.expected_exit_date,
+      daysInLot: data.days_in_lot,
+      recommendedExitDate: data.recommended_exit_date,
+      nextAvailableDate: data.next_available_date,
+      lotStatus: data.lot_status || 'available',
+      isOverdue: data.is_overdue || false,
+    };
+  } catch (error) {
+    console.error('Unexpected error in getLotGrazingMetrics:', error);
+    return null;
+  }
+};
+
+export const getRecommendedGrazingDays = (occupancyPercentage: number, maxGrazingDays: number = 15): number => {
+  if (occupancyPercentage > 80) return Math.floor(maxGrazingDays * 0.7); // 30% reduction
+  if (occupancyPercentage > 60) return Math.floor(maxGrazingDays * 0.8); // 20% reduction
+  if (occupancyPercentage > 40) return Math.floor(maxGrazingDays * 0.9); // 10% reduction
+  return maxGrazingDays; // Full days for low occupancy
+};
+
+export const getLotAvailability = async (): Promise<Lot[]> => {
+  try {
+    const lots = await getAllLots();
+    const lotsWithMetrics = await Promise.all(
+      lots.map(async (lot) => {
+        const metrics = await getLotGrazingMetrics(lot.id);
+        return {
+          ...lot,
+          grazingMetrics: metrics,
+          isAvailable: metrics?.lotStatus === 'available',
+          nextAvailableDate: metrics?.nextAvailableDate,
+        };
+      })
+    );
+    
+    return lotsWithMetrics.filter(lot => lot.isAvailable);
+  } catch (error) {
+    console.error('Error getting lot availability:', error);
+    return [];
+  }
+};
+
 export const createRotation = async (rotation: Omit<LotRotation, 'id'>): Promise<boolean> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();

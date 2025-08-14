@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, Users, MapPin, Activity, Calendar, Plus } from 'lucide-react';
+import { ArrowLeft, Edit, Users, MapPin, Activity, Calendar, Plus, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useLotStore, type Lot } from '@/stores/lotStore';
 import { useAnimalStore } from '@/stores/animalStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import LotForm from './LotForm';
 import AnimalAssignmentForm from './AnimalAssignmentForm';
 
@@ -16,15 +17,17 @@ interface LotDetailProps {
 }
 
 const LotDetail = ({ lot, onBack }: LotDetailProps) => {
-  const { loadAssignments, assignments, removeAnimal } = useLotStore();
+  const { loadAssignments, assignments, removeAnimal, loadGrazingMetrics, getGrazingMetrics } = useLotStore();
   const { animals, loadAnimals } = useAnimalStore();
   const [showEditForm, setShowEditForm] = useState(false);
   const [showAssignForm, setShowAssignForm] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadAssignments(lot.id);
     loadAnimals();
-  }, [lot.id, loadAssignments, loadAnimals]);
+    loadGrazingMetrics(lot.id);
+  }, [lot.id, loadAssignments, loadAnimals, loadGrazingMetrics]);
 
   const activeAssignments = assignments.filter(a => !a.removedDate);
   const assignedAnimals = activeAssignments.map(assignment => {
@@ -32,12 +35,12 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
     return { ...assignment, animal };
   }).filter(item => item.animal);
 
-  // Grazing metrics
+  // Get grazing metrics from store
+  const grazingMetrics = getGrazingMetrics(lot.id);
+  
+  // Legacy calculations for fallback
   const capacity = lot.capacity ?? 0;
   const occupancy = capacity > 0 ? assignedAnimals.length / capacity : 0;
-  const estimatedGrazingDays = capacity > 0 && assignedAnimals.length > 0
-    ? Math.max(1, Math.round((capacity / assignedAnimals.length) * 7))
-    : null;
 
   const handleRemoveAnimal = async (animalId: string) => {
     const success = await removeAnimal(animalId, lot.id);
@@ -62,6 +65,53 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
       case 'poor': return 'bg-red-400';
       default: return 'bg-gray-400';
     }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return null;
+    return new Date(dateString).toLocaleDateString('es-ES');
+  };
+
+  const getDaysRemaining = (targetDate: string | null) => {
+    if (!targetDate) return null;
+    const days = Math.ceil((new Date(targetDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    return days;
+  };
+
+  const getRotationStatusBadge = () => {
+    if (!grazingMetrics) return null;
+    
+    if (grazingMetrics.isOverdue) {
+      return (
+        <Badge variant="destructive" className="ml-2">
+          <AlertTriangle className="w-3 h-3 mr-1" />
+          Sobrepasteando
+        </Badge>
+      );
+    }
+    
+    if (grazingMetrics.expectedExitDate) {
+      const daysRemaining = getDaysRemaining(grazingMetrics.expectedExitDate);
+      if (daysRemaining !== null && daysRemaining <= 2) {
+        return (
+          <Badge variant="destructive" className="ml-2">
+            <Clock className="w-3 h-3 mr-1" />
+            Salida en {daysRemaining} día{daysRemaining !== 1 ? 's' : ''}
+          </Badge>
+        );
+      }
+    }
+    
+    if (grazingMetrics.lotStatus === 'available') {
+      return (
+        <Badge variant="default" className="ml-2">
+          <CheckCircle2 className="w-3 h-3 mr-1" />
+          Disponible
+        </Badge>
+      );
+    }
+    
+    return null;
   };
 
   return (
@@ -126,10 +176,14 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Estado</span>
-                <Badge className={getStatusColor(lot.status)}>
-                  {lot.status === 'active' ? 'Activo' : 
-                   lot.status === 'resting' ? 'Descanso' : 'Mantenimiento'}
-                </Badge>
+                <div className="flex items-center">
+                  <Badge className={getStatusColor(grazingMetrics?.lotStatus || lot.status)}>
+                    {(grazingMetrics?.lotStatus || lot.status) === 'active' ? 'Activo' : 
+                     (grazingMetrics?.lotStatus || lot.status) === 'resting' ? 'Descanso' : 
+                     (grazingMetrics?.lotStatus || lot.status) === 'available' ? 'Disponible' : 'Mantenimiento'}
+                  </Badge>
+                  {getRotationStatusBadge()}
+                </div>
               </div>
               
               <div className="flex justify-between items-center">
@@ -163,20 +217,46 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
               
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Animales Actuales</span>
-                <span className="text-sm">{assignedAnimals.length}</span>
+                <span className="text-sm">{grazingMetrics?.currentAnimalsCount || assignedAnimals.length}</span>
               </div>
+              
+              {grazingMetrics?.entryDate && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Fecha de Entrada</span>
+                  <span className="text-sm">{formatDate(grazingMetrics.entryDate)}</span>
+                </div>
+              )}
+              
+              {grazingMetrics?.expectedExitDate && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Salida Recomendada</span>
+                  <span className="text-sm font-medium text-orange-600">
+                    {formatDate(grazingMetrics.expectedExitDate)}
+                  </span>
+                </div>
+              )}
+              
+              {grazingMetrics?.daysInLot !== null && grazingMetrics.daysInLot !== undefined && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Días en Potrero</span>
+                  <span className="text-sm">{grazingMetrics.daysInLot} días</span>
+                </div>
+              )}
               
               {lot.capacity && (
                 <div className="mt-4">
                   <div className="flex justify-between text-sm text-gray-600 mb-1">
                     <span>Ocupación</span>
-                    <span>{Math.round((assignedAnimals.length / lot.capacity) * 100)}%</span>
+                    <span>{grazingMetrics?.occupancyPercentage || Math.round((assignedAnimals.length / lot.capacity) * 100)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        (grazingMetrics?.occupancyPercentage || 0) > 80 ? 'bg-red-500' :
+                        (grazingMetrics?.occupancyPercentage || 0) > 60 ? 'bg-yellow-500' : 'bg-green-500'
+                      }`}
                       style={{
-                        width: `${Math.min((assignedAnimals.length / lot.capacity) * 100, 100)}%`
+                        width: `${Math.min(grazingMetrics?.occupancyPercentage || (assignedAnimals.length / lot.capacity) * 100, 100)}%`
                       }}
                     />
                   </div>
@@ -190,16 +270,27 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Activity className="w-5 h-5 mr-2" />
-                Estadísticas Rápidas
+                Métricas de Pastoreo
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Tiempo de pastoreo estimado</span>
-                <span className="text-sm">
-                  {estimatedGrazingDays ? `≈ ${estimatedGrazingDays} días` : 'N/A'}
-                </span>
-              </div>
+              {grazingMetrics?.nextAvailableDate && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Próxima Disponibilidad</span>
+                  <span className="text-sm font-medium">
+                    {formatDate(grazingMetrics.nextAvailableDate)}
+                  </span>
+                </div>
+              )}
+              
+              {grazingMetrics?.daysInLot !== null && grazingMetrics?.expectedExitDate && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Días Restantes</span>
+                  <span className="text-sm font-medium">
+                    {getDaysRemaining(grazingMetrics.expectedExitDate)} días
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Machos</span>
                 <span className="text-sm">
@@ -283,8 +374,14 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Asignado:</span>
-                          <span>{new Date(assignment.assignedDate).toLocaleDateString()}</span>
+                          <span>{new Date(assignment.assignedDate).toLocaleDateString('es-ES')}</span>
                         </div>
+                        {grazingMetrics?.entryDate && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Días en lote:</span>
+                            <span>{grazingMetrics.daysInLot || 0} días</span>
+                          </div>
+                        )}
                         {assignment.assignmentReason && (
                           <div className="mt-2">
                             <span className="text-gray-600 text-xs">Motivo: </span>

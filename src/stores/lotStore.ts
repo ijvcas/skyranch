@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getAllLots, getLot, addLot, updateLot, deleteLot, assignAnimalToLot, removeAnimalFromLot, getLotAssignments, createRotation } from '@/services/lotService';
+import { getAllLots, getLot, addLot, updateLot, deleteLot, assignAnimalToLot, removeAnimalFromLot, getLotAssignments, createRotation, getLotGrazingMetrics, type GrazingMetrics } from '@/services/lotService';
 
 export interface Lot {
   id: string;
@@ -48,6 +48,7 @@ interface LotStore {
   rotations: LotRotation[];
   isLoading: boolean;
   selectedLot: Lot | null;
+  grazingMetrics: Record<string, GrazingMetrics>;
   
   // Lot management
   loadLots: () => Promise<void>;
@@ -64,6 +65,10 @@ interface LotStore {
   // Rotations
   loadRotations: (lotId?: string) => Promise<void>;
   createRotation: (rotation: Omit<LotRotation, 'id'>) => Promise<boolean>;
+  
+  // Grazing metrics
+  loadGrazingMetrics: (lotId: string) => Promise<void>;
+  getGrazingMetrics: (lotId: string) => GrazingMetrics | null;
 }
 
 export const useLotStore = create<LotStore>((set, get) => ({
@@ -72,6 +77,7 @@ export const useLotStore = create<LotStore>((set, get) => ({
   rotations: [],
   isLoading: false,
   selectedLot: null,
+  grazingMetrics: {},
 
   loadLots: async () => {
     set({ isLoading: true });
@@ -183,5 +189,22 @@ export const useLotStore = create<LotStore>((set, get) => ({
       console.error('Error creating rotation:', error);
       return false;
     }
+  },
+
+  loadGrazingMetrics: async (lotId) => {
+    try {
+      const metrics = await getLotGrazingMetrics(lotId);
+      if (metrics) {
+        set(state => ({
+          grazingMetrics: { ...state.grazingMetrics, [lotId]: metrics }
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading grazing metrics:', error);
+    }
+  },
+
+  getGrazingMetrics: (lotId) => {
+    return get().grazingMetrics[lotId] || null;
   },
 }));
