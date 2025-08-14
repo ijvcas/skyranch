@@ -26,7 +26,7 @@ const LotForm = ({ onClose, lot }: LotFormProps) => {
     capacity: lot?.capacity?.toString() || '',
     grassType: lot?.grassType || '',
     locationCoordinates: lot?.locationCoordinates || '',
-    status: lot?.status || 'active',
+    status: lot?.status || 'available',
     grassCondition: lot?.grassCondition || 'good',
   });
 
@@ -121,13 +121,9 @@ const LotForm = ({ onClose, lot }: LotFormProps) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Activo</SelectItem>
+              <SelectItem value="available">Disponible</SelectItem>
+              <SelectItem value="active">En Uso</SelectItem>
               <SelectItem value="resting">En Descanso</SelectItem>
-              <SelectItem value="maintenance">Mantenimiento</SelectItem>
-              <SelectItem value="property">Propiedad</SelectItem>
-              <SelectItem value="lista de compra">Lista de Compra</SelectItem>
-              <SelectItem value="por firmar">Por Firmar</SelectItem>
-              <SelectItem value="negociando">Negociando</SelectItem>
             </SelectContent>
           </Select>
         </div>
