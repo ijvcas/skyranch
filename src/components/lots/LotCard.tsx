@@ -37,6 +37,17 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onSelect, onDelete, polygonData 
     }
   };
 
+  const getCardBackgroundColor = (status: string, currentAnimals?: number, capacity?: number) => {
+    // Card background based on status
+    if (currentAnimals && currentAnimals > 0) {
+      return 'bg-blue-50 border-blue-200'; // En Uso - light blue
+    } else if (status === 'resting') {
+      return 'bg-yellow-50 border-yellow-200'; // En Descanso - light yellow
+    } else {
+      return 'bg-green-50 border-green-200'; // Disponible - light green
+    }
+  };
+
   const getStatusText = (status: string, currentAnimals?: number, capacity?: number) => {
     // Dynamic status based on animals and capacity
     if (currentAnimals && currentAnimals > 0) {
@@ -53,7 +64,7 @@ const LotCard: React.FC<LotCardProps> = ({ lot, onSelect, onDelete, polygonData 
   const polygonArea = polygonData?.find(p => p.lotId === lot.id)?.areaHectares;
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+    <Card className={`hover:shadow-md transition-shadow cursor-pointer border-2 ${getCardBackgroundColor(lot.status, lot.currentAnimals, lot.capacity)}`}>
       <CardHeader className="px-4 pb-3 sm:px-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 flex-1 min-w-0">

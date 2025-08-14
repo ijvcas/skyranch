@@ -273,12 +273,16 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center">
-                  <Users className="w-5 h-5 mr-2" />
-                  Animales en el Lote ({assignedAnimals.length})
-                </CardTitle>
-                <Button size="sm" onClick={() => setShowAssignForm(true)}>
+              <CardTitle className="flex items-center justify-center text-center">
+                <Users className="w-5 h-5 mr-2" />
+                Animales en el Lote ({assignedAnimals.length})
+              </CardTitle>
+              
+              <div className="flex justify-center mt-4">
+                <Button 
+                  onClick={() => setShowAssignForm(true)}
+                  className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white border-0"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   {assignedAnimals.length === 0 ? 'Asignar Primer Animal' : 'Agregar Más Animales'}
                 </Button>
