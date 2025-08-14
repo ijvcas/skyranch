@@ -296,9 +296,9 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
         style={{ touchAction: isMobile ? 'manipulation' : 'auto' }}
       />
 
-      {/* Fit bounds control */}
+      {/* Fit bounds control - moved down to avoid being hidden */}
       {isMapReady && (
-        <div className="absolute right-4 top-16 z-20">
+        <div className="absolute right-4 top-24 z-20">
           <FitBoundsButton onClick={handleFitBounds} />
         </div>
       )}
