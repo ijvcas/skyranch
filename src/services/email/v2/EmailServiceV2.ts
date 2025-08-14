@@ -22,11 +22,12 @@ export class EmailServiceV2 {
         return appUser.name;
       }
 
-      // If not found in app_users, try profiles table
+      // If not found in app_users, try profiles table (RLS ensures only own profile is accessible)
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('email', email)
+        .eq('id', (await supabase.auth.getUser()).data.user?.id) // Additional security: ensure we only get the current user's profile
         .single();
 
       if (profile && profile.full_name) {
