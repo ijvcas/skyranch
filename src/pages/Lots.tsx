@@ -44,7 +44,11 @@ const Lots = () => {
   useEffect(() => {
     console.log('🔄 Loading lots and polygon data...');
 
-    // Ensure visibility by syncing auto-generados (per-user) antes de cargar
+    // Load lots first
+    loadLots();
+    loadPolygonData();
+
+    // Then sync cadastral parcels
     syncCadastralParcelsToLots()
       .then(() => {
         console.log('✅ Cadastral sync complete, reloading lots...');
@@ -53,9 +57,6 @@ const Lots = () => {
       })
       .catch((e) => {
         console.warn('⚠️ Cadastral sync skipped/failed:', e);
-        // Fallback: still try to load data
-        loadLots();
-        loadPolygonData();
       });
     
     // Sync polygon areas with lot sizes to ensure consistency
