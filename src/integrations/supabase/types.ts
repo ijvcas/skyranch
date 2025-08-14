@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1307,6 +1307,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_expected_exit_date: {
+        Args: {
+          current_animals: number
+          entry_date: string
+          lot_capacity: number
+          max_grazing_days: number
+        }
+        Returns: string
+      }
+      calculate_next_available_date: {
+        Args: { last_grazing_end_date: string; rest_days_required: number }
+        Returns: string
+      }
       cleanup_old_notifications: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1316,22 +1329,36 @@ export type Database = {
         Returns: {
           lots_created: number
           lots_deleted: number
-          success: boolean
           message: string
+          success: boolean
         }[]
       }
       get_auth_users: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          email: string
-          raw_user_meta_data: Json
           created_at: string
+          email: string
+          id: string
+          raw_user_meta_data: Json
         }[]
       }
       get_current_app_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_lot_grazing_metrics: {
+        Args: { lot_id_param: string }
+        Returns: {
+          current_animals_count: number
+          days_in_lot: number
+          entry_date: string
+          expected_exit_date: string
+          is_overdue: boolean
+          lot_status: string
+          next_available_date: string
+          occupancy_percentage: number
+          recommended_exit_date: string
+        }[]
       }
       is_active_user: {
         Args: Record<PropertyKey, never>
