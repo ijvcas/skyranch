@@ -32,14 +32,14 @@ const MapLotLabelsControl = ({
 
   if (isMinimized) {
     return (
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 translate-x-40 z-20">
+      <div className="absolute top-4 left-4 z-20">
         <Button
           onClick={() => setIsMinimized(false)}
           variant="outline"
           size="sm"
-          className="bg-white/95 shadow-lg"
+          className="bg-white/95 shadow-lg text-xs px-2 py-1"
         >
-          <Layers className="w-4 h-4 mr-2" />
+          <Layers className="w-3 h-3 mr-1" />
           Etiquetas
         </Button>
       </div>
@@ -47,11 +47,11 @@ const MapLotLabelsControl = ({
   }
 
   return (
-    <Card className="absolute top-4 left-1/2 transform -translate-x-1/2 translate-x-40 w-64 z-20 shadow-lg bg-white/95 backdrop-blur-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center justify-between">
+    <Card className="absolute top-4 left-4 w-48 z-20 shadow-lg bg-white/95 backdrop-blur-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm flex items-center justify-between">
           <div className="flex items-center">
-            <Layers className="w-5 h-5 mr-2" />
+            <Layers className="w-4 h-4 mr-1" />
             Etiquetas
           </div>
           <div className="flex items-center space-x-1">
@@ -59,28 +59,28 @@ const MapLotLabelsControl = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="h-6 w-6 p-0"
+              className="h-5 w-5 p-0"
             >
-              {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              {isCollapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsMinimized(true)}
-              className="h-6 w-6 p-0"
+              className="h-5 w-5 p-0"
             >
-              <Minimize2 className="w-4 h-4" />
+              <Minimize2 className="w-3 h-3" />
             </Button>
           </div>
         </CardTitle>
       </CardHeader>
       
       {!isCollapsed && (
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 p-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Building className="w-4 h-4 text-gray-500" />
-              <Label htmlFor="show-property-lots">Lotes de Propiedad</Label>
+            <div className="flex items-center space-x-1">
+              <Building className="w-3 h-3 text-gray-500" />
+              <Label htmlFor="show-property-lots" className="text-xs">Lotes de Propiedad</Label>
             </div>
             <Switch 
               id="show-property-lots" 
@@ -90,9 +90,9 @@ const MapLotLabelsControl = ({
           </div>
           
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Leaf className="w-4 h-4 text-green-600" />
-              <Label htmlFor="show-pasture-lots">Lotes de Pastoreo</Label>
+            <div className="flex items-center space-x-1">
+              <Leaf className="w-3 h-3 text-green-600" />
+              <Label htmlFor="show-pasture-lots" className="text-xs">Lotes de Pastoreo</Label>
             </div>
             <Switch 
               id="show-pasture-lots" 
@@ -102,9 +102,9 @@ const MapLotLabelsControl = ({
           </div>
           
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <MapPin className="w-4 h-4 text-blue-600" />
-              <Label htmlFor="show-property-name">Nombre SkyRanch</Label>
+            <div className="flex items-center space-x-1">
+              <MapPin className="w-3 h-3 text-blue-600" />
+              <Label htmlFor="show-property-name" className="text-xs">Nombre SkyRanch</Label>
             </div>
             <Switch 
               id="show-property-name" 
