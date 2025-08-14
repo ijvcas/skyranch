@@ -180,9 +180,11 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Estado</span>
-                <Badge className={getStatusColor(assignedAnimals.length > 0 ? 'active' : 'available')}>
-                  {assignedAnimals.length > 0 ? 'En Uso' : 
-                   (grazingMetrics?.lotStatus || lot.status) === 'resting' ? 'En Descanso' : 'Disponible'}
+                <Badge className={getStatusColor(grazingMetrics?.lotStatus || (assignedAnimals.length > 0 ? 'active' : 'available'))}>
+                  {grazingMetrics?.lotStatus === 'active' ? 'En Uso' :
+                   grazingMetrics?.lotStatus === 'resting' ? 'En Descanso' :
+                   grazingMetrics?.lotStatus === 'available' ? 'Disponible' :
+                   assignedAnimals.length > 0 ? 'En Uso' : 'Disponible'}
                 </Badge>
               </div>
               
@@ -271,24 +273,52 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="w-5 h-5 mr-2" />
-                Animales en el Lote ({assignedAnimals.length})
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center">
+                  <Users className="w-5 h-5 mr-2" />
+                  Animales en el Lote ({assignedAnimals.length})
+                </CardTitle>
+                <Button size="sm" onClick={() => setShowAssignForm(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {assignedAnimals.length === 0 ? 'Asignar Primer Animal' : 'Agregar Más Animales'}
+                </Button>
+              </div>
+              
+              {/* Rest Period Information */}
+              {grazingMetrics && (
+                <div className="mt-4 space-y-2">
+                  {grazingMetrics.lotStatus === 'resting' && grazingMetrics.nextAvailableDate && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                      <div className="flex items-center text-amber-800">
+                        <Clock className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Lote en Descanso</span>
+                      </div>
+                      <div className="mt-1 text-sm text-amber-700">
+                        Disponible el: {formatDate(grazingMetrics.nextAvailableDate)}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {grazingMetrics.lotStatus === 'available' && lot.lastGrazingEndDate && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="flex items-center text-green-800">
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Lote Disponible</span>
+                      </div>
+                      <div className="mt-1 text-sm text-green-700">
+                        Última salida: {formatDate(lot.lastGrazingEndDate)} - Listo para recibir animales
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               {assignedAnimals.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                   <p>No hay animales asignados a este lote</p>
-                  <Button 
-                    variant="gradient"
-                    className="mt-4" 
-                    onClick={() => setShowAssignForm(true)}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Asignar Primer Animal
-                  </Button>
+                  <p className="text-sm mt-2">Use el botón "Asignar Primer Animal" para comenzar</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
