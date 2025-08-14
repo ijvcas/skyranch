@@ -27,7 +27,8 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
     startDrawing,
     stopDrawing,
     deletePolygon,
-    getLotColor
+    getLotColor,
+    debugLots
   } = useSimplePolygonDrawing({ lots, onLotSelect });
   
   const [showPropertyLots, setShowPropertyLots] = useState(true);
