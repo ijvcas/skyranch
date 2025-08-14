@@ -265,58 +265,6 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
             </CardContent>
           </Card>
 
-          {/* Quick Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Activity className="w-5 h-5 mr-2" />
-                Métricas de Pastoreo
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {grazingMetrics?.nextAvailableDate && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Próxima Disponibilidad</span>
-                  <span className="text-sm font-medium">
-                    {formatDate(grazingMetrics.nextAvailableDate)}
-                  </span>
-                </div>
-              )}
-              
-              {grazingMetrics?.daysInLot !== null && grazingMetrics?.daysInLot !== undefined && grazingMetrics?.expectedExitDate && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Días Restantes</span>
-                  <span className="text-sm font-medium">
-                    {grazingMetrics?.expectedExitDate ? getDaysRemaining(grazingMetrics.expectedExitDate) || 0 : 0} días
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Machos</span>
-                <span className="text-sm">
-                  {assignedAnimals.filter(a => a.animal?.gender === 'male').length}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Hembras</span>
-                <span className="text-sm">
-                  {assignedAnimals.filter(a => a.animal?.gender === 'female').length}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Bovinos</span>
-                <span className="text-sm">
-                  {assignedAnimals.filter(a => a.animal?.species === 'bovine').length}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Equinos</span>
-                <span className="text-sm">
-                  {assignedAnimals.filter(a => a.animal?.species === 'equine').length}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Animals List */}
