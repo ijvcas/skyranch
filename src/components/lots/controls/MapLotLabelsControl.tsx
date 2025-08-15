@@ -27,12 +27,38 @@ const MapLotLabelsControl = ({
   showPastureLots,
   onTogglePastureLots
 }: MapLotLabelsControlProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [isMinimized, setIsMinimized] = useState(true);
-  const [position, setPosition] = useState({ x: 16, y: 16 });
+  // Load saved states from localStorage
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const saved = localStorage.getItem('etiquetas-collapsed');
+    return saved ? JSON.parse(saved) : true;
+  });
+  
+  const [isMinimized, setIsMinimized] = useState(() => {
+    const saved = localStorage.getItem('etiquetas-minimized');
+    return saved ? JSON.parse(saved) : true;
+  });
+  
+  const [position, setPosition] = useState(() => {
+    const saved = localStorage.getItem('etiquetas-position');
+    return saved ? JSON.parse(saved) : { x: 16, y: 16 };
+  });
+  
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Save states to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('etiquetas-collapsed', JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem('etiquetas-minimized', JSON.stringify(isMinimized));
+  }, [isMinimized]);
+
+  useEffect(() => {
+    localStorage.setItem('etiquetas-position', JSON.stringify(position));
+  }, [position]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);

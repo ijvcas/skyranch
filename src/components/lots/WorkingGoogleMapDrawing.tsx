@@ -31,10 +31,35 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
     debugLots
   } = useSimplePolygonDrawing({ lots, onLotSelect });
   
-  const [showPropertyLots, setShowPropertyLots] = useState(true);
-  const [showPastureLots, setShowPastureLots] = useState(true);
+  // Toggle states for label visibility - load from localStorage
+  const [showPropertyLots, setShowPropertyLots] = useState(() => {
+    const saved = localStorage.getItem('etiquetas-show-property-lots');
+    return saved ? JSON.parse(saved) : true;
+  });
+  
+  const [showPastureLots, setShowPastureLots] = useState(() => {
+    const saved = localStorage.getItem('etiquetas-show-pasture-lots');
+    return saved ? JSON.parse(saved) : true;
+  });
+  
   // Property name label should be hidden by default on Potreros map
-  const [showPropertyName, setShowPropertyName] = useState(false);
+  const [showPropertyName, setShowPropertyName] = useState(() => {
+    const saved = localStorage.getItem('etiquetas-show-property-name');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Save toggle states to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('etiquetas-show-property-lots', JSON.stringify(showPropertyLots));
+  }, [showPropertyLots]);
+
+  useEffect(() => {
+    localStorage.setItem('etiquetas-show-pasture-lots', JSON.stringify(showPastureLots));
+  }, [showPastureLots]);
+
+  useEffect(() => {
+    localStorage.setItem('etiquetas-show-property-name', JSON.stringify(showPropertyName));
+  }, [showPropertyName]);
   const [isMobile, setIsMobile] = useState(false);
   const labelsRef = useRef<{[key: string]: google.maps.Marker}>({});
   const propertyLabelRef = useRef<google.maps.Marker | null>(null);
