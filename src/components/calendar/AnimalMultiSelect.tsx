@@ -133,8 +133,8 @@ const AnimalMultiSelect = ({
           </Button>
         </PopoverTrigger>
         
-        <PopoverContent className="w-80 p-0" align="start">
-          <ScrollArea className="h-72">
+        <PopoverContent className="w-80 p-0 max-h-80" align="start">
+          <ScrollArea className="h-80">
             <div className="p-4 space-y-4">
               {Object.keys(animalsBySpecies).sort().map(species => (
                 <div key={species} className="space-y-2">
