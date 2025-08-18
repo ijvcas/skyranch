@@ -26,44 +26,71 @@ export interface CalendarEvent {
 }
 
 export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
-  const { data, error } = await supabase
-    .from('calendar_events')
-    .select(`
-      *,
-      app_users (
-        name
-      )
-    `)
-    .order('event_date', { ascending: true });
+  try {
+    console.log('🔄 Fetching calendar events...');
+    
+    // First get the events
+    const { data: events, error: eventsError } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .order('event_date', { ascending: true });
 
-  if (error) {
-    console.error('Error fetching calendar events:', error);
+    if (eventsError) {
+      console.error('❌ Error fetching calendar events:', eventsError);
+      throw eventsError;
+    }
+
+    console.log('✅ Calendar events fetched:', events?.length || 0);
+
+    if (!events || events.length === 0) {
+      return [];
+    }
+
+    // Get unique user IDs
+    const userIds = [...new Set(events.map(e => e.user_id))];
+    console.log('🔍 Fetching user names for event creators:', userIds);
+
+    // Get user names
+    const { data: users, error: usersError } = await supabase
+      .from('app_users')
+      .select('id, name')
+      .in('id', userIds);
+
+    if (usersError) {
+      console.error('⚠️ Error fetching user names:', usersError);
+      // Don't throw, just continue without names
+    }
+
+    console.log('✅ Users fetched for events:', users?.length || 0);
+
+    // Map events with creator names
+    return events.map(event => ({
+      id: event.id,
+      userId: event.user_id,
+      animalId: event.animal_id || undefined,
+      animalIds: event.animal_ids || undefined,
+      title: event.title,
+      description: event.description || undefined,
+      eventType: event.event_type as CalendarEvent['eventType'],
+      eventDate: event.event_date,
+      endDate: event.end_date || undefined,
+      allDay: event.all_day || false,
+      recurring: event.recurring || false,
+      recurrencePattern: event.recurrence_pattern || undefined,
+      status: event.status as CalendarEvent['status'],
+      reminderMinutes: event.reminder_minutes || 60,
+      veterinarian: event.veterinarian || undefined,
+      location: event.location || undefined,
+      cost: event.cost || undefined,
+      notes: event.notes || undefined,
+      createdAt: event.created_at,
+      updatedAt: event.updated_at,
+      createdByName: users?.find(u => u.id === event.user_id)?.name
+    }));
+  } catch (error) {
+    console.error('💥 Calendar events service error:', error);
     throw error;
   }
-
-  return (data || []).map(event => ({
-    id: event.id,
-    userId: event.user_id,
-    animalId: event.animal_id || undefined,
-    animalIds: event.animal_ids || undefined,
-    title: event.title,
-    description: event.description || undefined,
-    eventType: event.event_type as CalendarEvent['eventType'],
-    eventDate: event.event_date,
-    endDate: event.end_date || undefined,
-    allDay: event.all_day || false,
-    recurring: event.recurring || false,
-    recurrencePattern: event.recurrence_pattern || undefined,
-    status: event.status as CalendarEvent['status'],
-    reminderMinutes: event.reminder_minutes || 60,
-    veterinarian: event.veterinarian || undefined,
-    location: event.location || undefined,
-    cost: event.cost || undefined,
-    notes: event.notes || undefined,
-    createdAt: event.created_at,
-    updatedAt: event.updated_at,
-    createdByName: (event.app_users as any)?.name
-  }));
 };
 
 export const getEventNotificationUsers = async (eventId: string): Promise<string[]> => {

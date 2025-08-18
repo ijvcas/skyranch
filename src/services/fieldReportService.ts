@@ -57,21 +57,54 @@ export const fieldReportService = {
   },
 
   async getFieldReports(): Promise<FieldReport[]> {
-    const { data, error } = await supabase
-      .from('field_reports')
-      .select(`
-        *,
-        app_users (
-          name
-        )
-      `)
-      .order('created_at', { ascending: false });
+    try {
+      console.log('🔄 Fetching field reports...');
+      
+      // First get the reports
+      const { data: reports, error: reportsError } = await supabase
+        .from('field_reports')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return (data || []).map(report => ({
-      ...report,
-      createdByName: (report.app_users as any)?.name
-    }));
+      if (reportsError) {
+        console.error('❌ Error fetching field reports:', reportsError);
+        throw reportsError;
+      }
+
+      console.log('✅ Field reports fetched:', reports?.length || 0);
+
+      if (!reports || reports.length === 0) {
+        return [];
+      }
+
+      // Get unique user IDs
+      const userIds = [...new Set(reports.map(r => r.user_id))];
+      console.log('🔍 Fetching user names for IDs:', userIds);
+
+      // Get user names
+      const { data: users, error: usersError } = await supabase
+        .from('app_users')
+        .select('id, name')
+        .in('id', userIds);
+
+      if (usersError) {
+        console.error('⚠️ Error fetching user names:', usersError);
+        // Don't throw, just continue without names
+      }
+
+      console.log('✅ Users fetched:', users?.length || 0);
+
+      // Map reports with creator names
+      const reportsWithNames = reports.map(report => ({
+        ...report,
+        createdByName: users?.find(u => u.id === report.user_id)?.name
+      }));
+
+      return reportsWithNames;
+    } catch (error) {
+      console.error('💥 Field reports service error:', error);
+      throw error;
+    }
   },
 
   async getFieldReportWithEntries(reportId: string) {
