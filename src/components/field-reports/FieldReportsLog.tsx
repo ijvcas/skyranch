@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,23 @@ import { Eye, FileText, Calendar, User, MapPin } from 'lucide-react';
 import { useFieldReports } from '@/hooks/useFieldReports';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import FieldReportDetailDialog from './FieldReportDetailDialog';
+import { FieldReport } from '@/services/fieldReportService';
 
 const FieldReportsLog = () => {
   const { data: reports, isLoading, error } = useFieldReports();
+  const [selectedReport, setSelectedReport] = useState<FieldReport | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
+  const handleViewDetails = (report: FieldReport) => {
+    setSelectedReport(report);
+    setIsDetailDialogOpen(true);
+  };
+
+  const closeDetailDialog = () => {
+    setIsDetailDialogOpen(false);
+    setSelectedReport(null);
+  };
 
   if (isLoading) {
     return (
@@ -118,7 +132,7 @@ const FieldReportsLog = () => {
                       </Badge>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(report)}>
                     <Eye className="w-4 h-4 mr-1" />
                     Ver Detalles
                   </Button>
@@ -163,6 +177,12 @@ const FieldReportsLog = () => {
           </div>
         )}
       </CardContent>
+      
+      <FieldReportDetailDialog
+        report={selectedReport}
+        isOpen={isDetailDialogOpen}
+        onClose={closeDetailDialog}
+      />
     </Card>
   );
 };

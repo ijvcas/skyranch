@@ -48,6 +48,11 @@ const CalendarContent = ({
                 onSelect={onSelectDate}
                 className="rounded-md border w-full max-w-md mx-auto"
                 showNavigationHeader={true}
+                events={events.map(event => ({
+                  eventDate: event.eventDate,
+                  title: event.title,
+                  eventType: event.eventType
+                }))}
               />
             </div>
           </CardContent>

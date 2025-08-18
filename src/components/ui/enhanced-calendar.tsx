@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 
 export type EnhancedCalendarProps = React.ComponentProps<typeof DayPicker> & {
   showNavigationHeader?: boolean;
+  events?: Array<{ eventDate: string; title: string; eventType: string }>;
 };
 
 function EnhancedCalendar({
@@ -31,6 +32,7 @@ function EnhancedCalendar({
   classNames,
   showOutsideDays = true,
   showNavigationHeader = true,
+  events = [],
   ...props
 }: EnhancedCalendarProps) {
   const [month, setMonth] = useState<Date>(props.month || new Date());
@@ -97,6 +99,53 @@ function EnhancedCalendar({
     if (e.key === 'Enter') {
       handleYearInputSubmit();
     }
+  };
+
+  // Function to check if a date has events
+  const hasEvents = (date: Date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return events.some(event => event.eventDate.startsWith(dateStr));
+  };
+
+  // Function to get event type for styling
+  const getEventType = (date: Date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    const dateEvents = events.filter(event => event.eventDate.startsWith(dateStr));
+    if (dateEvents.length === 0) return null;
+    
+    // Prioritize certain event types
+    const priorities = ['vaccination', 'checkup', 'breeding', 'appointment', 'treatment'];
+    for (const priority of priorities) {
+      if (dateEvents.some(event => event.eventType === priority)) {
+        return priority;
+      }
+    }
+    return dateEvents[0].eventType;
+  };
+
+  // Custom day component to show event indicators
+  const DayWithEvents = ({ date, ...dayProps }: any) => {
+    const hasEventsOnDate = hasEvents(date);
+    const eventType = getEventType(date);
+    
+    return (
+      <div className="relative">
+        <div {...dayProps} />
+        {hasEventsOnDate && (
+          <div 
+            className={cn(
+              "absolute top-1 right-1 w-2 h-2 rounded-full",
+              eventType === 'vaccination' && "bg-red-500",
+              eventType === 'checkup' && "bg-blue-500", 
+              eventType === 'breeding' && "bg-pink-500",
+              eventType === 'appointment' && "bg-green-500",
+              eventType === 'treatment' && "bg-orange-500",
+              !['vaccination', 'checkup', 'breeding', 'appointment', 'treatment'].includes(eventType || '') && "bg-gray-500"
+            )}
+          />
+        )}
+      </div>
+    );
   };
 
   // Custom header component
@@ -238,37 +287,37 @@ function EnhancedCalendar({
       {showNavigationHeader && <CustomHeader />}
       <DayPicker
         showOutsideDays={showOutsideDays}
+        className={cn("p-3", className)}
         month={month}
         onMonthChange={setMonth}
-        className={cn("p-3 pointer-events-auto", className)}
+        components={{
+          Day: DayWithEvents
+        }}
         classNames={{
           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-          month: "space-y-4",
-          caption: "hidden", // Hide default caption since we use custom header
+          month: "space-y-4 w-full",
+          caption: showNavigationHeader ? "hidden" : "flex justify-center pt-1 relative items-center",
           caption_label: "text-sm font-medium",
-          nav: "hidden", // Hide default nav since we use custom header
-          nav_button: "hidden",
-          nav_button_previous: "hidden",
-          nav_button_next: "hidden",
+          nav: "space-x-1 flex items-center",
+          nav_button: cn(
+            "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+          ),
+          nav_button_previous: "absolute left-1",
+          nav_button_next: "absolute right-1",
           table: "w-full border-collapse space-y-1",
           head_row: "flex",
-          head_cell:
-            "text-muted-foreground rounded-md w-8 sm:w-9 font-normal text-xs sm:text-sm",
+          head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
           row: "flex w-full mt-2",
-          cell: "h-8 w-8 sm:h-9 sm:w-9 text-center text-xs sm:text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+          cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
           day: cn(
-            buttonVariants({ variant: "ghost" }),
-            "h-8 w-8 sm:h-9 sm:w-9 p-0 font-normal aria-selected:opacity-100 text-xs sm:text-sm"
+            "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
           ),
           day_range_end: "day-range-end",
-          day_selected:
-            "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-          day_today: "bg-gradient-blue-green text-white",
-          day_outside:
-            "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+          day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+          day_today: "bg-accent text-accent-foreground",
+          day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
           day_disabled: "text-muted-foreground opacity-50",
-          day_range_middle:
-            "aria-selected:bg-accent aria-selected:text-accent-foreground",
+          day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
           day_hidden: "invisible",
           ...classNames,
         }}
