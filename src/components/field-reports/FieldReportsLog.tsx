@@ -130,6 +130,13 @@ const FieldReportsLog = () => {
                     {format(new Date(report.created_at), 'dd/MM/yyyy HH:mm', { locale: es })}
                   </div>
                   
+                  {report.createdByName && (
+                    <div className="flex items-center">
+                      <User className="w-4 h-4 mr-1" />
+                      Creado por: {report.createdByName}
+                    </div>
+                  )}
+                  
                   {report.weather_conditions && (
                     <div className="flex items-center">
                       <span className="w-4 h-4 mr-1">🌤️</span>

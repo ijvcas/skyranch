@@ -80,6 +80,11 @@ const UpcomingEvents = ({ events, animals, onEventClick }: UpcomingEventsProps) 
               <p className="text-xs sm:text-sm text-gray-600 mb-1">
                 {new Date(event.eventDate).toLocaleDateString('es-ES')}
               </p>
+              {event.createdByName && (
+                <p className="text-xs text-gray-500 mb-1">
+                  Creado por: {event.createdByName}
+                </p>
+              )}
               {event.animalId && (
                 <p className="text-xs text-gray-500 mb-2 truncate">
                   Animal: {animals.find(a => a.id === event.animalId)?.name || 'N/A'}

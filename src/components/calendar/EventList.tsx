@@ -70,7 +70,12 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
       {eventsForSelectedDate.map(event => (
         <div key={event.id} className="p-3 border rounded-lg">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="font-semibold">{event.title}</h4>
+            <div className="flex-1">
+              <h4 className="font-semibold">{event.title}</h4>
+              {event.createdByName && (
+                <p className="text-xs text-gray-500">Creado por: {event.createdByName}</p>
+              )}
+            </div>
             <div className="flex items-center space-x-2">
               <Badge className={getEventTypeColor(event.eventType)}>
                 {getEventTypeLabel(event.eventType)}

@@ -126,7 +126,14 @@ const EventDetailDialog = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{event.title}</span>
+            <div>
+              <span>{event.title}</span>
+              {event.createdByName && (
+                <p className="text-sm font-normal text-gray-500 mt-1">
+                  Creado por: {event.createdByName}
+                </p>
+              )}
+            </div>
             <Badge className={getEventTypeColor(event.eventType)}>
               {getEventTypeLabel(event.eventType)}
             </Badge>

@@ -2,10 +2,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
-type FieldReport = Database['public']['Tables']['field_reports']['Row'];
-type FieldReportInsert = Database['public']['Tables']['field_reports']['Insert'];
-type FieldReportEntry = Database['public']['Tables']['field_report_entries']['Row'];
-type FieldReportEntryInsert = Database['public']['Tables']['field_report_entries']['Insert'];
+export type FieldReport = Database['public']['Tables']['field_reports']['Row'] & {
+  createdByName?: string;
+};
+export type FieldReportInsert = Database['public']['Tables']['field_reports']['Insert'];
+export type FieldReportEntry = Database['public']['Tables']['field_report_entries']['Row'];
+export type FieldReportEntryInsert = Database['public']['Tables']['field_report_entries']['Insert'];
 
 export interface CreateFieldReportData {
   title: string;
@@ -57,11 +59,19 @@ export const fieldReportService = {
   async getFieldReports(): Promise<FieldReport[]> {
     const { data, error } = await supabase
       .from('field_reports')
-      .select('*')
+      .select(`
+        *,
+        app_users (
+          name
+        )
+      `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(report => ({
+      ...report,
+      createdByName: (report.app_users as any)?.name
+    }));
   },
 
   async getFieldReportWithEntries(reportId: string) {

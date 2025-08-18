@@ -22,12 +22,18 @@ export interface CalendarEvent {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  createdByName?: string;
 }
 
 export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
   const { data, error } = await supabase
     .from('calendar_events')
-    .select('*')
+    .select(`
+      *,
+      app_users (
+        name
+      )
+    `)
     .order('event_date', { ascending: true });
 
   if (error) {
@@ -55,7 +61,8 @@ export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
     cost: event.cost || undefined,
     notes: event.notes || undefined,
     createdAt: event.created_at,
-    updatedAt: event.updated_at
+    updatedAt: event.updated_at,
+    createdByName: (event.app_users as any)?.name
   }));
 };
 
