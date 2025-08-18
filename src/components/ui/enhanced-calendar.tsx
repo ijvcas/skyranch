@@ -148,7 +148,6 @@ function EnhancedCalendar({
   // Custom day component to show event indicators
   const DayWithEvents = ({ date, ...dayProps }: any) => {
     const hasEventsOnDate = hasEvents(date);
-    const eventType = getEventType(date);
     const isToday = new Date().toDateString() === date.toDateString();
     
     return (
@@ -156,13 +155,15 @@ function EnhancedCalendar({
         {...dayProps}
         className={cn(
           dayProps.className,
-          hasEventsOnDate && !isToday && "relative",
+          hasEventsOnDate && "relative"
         )}
       >
         {date.getDate()}
-        {hasEventsOnDate && !isToday && (
-          <div className="absolute inset-0 bg-red-500/70 rounded-sm pointer-events-none" 
-               style={{ margin: '2px' }} />
+        {hasEventsOnDate && (
+          <div 
+            className="absolute top-1 right-1 w-2 h-2 bg-red-500/70 rounded-none" 
+            style={{ width: '8px', height: '8px' }}
+          />
         )}
       </div>
     );
@@ -334,7 +335,7 @@ function EnhancedCalendar({
           ),
           day_range_end: "day-range-end",
           day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-          day_today: "!bg-gradient-to-br !from-blue-500 !to-green-500 !text-white !rounded-sm relative z-10",
+          day_today: "bg-gradient-to-br from-blue-500 to-green-500 text-white font-bold",
           day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
           day_disabled: "text-muted-foreground opacity-50",
           day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
