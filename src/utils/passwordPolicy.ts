@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client';
+
 export interface PasswordCheckResult {
   valid: boolean;
   score: number; // 0-5
@@ -42,4 +44,34 @@ export function validatePasswordStrength(password: string, email?: string, fullN
 
   const valid = errors.length === 0;
   return { valid, score: Math.min(score, 5), errors };
+}
+
+/**
+ * Validates password using server-side validation for enhanced security
+ */
+export async function validatePasswordServerSide(password: string, email?: string, fullName?: string): Promise<PasswordCheckResult> {
+  try {
+    const { data, error } = await supabase.rpc('validate_password_server_side', {
+      password,
+      email: email || null,
+      full_name: fullName || null
+    });
+
+    if (error || !data) {
+      console.warn('Server-side password validation failed, falling back to client-side:', error);
+      return validatePasswordStrength(password, email, fullName);
+    }
+
+    // Type assertion for the expected response structure
+    const result = data as { valid: boolean; score: number; errors: string[] };
+    
+    return {
+      valid: result.valid,
+      score: result.score,
+      errors: result.errors || []
+    };
+  } catch (error) {
+    console.warn('Error in server-side password validation, using client-side:', error);
+    return validatePasswordStrength(password, email, fullName);
+  }
 }

@@ -1266,6 +1266,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_role_audit: {
+        Row: {
+          changed_at: string
+          changed_by: string
+          id: string
+          metadata: Json | null
+          new_role: string
+          old_role: string | null
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by: string
+          id?: string
+          metadata?: Json | null
+          new_role: string
+          old_role?: string | null
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string
+          id?: string
+          metadata?: Json | null
+          new_role?: string
+          old_role?: string | null
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       weather_settings: {
         Row: {
           created_at: string
@@ -1378,6 +1411,10 @@ export type Database = {
       update_single_lot_status: {
         Args: { target_lot_id: string }
         Returns: undefined
+      }
+      validate_password_server_side: {
+        Args: { email?: string; full_name?: string; password: string }
+        Returns: Json
       }
     }
     Enums: {

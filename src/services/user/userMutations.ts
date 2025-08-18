@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { type AppUser } from './types';
+import { sanitizeUserInput, isValidEmail, isValidPhone, isValidName } from '@/utils/security';
 
 // Add a new user to the app_users table
 export const addUser = async (userData: Omit<AppUser, 'id' | 'created_at' | 'created_by'>): Promise<boolean> => {
@@ -14,13 +15,29 @@ export const addUser = async (userData: Omit<AppUser, 'id' | 'created_at' | 'cre
       throw new Error('No authenticated user');
     }
 
-    // Insert into app_users table with phone
+    // Validate and sanitize input data
+    const sanitizedName = sanitizeUserInput(userData.name);
+    const sanitizedEmail = userData.email.toLowerCase().trim();
+    const sanitizedPhone = userData.phone ? sanitizeUserInput(userData.phone) : '';
+
+    // Security validations
+    if (!isValidName(sanitizedName)) {
+      throw new Error('Invalid name format');
+    }
+    if (!isValidEmail(sanitizedEmail)) {
+      throw new Error('Invalid email format');
+    }
+    if (userData.phone && !isValidPhone(sanitizedPhone)) {
+      throw new Error('Invalid phone format');
+    }
+
+    // Insert into app_users table with sanitized data
     const { data, error } = await supabase
       .from('app_users')
       .insert([{
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone || '',
+        name: sanitizedName,
+        email: sanitizedEmail,
+        phone: sanitizedPhone,
         role: userData.role,
         is_active: userData.is_active,
         created_by: currentUser.id
@@ -46,11 +63,34 @@ export const updateUser = async (userId: string, updates: Partial<AppUser>): Pro
   try {
     console.log('📝 Updating user:', userId, updates);
 
-    // Prepare update data including phone
+    // Prepare and sanitize update data
     const updateData: any = {};
-    if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.email !== undefined) updateData.email = updates.email;
-    if (updates.phone !== undefined) updateData.phone = updates.phone;
+    
+    if (updates.name !== undefined) {
+      const sanitizedName = sanitizeUserInput(updates.name);
+      if (!isValidName(sanitizedName)) {
+        throw new Error('Invalid name format');
+      }
+      updateData.name = sanitizedName;
+    }
+    
+    if (updates.email !== undefined) {
+      const sanitizedEmail = updates.email.toLowerCase().trim();
+      if (!isValidEmail(sanitizedEmail)) {
+        throw new Error('Invalid email format');
+      }
+      updateData.email = sanitizedEmail;
+    }
+    
+    if (updates.phone !== undefined) {
+      const sanitizedPhone = sanitizeUserInput(updates.phone);
+      if (updates.phone && !isValidPhone(sanitizedPhone)) {
+        throw new Error('Invalid phone format');
+      }
+      updateData.phone = sanitizedPhone;
+    }
+    
+    // Role and is_active updates are handled by RLS policies
     if (updates.role !== undefined) updateData.role = updates.role;
     if (updates.is_active !== undefined) updateData.is_active = updates.is_active;
 
