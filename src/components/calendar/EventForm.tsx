@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import UserSelector from '@/components/notifications/UserSelector';
 import DatePickerField from './DatePickerField';
 import EventTypeSelect from './EventTypeSelect';
+import AnimalMultiSelect from './AnimalMultiSelect';
 
 interface EventFormProps {
   selectedDate: Date | undefined;
@@ -32,7 +33,7 @@ const EventForm = ({
     title: '',
     description: '',
     eventType: 'appointment' as CalendarEvent['eventType'],
-    animalId: '',
+    animalIds: [] as string[],
     eventDate: '',
     startTime: '09:00',
     endTime: '',
@@ -96,7 +97,7 @@ const EventForm = ({
       title: '',
       description: '',
       eventType: 'appointment',
-      animalId: '',
+      animalIds: [],
       eventDate: today,
       startTime: '09:00',
       endTime: '',
@@ -209,24 +210,12 @@ const EventForm = ({
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label>Animal (Opcional)</Label>
-          <Select 
-            value={newEvent.animalId} 
-            onValueChange={(value) => setNewEvent(prev => ({ ...prev, animalId: value }))}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleccionar animal" />
-            </SelectTrigger>
-            <SelectContent className="z-[9999]">
-              {animals.map(animal => (
-                <SelectItem key={animal.id} value={animal.id}>
-                  {animal.name} (#{animal.tag})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <AnimalMultiSelect
+          animals={animals}
+          selectedAnimalIds={newEvent.animalIds}
+          onChange={(selectedIds) => setNewEvent(prev => ({ ...prev, animalIds: selectedIds }))}
+          label="Animales (Opcional)"
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">

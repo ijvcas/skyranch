@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 export interface CalendarEvent {
   id: string;
   userId: string;
-  animalId?: string;
+  animalId?: string; // Keep for backward compatibility
+  animalIds?: string[]; // New field for multiple animals
   title: string;
   description?: string;
   eventType: 'vaccination' | 'checkup' | 'breeding' | 'feeding' | 'treatment' | 'appointment' | 'reminder';
@@ -38,6 +39,7 @@ export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
     id: event.id,
     userId: event.user_id,
     animalId: event.animal_id || undefined,
+    animalIds: event.animal_ids || undefined,
     title: event.title,
     description: event.description || undefined,
     eventType: event.event_type as CalendarEvent['eventType'],
@@ -87,6 +89,7 @@ export const addCalendarEvent = async (
     .insert({
       user_id: user.id,
       animal_id: event.animalId || null,
+      animal_ids: event.animalIds || null,
       title: event.title,
       description: event.description || null,
       event_type: event.eventType,
@@ -140,6 +143,7 @@ export const updateCalendarEvent = async (
     .from('calendar_events')
     .update({
       ...(updatedData.animalId !== undefined && { animal_id: updatedData.animalId || null }),
+      ...(updatedData.animalIds !== undefined && { animal_ids: updatedData.animalIds || null }),
       ...(updatedData.title && { title: updatedData.title }),
       ...(updatedData.description !== undefined && { description: updatedData.description || null }),
       ...(updatedData.eventType && { event_type: updatedData.eventType }),
