@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
 export type Permission = 
-  | 'animals_view' | 'animals_edit' | 'animals_delete' | 'animals_create'
+  | 'animals_view' | 'animals_edit' | 'animals_delete' | 'animals_create' | 'animals_declare_death'
   | 'lots_manage' | 'health_records' | 'breeding_records' | 'calendar_manage'
   | 'users_manage' | 'system_settings';
 
@@ -13,12 +13,12 @@ export type UserRole = 'admin' | 'manager' | 'worker';
 // New rule: Everyone can see everything, but only admin can access system settings
 const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   admin: [
-    'animals_view', 'animals_edit', 'animals_delete', 'animals_create',
+    'animals_view', 'animals_edit', 'animals_delete', 'animals_create', 'animals_declare_death',
     'lots_manage', 'health_records', 'breeding_records', 'calendar_manage',
     'users_manage', 'system_settings'
   ],
   manager: [
-    'animals_view', 'animals_edit', 'animals_delete', 'animals_create',
+    'animals_view', 'animals_edit', 'animals_delete', 'animals_create', 'animals_declare_death',
     'lots_manage', 'health_records', 'breeding_records', 'calendar_manage',
     'users_manage'
   ],

@@ -1,13 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { usePermissionCheck } from '@/hooks/usePermissions';
+import { AlertTriangle } from 'lucide-react';
+import DeathConfirmationDialog from './DeathConfirmationDialog';
 
 interface HealthStatusFormProps {
   formData: {
+    name?: string;
     healthStatus: string;
     notes: string;
     lifecycleStatus?: string;
@@ -23,6 +28,38 @@ const HealthStatusForm = ({
   onInputChange, 
   disabled 
 }: HealthStatusFormProps) => {
+  const [showDeathConfirmation, setShowDeathConfirmation] = useState(false);
+  const [pendingLifecycleChange, setPendingLifecycleChange] = useState<string | null>(null);
+  const { hasAccess: canDeclareDeaths } = usePermissionCheck('animals_declare_death');
+
+  const handleLifecycleChange = (value: string) => {
+    if (value === 'deceased' && formData.lifecycleStatus !== 'deceased') {
+      if (!canDeclareDeaths) {
+        return; // Permission check will be handled by the UI
+      }
+      setPendingLifecycleChange(value);
+      setShowDeathConfirmation(true);
+    } else {
+      onInputChange('lifecycleStatus', value);
+    }
+  };
+
+  const handleDeathConfirmation = () => {
+    if (pendingLifecycleChange) {
+      onInputChange('lifecycleStatus', pendingLifecycleChange);
+      setShowDeathConfirmation(false);
+      setPendingLifecycleChange(null);
+    }
+  };
+
+  const handleDeathCancel = () => {
+    setShowDeathConfirmation(false);
+    setPendingLifecycleChange(null);
+  };
+
+  const isDeceased = formData.lifecycleStatus === 'deceased';
+  const today = new Date().toISOString().split('T')[0];
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -52,17 +89,27 @@ const HealthStatusForm = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Label htmlFor="lifecycleStatus">Estado de Vida</Label>
+            {!canDeclareDeaths && !isDeceased && (
+              <Alert className="mb-2 border-yellow-200 bg-yellow-50">
+                <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-yellow-800">
+                  No tienes permisos para declarar fallecimientos. Solo administradores y gerentes pueden hacerlo.
+                </AlertDescription>
+              </Alert>
+            )}
             <Select 
               value={formData.lifecycleStatus || 'active'} 
-              onValueChange={(value) => onInputChange('lifecycleStatus', value)}
-              disabled={disabled}
+              onValueChange={handleLifecycleChange}
+              disabled={disabled || (!canDeclareDeaths && !isDeceased)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona el estado de vida" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[9999]">
                 <SelectItem value="active">Activo</SelectItem>
-                <SelectItem value="deceased">Fallecido</SelectItem>
+                <SelectItem value="deceased" disabled={!canDeclareDeaths && !isDeceased}>
+                  Fallecido
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -73,8 +120,15 @@ const HealthStatusForm = ({
               type="date"
               value={formData.dateOfDeath || ''}
               onChange={(e) => onInputChange('dateOfDeath', e.target.value)}
-              disabled={disabled || (formData.lifecycleStatus !== 'deceased')}
+              disabled={disabled || !isDeceased}
+              max={today}
+              required={isDeceased}
             />
+            {isDeceased && !formData.dateOfDeath && (
+              <p className="text-sm text-red-600 mt-1">
+                La fecha de fallecimiento es obligatoria
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="causeOfDeath">Causa</Label>
@@ -83,9 +137,15 @@ const HealthStatusForm = ({
               type="text"
               value={formData.causeOfDeath || ''}
               onChange={(e) => onInputChange('causeOfDeath', e.target.value)}
-              disabled={disabled || (formData.lifecycleStatus !== 'deceased')}
+              disabled={disabled || !isDeceased}
               placeholder="Motivo del fallecimiento"
+              required={isDeceased}
             />
+            {isDeceased && !formData.causeOfDeath && (
+              <p className="text-sm text-red-600 mt-1">
+                La causa de fallecimiento es obligatoria
+              </p>
+            )}
           </div>
         </div>
         
@@ -104,6 +164,13 @@ const HealthStatusForm = ({
             Escribe cualquier información adicional relevante sobre el animal.
           </p>
         </div>
+
+        <DeathConfirmationDialog
+          isOpen={showDeathConfirmation}
+          onClose={handleDeathCancel}
+          onConfirm={handleDeathConfirmation}
+          animalName={formData.name || 'el animal'}
+        />
       </CardContent>
     </Card>
   );
