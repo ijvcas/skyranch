@@ -150,20 +150,24 @@ function EnhancedCalendar({
     const hasEventsOnDate = hasEvents(date);
     const isToday = new Date().toDateString() === date.toDateString();
     
+    // Determine background class based on today and events
+    let bgClass = "";
+    if (isToday) {
+      bgClass = "bg-gradient-to-br from-blue-500 to-green-500 text-white";
+    } else if (hasEventsOnDate) {
+      bgClass = "bg-green-600 text-white";
+    }
+    
     return (
       <div 
         {...dayProps}
         className={cn(
           dayProps.className,
-          hasEventsOnDate && "relative"
+          bgClass,
+          "rounded-md"
         )}
       >
         {date.getDate()}
-        {hasEventsOnDate && (
-          <div 
-            className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-600 rounded-none" 
-          />
-        )}
       </div>
     );
   };
@@ -334,7 +338,7 @@ function EnhancedCalendar({
           ),
           day_range_end: "day-range-end",
           day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-          day_today: "bg-gradient-to-br from-blue-500 to-green-500 text-white font-bold rounded-md",
+          day_today: "",
           day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
           day_disabled: "text-muted-foreground opacity-50",
           day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
