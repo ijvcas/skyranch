@@ -161,8 +161,7 @@ function EnhancedCalendar({
         {date.getDate()}
         {hasEventsOnDate && (
           <div 
-            className="absolute top-1 right-1 w-2 h-2 bg-red-500/70 rounded-none" 
-            style={{ width: '8px', height: '8px' }}
+            className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-600 rounded-none" 
           />
         )}
       </div>
