@@ -46,7 +46,15 @@ const HealthStatusForm = ({
 
   const handleDeathConfirmation = () => {
     if (pendingLifecycleChange) {
+      console.log('🔄 Death confirmation - changing lifecycle status to:', pendingLifecycleChange);
       onInputChange('lifecycleStatus', pendingLifecycleChange);
+      
+      // Clear fields if reverting back to active
+      if (pendingLifecycleChange === 'active') {
+        onInputChange('dateOfDeath', '');
+        onInputChange('causeOfDeath', '');
+      }
+      
       setShowDeathConfirmation(false);
       setPendingLifecycleChange(null);
     }
