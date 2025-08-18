@@ -108,7 +108,14 @@ function EnhancedCalendar({
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
-    return events.some(event => event.eventDate.startsWith(dateStr));
+    return events.some(event => {
+      const eventDate = new Date(event.eventDate);
+      const eventYear = eventDate.getFullYear();
+      const eventMonth = String(eventDate.getMonth() + 1).padStart(2, '0');
+      const eventDay = String(eventDate.getDate()).padStart(2, '0');
+      const eventDateStr = `${eventYear}-${eventMonth}-${eventDay}`;
+      return eventDateStr === dateStr;
+    });
   };
 
   // Function to get event type for styling
@@ -118,7 +125,14 @@ function EnhancedCalendar({
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
-    const dateEvents = events.filter(event => event.eventDate.startsWith(dateStr));
+    const dateEvents = events.filter(event => {
+      const eventDate = new Date(event.eventDate);
+      const eventYear = eventDate.getFullYear();
+      const eventMonth = String(eventDate.getMonth() + 1).padStart(2, '0');
+      const eventDay = String(eventDate.getDate()).padStart(2, '0');
+      const eventDateStr = `${eventYear}-${eventMonth}-${eventDay}`;
+      return eventDateStr === dateStr;
+    });
     if (dateEvents.length === 0) return null;
     
     // Prioritize certain event types
@@ -135,16 +149,21 @@ function EnhancedCalendar({
   const DayWithEvents = ({ date, ...dayProps }: any) => {
     const hasEventsOnDate = hasEvents(date);
     const eventType = getEventType(date);
+    const isToday = new Date().toDateString() === date.toDateString();
     
     return (
       <div 
         {...dayProps}
         className={cn(
           dayProps.className,
-          hasEventsOnDate && "!bg-gradient-to-br !from-red-500 !to-red-600 !text-white hover:!from-red-600 hover:!to-red-700 !rounded-sm"
+          hasEventsOnDate && !isToday && "relative",
         )}
       >
         {date.getDate()}
+        {hasEventsOnDate && !isToday && (
+          <div className="absolute inset-0 bg-red-500/70 rounded-sm pointer-events-none" 
+               style={{ margin: '2px' }} />
+        )}
       </div>
     );
   };
@@ -315,7 +334,7 @@ function EnhancedCalendar({
           ),
           day_range_end: "day-range-end",
           day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-          day_today: "!bg-gradient-to-br !from-blue-500 !to-green-500 !text-white !rounded-sm",
+          day_today: "!bg-gradient-to-br !from-blue-500 !to-green-500 !text-white !rounded-sm relative z-10",
           day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
           day_disabled: "text-muted-foreground opacity-50",
           day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",

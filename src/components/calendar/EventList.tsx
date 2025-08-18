@@ -14,8 +14,20 @@ interface EventListProps {
 const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
   const eventsForSelectedDate = events.filter(event => {
     if (!selectedDate) return false;
+    
+    // Fix timezone issues by comparing dates properly
     const eventDate = new Date(event.eventDate);
-    return eventDate.toDateString() === selectedDate.toDateString();
+    const selectedYear = selectedDate.getFullYear();
+    const selectedMonth = selectedDate.getMonth();
+    const selectedDay = selectedDate.getDate();
+    
+    const eventYear = eventDate.getFullYear();
+    const eventMonth = eventDate.getMonth();
+    const eventDay = eventDate.getDate();
+    
+    return eventYear === selectedYear && 
+           eventMonth === selectedMonth && 
+           eventDay === selectedDay;
   });
 
   const getEventTypeColor = (type: string) => {
