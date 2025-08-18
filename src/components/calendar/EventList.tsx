@@ -12,6 +12,7 @@ interface EventListProps {
 }
 
 const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
+  // Filter events for the selected date, including ALL events (past, present, future)
   const eventsForSelectedDate = events.filter(event => {
     if (!selectedDate) return false;
     
