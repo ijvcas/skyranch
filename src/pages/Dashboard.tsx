@@ -9,6 +9,7 @@ import { checkPermission } from '@/services/permissionService';
 import { getCurrentUser } from '@/services/userService';
 import { dashboardBannerService } from '@/services/dashboardBannerService';
 import { networkDiagnostics } from '@/utils/networkDiagnostics';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import ImageUpload from '@/components/ImageUpload';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -101,28 +102,43 @@ const Dashboard = () => {
       try {
         console.log('🔍 Starting animal data fetch...');
         
-        // First, try to get current user to check if they're admin
-        let isAdmin = false;
+        // Use the auth context user instead of calling getCurrentUser()
+        if (!user) {
+          console.log('❌ No authenticated user found');
+          return [];
+        }
+        
+        console.log('👤 Auth user:', user.email);
+        
+        // Get user role from app_users table directly
+        let userRole = null;
         let shouldBypassPermissions = false;
         
         try {
-          const currentUser = await getCurrentUser();
-          console.log('👤 Current user:', currentUser?.email, 'Role:', currentUser?.role);
-          isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'manager';
+          const { data: appUser, error } = await supabase
+            .from('app_users')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle();
           
-          // If user sync issues, allow admins and managers to bypass permission checks
-          if (isAdmin) {
-            shouldBypassPermissions = true;
-            console.log('🔓 Admin/Manager detected - enabling fallback access');
+          if (!error && appUser) {
+            userRole = appUser.role;
+            console.log('👤 User role:', userRole);
+            
+            // If user is admin or manager, allow bypass
+            if (userRole === 'admin' || userRole === 'manager') {
+              shouldBypassPermissions = true;
+              console.log('🔓 Admin/Manager detected - enabling fallback access');
+            }
           }
         } catch (userError) {
-          console.error('❌ Error getting current user:', userError);
+          console.error('❌ Error getting user role:', userError);
         }
         
         // Try permission check, but don't block dashboard for new users
         if (!shouldBypassPermissions) {
           try {
-            await checkPermission('animals_view');
+            await checkPermission('animals_view', user);
             console.log('✅ Permission granted for animals_view');
           } catch (permissionError) {
             console.warn('⚠️ Permission check failed for animals_view, continuing in read-only mode:', permissionError);
