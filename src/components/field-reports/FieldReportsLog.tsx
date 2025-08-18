@@ -133,8 +133,7 @@ const FieldReportsLog = () => {
                     </div>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => handleViewDetails(report)}>
-                    <Eye className="w-4 h-4 mr-1" />
-                    Ver Detalles
+                    <Eye className="w-4 h-4" />
                   </Button>
                 </div>
 
@@ -167,11 +166,6 @@ const FieldReportsLog = () => {
                   )}
                 </div>
 
-                {report.notes && (
-                  <div className="mt-3 text-sm text-gray-700 bg-gray-50 p-2 rounded">
-                    {report.notes}
-                  </div>
-                )}
               </div>
             ))}
           </div>
