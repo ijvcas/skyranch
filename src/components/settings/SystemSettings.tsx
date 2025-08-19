@@ -1,51 +1,23 @@
 
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import SupportInfoSettings from './SupportInfoSettings';
-import DashboardBannerSettings from './DashboardBannerSettings';
-import TimezoneSettings from '@/components/TimezoneSettings';
-import VersionControlPanel from '@/components/version-management/VersionControlPanel';
-import VersionHistoryPanel from '@/components/version-management/VersionHistoryPanel';
-import FarmProfileSettings from './FarmProfileSettings';
-import UserActivityLogs from './UserActivityLogs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const SystemSettings = () => {
-  const { user } = useAuth();
-  const isAdmin = user?.email === 'jvcas@mac.com';
-
   return (
-    <div className="space-y-6">
-      {/* User Activity Logs */}
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Sistema</h3>
-        {/* User activity under System */}
-        {/* We keep sections modular to avoid bloating this file */}
-        <UserActivityLogs />
-      </div>
-
-      {/* Farm Profile Settings */}
-      <FarmProfileSettings />
-
-      {/* Support Info Panel at the top */}
-      <SupportInfoSettings isAdmin={isAdmin} />
-
-      {/* Dashboard Banner Settings */}
-      <DashboardBannerSettings />
-
-      {/* Timezone Settings */}
-      <TimezoneSettings />
-
-      {/* Version Management Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Gestión de Versiones</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <VersionControlPanel />
-          <VersionHistoryPanel />
+    <Card>
+      <CardHeader>
+        <CardTitle>Configuración del Sistema</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-center py-8">
+          <p className="text-gray-600">Configuración del sistema disponible próximamente.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Esta sección permitirá configurar aspectos generales del sistema.
+          </p>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
-
 };
 
 export default SystemSettings;

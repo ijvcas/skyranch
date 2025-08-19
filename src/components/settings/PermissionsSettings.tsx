@@ -1,13 +1,22 @@
 
 import React from 'react';
-import { TabsContent } from '@/components/ui/tabs';
-import PermissionsManager from '@/components/PermissionsManager';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const PermissionsSettings = () => {
   return (
-    <TabsContent value="permissions" className="space-y-6">
-      <PermissionsManager />
-    </TabsContent>
+    <Card>
+      <CardHeader>
+        <CardTitle>Permisos y Roles</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-center py-8">
+          <p className="text-gray-600">Configuración de permisos disponible próximamente.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Esta sección permitirá configurar roles y permisos de usuarios.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
