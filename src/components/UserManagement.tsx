@@ -6,6 +6,7 @@ import {
   getCurrentUser,
   type AppUser
 } from '@/services/userService';
+import { getUsersData } from '@/services/coreDataService';
 import EditUserDialog from './EditUserDialog';
 import UserManagementHeader from './user-management/UserManagementHeader';
 import AddUserForm from './user-management/AddUserForm';
@@ -35,14 +36,28 @@ const UserManagement = () => {
     syncUsersMutation
   } = useUserManagement();
 
-  // Optimized user queries with proper timeout and reasonable refetch
+  // Enhanced users fetching with core service fallback
   const { data: users = [], isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['app-users'],
-    queryFn: getAllUsers,
-    staleTime: 30000, // Data is fresh for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    queryKey: ['users-enhanced'],
+    queryFn: async () => {
+      console.log('👥 USER_MGMT: Fetching users...');
+      try {
+        const usersData = await getUsersData();
+        console.log('👥 USER_MGMT: Core service success:', usersData?.length || 0);
+        return usersData?.map(user => ({
+          ...user,
+          role: user.role as 'admin' | 'manager' | 'worker',
+          phone: user.phone || '',
+        })) || [];
+      } catch (error) {
+        console.error('👥 USER_MGMT: Core service failed, trying fallback');
+        return await getAllUsers();
+      }
+    },
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
     retry: 2,
-    refetchOnWindowFocus: false, // Don't refetch on focus to avoid spam
+    refetchOnWindowFocus: false,
     refetchOnMount: 'always',
   });
 
