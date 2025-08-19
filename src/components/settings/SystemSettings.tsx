@@ -2,25 +2,39 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Database, Shield, Clock } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { RefreshCw, Database, Shield, Clock, Users, Image, Building2, Code, Activity } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import UserActivityLogs from './UserActivityLogs';
+import DashboardBannerSettings from './DashboardBannerSettings';
+import FarmProfileSettings from './FarmProfileSettings';
+import DeploymentVersionDisplay from '../app-info/DeploymentVersionDisplay';
+import DatabaseVersionDisplay from '../app-info/DatabaseVersionDisplay';
 
 const SystemSettings = () => {
+  const queryClient = useQueryClient();
+
   const handleSystemRefresh = () => {
+    // Clear React Query cache before reload to ensure fresh data
+    queryClient.clear();
     window.location.reload();
   };
 
   const handleClearCache = () => {
+    // Clear all storage and React Query cache
     localStorage.clear();
     sessionStorage.clear();
+    queryClient.clear();
     window.location.reload();
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* System Status Overview */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Database className="w-5 h-5" />
+            <Activity className="w-5 h-5" />
             Estado del Sistema
           </CardTitle>
         </CardHeader>
@@ -30,7 +44,7 @@ const SystemSettings = () => {
               <p className="font-medium">Base de Datos</p>
               <p className="text-sm text-muted-foreground">Conexión activa a Supabase</p>
             </div>
-            <Badge variant="default" className="bg-green-100 text-green-800">
+            <Badge variant="default" className="bg-success text-success-foreground">
               Conectado
             </Badge>
           </div>
@@ -40,7 +54,7 @@ const SystemSettings = () => {
               <p className="font-medium">Autenticación</p>
               <p className="text-sm text-muted-foreground">Sistema de autenticación activo</p>
             </div>
-            <Badge variant="default" className="bg-green-100 text-green-800">
+            <Badge variant="default" className="bg-success text-success-foreground">
               Activo
             </Badge>
           </div>
@@ -58,6 +72,7 @@ const SystemSettings = () => {
         </CardContent>
       </Card>
 
+      {/* System Maintenance */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -92,6 +107,80 @@ const SystemSettings = () => {
               La limpieza de caché puede resolver problemas de carga.
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Version Information */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Code className="w-5 h-5" />
+              Información de Versiones
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DeploymentVersionDisplay />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              Base de Datos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DatabaseVersionDisplay />
+          </CardContent>
+        </Card>
+      </div>
+
+      <Separator />
+
+      {/* Farm Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
+            Configuración de la Finca
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FarmProfileSettings />
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Dashboard Customization */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Image className="w-5 h-5" />
+            Personalización del Dashboard
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DashboardBannerSettings />
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* User Activity Monitoring */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Monitoreo de Actividad
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <UserActivityLogs />
         </CardContent>
       </Card>
     </div>

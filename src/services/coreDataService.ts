@@ -1,18 +1,29 @@
 // Core data service to bypass RLS issues and provide reliable data access
 import { supabase } from '@/integrations/supabase/client';
 
-// Enhanced auth user check with session verification
+// Enhanced auth user check with session verification and caching
+let cachedUser: any = null;
+let cacheTime = 0;
+const CACHE_DURATION = 60000; // 1 minute cache to prevent excessive auth checks
+
 export const getAuthenticatedUser = async () => {
   try {
+    // Use cached user if still valid
+    if (cachedUser && (Date.now() - cacheTime) < CACHE_DURATION) {
+      return cachedUser;
+    }
+
     // First check if we have a session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError) {
       console.error('❌ Session error:', sessionError);
+      cachedUser = null;
       return null;
     }
     
     if (!session) {
       console.log('❌ No active session found');
+      cachedUser = null;
       return null;
     }
     
@@ -20,18 +31,23 @@ export const getAuthenticatedUser = async () => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) {
       console.error('❌ Auth error:', error);
+      cachedUser = null;
       return null;
     }
     
     if (!user) {
       console.log('❌ No user in session');
+      cachedUser = null;
       return null;
     }
     
     console.log('✅ Authenticated user:', user.email);
+    cachedUser = user;
+    cacheTime = Date.now();
     return user;
   } catch (error) {
     console.error('❌ Exception getting user:', error);
+    cachedUser = null;
     return null;
   }
 };

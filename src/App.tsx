@@ -31,11 +31,25 @@ import AppErrorBoundary from '@/components/common/AppErrorBoundary';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes
+      staleTime: 1000 * 60 * 15, // 15 minutes - longer cache to fix dashboard reloading
+      gcTime: 1000 * 60 * 60, // 60 minutes - keep data in memory longer
+      refetchOnWindowFocus: false, // Prevent refetch on focus to maintain data stability
+      retry: 3, // Add retry logic for failed requests
     },
   },
 });
+
+// Make queryClient globally accessible for cache management
+declare global {
+  interface Window {
+    queryClient: QueryClient;
+  }
+}
+
+// Assign to window for global access
+if (typeof window !== 'undefined') {
+  window.queryClient = queryClient;
+}
 
 function AppContent() {
   useDeepLinking();
