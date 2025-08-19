@@ -77,7 +77,7 @@ export const useAnimalEditLogic = () => {
         derivedNotes = `Creado automáticamente desde parto de ${motherName}${dateStr ? ' el ' + dateStr : ''}`;
       }
 
-      setFormData({
+      const newFormData = {
         name: animal.name || '',
         species: animal.species || '',
         breed: animal.breed || '',
@@ -106,7 +106,12 @@ export const useAnimalEditLogic = () => {
         paternalGreatGrandfatherMaternalId: animal.paternalGreatGrandfatherMaternalId || '',
         paternalGreatGrandmotherPaternalId: animal.paternalGreatGrandmotherPaternalId || '',
         paternalGreatGrandfatherPaternalId: animal.paternalGreatGrandfatherPaternalId || ''
-      });
+      };
+      
+      console.log('🔄 Initial formData set with lifecycleStatus:', newFormData.lifecycleStatus);
+      console.log('🔄 Animal lifecycleStatus from DB:', animal.lifecycleStatus);
+      
+      setFormData(newFormData);
     }
   }, [animal, getNameOnly, getDisplayName, animalNamesMap]);
 

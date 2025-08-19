@@ -28,6 +28,8 @@ const HealthStatusForm = ({
   onInputChange, 
   disabled 
 }: HealthStatusFormProps) => {
+  console.log('🏥 HealthStatusForm RENDERED with formData:', formData);
+  console.log('🏥 HealthStatusForm lifecycle status:', formData.lifecycleStatus);
   const [showDeathConfirmation, setShowDeathConfirmation] = useState(false);
   const [pendingLifecycleChange, setPendingLifecycleChange] = useState<string | null>(null);
   const { hasAccess: canDeclareDeaths } = usePermissionCheck('animals_declare_death');
