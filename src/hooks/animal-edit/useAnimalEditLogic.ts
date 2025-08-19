@@ -113,7 +113,7 @@ export const useAnimalEditLogic = () => {
       
       setFormData(newFormData);
     }
-  }, [animal, getNameOnly, getDisplayName]);
+  }, [animal]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {

@@ -19,21 +19,21 @@ export const useAnimalNames = () => {
   }, [allAnimals]);
 
   // Returns "Name (TAG)" for registered animals; otherwise returns the value as-is
-  const getDisplayName = (parentId: string | undefined): string | null => {
+  const getDisplayName = React.useCallback((parentId: string | undefined): string | null => {
     if (!parentId) return null;
     if (animalNamesMap[parentId]) {
       return animalNamesMap[parentId];
     }
     return parentId;
-  };
+  }, [animalNamesMap]);
 
   // Returns just the name for registered animals; otherwise returns the value as-is
-  const getNameOnly = (parentId: string | undefined): string | null => {
+  const getNameOnly = React.useCallback((parentId: string | undefined): string | null => {
     if (!parentId) return null;
     const found = allAnimals.find(a => a.id === parentId);
     if (found) return found.name;
     return parentId;
-  };
+  }, [allAnimals]);
 
   return {
     getDisplayName,
