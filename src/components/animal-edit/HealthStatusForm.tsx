@@ -117,30 +117,38 @@ const HealthStatusForm = ({
                 </AlertDescription>
               </Alert>
             )}
-            <Select 
-              value={formData.lifecycleStatus || 'active'} 
-              onValueChange={(value) => {
-                console.log('🔄 Select onValueChange triggered with value:', value);
-                handleLifecycleChange(value);
-              }}
-              disabled={disabled || (!canDeclareDeaths && !isDeceased)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona el estado de vida" />
-              </SelectTrigger>
-              <SelectContent className="z-[9999] bg-white border border-gray-200 shadow-lg">
-                <SelectItem value="active">Activo</SelectItem>
-                <SelectItem 
-                  value="deceased" 
-                  disabled={!canDeclareDeaths && !isDeceased}
-                  className="text-red-600"
+            <div className="relative">
+              <Select 
+                value={formData.lifecycleStatus || 'active'} 
+                onValueChange={(value) => {
+                  console.log('🔄 Select onValueChange triggered with value:', value);
+                  handleLifecycleChange(value);
+                }}
+                disabled={disabled || (!canDeclareDeaths && !isDeceased)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona el estado de vida" />
+                </SelectTrigger>
+                <SelectContent 
+                  className="z-[9999] bg-white border border-gray-200 shadow-lg min-w-[200px]"
+                  position="popper"
+                  sideOffset={5}
                 >
-                  Fallecido
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                  <SelectItem value="active" className="cursor-pointer hover:bg-gray-100">
+                    Activo
+                  </SelectItem>
+                  <SelectItem 
+                    value="deceased" 
+                    disabled={!canDeclareDeaths && !isDeceased}
+                    className="cursor-pointer hover:bg-red-50 text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Fallecido
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {/* Debug info */}
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-50 rounded">
               Debug: Current value = {formData.lifecycleStatus || 'active'} | canDeclareDeaths = {canDeclareDeaths.toString()} | isDeceased = {isDeceased.toString()}
             </div>
           </div>
