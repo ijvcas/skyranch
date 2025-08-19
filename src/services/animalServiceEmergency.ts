@@ -20,9 +20,11 @@ export const getAnimalsEmergency = async (userIdOverride?: string) => {
     console.log('✅ EMERGENCY: Using user ID:', userId);
     
     // Get stats directly
+    console.log('📊 EMERGENCY: Fetching stats for user:', userId);
     const { data: statsData, error: statsError } = await supabase.rpc('get_animal_stats_bypass', {
       target_user_id: userId
     });
+    console.log('📊 EMERGENCY: Stats result:', { statsData, statsError });
     
     if (statsError) {
       console.error('❌ EMERGENCY: Stats bypass error:', statsError);
@@ -32,10 +34,12 @@ export const getAnimalsEmergency = async (userIdOverride?: string) => {
     console.log('✅ EMERGENCY: Got bypass stats:', statsData);
     
     // Get animals directly
+    console.log('🐄 EMERGENCY: Fetching animals for user:', userId);
     const { data: animalsData, error: animalsError } = await supabase.rpc('get_animals_list_bypass', {
       target_user_id: userId,
       max_limit: 100
     });
+    console.log('🐄 EMERGENCY: Animals result:', { animalsData, animalsError, count: animalsData?.length });
     
     if (animalsError) {
       console.error('❌ EMERGENCY: Animals bypass error:', animalsError);
