@@ -33,12 +33,16 @@ const SessionTimeoutWarning: React.FC = () => {
     };
 
     const handleSessionExpired = async () => {
-      await logSecurityEvent('session_expired', undefined, {
-        reason: 'Session timeout',
-        lastActivity: getLastActivity().toISOString()
-      });
-      
-      await supabase.auth.signOut();
+      try {
+        await logSecurityEvent('session_expired', undefined, {
+          reason: 'Session timeout',
+          lastActivity: getLastActivity().toISOString()
+        });
+        
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.warn('Failed to log session expiry:', error);
+      }
       window.location.href = '/login';
     };
 
@@ -68,20 +72,28 @@ const SessionTimeoutWarning: React.FC = () => {
     };
   }, [logSecurityEvent]);
 
-  const handleExtendSession = () => {
+  const handleExtendSession = async () => {
     updateLastActivity();
     setShowWarning(false);
-    logSecurityEvent('session_extended', undefined, {
-      reason: 'User extended session',
-      extendedAt: new Date().toISOString()
-    });
+    try {
+      await logSecurityEvent('session_extended', undefined, {
+        reason: 'User extended session',
+        extendedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.warn('Failed to log session extension:', error);
+    }
   };
 
   const handleSignOut = async () => {
-    await logSecurityEvent('manual_logout', undefined, {
-      reason: 'User chose to sign out from session warning'
-    });
-    await supabase.auth.signOut();
+    try {
+      await logSecurityEvent('manual_logout', undefined, {
+        reason: 'User chose to sign out from session warning'
+      });
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.warn('Failed to log manual logout:', error);
+    }
     window.location.href = '/login';
   };
 

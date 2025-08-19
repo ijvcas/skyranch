@@ -22,32 +22,40 @@ const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) => {
   const { logSecurityEvent } = useSecurity();
 
   useEffect(() => {
-    // Log user connection
+    // Log user connection with error handling
     const logConnection = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await logSecurityEvent('user_session_start', user.id, {
-          connectionTime: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          platform: navigator.platform
-        });
-        updateLastActivity();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await logSecurityEvent('user_session_start', user.id, {
+            connectionTime: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            platform: navigator.platform
+          });
+          updateLastActivity();
+        }
+      } catch (error) {
+        console.warn('Failed to log user connection:', error);
       }
     };
 
-    // Monitor auth state changes
+    // Monitor auth state changes with error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        await logSecurityEvent('user_signed_in', session.user.id, {
-          event,
-          timestamp: new Date().toISOString()
-        });
-        updateLastActivity();
-      } else if (event === 'SIGNED_OUT') {
-        await logSecurityEvent('user_signed_out', undefined, {
-          event,
-          timestamp: new Date().toISOString()
-        });
+      try {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await logSecurityEvent('user_signed_in', session.user.id, {
+            event,
+            timestamp: new Date().toISOString()
+          });
+          updateLastActivity();
+        } else if (event === 'SIGNED_OUT') {
+          await logSecurityEvent('user_signed_out', undefined, {
+            event,
+            timestamp: new Date().toISOString()
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to log auth state change:', error);
       }
     });
 
