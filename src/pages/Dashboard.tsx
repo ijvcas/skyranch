@@ -94,16 +94,44 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // SIMPLE WORKING APPROACH - NO DATABASE CALLS THAT HANG
-  const totalAnimals = 0;
-  const speciesCounts = {};
-  const isLoading = false;
-  const error = null;
-
-  const refetch = async () => {
-    // Simple refetch that doesn't hang
-    console.log('✅ Refetch requested - dashboard working');
-  };
+  // Use the existing optimized function that works
+  const { data: dashboardStats, isLoading, error, refetch } = useQuery({
+    queryKey: ['dashboard', 'animal-stats'],
+    queryFn: async () => {
+      console.log('🔍 Starting dashboard stats fetch...');
+      
+      if (!user) {
+        console.log('❌ No authenticated user found');
+        return { species_counts: {}, total_count: 0 };
+      }
+      
+      console.log('👤 Auth user:', user.email);
+      
+      try {
+        // Use the existing working function that was already in the database
+        console.log('🔄 Calling get_dashboard_animal_stats function...');
+        const { data, error } = await supabase.rpc('get_dashboard_animal_stats');
+        
+        if (error) {
+          console.error('❌ RPC Error:', error);
+          return { species_counts: {}, total_count: 0 };
+        }
+        
+        console.log('✅ Dashboard stats fetched successfully:', data);
+        return data[0] || { species_counts: {}, total_count: 0 };
+      } catch (error) {
+        console.error('❌ Error fetching dashboard stats:', error);
+        return { species_counts: {}, total_count: 0 };
+      }
+    },
+    enabled: !!user,
+    staleTime: 30000,
+    gcTime: 300000,
+    retry: 1,
+    retryDelay: 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
 
   // Force a complete refresh of all data with user sync retry
   const handleForceRefresh = async () => {
@@ -138,8 +166,9 @@ const Dashboard = () => {
     }
   };
 
-  // Use simple static values - dashboard renders immediately
-  // Data can be added back later once core functionality works
+  // Extract stats from the optimized query result
+  const totalAnimals = dashboardStats?.total_count || 0;
+  const speciesCounts = dashboardStats?.species_counts || {};
 
   const handleSignOut = async () => {
     try {
@@ -158,10 +187,9 @@ const Dashboard = () => {
     }
   };
 
-  // DASHBOARD RENDERS IMMEDIATELY - NO LOADING STATES
-  // if (isLoading) {
-  //   return <DashboardLoadingState userEmail={user?.email} />;
-  // }
+  if (isLoading) {
+    return <DashboardLoadingState userEmail={user?.email} />;
+  }
 
   if (error) {
     console.warn('⚠️ Non-blocking dashboard error:', error);

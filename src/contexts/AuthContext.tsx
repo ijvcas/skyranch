@@ -169,11 +169,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     console.log('🚪 [AUTH CONTEXT] Signing out...');
-    // Log before signing out so RLS still allows insert
-    await logConnection('signed_out');
-    await supabase.auth.signOut();
-    localStorage.removeItem('supabase.auth.token');
-    sessionStorage.clear();
+    try {
+      // Log before signing out so RLS still allows insert
+      await logConnection('signed_out');
+      console.log('✅ [AUTH CONTEXT] Connection logged');
+    } catch (logError) {
+      console.warn('⚠️ [AUTH CONTEXT] Connection log failed:', logError);
+    }
+    
+    try {
+      console.log('🔄 [AUTH CONTEXT] Calling supabase.auth.signOut()...');
+      await supabase.auth.signOut();
+      console.log('✅ [AUTH CONTEXT] Supabase signOut completed');
+    } catch (signOutError) {
+      console.error('❌ [AUTH CONTEXT] SignOut error:', signOutError);
+    }
+    
+    try {
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.clear();
+      console.log('🧹 [AUTH CONTEXT] Storage cleared');
+    } catch (storageError) {
+      console.warn('⚠️ [AUTH CONTEXT] Storage clear failed:', storageError);
+    }
+    
+    // Force reset state immediately
+    setSession(null);
+    setUser(null);
+    console.log('🔄 [AUTH CONTEXT] Auth state reset manually');
   };
 
   const resetPassword = async (email: string) => {
