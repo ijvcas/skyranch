@@ -67,21 +67,33 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
 // Lean fetch for Dashboard stats: only id and species
 export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'species'>>> => {
   try {
+    console.log('🔍 Starting getAnimalsLean...');
+    
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    console.log('👤 getAnimalsLean user check:', user?.email);
+    
+    if (!user) {
+      console.log('❌ No user in getAnimalsLean');
+      return [];
+    }
 
+    console.log('🔄 Executing animals query...');
     const { data, error } = await (supabase
       .from('animals') as any)
       .select('id,species')
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
+    console.log('📊 Animals query result:', { data: data?.length, error });
+
     if (error) {
       console.error('❌ Error in getAnimalsLean:', error);
       return [];
     }
 
-    return (data || []).map(a => ({ id: a.id, species: a.species }));
+    const result = (data || []).map(a => ({ id: a.id, species: a.species }));
+    console.log('✅ getAnimalsLean completed successfully:', result.length);
+    return result;
   } catch (e) {
     console.error('❌ Unexpected error in getAnimalsLean:', e);
     return [];

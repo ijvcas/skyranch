@@ -228,7 +228,8 @@ const Dashboard = () => {
     }
   };
 
-  if (isLoading) {
+  // Temporarily disable loading state to debug the issue
+  if (false && isLoading) {
     return <DashboardLoadingState userEmail={user?.email} />;
   }
 
