@@ -1,36 +1,28 @@
 import { supabase } from '@/integrations/supabase/client';
 
 // EMERGENCY FIXED: Use new database functions with explicit user ID
-export const getAnimalsEmergency = async () => {
+export const getAnimalsEmergency = async (userIdOverride?: string) => {
   try {
     console.log('🚨 EMERGENCY FIXED: Using explicit user ID functions...');
     
-    // Get the current user ID with timeout
-    const userPromise = supabase.auth.getUser();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Auth timeout')), 5000)
-    );
+    // Use passed user ID or get from session
+    let userId = userIdOverride;
+    if (!userId) {
+      const { data: { session } } = await supabase.auth.getSession();
+      userId = session?.user?.id;
+    }
     
-    const { data: { user } } = await Promise.race([userPromise, timeoutPromise]) as any;
-    if (!user) {
-      console.error('❌ EMERGENCY: No authenticated user');
+    if (!userId) {
+      console.error('❌ EMERGENCY: No user ID available');
       return { animals: [], stats: { total_count: 0, species_counts: {} } };
     }
     
-    console.log('✅ EMERGENCY: User authenticated:', user.id);
+    console.log('✅ EMERGENCY: Using user ID:', userId);
     
-    // Get stats with timeout
-    const statsPromise = supabase.rpc('get_animal_stats_bypass', {
-      target_user_id: user.id
+    // Get stats directly
+    const { data: statsData, error: statsError } = await supabase.rpc('get_animal_stats_bypass', {
+      target_user_id: userId
     });
-    const statsTimeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Stats timeout')), 10000)
-    );
-    
-    const { data: statsData, error: statsError } = await Promise.race([
-      statsPromise, 
-      statsTimeoutPromise
-    ]) as any;
     
     if (statsError) {
       console.error('❌ EMERGENCY: Stats bypass error:', statsError);
@@ -39,19 +31,11 @@ export const getAnimalsEmergency = async () => {
     
     console.log('✅ EMERGENCY: Got bypass stats:', statsData);
     
-    // Get animals with timeout
-    const animalsPromise = supabase.rpc('get_animals_list_bypass', {
-      target_user_id: user.id,
+    // Get animals directly
+    const { data: animalsData, error: animalsError } = await supabase.rpc('get_animals_list_bypass', {
+      target_user_id: userId,
       max_limit: 100
     });
-    const animalsTimeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Animals timeout')), 10000)
-    );
-    
-    const { data: animalsData, error: animalsError } = await Promise.race([
-      animalsPromise, 
-      animalsTimeoutPromise
-    ]) as any;
     
     if (animalsError) {
       console.error('❌ EMERGENCY: Animals bypass error:', animalsError);

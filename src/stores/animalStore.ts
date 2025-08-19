@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getAnimalsEmergency } from '@/services/animalServiceEmergency';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Animal {
   id: string;
@@ -73,7 +74,9 @@ export const useAnimalStore = create<AnimalStore>((set, get) => ({
     set({ isLoading: true });
     try {
       console.log('🚨 Using FIXED emergency animal service...');
-      const result = await getAnimalsEmergency();
+      // Get user ID from current session
+      const { data: { session } } = await supabase.auth.getSession();
+      const result = await getAnimalsEmergency(session?.user?.id);
       console.log('✅ FIXED emergency fetch completed:', result);
       
       // Convert to store format  

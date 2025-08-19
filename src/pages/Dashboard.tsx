@@ -23,10 +23,10 @@ const Dashboard = () => {
       console.log('🔄 Dashboard: Loading animals for authenticated user');
       loadAnimals();
       
-      // Also load stats
+      // Also load stats with user ID
       const loadStats = async () => {
         try {
-          const result = await getAnimalsEmergency();
+          const result = await getAnimalsEmergency(user?.id);
           setStats(result.stats);
         } catch (error) {
           console.error('Failed to load stats:', error);
@@ -40,9 +40,9 @@ const Dashboard = () => {
     console.log('🔄 DASHBOARD: Force refresh triggered!');
     loadAnimals();
     
-    // Also refresh stats
+    // Also refresh stats with user ID
     try {
-      const result = await getAnimalsEmergency();
+      const result = await getAnimalsEmergency(user?.id);
       setStats(result.stats);
     } catch (error) {
       console.error('Failed to refresh stats:', error);
