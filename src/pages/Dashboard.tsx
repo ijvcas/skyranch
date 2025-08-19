@@ -1,15 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAnimalsLean } from '@/services/animalService';
-import { checkPermission } from '@/services/permissionService';
 import { getCurrentUser } from '@/services/userService';
 import { dashboardBannerService } from '@/services/dashboardBannerService';
 import { networkDiagnostics } from '@/utils/networkDiagnostics';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import ImageUpload from '@/components/ImageUpload';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -28,6 +25,7 @@ const Dashboard = () => {
   const queryClient = useQueryClient();
   const [bannerImage, setBannerImage] = useState<string>('/lovable-uploads/d3c33c19-f7cd-441e-884f-371ed6481179.png');
   const [userName, setUserName] = useState<string>('');
+  
   // SEO metadata
   useEffect(() => {
     applySEO({
@@ -95,80 +93,37 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Enhanced query with admin fallback and better error handling
+  // Simplified query with just essential functionality
   const { data: allAnimals = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['animals', 'all-users'],
+    queryKey: ['animals', 'dashboard-lean'],
     queryFn: async () => {
+      console.log('🔍 Starting dashboard animal data fetch...');
+      
+      if (!user) {
+        console.log('❌ No authenticated user found');
+        return [];
+      }
+      
+      console.log('👤 Auth user:', user.email);
+      
       try {
-        console.log('🔍 Starting animal data fetch...');
-        
-        // Use the auth context user instead of calling getCurrentUser()
-        if (!user) {
-          console.log('❌ No authenticated user found');
-          return [];
-        }
-        
-        console.log('👤 Auth user:', user.email);
-        
-        // Get user role from app_users table directly
-        let userRole = null;
-        let shouldBypassPermissions = false;
-        
-        try {
-          const { data: appUser, error } = await supabase
-            .from('app_users')
-            .select('role')
-            .eq('id', user.id)
-            .maybeSingle();
-          
-          if (!error && appUser) {
-            userRole = appUser.role;
-            console.log('👤 User role:', userRole);
-            
-            // If user is admin or manager, allow bypass
-            if (userRole === 'admin' || userRole === 'manager') {
-              shouldBypassPermissions = true;
-              console.log('🔓 Admin/Manager detected - enabling fallback access');
-            }
-          }
-        } catch (userError) {
-          console.error('❌ Error getting user role:', userError);
-        }
-        
-        // Try permission check, but don't block dashboard for new users
-        if (!shouldBypassPermissions) {
-          try {
-            await checkPermission('animals_view', user);
-            console.log('✅ Permission granted for animals_view');
-          } catch (permissionError) {
-            console.warn('⚠️ Permission check failed for animals_view, continuing in read-only mode:', permissionError);
-            // Continue without throwing to avoid blocking first login experiences
-          }
-        } else {
-          console.log('🔓 Bypassing permission check for admin/manager');
-        }
-        
         console.log('🔄 Fetching animals (lean) data...');
         const animals = await getAnimalsLean();
         console.log('✅ Animals (lean) fetched successfully:', animals.length);
         return animals;
       } catch (error) {
         console.error('❌ Error fetching animals:', error);
-        // Don’t break the dashboard for transient or permission issues
+        // Return empty array to avoid breaking dashboard
         return [];
       }
     },
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
-    retry: (failureCount, error) => {
-      // Only retry up to 2 times for certain errors
-      if (failureCount >= 2) return false;
-      return true;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    retry: 1, // Single retry
+    retryDelay: 2000, // 2 second delay
     refetchOnMount: true,
-    refetchOnWindowFocus: false, // Disable to prevent excessive requests
+    refetchOnWindowFocus: false,
   });
 
   // Force a complete refresh of all data with user sync retry
@@ -228,8 +183,7 @@ const Dashboard = () => {
     }
   };
 
-  // Temporarily disable loading state to debug the issue
-  if (false && isLoading) {
+  if (isLoading) {
     return <DashboardLoadingState userEmail={user?.email} />;
   }
 

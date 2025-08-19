@@ -69,8 +69,7 @@ const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) => {
   return (
     <SecurityContext.Provider value={{ isSecurityEnabled: true }}>
       {children}
-      {/* Temporarily disable session timeout during debugging */}
-      {false && <SessionTimeoutWarning />}
+      <SessionTimeoutWarning />
     </SecurityContext.Provider>
   );
 };
