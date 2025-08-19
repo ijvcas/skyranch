@@ -126,10 +126,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await new Promise(resolve => setTimeout(resolve, 500));
     }
     
+    console.log('🔄 [AUTH CONTEXT] Calling supabase.auth.signInWithPassword...');
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
+    
+    console.log('📋 [AUTH CONTEXT] signInWithPassword result:', { error });
     
     if (error) {
       console.error('❌ [AUTH CONTEXT] Sign in error for', email, ':', error);
@@ -142,7 +145,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       console.log('✅ [AUTH CONTEXT] Sign in successful for:', email);
       // Lightweight connection log
-      await logConnection('signed_in', { method: 'password' });
+      try {
+        await logConnection('signed_in', { method: 'password' });
+      } catch (logError) {
+        console.warn('⚠️ [AUTH CONTEXT] Connection log failed:', logError);
+      }
+      
       try {
         const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
         if (syncError) {
@@ -286,14 +294,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('🧹 Clearing corrupted session data...');
     
     try {
-      // Sign out completely
+      // Sign out completely first
+      console.log('🔄 Calling supabase.auth.signOut()...');
       await supabase.auth.signOut();
       
       // Clear all storage
+      console.log('🗑️ Clearing localStorage and sessionStorage...');
       localStorage.clear();
       sessionStorage.clear();
       
-      // Clear specific Supabase keys
+      // Clear specific Supabase keys (in case clear() didn't work)
       const allKeys = Object.keys(localStorage);
       allKeys.forEach(key => {
         if (key.includes('supabase') || key.includes('auth')) {
@@ -303,6 +313,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       // Reset auth state
+      console.log('🔄 Resetting auth state...');
       setSession(null);
       setUser(null);
       
