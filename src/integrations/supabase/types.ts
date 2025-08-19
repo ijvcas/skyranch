@@ -1121,6 +1121,7 @@ export type Database = {
           is_main_property: boolean | null
           name: string
           updated_at: string
+          user_id: string
           zoom_level: number | null
         }
         Insert: {
@@ -1133,6 +1134,7 @@ export type Database = {
           is_main_property?: boolean | null
           name: string
           updated_at?: string
+          user_id: string
           zoom_level?: number | null
         }
         Update: {
@@ -1145,6 +1147,7 @@ export type Database = {
           is_main_property?: boolean | null
           name?: string
           updated_at?: string
+          user_id?: string
           zoom_level?: number | null
         }
         Relationships: []
