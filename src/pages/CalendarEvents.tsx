@@ -45,7 +45,7 @@ const CalendarEvents = () => {
         );
 
         const eventsPromise = getAllEvents();
-        const result = await Promise.race([eventsPromise, timeoutPromise]);
+        const result = await Promise.race([eventsPromise, timeoutPromise]) as any[];
         
         console.log('📅 CALENDAR: Events fetched:', result?.length || 0);
         return result || [];
@@ -387,19 +387,24 @@ const CalendarEvents = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Event Form Dialog */}
+        {/* Simple Event Form */}
         {showEventForm && (
-          <EventForm
-            isOpen={showEventForm}
-            onOpenChange={setShowEventForm}
-            onSuccess={() => {
-              refetch();
-              toast({
-                title: "Evento creado",
-                description: "El evento ha sido programado exitosamente",
-              });
-            }}
-          />
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-background border rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Crear Nuevo Evento</h3>
+              <p className="text-muted-foreground mb-4">
+                Función de calendario en desarrollo. Por ahora puedes cerrar este diálogo.
+              </p>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setShowEventForm(false)}
+                  variant="outline"
+                >
+                  Cerrar
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </ErrorBoundary>

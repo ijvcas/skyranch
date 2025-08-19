@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Cow, Heart, Calendar, MapPin, Plus, Search, Filter, RefreshCw } from 'lucide-react';
+import { Heart, Calendar, MapPin, Plus, Search, Filter, RefreshCw } from 'lucide-react';
 import { getAllAnimals } from '@/services/animalService';
 import { getAnimalsData } from '@/services/coreDataService';
 import AnimalCard from '@/components/animals/AnimalCard';
@@ -125,7 +125,7 @@ const Animals = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
-              <Cow className="w-5 h-5" />
+              <Heart className="w-5 h-5" />
               Error al cargar animales
             </CardTitle>
             <CardDescription>
@@ -229,7 +229,7 @@ const Animals = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las especies</SelectItem>
-                  {uniqueSpecies.map(species => (
+                  {uniqueSpecies.map((species: string) => (
                     <SelectItem key={species} value={species}>
                       {species}
                     </SelectItem>
@@ -257,7 +257,7 @@ const Animals = () => {
         {/* Animals Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredAnimals.length > 0 ? (
-            filteredAnimals.map((animal) => (
+            filteredAnimals.map((animal: any) => (
               <ErrorBoundary key={animal.id}>
                 <AnimalCard animal={animal} />
               </ErrorBoundary>
@@ -266,7 +266,7 @@ const Animals = () => {
             <div className="col-span-full">
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-8">
-                  <Cow className="w-12 h-12 text-muted-foreground mb-4" />
+                  <Heart className="w-12 h-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">
                     {searchTerm || speciesFilter !== 'all' || healthFilter !== 'all' 
                       ? 'No se encontraron animales' 
