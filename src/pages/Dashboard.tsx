@@ -94,28 +94,58 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Simple fallback approach - no database calls, just mock data for now
+  // Use the existing optimized function that works
   const { data: dashboardStats, isLoading, error, refetch } = useQuery({
-    queryKey: ['dashboard', 'simple-stats'],
+    queryKey: ['dashboard', 'animal-stats'],
     queryFn: async () => {
-      console.log('🔍 Using simple stats approach...');
+      console.log('🔍 Starting dashboard stats fetch...');
       
       if (!user) {
+        console.log('❌ No authenticated user found');
         return { species_counts: {}, total_count: 0 };
       }
       
-      // Return simple mock data to get the dashboard working
-      // This can be enhanced later once the core loading issue is resolved
-      return {
-        species_counts: { bovino: 5, ovino: 3, caprino: 2 },
-        total_count: 10
-      };
+      console.log('👤 Auth user:', user.email);
+      
+      try {
+        // Use the existing working function that was already in the database
+        console.log('🔄 Calling get_animals_lean_with_timeout function...');
+        const { data, error } = await supabase.rpc('get_animals_lean_with_timeout');
+        
+        if (error) {
+          console.error('❌ RPC Error:', error);
+          return { species_counts: {}, total_count: 0 };
+        }
+        
+        if (!data || data.length === 0) {
+          console.log('📊 No animals found, returning empty stats');
+          return { species_counts: {}, total_count: 0 };
+        }
+        
+        // Process the lean data to create stats
+        const speciesCounts = data.reduce((counts: any, animal: any) => {
+          counts[animal.species] = (counts[animal.species] || 0) + 1;
+          return counts;
+        }, {});
+        
+        const result = {
+          species_counts: speciesCounts,
+          total_count: data.length
+        };
+        
+        console.log('✅ Dashboard stats calculated successfully:', result);
+        return result;
+      } catch (error) {
+        console.error('❌ Error fetching dashboard stats:', error);
+        return { species_counts: {}, total_count: 0 };
+      }
     },
     enabled: !!user,
-    staleTime: 5000,
-    gcTime: 30000,
+    staleTime: 30000,
+    gcTime: 300000,
     retry: 1,
-    refetchOnMount: false,
+    retryDelay: 1000,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 

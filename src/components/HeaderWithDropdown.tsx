@@ -87,15 +87,12 @@ const HeaderWithDropdown = () => {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Button
-                  variant="ghost"
-                  onClick={handleSignOut}
-                  className="flex items-center px-3 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 cursor-pointer w-full justify-start"
-                >
-                  <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
-                  Cerrar Sesión
-                </Button>
+              <DropdownMenuItem 
+                onClick={handleSignOut}
+                className="flex items-center px-3 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 cursor-pointer w-full"
+              >
+                <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
+                Cerrar Sesión
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
