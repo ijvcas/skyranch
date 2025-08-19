@@ -35,7 +35,8 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
     };
 
     checkTabPermissions();
-  }, [checkPermission, activeTab, onTabChange]);
+    // Remove checkPermission from dependencies to prevent infinite loops
+  }, []); // Only run once on mount
 
   return (
     <div className="page-with-logo">
