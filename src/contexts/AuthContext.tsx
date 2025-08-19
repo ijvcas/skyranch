@@ -120,11 +120,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     console.log('🔐 [AUTH CONTEXT] Attempting sign in for:', email);
 
-    if (email === 'jvcas@mac.com') {
-      console.log('🧹 [AUTH CONTEXT] Special handling for jvcas@mac.com - clearing corrupted session first');
-      await clearCorruptedSession();
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
+    // Temporarily bypass session clearing to fix login issue
+    // if (email === 'jvcas@mac.com') {
+    //   console.log('🧹 [AUTH CONTEXT] Special handling for jvcas@mac.com - clearing corrupted session first');
+    //   await clearCorruptedSession();
+    //   await new Promise(resolve => setTimeout(resolve, 500));
+    // }
     
     console.log('🔄 [AUTH CONTEXT] Calling supabase.auth.signInWithPassword...');
     const { error } = await supabase.auth.signInWithPassword({
