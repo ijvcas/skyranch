@@ -5,40 +5,41 @@ import UserSettings from '@/components/settings/UserSettings';
 import BackupSettings from '@/components/settings/BackupSettings';
 import PermissionsSettings from '@/components/settings/PermissionsSettings';
 import SystemSettings from '@/components/settings/SystemSettings';
-import PermissionGuard from '@/components/PermissionGuard';
 import { TabsContent } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('users');
 
   return (
-    <PermissionGuard permission="system_settings">
-      <SettingsLayout activeTab={activeTab} onTabChange={setActiveTab}>
-        <TabsContent value="users" className="mt-8">
-          <PermissionGuard permission="users_manage">
-            <UserSettings />
-          </PermissionGuard>
-        </TabsContent>
-        
-        <TabsContent value="backup" className="mt-8">
-          <PermissionGuard permission="system_settings">
-            <BackupSettings />
-          </PermissionGuard>
-        </TabsContent>
-        
-        <TabsContent value="permissions" className="mt-8">
-          <PermissionGuard permission="system_settings">
-            <PermissionsSettings />
-          </PermissionGuard>
-        </TabsContent>
-        
-        <TabsContent value="system" className="mt-8">
-          <PermissionGuard permission="system_settings">
-            <SystemSettings />
-          </PermissionGuard>
-        </TabsContent>
-      </SettingsLayout>
-    </PermissionGuard>
+    <div className="container mx-auto p-6">
+      <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Configuración</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SettingsLayout activeTab={activeTab} onTabChange={setActiveTab}>
+              <TabsContent value="users" className="mt-8">
+                <UserSettings />
+              </TabsContent>
+              
+              <TabsContent value="backup" className="mt-8">
+                <BackupSettings />
+              </TabsContent>
+              
+              <TabsContent value="permissions" className="mt-8">
+                <PermissionsSettings />
+              </TabsContent>
+              
+              <TabsContent value="system" className="mt-8">
+                <SystemSettings />
+              </TabsContent>
+            </SettingsLayout>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
