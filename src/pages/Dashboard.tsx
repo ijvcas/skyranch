@@ -112,11 +112,17 @@ const Dashboard = () => {
         console.log('🔍 Querying animals table for user:', user.id);
         const { data: animals, error } = await supabase
           .from('animals')
-          .select('species, id, name')
-          .eq('user_id', user.id)
-          .neq('lifecycle_status', 'deceased');
+          .select('species, id, name, lifecycle_status')
+          .eq('user_id', user.id);
+          // Removed the lifecycle_status filter to see all animals first
 
-        console.log('📊 Query result:', { animals, error, count: animals?.length });
+        console.log('📊 Raw query result:', { animals, error, count: animals?.length });
+        console.log('📊 All animals for user:', animals?.map(a => ({ 
+          id: a.id, 
+          name: a.name, 
+          species: a.species, 
+          lifecycle_status: a.lifecycle_status 
+        })));
 
         if (error) {
           console.error('❌ Direct animals query error:', error);
@@ -124,22 +130,16 @@ const Dashboard = () => {
         }
 
         if (!animals || animals.length === 0) {
-          console.log('📊 No animals found for user - checking if any animals exist at all');
-          
-          // Check if there are ANY animals for debugging
-          const { data: allAnimals } = await supabase
-            .from('animals')
-            .select('user_id, species')
-            .neq('lifecycle_status', 'deceased')
-            .limit(5);
-          
-          console.log('🔍 Sample animals in database:', allAnimals);
-          
+          console.log('📊 No animals found for user - this should not happen!');
           return { species_counts: {}, total_count: 0 };
         }
 
-        // Calculate species counts
-        const speciesCounts = animals.reduce((acc: Record<string, number>, animal) => {
+        // Filter out deceased animals for counting
+        const activeAnimals = animals.filter(animal => animal.lifecycle_status !== 'deceased');
+        console.log('📊 Active animals:', activeAnimals.length, 'Total animals:', animals.length);
+
+        // Calculate species counts from active animals only
+        const speciesCounts = activeAnimals.reduce((acc: Record<string, number>, animal) => {
           const species = animal.species || 'Sin especificar';
           acc[species] = (acc[species] || 0) + 1;
           return acc;
@@ -147,11 +147,11 @@ const Dashboard = () => {
 
         const result = {
           species_counts: speciesCounts,
-          total_count: animals.length
+          total_count: activeAnimals.length
         };
 
         console.log('✅ Animals fetched successfully:', result);
-        console.log('🐄 Animal details:', animals.map(a => ({ id: a.id, name: a.name, species: a.species })));
+        console.log('🐄 Active animal details:', activeAnimals.map(a => ({ id: a.id, name: a.name, species: a.species })));
         
         return result;
       } catch (error) {
