@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Heart, Calendar, MapPin, Plus, Search, Filter, RefreshCw } from 'lucide-react';
-import { getAllAnimals } from '@/services/animalService';
 import { getAnimalsData } from '@/services/coreDataService';
 import AnimalCard from '@/components/animals/AnimalCard';
 import AddAnimalDialog from '@/components/animals/AddAnimalDialog';
@@ -33,7 +32,7 @@ const Animals = () => {
 
   // Enhanced animals fetching with core service
   const { 
-    data: animals = [], 
+    data: rawAnimals = [], 
     isLoading, 
     error, 
     refetch 
@@ -45,34 +44,33 @@ const Animals = () => {
         const animalsData = await getAnimalsData();
         console.log('🐄 ANIMALS: Core service success:', animalsData?.length || 0);
         
-        // Map to expected format
-        return (animalsData || []).map(animal => ({
-          id: animal.id,
-          name: animal.name,
-          tag: animal.tag || '',
-          species: animal.species,
-          breed: animal.breed || '',
-          birthDate: animal.birth_date || '',
-          gender: animal.gender || '',
-          weight: animal.weight?.toString() || '',
-          color: animal.color || '',
-          healthStatus: animal.health_status || 'healthy',
-          notes: animal.notes || '',
-          image: animal.image_url,
-          lifecycleStatus: animal.lifecycle_status || 'active',
-          current_lot_id: animal.current_lot_id
-        }));
+        return animalsData || [];
       } catch (error) {
-        console.error('🐄 ANIMALS: Core service failed, trying fallback');
-        return await getAllAnimals();
+        console.error('🐄 ANIMALS: Core service error:', error);
+        return [];
       }
     },
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
-    retry: 2,
-    refetchOnWindowFocus: false,
-    refetchOnMount: 'always',
+    retry: 3,
+    staleTime: 30000
   });
+
+  // Transform raw data to expected format
+  const animals = rawAnimals.map(animal => ({
+    id: animal.id,
+    name: animal.name,
+    tag: animal.tag || '',
+    species: animal.species,
+    breed: animal.breed || '',
+    birthDate: animal.birth_date || '',
+    gender: animal.gender || '',
+    weight: animal.weight?.toString() || '',
+    color: animal.color || '',
+    healthStatus: animal.health_status || 'healthy',
+    notes: animal.notes || '',
+    image: animal.image_url,
+    lifecycleStatus: animal.lifecycle_status || 'active',
+    current_lot_id: animal.current_lot_id
+  }));
 
   // Filter animals based on search and filters
   const filteredAnimals = animals.filter(animal => {

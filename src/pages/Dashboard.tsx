@@ -117,44 +117,27 @@ const Dashboard = () => {
       setHealthStatus(health);
       console.log('🏥 DASHBOARD: Health check result:', health);
       
-      if (!health.isHealthy) {
-        console.warn('⚠️ DASHBOARD: System unhealthy, setting empty data');
-        setDashboardStats({ species_counts: {}, total_count: 0 });
-        return;
-      }
-
-      // Fetch animals data using the new service
-      console.log('🔍 DASHBOARD: Fetching animals data...');
+      // Get animals data regardless of health status
       const animalsData = await getAnimalsData();
-      console.log('📊 DASHBOARD: Animals data received:', animalsData?.length || 0);
-
-      if (!animalsData || animalsData.length === 0) {
-        console.log('📊 DASHBOARD: No animals found');
-        setDashboardStats({ species_counts: {}, total_count: 0 });
-        return;
-      }
-
-      // Process animals for dashboard stats
-      const activeAnimals = animalsData.filter(animal => 
-        animal.lifecycle_status !== 'deceased'
-      );
+      console.log('🔄 DASHBOARD: Animals data received:', animalsData.length);
       
-      console.log('📊 DASHBOARD: Active animals:', activeAnimals.length);
-
-      // Calculate species counts
-      const speciesCounts = activeAnimals.reduce((acc: Record<string, number>, animal) => {
-        const species = animal.species || 'Sin especificar';
-        acc[species] = (acc[species] || 0) + 1;
-        return acc;
-      }, {});
-
-      const result = {
+      // Process animal statistics
+      const speciesCounts: Record<string, number> = {};
+      let totalCount = 0;
+      
+      animalsData.forEach(animal => {
+        if (animal.species) {
+          speciesCounts[animal.species] = (speciesCounts[animal.species] || 0) + 1;
+          totalCount++;
+        }
+      });
+      
+      setDashboardStats({
         species_counts: speciesCounts,
-        total_count: activeAnimals.length
-      };
-
-      console.log('✅ DASHBOARD: Final stats:', result);
-      setDashboardStats(result);
+        total_count: totalCount
+      });
+      
+      console.log('✅ DASHBOARD: Stats updated:', { speciesCounts, totalCount });
 
     } catch (error) {
       console.error('❌ DASHBOARD: Exception in data fetch:', error);

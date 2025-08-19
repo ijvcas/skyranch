@@ -1,14 +1,34 @@
 // Core data service to bypass RLS issues and provide reliable data access
 import { supabase } from '@/integrations/supabase/client';
 
-// Bypass RLS by using direct auth user checks instead of database functions
+// Enhanced auth user check with session verification
 export const getAuthenticatedUser = async () => {
   try {
+    // First check if we have a session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error('❌ Session error:', sessionError);
+      return null;
+    }
+    
+    if (!session) {
+      console.log('❌ No active session found');
+      return null;
+    }
+    
+    // Verify the session is valid by checking the user
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) {
       console.error('❌ Auth error:', error);
       return null;
     }
+    
+    if (!user) {
+      console.log('❌ No user in session');
+      return null;
+    }
+    
+    console.log('✅ Authenticated user:', user.email);
     return user;
   } catch (error) {
     console.error('❌ Exception getting user:', error);
@@ -52,7 +72,7 @@ export const getUserRoleSecure = async (): Promise<'admin' | 'manager' | 'worker
   }
 };
 
-// Animals data with enhanced error handling
+// Animals data with enhanced error handling and explicit user filtering
 export const getAnimalsData = async () => {
   try {
     const user = await getAuthenticatedUser();
@@ -61,15 +81,17 @@ export const getAnimalsData = async () => {
       return [];
     }
 
-    console.log('🔍 CORE: Fetching animals for user:', user.email);
+    console.log('🔍 CORE: Fetching animals for user:', user.email, 'ID:', user.id);
 
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Query timeout')), 10000)
     );
 
+    // Explicit user filtering to bypass RLS issues
     const queryPromise = supabase
       .from('animals')
-      .select('id, name, species, lifecycle_status, user_id')
+      .select('*')
+      .eq('user_id', user.id)
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
@@ -77,6 +99,12 @@ export const getAnimalsData = async () => {
 
     if (error) {
       console.error('❌ CORE: Animals query error:', error);
+      console.error('❌ CORE: Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       return [];
     }
 
