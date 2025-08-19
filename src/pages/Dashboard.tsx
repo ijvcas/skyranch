@@ -94,7 +94,7 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Use the existing optimized function that works
+  // Simplified dashboard stats with timeout and fallback
   const { data: dashboardStats, isLoading, error, refetch } = useQuery({
     queryKey: ['dashboard', 'animal-stats'],
     queryFn: async () => {
@@ -108,27 +108,33 @@ const Dashboard = () => {
       console.log('👤 Auth user:', user.email);
       
       try {
-        // Use the existing working function that was already in the database
-        console.log('🔄 Calling get_dashboard_animal_stats function...');
-        const { data, error } = await supabase.rpc('get_dashboard_animal_stats');
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Dashboard stats timeout')), 8000)
+        );
         
-        if (error) {
-          console.error('❌ RPC Error:', error);
+        const statsPromise = supabase.rpc('get_dashboard_animal_stats');
+        
+        const result = await Promise.race([statsPromise, timeoutPromise]);
+        
+        if (result.error) {
+          console.error('❌ RPC Error:', result.error);
           return { species_counts: {}, total_count: 0 };
         }
         
-        console.log('✅ Dashboard stats fetched successfully:', data);
-        return data[0] || { species_counts: {}, total_count: 0 };
+        console.log('✅ Dashboard stats fetched successfully:', result.data);
+        return result.data?.[0] || { species_counts: {}, total_count: 0 };
       } catch (error) {
         console.error('❌ Error fetching dashboard stats:', error);
+        // Return empty data instead of throwing
         return { species_counts: {}, total_count: 0 };
       }
     },
     enabled: !!user,
-    staleTime: 30000,
+    staleTime: 60000, // 1 minute
     gcTime: 300000,
     retry: 1,
-    retryDelay: 1000,
+    retryDelay: 2000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
@@ -171,29 +177,40 @@ const Dashboard = () => {
   const speciesCounts = dashboardStats?.species_counts || {};
 
   const handleSignOut = async () => {
+    console.log('🚪 SIGN OUT CLICKED');
     try {
+      console.log('🔄 Calling signOut function...');
       await signOut();
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente.",
-      });
-      navigate('/login');
+      
+      // Force clear React Query cache
+      queryClient.clear();
+      
+      // Force navigation to login
+      window.location.href = '/login';
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Error al cerrar sesión.",
-        variant: "destructive"
-      });
+      console.error('❌ Sign out error:', error);
+      // Force navigation even if signOut fails
+      window.location.href = '/login';
     }
   };
 
+  // Show loading only for short time, then show with empty data
   if (isLoading) {
-    return <DashboardLoadingState userEmail={user?.email} />;
-  }
-
-  if (error) {
-    console.warn('⚠️ Non-blocking dashboard error:', error);
-    // Continue rendering with whatever data we have (may be empty)
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="text-lg text-muted-foreground">Cargando dashboard...</div>
+          <div className="text-sm text-muted-foreground mt-2">Usuario: {user?.email}</div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 text-sm text-primary hover:underline"
+          >
+            Recargar si tarda mucho
+          </button>
+        </div>
+      </div>
+    );
   }
 
 
