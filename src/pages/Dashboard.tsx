@@ -94,95 +94,103 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Fixed animals query with proper debugging
-  const { data: dashboardStats, isLoading, error, refetch } = useQuery({
-    queryKey: ['dashboard', 'animals-direct', user?.id],
-    queryFn: async () => {
-      console.log('🔍 Fetching animals directly from table...');
-      console.log('👤 Current user:', user);
-      console.log('🆔 User ID:', user?.id);
-      
-      if (!user?.id) {
-        console.log('❌ No user ID available');
-        return { species_counts: {}, total_count: 0 };
-      }
-
-      try {
-        // Direct query to animals table with detailed logging
-        console.log('🔍 Querying animals table for user:', user.id);
-        const { data: animals, error } = await supabase
-          .from('animals')
-          .select('species, id, name, lifecycle_status')
-          .eq('user_id', user.id);
-          // Removed the lifecycle_status filter to see all animals first
-
-        console.log('📊 Raw query result:', { animals, error, count: animals?.length });
-        console.log('📊 All animals for user:', animals?.map(a => ({ 
-          id: a.id, 
-          name: a.name, 
-          species: a.species, 
-          lifecycle_status: a.lifecycle_status 
-        })));
-
-        if (error) {
-          console.error('❌ Direct animals query error:', error);
-          return { species_counts: {}, total_count: 0 };
-        }
-
-        if (!animals || animals.length === 0) {
-          console.log('📊 No animals found for user - this should not happen!');
-          return { species_counts: {}, total_count: 0 };
-        }
-
-        // Filter out deceased animals for counting
-        const activeAnimals = animals.filter(animal => animal.lifecycle_status !== 'deceased');
-        console.log('📊 Active animals:', activeAnimals.length, 'Total animals:', animals.length);
-
-        // Calculate species counts from active animals only
-        const speciesCounts = activeAnimals.reduce((acc: Record<string, number>, animal) => {
-          const species = animal.species || 'Sin especificar';
-          acc[species] = (acc[species] || 0) + 1;
-          return acc;
-        }, {});
-
-        const result = {
-          species_counts: speciesCounts,
-          total_count: activeAnimals.length
-        };
-
-        console.log('✅ Animals fetched successfully:', result);
-        console.log('🐄 Active animal details:', activeAnimals.map(a => ({ id: a.id, name: a.name, species: a.species })));
-        
-        return result;
-      } catch (error) {
-        console.error('❌ Error fetching animals:', error);
-        return { species_counts: {}, total_count: 0 };
-      }
-    },
-    enabled: !!user?.id,
-    staleTime: 10000, // Shorter stale time for debugging
-    gcTime: 300000,
-    retry: 1,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
+  // State for animals data - bypass React Query completely
+  const [dashboardStats, setDashboardStats] = useState<{species_counts: Record<string, number>, total_count: number}>({
+    species_counts: {},
+    total_count: 0
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Simple force refresh that works
+  // Direct function to fetch animals - no React Query
+  const fetchAnimalsDirectly = async () => {
+    console.log('🔍 DIRECT: Fetching animals directly...');
+    console.log('👤 DIRECT: Current user:', user);
+    console.log('🆔 DIRECT: User ID:', user?.id);
+    
+    if (!user?.id) {
+      console.log('❌ DIRECT: No user ID available');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      console.log('🔍 DIRECT: Querying animals table for user:', user.id);
+      const { data: animals, error } = await supabase
+        .from('animals')
+        .select('species, id, name, lifecycle_status')
+        .eq('user_id', user.id);
+
+      console.log('📊 DIRECT: Raw query result:', { animals, error, count: animals?.length });
+      
+      if (error) {
+        console.error('❌ DIRECT: Query error:', error);
+        setDashboardStats({ species_counts: {}, total_count: 0 });
+        return;
+      }
+
+      if (!animals || animals.length === 0) {
+        console.log('📊 DIRECT: No animals found');
+        setDashboardStats({ species_counts: {}, total_count: 0 });
+        return;
+      }
+
+      console.log('📊 DIRECT: All animals:', animals.map(a => ({ 
+        id: a.id, 
+        name: a.name, 
+        species: a.species, 
+        lifecycle_status: a.lifecycle_status 
+      })));
+
+      // Filter active animals
+      const activeAnimals = animals.filter(animal => animal.lifecycle_status !== 'deceased');
+      console.log('📊 DIRECT: Active animals:', activeAnimals.length, 'Total:', animals.length);
+
+      // Calculate species counts
+      const speciesCounts = activeAnimals.reduce((acc: Record<string, number>, animal) => {
+        const species = animal.species || 'Sin especificar';
+        acc[species] = (acc[species] || 0) + 1;
+        return acc;
+      }, {});
+
+      const result = {
+        species_counts: speciesCounts,
+        total_count: activeAnimals.length
+      };
+
+      console.log('✅ DIRECT: Final result:', result);
+      setDashboardStats(result);
+
+    } catch (error) {
+      console.error('❌ DIRECT: Exception:', error);
+      setDashboardStats({ species_counts: {}, total_count: 0 });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load animals on component mount
+  useEffect(() => {
+    if (user?.id) {
+      console.log('🚀 DIRECT: Component mounted, fetching animals...');
+      fetchAnimalsDirectly();
+    }
+  }, [user?.id]);
+
+  // Simple force refresh that calls our direct function
   const handleForceRefresh = async () => {
-    console.log('🔄 Force refreshing dashboard...');
+    console.log('🔄 DIRECT: Force refresh clicked!');
     
-    // Clear React Query cache and refetch
-    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-    queryClient.invalidateQueries({ queryKey: ['app-users'] });
-    queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    
-    await refetch();
+    await fetchAnimalsDirectly();
     
     toast({
       title: "Actualizado",
-      description: "Dashboard actualizado correctamente.",
+      description: "Dashboard actualizado - revisa la consola para ver los datos.",
     });
   };
+
+  // Define refetch as alias to fetchAnimalsDirectly for compatibility
+  const refetch = fetchAnimalsDirectly;
 
   // Extract stats from the optimized query result
   const totalAnimals = dashboardStats?.total_count || 0;
