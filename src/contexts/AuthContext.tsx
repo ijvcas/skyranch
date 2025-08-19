@@ -33,19 +33,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log('🔄 [AUTH CONTEXT] Initializing auth...');
+    let mounted = true;
 
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!mounted) return;
+        
         console.log('🔄 [AUTH CONTEXT] Auth state changed:', event, session?.user?.email || 'No user');
 
+        // Handle auth events synchronously only
+        setSession(session);
+        setUser(session?.user ?? null);
+        
         if (event === 'PASSWORD_RECOVERY') {
           setLoading(false);
           return;
-        }
-
-        if (event === 'TOKEN_REFRESHED') {
-          // Throttled to avoid noise
-          logTokenRefreshedThrottled().catch((e) => console.warn('[AUTH CONTEXT] token refresh log failed', e));
         }
 
         if (event === 'SIGNED_OUT') {
@@ -57,27 +60,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
 
-        setSession(session);
-        setUser(session?.user ?? null);
+        // Defer any async operations
+        if (event === 'TOKEN_REFRESHED') {
+          setTimeout(() => {
+            logTokenRefreshedThrottled().catch((e) => console.warn('[AUTH CONTEXT] token refresh log failed', e));
+          }, 0);
+        }
+
         setLoading(false);
       }
     );
 
+    // THEN check for existing session
     supabase.auth.getSession()
       .then(({ data: { session }, error }) => {
+        if (!mounted) return;
+        
         console.log('📋 [AUTH CONTEXT] Initial session check:', session?.user?.email || 'No session');
         if (error) {
           console.error('❌ [AUTH CONTEXT] Error getting initial session:', error);
         }
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false);
       })
       .catch((error) => {
+        if (!mounted) return;
         console.error('❌ [AUTH CONTEXT] Exception getting initial session:', error);
-      })
-      .finally(() => setLoading(false));
+        setLoading(false);
+      });
 
     return () => {
+      mounted = false;
       console.log('🧹 [AUTH CONTEXT] Cleaning up auth subscription');
       subscription.unsubscribe();
     };

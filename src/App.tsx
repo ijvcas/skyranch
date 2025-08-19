@@ -26,7 +26,7 @@ import Settings from '@/pages/Settings';
 import HealthRecords from '@/pages/HealthRecords';
 import NotFound from '@/pages/NotFound';
 import './App.css';
-import AppErrorBoundary from '@/components/common/AppErrorBoundary';
+import AppErrorBoundary from '@/components/AppErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {

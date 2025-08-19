@@ -15,28 +15,35 @@ function pickIcon(text?: string | null) {
 }
 
 const WeatherWidget: React.FC = () => {
-  const { data: weatherSettings, isLoading: settingsLoading } = useWeatherSettings();
-  console.log("🌤️ [WeatherWidget] Weather settings:", weatherSettings);
-  console.log("🌤️ [WeatherWidget] Settings loading:", settingsLoading);
+  const { data: weatherSettings, isLoading: settingsLoading, error: settingsError } = useWeatherSettings();
   
   const { data: weather, isLoading, error } = useGoogleWeatherAPI(
     weatherSettings?.location_query || undefined,
-    weatherSettings ? { lat: weatherSettings.lat, lng: weatherSettings.lng } : undefined
+    weatherSettings ? { lat: Number(weatherSettings.lat), lng: Number(weatherSettings.lng) } : undefined
   );
-  console.log("🌤️ [WeatherWidget] Weather data:", weather);
-  console.log("🌤️ [WeatherWidget] Weather loading:", isLoading);
-  console.log("🌤️ [WeatherWidget] Weather error:", error);
+
+  // Handle errors gracefully
+  if (settingsError) {
+    console.warn("🌤️ [WeatherWidget] Settings error:", settingsError);
+  }
+  if (error) {
+    console.warn("🌤️ [WeatherWidget] Weather API error:", error);
+  }
 
   const TempIcon = pickIcon(weather?.conditionText);
   const tempValue = weather?.temperatureC;
   
   const formatLocation = () => {
-    return weatherSettings?.display_name || "Ubicación";
+    if (settingsLoading) return "Cargando...";
+    if (settingsError) return "Error en configuración";
+    return weatherSettings?.display_name || "Ubicación no configurada";
   };
 
   const getWeatherCondition = () => {
     if (settingsLoading || isLoading) return "Cargando clima...";
-    if (!weatherSettings?.location_query) return "Sin ubicación";
+    if (settingsError) return "Error en configuración";
+    if (error) return "Error conectando al clima";
+    if (!weatherSettings?.location_query) return "Sin ubicación configurada";
     if (!weather?.conditionText) return "Conectando...";
     return weather.conditionText;
   };

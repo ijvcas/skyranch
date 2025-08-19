@@ -64,13 +64,21 @@ export const useAnimalStore = create<AnimalStore>((set, get) => ({
   getAnimal: (id) => get().animals.find((animal) => animal.id === id),
   getAllAnimals: () => get().animals,
   loadAnimals: async () => {
+    const { isLoading } = get();
+    if (isLoading) {
+      console.log('🔄 Animals already loading, skipping duplicate request');
+      return;
+    }
+    
     set({ isLoading: true });
     try {
+      console.log('🔄 Loading animals from API...');
       const animals = await fetchAllAnimals();
+      console.log('✅ Animals loaded successfully:', animals.length);
       set({ animals, isLoading: false });
     } catch (error) {
-      console.error('Error loading animals:', error);
-      set({ isLoading: false });
+      console.error('❌ Error loading animals:', error);
+      set({ isLoading: false, animals: [] });
     }
   },
   setAnimals: (animals) => set({ animals }),
