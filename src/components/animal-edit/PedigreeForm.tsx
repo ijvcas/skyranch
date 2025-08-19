@@ -11,22 +11,6 @@ interface PedigreeFormProps {
 }
 
 const PedigreeForm = ({ formData, onInputChange, disabled = false }: PedigreeFormProps) => {
-  console.log('PedigreeForm - Current formData with great-grandparents:', {
-    motherId: formData.motherId,
-    fatherId: formData.fatherId,
-    maternalGrandmotherId: formData.maternalGrandmotherId,
-    maternalGrandfatherId: formData.maternalGrandfatherId,
-    paternalGrandmotherId: formData.paternalGrandmotherId,
-    paternalGrandfatherId: formData.paternalGrandfatherId,
-    maternalGreatGrandmotherMaternalId: formData.maternalGreatGrandmotherMaternalId,
-    maternalGreatGrandfatherMaternalId: formData.maternalGreatGrandfatherMaternalId,
-    maternalGreatGrandmotherPaternalId: formData.maternalGreatGrandmotherPaternalId,
-    maternalGreatGrandfatherPaternalId: formData.maternalGreatGrandfatherPaternalId,
-    paternalGreatGrandmotherMaternalId: formData.paternalGreatGrandmotherMaternalId,
-    paternalGreatGrandfatherMaternalId: formData.paternalGreatGrandfatherMaternalId,
-    paternalGreatGrandmotherPaternalId: formData.paternalGreatGrandmotherPaternalId,
-    paternalGreatGrandfatherPaternalId: formData.paternalGreatGrandfatherPaternalId
-  });
 
   return (
     <Card className="shadow-lg">
