@@ -196,7 +196,7 @@ const UserActivityLogs: React.FC = () => {
         </div>
       )}
 
-      {!loading && !error && hasPermission && (
+      {!loading && !error && hasPermission && filteredUsers.length > 0 && (
         <div className="divide-y rounded-md border">
           {filteredUsers.map((u) => {
             const last = lastLogins[u.id];
@@ -260,6 +260,12 @@ const UserActivityLogs: React.FC = () => {
               </article>
             );
           })}
+        </div>
+      )}
+      
+      {!loading && !error && hasPermission && filteredUsers.length === 0 && (
+        <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+          No se encontraron usuarios.
         </div>
       )}
     </section>
