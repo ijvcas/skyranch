@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getAllAnimals as fetchAllAnimals, getAnimal as fetchAnimal } from '@/services/animalService';
+import { getAnimalsEmergency } from '@/services/animalServiceEmergency';
 
 export interface Animal {
   id: string;
@@ -72,12 +72,47 @@ export const useAnimalStore = create<AnimalStore>((set, get) => ({
     
     set({ isLoading: true });
     try {
-      console.log('🔄 Loading animals from API...');
-      const animals = await fetchAllAnimals();
-      console.log('✅ Animals loaded successfully:', animals.length);
+      console.log('🚨 Using emergency animal service...');
+      const result = await getAnimalsEmergency();
+      console.log('✅ Emergency fetch completed:', result);
+      
+      // Convert to store format
+      const animals = result.animals.map(animal => ({
+        id: animal.id,
+        name: animal.name || '',
+        tag: animal.tag || '',
+        species: animal.species || '',
+        breed: '',
+        birthDate: '',
+        gender: '',
+        weight: '',
+        color: '',
+        motherId: '',
+        fatherId: '',
+        maternalGrandmotherId: '',
+        maternalGrandfatherId: '',
+        paternalGrandmotherId: '',
+        paternalGrandfatherId: '',
+        maternalGreatGrandmotherMaternalId: '',
+        maternalGreatGrandfatherMaternalId: '',
+        maternalGreatGrandmotherPaternalId: '',
+        maternalGreatGrandfatherPaternalId: '',
+        paternalGreatGrandmotherMaternalId: '',
+        paternalGreatGrandfatherMaternalId: '',
+        paternalGreatGrandmotherPaternalId: '',
+        paternalGreatGrandfatherPaternalId: '',
+        healthStatus: 'healthy',
+        notes: '',
+        image: null,
+        current_lot_id: undefined,
+        lifecycleStatus: 'active',
+        dateOfDeath: '',
+        causeOfDeath: ''
+      }));
+      
       set({ animals, isLoading: false });
     } catch (error) {
-      console.error('❌ Error loading animals:', error);
+      console.error('❌ Emergency service failed:', error);
       set({ isLoading: false, animals: [] });
     }
   },

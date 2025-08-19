@@ -27,11 +27,20 @@ const Dashboard = () => {
     loadAnimals();
   };
 
-  if (shouldWait || isLoading) {
+  if (shouldWait) {
     return (
       <div className="page-with-logo">
         <DashboardBanner />
-        <LoadingState message="Cargando datos del dashboard..." />
+        <LoadingState message="Autenticando usuario..." />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="page-with-logo">
+        <DashboardBanner />
+        <LoadingState message="Cargando animales..." />
       </div>
     );
   }
