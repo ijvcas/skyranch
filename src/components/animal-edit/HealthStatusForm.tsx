@@ -118,42 +118,24 @@ const HealthStatusForm = ({
               </Alert>
             )}
             <div className="relative">
-              <Select 
-                value={formData.lifecycleStatus || 'active'} 
-                onValueChange={(value) => {
-                  console.log('🔄 Select onValueChange triggered with value:', value);
-                  handleLifecycleChange(value);
+              {/* Temporary simple dropdown to bypass render issues */}
+              <select
+                value={formData.lifecycleStatus || 'active'}
+                onChange={(e) => {
+                  console.log('🔄 Native select changed to:', e.target.value);
+                  handleLifecycleChange(e.target.value);
                 }}
                 disabled={disabled || (!canDeclareDeaths && !isDeceased)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
               >
-                <SelectTrigger 
-                  className="w-full"
-                  onClick={() => console.log('🔄 SelectTrigger clicked!')}
+                <option value="active">Activo</option>
+                <option 
+                  value="deceased" 
+                  disabled={!canDeclareDeaths && !isDeceased}
                 >
-                  <SelectValue placeholder="Selecciona el estado de vida" />
-                </SelectTrigger>
-                <SelectContent 
-                  className="z-[9999] bg-white border border-gray-200 shadow-lg min-w-[200px]"
-                  position="popper"
-                  sideOffset={5}
-                >
-                  <SelectItem 
-                    value="active" 
-                    className="cursor-pointer hover:bg-gray-100"
-                    onClick={() => console.log('🔄 Active item clicked!')}
-                  >
-                    Activo
-                  </SelectItem>
-                  <SelectItem 
-                    value="deceased" 
-                    disabled={!canDeclareDeaths && !isDeceased}
-                    className="cursor-pointer hover:bg-red-50 text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={() => console.log('🔄 Deceased item clicked!')}
-                  >
-                    Fallecido
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                  Fallecido
+                </option>
+              </select>
             </div>
             {/* Debug info */}
             <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-50 rounded">
