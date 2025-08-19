@@ -119,22 +119,29 @@ const HealthStatusForm = ({
             )}
             <Select 
               value={formData.lifecycleStatus || 'active'} 
-              onValueChange={handleLifecycleChange}
+              onValueChange={(value) => {
+                console.log('🔄 Select onValueChange triggered with value:', value);
+                handleLifecycleChange(value);
+              }}
               disabled={disabled || (!canDeclareDeaths && !isDeceased)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona el estado de vida" />
               </SelectTrigger>
-              <SelectContent className="z-[9999]">
+              <SelectContent className="z-[9999] bg-white border border-gray-200 shadow-lg">
                 <SelectItem value="active">Activo</SelectItem>
-                <SelectItem value="deceased" disabled={!canDeclareDeaths && !isDeceased}>
+                <SelectItem 
+                  value="deceased" 
+                  disabled={!canDeclareDeaths && !isDeceased}
+                  className="text-red-600"
+                >
                   Fallecido
                 </SelectItem>
               </SelectContent>
             </Select>
             {/* Debug info */}
             <div className="text-xs text-gray-500 mt-1">
-              Debug: Current value = {formData.lifecycleStatus || 'active'}
+              Debug: Current value = {formData.lifecycleStatus || 'active'} | canDeclareDeaths = {canDeclareDeaths.toString()} | isDeceased = {isDeceased.toString()}
             </div>
           </div>
           <div>
