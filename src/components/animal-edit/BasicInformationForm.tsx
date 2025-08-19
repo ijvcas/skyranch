@@ -62,20 +62,21 @@ const BasicInformationForm = ({ formData, onInputChange, disabled = false }: Bas
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="species">Especie *</Label>
-            <Select value={formData.species || ''} onValueChange={(value) => onInputChange('species', value)} disabled={disabled}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Seleccionar especie" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bovino">Bovino</SelectItem>
-                <SelectItem value="ovino">Ovino</SelectItem>
-                <SelectItem value="caprino">Caprino</SelectItem>
-                <SelectItem value="porcino">Porcino</SelectItem>
-                <SelectItem value="equino">Equino</SelectItem>
-                <SelectItem value="aviar">Aviar</SelectItem>
-                <SelectItem value="caninos">Caninos</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={formData.species || ''}
+              onChange={(e) => onInputChange('species', e.target.value)}
+              disabled={disabled}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md bg-white"
+            >
+              <option value="">Seleccionar especie</option>
+              <option value="bovino">Bovino</option>
+              <option value="ovino">Ovino</option>
+              <option value="caprino">Caprino</option>
+              <option value="porcino">Porcino</option>
+              <option value="equino">Equino</option>
+              <option value="aviar">Aviar</option>
+              <option value="caninos">Caninos</option>
+            </select>
           </div>
           <div>
             <Label htmlFor="breed">Raza</Label>
@@ -118,15 +119,16 @@ const BasicInformationForm = ({ formData, onInputChange, disabled = false }: Bas
           </div>
           <div>
             <Label htmlFor="gender">Sexo</Label>
-            <Select value={formData.gender || ''} onValueChange={(value) => onInputChange('gender', value)} disabled={disabled}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Seleccionar sexo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="macho">Macho</SelectItem>
-                <SelectItem value="hembra">Hembra</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={formData.gender || ''}
+              onChange={(e) => onInputChange('gender', e.target.value)}
+              disabled={disabled}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md bg-white"
+            >
+              <option value="">Seleccionar sexo</option>
+              <option value="macho">Macho</option>
+              <option value="hembra">Hembra</option>
+            </select>
           </div>
           <div>
             <Label htmlFor="weight">Peso (kg)</Label>
