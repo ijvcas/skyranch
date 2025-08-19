@@ -94,23 +94,16 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Fast dashboard stats with aggressive timeout and direct fallback
+  // Non-blocking dashboard stats - dashboard loads immediately
   const { data: dashboardStats, isLoading, error, refetch } = useQuery({
     queryKey: ['dashboard', 'animal-stats'],
     queryFn: async () => {
       console.log('🔍 Starting dashboard stats fetch...');
       
-      if (!user) {
-        console.log('❌ No authenticated user found');
-        return { species_counts: {}, total_count: 0 };
-      }
-      
-      console.log('👤 Auth user:', user.email);
-      
       try {
-        // Much shorter timeout - 3 seconds max
+        // Very short timeout - 2 seconds max
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Dashboard stats timeout')), 3000)
+          setTimeout(() => reject(new Error('Dashboard stats timeout')), 2000)
         );
         
         const statsPromise = supabase.rpc('get_dashboard_animal_stats');
@@ -118,54 +111,50 @@ const Dashboard = () => {
         const result = await Promise.race([statsPromise, timeoutPromise]);
         
         if (result.error) {
-          console.error('❌ RPC Error:', result.error);
           throw result.error;
         }
         
-        console.log('✅ Dashboard stats fetched successfully:', result.data);
         return result.data?.[0] || { species_counts: {}, total_count: 0 };
       } catch (error) {
         console.error('❌ RPC failed, trying direct query:', error);
         
         // Fallback: Direct query to animals table
-        try {
-          const { data: animals, error: directError } = await supabase
-            .from('animals')
-            .select('species')
-            .eq('user_id', user.id)
-            .neq('lifecycle_status', 'deceased');
-            
-          if (directError) {
-            console.error('❌ Direct query failed:', directError);
-            return { species_counts: {}, total_count: 0 };
-          }
+        const { data: animals } = await supabase
+          .from('animals')
+          .select('species')
+          .eq('user_id', user?.id)
+          .neq('lifecycle_status', 'deceased');
           
-          // Calculate stats manually
-          const speciesCounts = animals.reduce((acc: any, animal) => {
-            acc[animal.species] = (acc[animal.species] || 0) + 1;
-            return acc;
-          }, {});
-          
-          const result = {
-            species_counts: speciesCounts,
-            total_count: animals.length
-          };
-          
-          console.log('✅ Direct query success:', result);
-          return result;
-        } catch (fallbackError) {
-          console.error('❌ All queries failed:', fallbackError);
-          return { species_counts: {}, total_count: 0 };
-        }
+        if (!animals) return { species_counts: {}, total_count: 0 };
+        
+        // Calculate stats manually
+        const speciesCounts = animals.reduce((acc: any, animal) => {
+          acc[animal.species] = (acc[animal.species] || 0) + 1;
+          return acc;
+        }, {});
+        
+        return {
+          species_counts: speciesCounts,
+          total_count: animals.length
+        };
       }
     },
-    enabled: !!user,
-    staleTime: 30000, // 30 seconds
+    enabled: false, // Start disabled - enable after dashboard loads
+    staleTime: 30000,
     gcTime: 300000,
-    retry: false, // Don't retry, use fallback instead
-    refetchOnMount: true,
+    retry: false,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
+
+  // Enable stats query after component mounts
+  useEffect(() => {
+    if (user) {
+      setTimeout(() => {
+        refetch();
+      }, 100); // Load dashboard first, then fetch stats
+    }
+  }, [user, refetch]);
 
   // Improved force refresh that clears cache and forces new data
   const handleForceRefresh = async () => {
@@ -219,24 +208,8 @@ const Dashboard = () => {
     }
   };
 
-  // Show loading only for short time, then show with empty data
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <div className="text-lg text-muted-foreground">Cargando dashboard...</div>
-          <div className="text-sm text-muted-foreground mt-2">Usuario: {user?.email}</div>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 text-sm text-primary hover:underline"
-          >
-            Recargar si tarda mucho
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Dashboard always loads immediately - no blocking on data
+  // Show loading only for authentication, not for data
 
 
   return (
