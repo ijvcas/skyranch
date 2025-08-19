@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAnimalsLean } from '@/services/animalService';
+import { getAnimalsLean } from '@/services/animal/animalQueries';
 import { getCurrentUser } from '@/services/userService';
 import { dashboardBannerService } from '@/services/dashboardBannerService';
 import { networkDiagnostics } from '@/utils/networkDiagnostics';
@@ -93,7 +93,7 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Simplified query with just essential functionality
+  // Robust query with timeout and fallback
   const { data: allAnimals = [], isLoading, error, refetch } = useQuery({
     queryKey: ['animals', 'dashboard-lean'],
     queryFn: async () => {
@@ -106,22 +106,28 @@ const Dashboard = () => {
       
       console.log('👤 Auth user:', user.email);
       
+      // Create timeout promise
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Query timeout')), 15000)
+      );
+      
       try {
-        console.log('🔄 Fetching animals (lean) data...');
-        const animals = await getAnimalsLean();
+        console.log('🔄 Fetching animals (lean) data with timeout...');
+        const animalsPromise = getAnimalsLean();
+        const animals = await Promise.race([animalsPromise, timeoutPromise]) as Array<Pick<any, 'id' | 'species'>>;
         console.log('✅ Animals (lean) fetched successfully:', animals.length);
         return animals;
       } catch (error) {
         console.error('❌ Error fetching animals:', error);
-        // Return empty array to avoid breaking dashboard
+        // Graceful fallback - return minimal data structure
         return [];
       }
     },
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
-    retry: 1, // Single retry
-    retryDelay: 2000, // 2 second delay
+    retry: 2, // Two retries
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });

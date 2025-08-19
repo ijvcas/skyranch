@@ -1376,6 +1376,14 @@ export type Database = {
           success: boolean
         }[]
       }
+      get_animals_lean_with_timeout: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          species: string
+          user_count: number
+        }[]
+      }
       get_auth_users: {
         Args: Record<PropertyKey, never>
         Returns: {
