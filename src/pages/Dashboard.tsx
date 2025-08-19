@@ -94,11 +94,13 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Direct animals query - bypass the problematic RPC function completely
+  // Fixed animals query with proper debugging
   const { data: dashboardStats, isLoading, error, refetch } = useQuery({
-    queryKey: ['dashboard', 'animals-direct'],
+    queryKey: ['dashboard', 'animals-direct', user?.id],
     queryFn: async () => {
       console.log('🔍 Fetching animals directly from table...');
+      console.log('👤 Current user:', user);
+      console.log('🆔 User ID:', user?.id);
       
       if (!user?.id) {
         console.log('❌ No user ID available');
@@ -106,12 +108,15 @@ const Dashboard = () => {
       }
 
       try {
-        // Direct query to animals table - no RPC function
+        // Direct query to animals table with detailed logging
+        console.log('🔍 Querying animals table for user:', user.id);
         const { data: animals, error } = await supabase
           .from('animals')
-          .select('species')
+          .select('species, id, name')
           .eq('user_id', user.id)
           .neq('lifecycle_status', 'deceased');
+
+        console.log('📊 Query result:', { animals, error, count: animals?.length });
 
         if (error) {
           console.error('❌ Direct animals query error:', error);
@@ -119,7 +124,17 @@ const Dashboard = () => {
         }
 
         if (!animals || animals.length === 0) {
-          console.log('📊 No animals found for user');
+          console.log('📊 No animals found for user - checking if any animals exist at all');
+          
+          // Check if there are ANY animals for debugging
+          const { data: allAnimals } = await supabase
+            .from('animals')
+            .select('user_id, species')
+            .neq('lifecycle_status', 'deceased')
+            .limit(5);
+          
+          console.log('🔍 Sample animals in database:', allAnimals);
+          
           return { species_counts: {}, total_count: 0 };
         }
 
@@ -136,6 +151,8 @@ const Dashboard = () => {
         };
 
         console.log('✅ Animals fetched successfully:', result);
+        console.log('🐄 Animal details:', animals.map(a => ({ id: a.id, name: a.name, species: a.species })));
+        
         return result;
       } catch (error) {
         console.error('❌ Error fetching animals:', error);
@@ -143,7 +160,7 @@ const Dashboard = () => {
       }
     },
     enabled: !!user?.id,
-    staleTime: 30000,
+    staleTime: 10000, // Shorter stale time for debugging
     gcTime: 300000,
     retry: 1,
     refetchOnMount: true,
