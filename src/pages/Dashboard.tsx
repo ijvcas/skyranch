@@ -94,96 +94,77 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Non-blocking dashboard stats - dashboard loads immediately
+  // Direct animals query - bypass the problematic RPC function completely
   const { data: dashboardStats, isLoading, error, refetch } = useQuery({
-    queryKey: ['dashboard', 'animal-stats'],
+    queryKey: ['dashboard', 'animals-direct'],
     queryFn: async () => {
-      console.log('🔍 Starting dashboard stats fetch...');
+      console.log('🔍 Fetching animals directly from table...');
       
+      if (!user?.id) {
+        console.log('❌ No user ID available');
+        return { species_counts: {}, total_count: 0 };
+      }
+
       try {
-        // Very short timeout - 2 seconds max
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Dashboard stats timeout')), 2000)
-        );
-        
-        const statsPromise = supabase.rpc('get_dashboard_animal_stats');
-        
-        const result = await Promise.race([statsPromise, timeoutPromise]);
-        
-        if (result.error) {
-          throw result.error;
-        }
-        
-        return result.data?.[0] || { species_counts: {}, total_count: 0 };
-      } catch (error) {
-        console.error('❌ RPC failed, trying direct query:', error);
-        
-        // Fallback: Direct query to animals table
-        const { data: animals } = await supabase
+        // Direct query to animals table - no RPC function
+        const { data: animals, error } = await supabase
           .from('animals')
           .select('species')
-          .eq('user_id', user?.id)
+          .eq('user_id', user.id)
           .neq('lifecycle_status', 'deceased');
-          
-        if (!animals) return { species_counts: {}, total_count: 0 };
-        
-        // Calculate stats manually
-        const speciesCounts = animals.reduce((acc: any, animal) => {
-          acc[animal.species] = (acc[animal.species] || 0) + 1;
+
+        if (error) {
+          console.error('❌ Direct animals query error:', error);
+          return { species_counts: {}, total_count: 0 };
+        }
+
+        if (!animals || animals.length === 0) {
+          console.log('📊 No animals found for user');
+          return { species_counts: {}, total_count: 0 };
+        }
+
+        // Calculate species counts
+        const speciesCounts = animals.reduce((acc: Record<string, number>, animal) => {
+          const species = animal.species || 'Sin especificar';
+          acc[species] = (acc[species] || 0) + 1;
           return acc;
         }, {});
-        
-        return {
+
+        const result = {
           species_counts: speciesCounts,
           total_count: animals.length
         };
+
+        console.log('✅ Animals fetched successfully:', result);
+        return result;
+      } catch (error) {
+        console.error('❌ Error fetching animals:', error);
+        return { species_counts: {}, total_count: 0 };
       }
     },
-    enabled: false, // Start disabled - enable after dashboard loads
+    enabled: !!user?.id,
     staleTime: 30000,
     gcTime: 300000,
-    retry: false,
-    refetchOnMount: false,
+    retry: 1,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
-  // Enable stats query after component mounts
-  useEffect(() => {
-    if (user) {
-      setTimeout(() => {
-        refetch();
-      }, 100); // Load dashboard first, then fetch stats
-    }
-  }, [user, refetch]);
-
-  // Improved force refresh that clears cache and forces new data
+  // Simple force refresh that works
   const handleForceRefresh = async () => {
-    console.log('🔄 Force refreshing dashboard data...');
+    console.log('🔄 Force refreshing dashboard...');
     
-    try {
-      // Clear React Query cache completely
-      queryClient.clear();
-      
-      // Force immediate refetch with loading state
-      await refetch();
-      
-      toast({
-        title: "Datos actualizados",
-        description: "Dashboard actualizado con los datos más recientes.",
-      });
-    } catch (error) {
-      console.error('❌ Error during force refresh:', error);
-      
-      // If refresh fails, try reloading the page
-      toast({
-        title: "Recargando página",
-        description: "Recargando para obtener los datos más recientes...",
-      });
-      
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
+    // Clear React Query cache and refetch
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    queryClient.invalidateQueries({ queryKey: ['app-users'] });
+    queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    
+    await refetch();
+    
+    toast({
+      title: "Actualizado",
+      description: "Dashboard actualizado correctamente.",
+    });
   };
 
   // Extract stats from the optimized query result
