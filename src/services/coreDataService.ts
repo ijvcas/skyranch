@@ -1,209 +1,152 @@
-// Core data service to bypass RLS issues and provide reliable data access
+// Simple, reliable core data service
 import { supabase } from '@/integrations/supabase/client';
-
-// Enhanced auth user check with session verification and caching
-let cachedUser: any = null;
-let cacheTime = 0;
-const CACHE_DURATION = 60000; // 1 minute cache to prevent excessive auth checks
 
 export const getAuthenticatedUser = async () => {
   try {
-    // Use cached user if still valid
-    if (cachedUser && (Date.now() - cacheTime) < CACHE_DURATION) {
-      return cachedUser;
-    }
-
-    // First check if we have a session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) {
-      console.error('❌ Session error:', sessionError);
-      cachedUser = null;
-      return null;
-    }
-    
-    if (!session) {
-      console.log('❌ No active session found');
-      cachedUser = null;
-      return null;
-    }
-    
-    // Verify the session is valid by checking the user
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error) {
-      console.error('❌ Auth error:', error);
-      cachedUser = null;
-      return null;
-    }
-    
-    if (!user) {
-      console.log('❌ No user in session');
-      cachedUser = null;
-      return null;
-    }
-    
-    console.log('✅ Authenticated user:', user.email);
-    cachedUser = user;
-    cacheTime = Date.now();
+    const { data: { user } } = await supabase.auth.getUser();
     return user;
   } catch (error) {
-    console.error('❌ Exception getting user:', error);
-    cachedUser = null;
+    console.error('Auth error:', error);
     return null;
   }
 };
 
-// Get user role with fallback logic
 export const getUserRoleSecure = async (): Promise<'admin' | 'manager' | 'worker' | null> => {
   try {
     const user = await getAuthenticatedUser();
     if (!user) return null;
 
-    // Try direct query first with timeout
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 5000)
-    );
-
-    const queryPromise = supabase
+    const { data } = await supabase
       .from('app_users')
-      .select('role, is_active')
+      .select('role')
       .eq('id', user.id)
-      .maybeSingle();
+      .single();
 
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
-
-    if (error || !data) {
-      console.warn('⚠️ Could not get role from database, defaulting to worker');
-      return 'worker'; // Default fallback
-    }
-
-    if (!data.is_active) {
-      console.warn('⚠️ User is inactive');
-      return null;
-    }
-
-    return data.role as 'admin' | 'manager' | 'worker';
+    return (data?.role as 'admin' | 'manager' | 'worker') || 'worker';
   } catch (error) {
-    console.error('❌ Error getting user role:', error);
-    return 'worker'; // Safe fallback
+    console.error('Role error:', error);
+    return 'worker';
   }
 };
 
-// Animals data with enhanced error handling and explicit user filtering
 export const getAnimalsData = async () => {
   try {
     const user = await getAuthenticatedUser();
     if (!user) {
-      console.log('❌ No authenticated user for animals');
+      console.error('No authenticated user for animals');
       return [];
     }
 
-    console.log('🔍 CORE: Fetching animals for user:', user.email, 'ID:', user.id);
-
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Query timeout')), 10000)
-    );
-
-    // Explicit user filtering to bypass RLS issues
-    const queryPromise = supabase
+    const { data, error } = await supabase
       .from('animals')
       .select('*')
       .eq('user_id', user.id)
-      .neq('lifecycle_status', 'deceased')
-      .order('created_at', { ascending: false });
-
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+      .neq('lifecycle_status', 'deceased');
 
     if (error) {
-      console.error('❌ CORE: Animals query error:', error);
-      console.error('❌ CORE: Error details:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      });
+      console.error('Animals query error:', error);
       return [];
     }
 
-    console.log('✅ CORE: Animals fetched:', data?.length || 0);
+    console.log('✅ Animals loaded:', data?.length || 0);
     return data || [];
   } catch (error) {
-    console.error('❌ CORE: Exception fetching animals:', error);
+    console.error('Animals fetch error:', error);
     return [];
   }
 };
 
-// Users data with enhanced error handling  
-export const getUsersData = async () => {
+export const getLotsData = async () => {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('lots')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Lots query error:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Lots fetch error:', error);
+    return [];
+  }
+};
+
+export const getDashboardStats = async () => {
   try {
     const user = await getAuthenticatedUser();
     if (!user) {
-      console.log('❌ No authenticated user for users');
-      return [];
+      return {
+        totalAnimals: 0,
+        activeAnimals: 0,
+        totalLots: 0,
+        activeLots: 0,
+        recentEvents: 0,
+        speciesBreakdown: {}
+      };
     }
 
-    console.log('🔍 CORE: Fetching users...');
+    const [animalsRes, lotsRes] = await Promise.all([
+      supabase
+        .from('animals')
+        .select('species, lifecycle_status')
+        .eq('user_id', user.id),
+      supabase
+        .from('lots')
+        .select('status')
+        .eq('user_id', user.id)
+    ]);
 
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Query timeout')), 10000)
-    );
+    const animals = animalsRes.data || [];
+    const lots = lotsRes.data || [];
 
-    const queryPromise = supabase
-      .from('app_users')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const activeAnimals = animals.filter(a => a.lifecycle_status !== 'deceased');
+    const speciesBreakdown = activeAnimals.reduce((acc: any, animal) => {
+      acc[animal.species] = (acc[animal.species] || 0) + 1;
+      return acc;
+    }, {});
 
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
-
-    if (error) {
-      console.error('❌ CORE: Users query error:', error);
-      return [];
-    }
-
-    console.log('✅ CORE: Users fetched:', data?.length || 0);
-    return data || [];
+    return {
+      totalAnimals: animals.length,
+      activeAnimals: activeAnimals.length,
+      totalLots: lots.length,
+      activeLots: lots.filter(l => l.status === 'active').length,
+      recentEvents: 0,
+      speciesBreakdown
+    };
   } catch (error) {
-    console.error('❌ CORE: Exception fetching users:', error);
-    return [];
+    console.error('Dashboard stats error:', error);
+    return {
+      totalAnimals: 0,
+      activeAnimals: 0,
+      totalLots: 0,
+      activeLots: 0,
+      recentEvents: 0,
+      speciesBreakdown: {}
+    };
   }
 };
 
-// Health check function
-export const performHealthCheck = async (): Promise<{
-  isHealthy: boolean;
-  auth: boolean;
-  database: boolean;
-  userRole: string | null;
-}> => {
-  console.log('🏥 CORE: Running health check...');
-  
-  const result = {
-    isHealthy: false,
-    auth: false,
-    database: false,
-    userRole: null as string | null
-  };
-
+export const getUsersData = async () => {
   try {
-    // Check auth
-    const user = await getAuthenticatedUser();
-    result.auth = !!user;
+    const { data, error } = await supabase
+      .from('app_users')
+      .select('*');
     
-    if (user) {
-      // Check database access
-      try {
-        const role = await getUserRoleSecure();
-        result.userRole = role;
-        result.database = true;
-      } catch (error) {
-        console.error('❌ CORE: Database check failed:', error);
-      }
+    if (error) {
+      console.error('Users query error:', error);
+      return [];
     }
-
-    result.isHealthy = result.auth && result.database;
-    console.log('🏥 CORE: Health check result:', result);
-    return result;
+    
+    return data || [];
   } catch (error) {
-    console.error('❌ CORE: Health check exception:', error);
-    return result;
+    console.error('Users fetch error:', error);
+    return [];
   }
 };

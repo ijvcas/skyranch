@@ -1,8 +1,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Search, ChevronDown, ChevronRight, RefreshCcw } from 'lucide-react';
-import { getUserRoleSecure, getAuthenticatedUser } from '@/services/coreDataService';
 import { supabase } from '@/integrations/supabase/client';
+import { getUserRoleSecure, getAuthenticatedUser } from '@/services/coreDataService';
 
 interface AppUser {
   id: string;

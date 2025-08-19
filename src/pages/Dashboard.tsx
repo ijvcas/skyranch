@@ -1,274 +1,214 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { RefreshCw, Users, MapPin, Calendar, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
-import { getCurrentUser } from '@/services/userService';
-import { dashboardBannerService } from '@/services/dashboardBannerService';
-import { Card, CardContent } from '@/components/ui/card';
-import ImageUpload from '@/components/ImageUpload';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardStats from '@/components/dashboard/DashboardStats';
-import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions';
-import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import { applySEO, injectJSONLD } from '@/utils/seo';
-import { performHealthCheck, getAnimalsData } from '@/services/coreDataService';
-
+import WeatherWidget from '@/components/weather/WeatherWidget';
+import DashboardBanner from '@/components/dashboard/DashboardBanner';
+// import DashboardGreeting from '@/components/dashboard/DashboardGreeting';
+import { getAnimalsData, getDashboardStats } from '@/services/coreDataService';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [bannerImage, setBannerImage] = useState<string>('/lovable-uploads/d3c33c19-f7cd-441e-884f-371ed6481179.png');
-  const [userName, setUserName] = useState<string>('');
-  
-  // SEO metadata
-  useEffect(() => {
-    applySEO({
-      title: 'SKYRANCH Dashboard — Farm management',
-      description: 'Gestiona animales, lotes y rotaciones en tiempo real en SKYRANCH.',
-      canonical: window.location.href
-    });
-    
-    injectJSONLD({
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: 'SKYRANCH',
-      url: window.location.origin,
-      description: 'Gestión moderna de granjas: animales, lotes y rotaciones.'
-    });
-  }, []);
-  
-  // Load banner image and user data with health check
-  useEffect(() => {
-    const loadDashboardResources = async () => {
-      try {
-        // Run health check first
-        console.log('🏥 DASHBOARD: Running initial health check...');
-        const health = await performHealthCheck();
-        console.log('🏥 DASHBOARD: Health status:', health);
-        
-        if (!health.isHealthy) {
-          toast({
-            title: "Sistema con problemas",
-            description: "Algunos servicios pueden no estar disponibles",
-            variant: "destructive"
-          });
-        }
-        
-        // Load banner
-        try {
-          const bannerData = await dashboardBannerService.getBanner();
-          if (bannerData?.image_url) {
-            setBannerImage(bannerData.image_url);
-          }
-        } catch (error) {
-          console.error('⚠️ Error loading banner:', error);
-          // Keep default fallback image
-        }
-        
-        // Load user data
-        try {
-          const userData = await getCurrentUser();
-          if (userData?.name) {
-            setUserName(userData.name);
-          }
-        } catch (error) {
-          console.error('⚠️ Error loading user data:', error);
-          // Fallback to email if name not available
-        }
-      } catch (error) {
-        console.error('❌ Error in dashboard resource loading:', error);
-        toast({
-          title: "Error de carga",
-          description: "Algunos recursos del dashboard no se pudieron cargar",
-          variant: "destructive"
-        });
-      }
-    };
-    
-    loadDashboardResources();
-  }, [toast]);
-  
-  // Enhanced state management with health monitoring
-  const [dashboardStats, setDashboardStats] = useState<{species_counts: Record<string, number>, total_count: number}>({
-    species_counts: {},
-    total_count: 0
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalAnimals: 0,
+    activeAnimals: 0,
+    totalLots: 0,
+    activeLots: 0,
+    recentEvents: 0,
+    speciesBreakdown: {}
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [healthStatus, setHealthStatus] = useState<any>(null);
+  const [animals, setAnimals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Core data fetching function using new service
-  const fetchDashboardData = async () => {
-    console.log('🔄 DASHBOARD: Starting comprehensive data fetch...');
-    
-    if (!user?.id) {
-      console.log('❌ DASHBOARD: No user ID available');
-      return;
-    }
-
-    setIsLoading(true);
-
+  const loadDashboardData = async () => {
     try {
-      // Health check first
-      const health = await performHealthCheck();
-      setHealthStatus(health);
-      console.log('🏥 DASHBOARD: Health check result:', health);
+      setLoading(true);
+      setError(null);
       
-      // Get animals data regardless of health status
-      const animalsData = await getAnimalsData();
-      console.log('🔄 DASHBOARD: Animals data received:', animalsData.length);
+      console.log('🚀 DASHBOARD: Loading data...');
       
-      // Process animal statistics
-      const speciesCounts: Record<string, number> = {};
-      let totalCount = 0;
-      
-      animalsData.forEach(animal => {
-        if (animal.species) {
-          speciesCounts[animal.species] = (speciesCounts[animal.species] || 0) + 1;
-          totalCount++;
-        }
-      });
-      
-      setDashboardStats({
-        species_counts: speciesCounts,
-        total_count: totalCount
-      });
-      
-      console.log('✅ DASHBOARD: Stats updated:', { speciesCounts, totalCount });
+      const [dashboardStats, animalsData] = await Promise.all([
+        getDashboardStats(),
+        getAnimalsData()
+      ]);
 
+      setStats(dashboardStats);
+      setAnimals(animalsData);
+      
+      console.log('✅ DASHBOARD: Data loaded successfully');
     } catch (error) {
-      console.error('❌ DASHBOARD: Exception in data fetch:', error);
-      setDashboardStats({ species_counts: {}, total_count: 0 });
-      setHealthStatus({ isHealthy: false, auth: false, database: false, userRole: null });
+      console.error('❌ DASHBOARD: Error loading data:', error);
+      setError('Error loading dashboard data');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Load data on component mount
   useEffect(() => {
-    if (user?.id) {
-      console.log('🚀 DASHBOARD: Component mounted, fetching data...');
-      fetchDashboardData();
-    } else if (user === null) {
-      console.log('❌ DASHBOARD: No user, skipping data fetch');
-      setIsLoading(false);
+    if (user) {
+      loadDashboardData();
     }
-  }, [user?.id]);
+  }, [user]);
 
-  // Enhanced force refresh
-  const handleForceRefresh = async () => {
+  const handleForceRefresh = () => {
     console.log('🔄 DASHBOARD: Force refresh triggered!');
-    
-    await fetchDashboardData();
-    
-    const statusMessage = healthStatus?.isHealthy 
-      ? "Dashboard actualizado correctamente"
-      : "Dashboard actualizado con problemas del sistema";
-    
-    toast({
-      title: "Actualización completa",
-      description: statusMessage,
-      variant: healthStatus?.isHealthy ? "default" : "destructive"
-    });
+    loadDashboardData();
   };
 
-  // Define refetch as alias for compatibility
-  const refetch = fetchDashboardData;
-
-  // Extract stats from the optimized query result
-  const totalAnimals = dashboardStats?.total_count || 0;
-  const speciesCounts = dashboardStats?.species_counts || {};
-
-  const handleSignOut = async () => {
-    console.log('🚪 SIGN OUT CLICKED');
-    try {
-      console.log('🔄 Calling signOut function...');
-      await signOut();
-      
-      // Force clear React Query cache
-      queryClient.clear();
-      
-      // Force navigation to login
-      window.location.href = '/login';
-    } catch (error) {
-      console.error('❌ Sign out error:', error);
-      // Force navigation even if signOut fails
-      window.location.href = '/login';
-    }
-  };
-
-  // Dashboard always loads immediately - no blocking on data
-  // Show loading only for authentication, not for data
-
+  if (loading) {
+    return (
+      <div className="page-with-logo">
+        <DashboardBanner />
+        <div className="container mx-auto py-6">
+          <div className="text-center">Cargando datos del dashboard...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen">
-        {/* Health status indicator */}
-        {healthStatus && !healthStatus.isHealthy && (
-          <div className="bg-destructive text-destructive-foreground p-2 text-center text-sm">
-            ⚠️ Sistema con problemas: Auth: {healthStatus.auth ? '✅' : '❌'} | DB: {healthStatus.database ? '✅' : '❌'}
-          </div>
+    <div className="page-with-logo">
+      <DashboardBanner />
+      
+      <div className="container mx-auto py-6 space-y-6">
+        {/* <DashboardGreeting /> */}
+        
+        {error && (
+          <Card className="border-destructive">
+            <CardContent className="pt-6">
+              <div className="text-destructive">{error}</div>
+              <Button onClick={handleForceRefresh} className="mt-2">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reintentar
+              </Button>
+            </CardContent>
+          </Card>
         )}
-        
-        {/* Full-width banner */}
-        <div className="w-full px-3 md:px-4 pt-8 md:pt-12 pb-4 md:pb-6 bg-gradient-to-br from-green-50 to-blue-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="rounded-lg overflow-hidden">
-              <ImageUpload
-                currentImage={bannerImage}
-                onImageChange={() => {}} // Read-only mode
-                disabled={true}
-              />
-            </div>
-          </div>
-        </div>
-        
-        {/* Main content */}
-        <div className="bg-gradient-to-br from-green-50 to-blue-50 pt-2 md:pt-4 pb-20 min-h-screen">
-          <div className="max-w-7xl mx-auto px-3 md:px-4">
-            <ErrorBoundary>
-              <DashboardHeader 
-                userEmail={user?.email}
-                userName={userName}
-                totalAnimals={totalAnimals}
-                onForceRefresh={handleForceRefresh}
-              />
-            </ErrorBoundary>
 
-            <ErrorBoundary>
-              <DashboardStats 
-                totalAnimals={totalAnimals}
-                speciesCounts={speciesCounts}
-              />
-            </ErrorBoundary>
-
-            <ErrorBoundary>
-              <DashboardQuickActions />
-            </ErrorBoundary>
-            
-            <ErrorBoundary>
-              <DashboardSupportInfo />
-            </ErrorBoundary>
-
-            {/* Debug info for development */}
-            {process.env.NODE_ENV === 'development' && healthStatus && (
-              <Card className="mt-4 p-4 bg-muted">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3 space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Animales</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
                 <CardContent>
-                  <h3 className="font-semibold mb-2">Debug Info</h3>
-                  <pre className="text-xs">{JSON.stringify(healthStatus, null, 2)}</pre>
-                  <pre className="text-xs mt-2">Stats: {JSON.stringify(dashboardStats, null, 2)}</pre>
+                  <div className="text-2xl font-bold">{stats.totalAnimals}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.activeAnimals} activos
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Lotes</CardTitle>
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalLots}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.activeLots} disponibles
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Eventos</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.recentEvents}</div>
+                  <p className="text-xs text-muted-foreground">próximos</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Rendimiento</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">+12%</div>
+                  <p className="text-xs text-muted-foreground">vs. mes anterior</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Species Breakdown */}
+            {Object.keys(stats.speciesBreakdown).length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Distribución por Especies</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(stats.speciesBreakdown).map(([species, count]) => (
+                      <Badge key={species} variant="secondary">
+                        {species}: {count as number}
+                      </Badge>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
+
+            {/* Animals Message */}
+            {animals.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <div className="text-lg text-primary">
+                      No se encontraron animales. Si deberías ver animales, usa el botón "Forzar Actualización".
+                    </div>
+                    <Button onClick={handleForceRefresh} className="w-full">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Forzar Actualización
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Reporte de Campo</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center space-y-4">
+                    <Button className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600">
+                      📋 Reporte de Campo +
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Refresh Button */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <Button onClick={handleForceRefresh} variant="outline" className="w-full">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Actualizar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <WeatherWidget />
           </div>
         </div>
       </div>
-    </ErrorBoundary>
+    </div>
   );
 };
 
