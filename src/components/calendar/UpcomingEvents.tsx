@@ -55,7 +55,7 @@ const UpcomingEvents = ({ events, animals, onEventClick }: UpcomingEventsProps) 
   };
 
   const upcomingEvents = events
-    .filter(event => new Date(event.eventDate) >= new Date())
+    .filter(event => new Date(event.event_date) >= new Date())
     .slice(0, 6);
 
   return (
@@ -73,21 +73,19 @@ const UpcomingEvents = ({ events, animals, onEventClick }: UpcomingEventsProps) 
             >
               <div className="flex items-start justify-between mb-2 gap-2">
                 <h4 className="font-semibold text-xs sm:text-sm truncate flex-1">{event.title}</h4>
-                <Badge className={`${getEventTypeColor(event.eventType)} text-xs flex-shrink-0`}>
-                  {getEventTypeLabel(event.eventType)}
+                <Badge className={`${getEventTypeColor(event.event_type)} text-xs flex-shrink-0`}>
+                  {getEventTypeLabel(event.event_type)}
                 </Badge>
               </div>
               <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                {new Date(event.eventDate).toLocaleDateString('es-ES')}
+                {new Date(event.event_date).toLocaleDateString('es-ES')}
               </p>
-              {event.createdByName && (
-                <p className="text-xs text-gray-500 mb-1">
-                  Creado por: {event.createdByName}
-                </p>
-              )}
-              {event.animalId && (
+              <p className="text-xs text-gray-500 mb-1">
+                Creado por: Usuario
+              </p>
+              {event.animal_id && (
                 <p className="text-xs text-gray-500 mb-2 truncate">
-                  Animal: {animals.find(a => a.id === event.animalId)?.name || 'N/A'}
+                  Animal: {animals.find(a => a.id === event.animal_id)?.name || 'N/A'}
                 </p>
               )}
               <div className="text-xs text-blue-600 hover:text-blue-800">

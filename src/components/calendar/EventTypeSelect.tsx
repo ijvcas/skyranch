@@ -5,8 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CalendarEvent } from '@/services/calendarService';
 
 interface EventTypeSelectProps {
-  value: CalendarEvent['eventType'];
-  onChange: (value: CalendarEvent['eventType']) => void;
+  value: string;
+  onChange: (value: string) => void;
   label: string;
 }
 

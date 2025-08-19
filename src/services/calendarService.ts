@@ -98,7 +98,7 @@ export const getEventsByDateRange = async (startDate: string, endDate: string): 
 // Additional required functions for compatibility
 export const getCalendarEvents = getAllEvents;
 
-export const addCalendarEvent = async (eventData: Partial<CalendarEvent>): Promise<CalendarEvent | null> => {
+export const addCalendarEvent = async (eventData: Partial<CalendarEvent>, selectedUserIds?: string[]): Promise<string | null> => {
   try {
     console.log('📅 CALENDAR_SERVICE: Adding calendar event...');
     
@@ -126,14 +126,14 @@ export const addCalendarEvent = async (eventData: Partial<CalendarEvent>): Promi
     }
 
     console.log('✅ CALENDAR_SERVICE: Event added successfully');
-    return data;
+    return data.id;
   } catch (error) {
     console.error('❌ CALENDAR_SERVICE: Add event exception:', error);
     return null;
   }
 };
 
-export const updateCalendarEvent = async (id: string, eventData: Partial<CalendarEvent>): Promise<CalendarEvent | null> => {
+export const updateCalendarEvent = async (id: string, eventData: Partial<CalendarEvent>, selectedUserIds?: string[]): Promise<boolean> => {
   try {
     console.log('📅 CALENDAR_SERVICE: Updating calendar event:', id);
     
@@ -150,7 +150,7 @@ export const updateCalendarEvent = async (id: string, eventData: Partial<Calenda
     }
 
     console.log('✅ CALENDAR_SERVICE: Event updated successfully');
-    return data;
+    return true;
   } catch (error) {
     console.error('❌ CALENDAR_SERVICE: Update event exception:', error);
     return null;

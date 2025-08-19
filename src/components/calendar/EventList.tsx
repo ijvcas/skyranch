@@ -30,7 +30,7 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
       return matchesSearch;
     } else {
       // Filter for selected date
-      const eventDate = new Date(event.eventDate);
+      const eventDate = new Date(event.event_date);
       const selectedYear = selectedDate!.getFullYear();
       const selectedMonth = selectedDate!.getMonth();
       const selectedDay = selectedDate!.getDate();
@@ -125,16 +125,14 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
                   <h4 className="font-semibold">{event.title}</h4>
                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                     {showHistory && (
-                      <span>{new Date(event.eventDate).toLocaleDateString('es-ES')}</span>
-                    )}
-                    {event.createdByName && (
-                      <span>Creado por: {event.createdByName}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge className={getEventTypeColor(event.eventType)}>
-                    {getEventTypeLabel(event.eventType)}
+                       <span>{new Date(event.event_date).toLocaleDateString('es-ES')}</span>
+                     )}
+                     <span>Creado por: Usuario</span>
+                   </div>
+                 </div>
+                 <div className="flex items-center space-x-2">
+                   <Badge className={getEventTypeColor(event.event_type)}>
+                     {getEventTypeLabel(event.event_type)}
                   </Badge>
                   <Button
                     variant="ghost"

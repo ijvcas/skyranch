@@ -34,7 +34,7 @@ const EventEditDialog = ({
   const [editedEvent, setEditedEvent] = useState({
     title: '',
     description: '',
-    eventType: 'appointment' as CalendarEvent['eventType'],
+    eventType: 'appointment',
     animalId: '',
     eventDate: '',
     startTime: '09:00',
@@ -54,16 +54,16 @@ const EventEditDialog = ({
 
   useEffect(() => {
     if (event) {
-      const eventDate = new Date(event.eventDate);
+      const eventDate = new Date(event.event_date);
       const eventDateOnly = eventDate.toISOString().split('T')[0];
       
       let startTime = '09:00';
       let endTime = '';
       
-      if (!event.allDay) {
+      if (!event.all_day) {
         startTime = eventDate.toTimeString().slice(0, 5);
-        if (event.endDate) {
-          const endDate = new Date(event.endDate);
+        if (event.end_date) {
+          const endDate = new Date(event.end_date);
           endTime = endDate.toTimeString().slice(0, 5);
         }
       }
@@ -71,13 +71,13 @@ const EventEditDialog = ({
       setEditedEvent({
         title: event.title,
         description: event.description || '',
-        eventType: event.eventType,
-        animalId: event.animalId || '',
+        eventType: event.event_type,
+        animalId: event.animal_id || '',
         eventDate: eventDateOnly,
         startTime: startTime,
         endTime: endTime,
-        allDay: event.allDay || false,
-        reminderMinutes: event.reminderMinutes || 60,
+        allDay: event.all_day || false,
+        reminderMinutes: event.reminder_minutes || 60,
         veterinarian: event.veterinarian || '',
         location: event.location || '',
         cost: event.cost ? event.cost.toString() : '',
@@ -173,7 +173,7 @@ const EventEditDialog = ({
                 <Label>Tipo de Evento</Label>
                 <Select 
                   value={editedEvent.eventType} 
-                  onValueChange={(value: CalendarEvent['eventType']) => 
+                  onValueChange={(value: string) => 
                     setEditedEvent(prev => ({ ...prev, eventType: value }))
                   }
                 >

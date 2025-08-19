@@ -117,8 +117,8 @@ const EventDetailDialog = ({
     }
   };
 
-  const animalName = event.animalId 
-    ? animals.find(a => a.id === event.animalId)?.name 
+  const animalName = event.animal_id 
+    ? animals.find(a => a.id === event.animal_id)?.name 
     : null;
 
   return (
@@ -128,14 +128,12 @@ const EventDetailDialog = ({
           <DialogTitle className="flex items-center justify-between">
             <div>
               <span>{event.title}</span>
-              {event.createdByName && (
-                <p className="text-sm font-normal text-gray-500 mt-1">
-                  Creado por: {event.createdByName}
-                </p>
-              )}
+              <p className="text-sm font-normal text-gray-500 mt-1">
+                Creado por: Usuario
+              </p>
             </div>
-            <Badge className={getEventTypeColor(event.eventType)}>
-              {getEventTypeLabel(event.eventType)}
+            <Badge className={getEventTypeColor(event.event_type)}>
+              {getEventTypeLabel(event.event_type)}
             </Badge>
           </DialogTitle>
         </DialogHeader>
@@ -146,15 +144,15 @@ const EventDetailDialog = ({
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-gray-500" />
               <span className="text-sm">
-                {formatEventDateTime(event.eventDate, event.endDate, event.allDay)}
+                {formatEventDateTime(event.event_date, event.end_date, event.all_day)}
               </span>
             </div>
 
-            {event.reminderMinutes > 0 && (
+            {event.reminder_minutes && event.reminder_minutes > 0 && (
               <div className="flex items-center space-x-2">
                 <Bell className="w-4 h-4 text-gray-500" />
                 <span className="text-sm">
-                  Recordatorio: {getReminderText(event.reminderMinutes)}
+                  Recordatorio: {getReminderText(event.reminder_minutes)}
                 </span>
               </div>
             )}
@@ -215,7 +213,7 @@ const EventDetailDialog = ({
                       event.status === 'cancelled' ? 'Cancelado' :
                       event.status === 'missed' ? 'Perdido' : 'Programado'}
             </Badge>
-            {event.allDay && (
+            {event.all_day && (
               <Badge variant="outline">Todo el día</Badge>
             )}
             {event.recurring && (
