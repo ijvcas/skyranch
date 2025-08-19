@@ -2,39 +2,68 @@
 import { supabase } from '@/integrations/supabase/client';
 import { type AppUser } from './types';
 
-// Get all users from the app_users table AND sync auth users
+// Get all users from the app_users table with enhanced error handling
 export const getAllUsers = async (): Promise<AppUser[]> => {
   try {
-    console.log('🔍 Fetching all users from app_users table...');
+    console.log('🔍 USERS: Fetching all users from app_users table...');
     
-    // First, sync any missing auth users (with error handling)
-    try {
-      await syncAuthUsersToAppUsers();
-    } catch (syncError) {
-      console.warn('⚠️ Sync warning (continuing anyway):', syncError);
-      // Continue even if sync fails - we can still show existing users
+    // Check auth first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log('❌ USERS: No authenticated user');
+      return [];
     }
 
-    const { data: users, error } = await supabase
+    console.log('👤 USERS: Authenticated as:', user.email);
+
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Query timeout after 10 seconds')), 10000)
+    );
+
+    const queryPromise = supabase
       .from('app_users')
       .select('*')
       .order('created_at', { ascending: false });
 
+    console.log('🔄 USERS: Executing query with timeout...');
+    const { data: users, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+
     if (error) {
-      console.error('❌ Error fetching users:', error);
-      throw error;
+      console.error('❌ USERS: Query error:', error);
+      console.error('❌ USERS: Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+      return [];
     }
 
-    console.log('✅ Successfully fetched users:', users?.length || 0);
+    console.log('✅ USERS: Successfully fetched users:', users?.length || 0);
     
-    // Map the data with proper typing
-    return users?.map(user => ({
-      ...user,
-      role: user.role as 'admin' | 'manager' | 'worker',
-      phone: user.phone || '', // Now properly handled from database
-    })) || [];
+    // Map the data with proper typing and validation
+    const mappedUsers = (users || []).map(user => {
+      if (!user.id || !user.email) {
+        console.warn('⚠️ USERS: Invalid user data:', user);
+        return null;
+      }
+      return {
+        ...user,
+        role: user.role as 'admin' | 'manager' | 'worker',
+        phone: user.phone || '',
+      };
+    }).filter(Boolean);
+
+    console.log('✅ USERS: Mapped users count:', mappedUsers.length);
+    return mappedUsers as AppUser[];
   } catch (error) {
-    console.error('❌ Error in getAllUsers:', error);
+    console.error('❌ USERS: Exception in getAllUsers:', error);
+    if (error instanceof Error) {
+      console.error('❌ USERS: Error name:', error.name);
+      console.error('❌ USERS: Error message:', error.message);
+      console.error('❌ USERS: Error stack:', error.stack);
+    }
     return [];
   }
 };
@@ -59,87 +88,123 @@ export const syncAuthUsersToAppUsers = async (): Promise<void> => {
   }
 };
 
-// Get current authenticated user info with enhanced sync retry
+// Get current authenticated user info with enhanced error handling
 export const getCurrentUser = async (): Promise<AppUser | null> => {
   try {
+    console.log('🔍 CURRENT_USER: Getting current user...');
+    
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
     
     if (authError) {
-      console.error('❌ Auth error:', authError);
+      console.error('❌ CURRENT_USER: Auth error:', authError);
       return null;
     }
 
     if (!authUser) {
-      console.log('❌ No authenticated user found');
+      console.log('❌ CURRENT_USER: No authenticated user found');
       return null;
     }
 
-    console.log('🔍 Looking for user in app_users with ID:', authUser.id);
+    console.log('👤 CURRENT_USER: Auth user found:', authUser.email);
 
-    // First, try to find the user in app_users
-    let { data: appUser, error: dbError } = await supabase
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Database query timeout')), 8000)
+    );
+
+    const queryPromise = supabase
       .from('app_users')
       .select('*')
       .eq('id', authUser.id)
       .maybeSingle();
 
-    // If not found by ID, try by email as fallback
-    if (dbError && authUser.email) {
-      console.log('⚠️ User not found by ID, trying by email:', authUser.email);
-      const { data: userByEmail, error: emailError } = await supabase
-        .from('app_users')
-        .select('*')
-        .eq('email', authUser.email)
-        .maybeSingle();
-        
-      if (!emailError && userByEmail) {
-        appUser = userByEmail;
-        dbError = null;
-        console.log('✅ Found user by email, will sync ID');
-        
-        // Update the user record with correct auth ID
-        await supabase
-          .from('app_users')
-          .update({ id: authUser.id })
-          .eq('email', authUser.email);
-      }
+    console.log('🔄 CURRENT_USER: Querying app_users with timeout...');
+    const { data: appUser, error: dbError } = await Promise.race([queryPromise, timeoutPromise]) as any;
+
+    if (dbError) {
+      console.error('❌ CURRENT_USER: Database error:', dbError);
+      
+      // If database fails, create a minimal user object from auth data
+      console.log('⚠️ CURRENT_USER: Creating fallback user from auth data');
+      return {
+        id: authUser.id,
+        name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+        email: authUser.email || '',
+        role: 'worker', // Safe default
+        phone: '',
+        is_active: true,
+        created_at: authUser.created_at || new Date().toISOString(),
+        created_by: authUser.id
+      };
     }
 
-    // If still not found, try to sync and create the user
-    if (dbError || !appUser) {
-      console.log('⚠️ User not found in app_users, attempting sync...');
+    if (!appUser) {
+      console.log('⚠️ CURRENT_USER: User not found in app_users, attempting sync...');
       try {
         await syncAuthUsersToAppUsers();
         
-        // Try again after sync
-        const { data: syncedUser, error: syncError } = await supabase
+        // Try once more after sync
+        const { data: syncedUser } = await supabase
           .from('app_users')
           .select('*')
           .eq('id', authUser.id)
           .maybeSingle();
           
-        if (!syncError && syncedUser) {
-          appUser = syncedUser;
-          dbError = null;
-          console.log('✅ User found after sync');
+        if (syncedUser) {
+          console.log('✅ CURRENT_USER: User found after sync');
+          return {
+            ...syncedUser,
+            role: syncedUser.role as 'admin' | 'manager' | 'worker',
+            phone: syncedUser.phone || '',
+          };
         }
       } catch (syncError) {
-        console.error('❌ Sync failed:', syncError);
+        console.error('❌ CURRENT_USER: Sync failed:', syncError);
       }
+      
+      // Still no user, return fallback
+      console.log('⚠️ CURRENT_USER: Creating fallback user after failed sync');
+      return {
+        id: authUser.id,
+        name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
+        email: authUser.email || '',
+        role: 'worker',
+        phone: '',
+        is_active: true,
+        created_at: authUser.created_at || new Date().toISOString(),
+        created_by: authUser.id
+      };
     }
 
-    if (dbError || !appUser) {
-      console.error('❌ Database error or user not found:', dbError);
-      return null;
-    }
-
+    console.log('✅ CURRENT_USER: User found successfully:', appUser.name);
     return {
       ...appUser,
       role: appUser.role as 'admin' | 'manager' | 'worker',
       phone: appUser.phone || '',
     };
   } catch (error) {
-    console.error('❌ Error getting current user:', error);
+    console.error('❌ CURRENT_USER: Exception getting current user:', error);
+    
+    // Final fallback - try to get auth user for minimal data
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        console.log('⚠️ CURRENT_USER: Returning minimal fallback user');
+        return {
+          id: authUser.id,
+          name: authUser.email?.split('@')[0] || 'User',
+          email: authUser.email || '',
+          role: 'worker',
+          phone: '',
+          is_active: true,
+          created_at: authUser.created_at || new Date().toISOString(),
+          created_by: authUser.id
+        };
+      }
+    } catch (fallbackError) {
+      console.error('❌ CURRENT_USER: Even fallback failed:', fallbackError);
+    }
+    
     return null;
   }
 };
