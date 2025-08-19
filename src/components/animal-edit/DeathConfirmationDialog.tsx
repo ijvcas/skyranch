@@ -46,7 +46,10 @@ const DeathConfirmationDialog: React.FC<DeathConfirmationDialogProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction 
-            onClick={onConfirm}
+            onClick={() => {
+              console.log('🔄 Death confirmation dialog - Confirm button clicked');
+              onConfirm();
+            }}
             className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
           >
             Confirmar Fallecimiento
