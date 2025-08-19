@@ -1397,6 +1397,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_dashboard_animal_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          species_counts: Json
+          total_count: number
+        }[]
+      }
       get_lot_grazing_metrics: {
         Args: { lot_id_param: string }
         Returns: {

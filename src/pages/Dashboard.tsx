@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAnimalsLean } from '@/services/animal/animalQueries';
+import { supabase } from '@/integrations/supabase/client';
 import { getCurrentUser } from '@/services/userService';
 import { dashboardBannerService } from '@/services/dashboardBannerService';
 import { networkDiagnostics } from '@/utils/networkDiagnostics';
@@ -15,6 +15,7 @@ import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions'
 import DashboardLoadingState from '@/components/dashboard/DashboardLoadingState';
 import DashboardErrorState from '@/components/dashboard/DashboardErrorState';
 import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
+import SecureErrorBoundary from '@/components/common/SecureErrorBoundary';
 import { applySEO, injectJSONLD } from '@/utils/seo';
 
 
@@ -93,41 +94,46 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Robust query with timeout and fallback
-  const { data: allAnimals = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['animals', 'dashboard-lean'],
+  // Use optimized database function that avoids RLS conflicts
+  const { data: dashboardStats, isLoading, error, refetch } = useQuery({
+    queryKey: ['dashboard', 'animal-stats'],
     queryFn: async () => {
-      console.log('🔍 Starting dashboard animal data fetch...');
+      console.log('🔍 Starting dashboard stats fetch...');
       
       if (!user) {
         console.log('❌ No authenticated user found');
-        return [];
+        return { species_counts: {}, total_count: 0 };
       }
       
       console.log('👤 Auth user:', user.email);
       
-      // Create timeout promise
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Query timeout')), 15000)
-      );
-      
       try {
-        console.log('🔄 Fetching animals (lean) data with timeout...');
-        const animalsPromise = getAnimalsLean();
-        const animals = await Promise.race([animalsPromise, timeoutPromise]) as Array<Pick<any, 'id' | 'species'>>;
-        console.log('✅ Animals (lean) fetched successfully:', animals.length);
-        return animals;
+        console.log('🔄 Fetching dashboard animal stats...');
+        const { data, error } = await supabase.rpc('get_dashboard_animal_stats');
+        
+        if (error) {
+          console.error('❌ RPC Error:', error);
+          return { species_counts: {}, total_count: 0 };
+        }
+        
+        if (!data || data.length === 0) {
+          console.log('📊 No data returned, using empty stats');
+          return { species_counts: {}, total_count: 0 };
+        }
+        
+        const result = data[0];
+        console.log('✅ Dashboard stats fetched successfully:', result);
+        return result;
       } catch (error) {
-        console.error('❌ Error fetching animals:', error);
-        // Graceful fallback - return minimal data structure
-        return [];
+        console.error('❌ Error fetching dashboard stats:', error);
+        return { species_counts: {}, total_count: 0 };
       }
     },
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
-    retry: 2, // Two retries
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
@@ -165,12 +171,9 @@ const Dashboard = () => {
     }
   };
 
-  // Calculate all stats from the single query result
-  const totalAnimals = allAnimals.length;
-  const speciesCounts = allAnimals.reduce((counts, animal) => {
-    counts[animal.species] = (counts[animal.species] || 0) + 1;
-    return counts;
-  }, {} as Record<string, number>);
+  // Extract stats from the optimized query result
+  const totalAnimals = dashboardStats?.total_count || 0;
+  const speciesCounts = dashboardStats?.species_counts || {};
 
   const handleSignOut = async () => {
     try {
@@ -200,42 +203,51 @@ const Dashboard = () => {
 
 
   return (
-    <div className="min-h-screen">
-      {/* Full-width banner without white frame and more top spacing */}
-      <div className="w-full px-3 md:px-4 pt-8 md:pt-12 pb-4 md:pb-6 bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="rounded-lg overflow-hidden">
-            <ImageUpload
-              currentImage={bannerImage}
-              onImageChange={() => {}} // Read-only mode
-              disabled={true}
-            />
+    <SecureErrorBoundary component="Dashboard" onError={(error) => console.error('Dashboard Error:', error)}>
+      <div className="min-h-screen">
+        {/* Full-width banner without white frame and more top spacing */}
+        <div className="w-full px-3 md:px-4 pt-8 md:pt-12 pb-4 md:pb-6 bg-gradient-to-br from-green-50 to-blue-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="rounded-lg overflow-hidden">
+              <ImageUpload
+                currentImage={bannerImage}
+                onImageChange={() => {}} // Read-only mode
+                disabled={true}
+              />
+            </div>
+          </div>
+        </div>
+        
+        {/* Main content */}
+        <div className="bg-gradient-to-br from-green-50 to-blue-50 pt-2 md:pt-4 pb-20 min-h-screen">
+          <div className="max-w-7xl mx-auto px-3 md:px-4">
+            <SecureErrorBoundary component="DashboardHeader">
+              <DashboardHeader 
+                userEmail={user?.email}
+                userName={userName}
+                totalAnimals={totalAnimals}
+                onForceRefresh={handleForceRefresh}
+              />
+            </SecureErrorBoundary>
+
+            <SecureErrorBoundary component="DashboardStats">
+              <DashboardStats 
+                totalAnimals={totalAnimals}
+                speciesCounts={speciesCounts}
+              />
+            </SecureErrorBoundary>
+
+            <SecureErrorBoundary component="DashboardQuickActions">
+              <DashboardQuickActions />
+            </SecureErrorBoundary>
+            
+            <SecureErrorBoundary component="DashboardSupportInfo">
+              <DashboardSupportInfo />
+            </SecureErrorBoundary>
           </div>
         </div>
       </div>
-      
-      {/* Main content */}
-      <div className="bg-gradient-to-br from-green-50 to-blue-50 pt-2 md:pt-4 pb-20 min-h-screen">
-        <div className="max-w-7xl mx-auto px-3 md:px-4">
-          <DashboardHeader 
-            userEmail={user?.email}
-            userName={userName}
-            totalAnimals={totalAnimals}
-            onForceRefresh={handleForceRefresh}
-          />
-
-          <DashboardStats 
-            totalAnimals={totalAnimals}
-            speciesCounts={speciesCounts}
-          />
-
-          <DashboardQuickActions />
-          
-          
-          <DashboardSupportInfo />
-        </div>
-      </div>
-    </div>
+    </SecureErrorBoundary>
   );
 };
 
