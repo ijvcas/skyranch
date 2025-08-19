@@ -1430,6 +1430,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      system_health_check: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       trigger_daily_grazing_notifications: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -1441,6 +1445,10 @@ export type Database = {
       validate_password_server_side: {
         Args: { email?: string; full_name?: string; password: string }
         Returns: Json
+      }
+      validate_strong_password: {
+        Args: { password: string }
+        Returns: boolean
       }
     }
     Enums: {
