@@ -41,11 +41,16 @@ const HeaderWithDropdown = () => {
   ];
 
   const handleSignOut = async () => {
+    console.log('🚪 SIGN OUT CLICKED');
     try {
+      console.log('🔄 Calling signOut function...');
       await signOut();
+      console.log('✅ Sign out successful, navigating to login...');
       navigate('/login');
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('❌ Error signing out:', error);
+      // Force navigation anyway
+      navigate('/login');
     }
   };
 
