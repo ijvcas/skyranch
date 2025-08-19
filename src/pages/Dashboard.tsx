@@ -94,7 +94,7 @@ const Dashboard = () => {
     loadUserData();
   }, [toast]);
   
-  // Simplified dashboard stats with timeout and fallback
+  // Fast dashboard stats with aggressive timeout and direct fallback
   const { data: dashboardStats, isLoading, error, refetch } = useQuery({
     queryKey: ['dashboard', 'animal-stats'],
     queryFn: async () => {
@@ -108,9 +108,9 @@ const Dashboard = () => {
       console.log('👤 Auth user:', user.email);
       
       try {
-        // Add timeout to prevent hanging
+        // Much shorter timeout - 3 seconds max
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Dashboard stats timeout')), 8000)
+          setTimeout(() => reject(new Error('Dashboard stats timeout')), 3000)
         );
         
         const statsPromise = supabase.rpc('get_dashboard_animal_stats');
@@ -119,56 +119,81 @@ const Dashboard = () => {
         
         if (result.error) {
           console.error('❌ RPC Error:', result.error);
-          return { species_counts: {}, total_count: 0 };
+          throw result.error;
         }
         
         console.log('✅ Dashboard stats fetched successfully:', result.data);
         return result.data?.[0] || { species_counts: {}, total_count: 0 };
       } catch (error) {
-        console.error('❌ Error fetching dashboard stats:', error);
-        // Return empty data instead of throwing
-        return { species_counts: {}, total_count: 0 };
+        console.error('❌ RPC failed, trying direct query:', error);
+        
+        // Fallback: Direct query to animals table
+        try {
+          const { data: animals, error: directError } = await supabase
+            .from('animals')
+            .select('species')
+            .eq('user_id', user.id)
+            .neq('lifecycle_status', 'deceased');
+            
+          if (directError) {
+            console.error('❌ Direct query failed:', directError);
+            return { species_counts: {}, total_count: 0 };
+          }
+          
+          // Calculate stats manually
+          const speciesCounts = animals.reduce((acc: any, animal) => {
+            acc[animal.species] = (acc[animal.species] || 0) + 1;
+            return acc;
+          }, {});
+          
+          const result = {
+            species_counts: speciesCounts,
+            total_count: animals.length
+          };
+          
+          console.log('✅ Direct query success:', result);
+          return result;
+        } catch (fallbackError) {
+          console.error('❌ All queries failed:', fallbackError);
+          return { species_counts: {}, total_count: 0 };
+        }
       }
     },
     enabled: !!user,
-    staleTime: 60000, // 1 minute
+    staleTime: 30000, // 30 seconds
     gcTime: 300000,
-    retry: 1,
-    retryDelay: 2000,
+    retry: false, // Don't retry, use fallback instead
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
-  // Force a complete refresh of all data with user sync retry
+  // Improved force refresh that clears cache and forces new data
   const handleForceRefresh = async () => {
-    console.log('🔄 Force refreshing all data with user sync...');
+    console.log('🔄 Force refreshing dashboard data...');
     
     try {
-      // Clear cache and run diagnostics
-      networkDiagnostics.clearCache();
-      networkDiagnostics.runDiagnostics();
-      
-      // Force user sync retry
-      console.log('🔄 Forcing user sync retry...');
-      const { syncAuthUsersToAppUsers } = await import('@/services/user/userQueries');
-      await syncAuthUsersToAppUsers();
-      console.log('✅ User sync completed');
-      
-      // Clear React Query cache and refetch
+      // Clear React Query cache completely
       queryClient.clear();
+      
+      // Force immediate refetch with loading state
       await refetch();
       
       toast({
         title: "Datos actualizados",
-        description: "Se han recargado todos los datos del sistema.",
+        description: "Dashboard actualizado con los datos más recientes.",
       });
     } catch (error) {
       console.error('❌ Error during force refresh:', error);
+      
+      // If refresh fails, try reloading the page
       toast({
-        title: "Error al actualizar",
-        description: "Hubo un problema al recargar los datos. Intenta de nuevo.",
-        variant: "destructive"
+        title: "Recargando página",
+        description: "Recargando para obtener los datos más recientes...",
       });
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
   };
 
