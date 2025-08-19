@@ -1376,6 +1376,13 @@ export type Database = {
           success: boolean
         }[]
       }
+      get_animal_stats_bypass: {
+        Args: { target_user_id: string }
+        Returns: {
+          species_counts: Json
+          total_count: number
+        }[]
+      }
       get_animals_lean_with_timeout: {
         Args: Record<PropertyKey, never>
         Returns: {
