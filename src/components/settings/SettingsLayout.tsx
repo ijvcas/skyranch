@@ -39,7 +39,7 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
 
   return (
     <div className="page-with-logo">
-      <div className="container mx-auto py-6">
+      <div className="w-full py-6 px-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <SettingsIcon className="w-6 h-6" />

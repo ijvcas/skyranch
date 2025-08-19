@@ -12,34 +12,23 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState('users');
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>Configuración</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SettingsLayout activeTab={activeTab} onTabChange={setActiveTab}>
-              <TabsContent value="users" className="mt-8">
-                <UserSettings />
-              </TabsContent>
-              
-              <TabsContent value="backup" className="mt-8">
-                <BackupSettings />
-              </TabsContent>
-              
-              <TabsContent value="permissions" className="mt-8">
-                <PermissionsSettings />
-              </TabsContent>
-              
-              <TabsContent value="system" className="mt-8">
-                <SystemSettings />
-              </TabsContent>
-            </SettingsLayout>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <SettingsLayout activeTab={activeTab} onTabChange={setActiveTab}>
+      <TabsContent value="users" className="mt-8">
+        <UserSettings />
+      </TabsContent>
+      
+      <TabsContent value="backup" className="mt-8">
+        <BackupSettings />
+      </TabsContent>
+      
+      <TabsContent value="permissions" className="mt-8">
+        <PermissionsSettings />
+      </TabsContent>
+      
+      <TabsContent value="system" className="mt-8">
+        <SystemSettings />
+      </TabsContent>
+    </SettingsLayout>
   );
 };
 
