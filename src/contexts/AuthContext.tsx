@@ -102,16 +102,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('❌ [AUTH CONTEXT] Sign up error:', error);
     } else {
       console.log('✅ [AUTH CONTEXT] Sign up successful for:', email);
-      try {
-        const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
-        if (syncError) {
-          console.warn('⚠️ [AUTH CONTEXT] Post-signup sync failed:', syncError);
-        } else {
-          console.log('🔄 [AUTH CONTEXT] Post-signup sync completed');
-        }
-      } catch (e) {
-        console.warn('⚠️ [AUTH CONTEXT] Post-signup sync exception:', e);
-      }
+      // Remove post-signup sync to avoid database connection bottleneck
+      // Sync will happen automatically via UserManagement component when needed
+      console.log('🔄 [AUTH CONTEXT] Skipping post-signup sync to avoid connection issues');
     }
     
     return { error };
@@ -152,16 +145,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.warn('⚠️ [AUTH CONTEXT] Connection log failed:', logError);
       }
       
-      try {
-        const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
-        if (syncError) {
-          console.warn('⚠️ [AUTH CONTEXT] Post-signin sync failed:', syncError);
-        } else {
-          console.log('🔄 [AUTH CONTEXT] Post-signin sync completed');
-        }
-      } catch (e) {
-        console.warn('⚠️ [AUTH CONTEXT] Post-signin sync exception:', e);
-      }
+      // Remove post-signin sync to avoid database connection bottleneck
+      // Sync will happen automatically via UserManagement component when needed
+      console.log('🔄 [AUTH CONTEXT] Skipping post-signin sync to avoid connection issues');
     }
     
     return { error };

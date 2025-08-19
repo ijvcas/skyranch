@@ -35,41 +35,26 @@ const UserManagement = () => {
     syncUsersMutation
   } = useUserManagement();
 
-  // Fetch users from Supabase with aggressive refetching
+  // Optimized user queries with proper timeout and reasonable refetch
   const { data: users = [], isLoading, refetch, isFetching } = useQuery({
     queryKey: ['app-users'],
     queryFn: getAllUsers,
-    refetchInterval: 10000, // Refetch every 10 seconds
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
+    staleTime: 30000, // Data is fresh for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    retry: 2,
+    refetchOnWindowFocus: false, // Don't refetch on focus to avoid spam
+    refetchOnMount: 'always',
   });
 
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
     queryFn: getCurrentUser,
-    refetchInterval: 10000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
+    staleTime: 60000, // Current user changes less frequently
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    refetchOnWindowFocus: false,
+    refetchOnMount: 'always',
   });
-
-  // Force refresh on component mount and when navigating to settings
-  useEffect(() => {
-    console.log('UserManagement component mounted, forcing refresh...');
-    queryClient.invalidateQueries({ queryKey: ['app-users'] });
-    queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    refetch();
-  }, [refetch, queryClient]);
-
-  // Auto-refresh after user operations
-  useEffect(() => {
-    if (!addUserMutation.isPending && addUserMutation.isSuccess) {
-      setTimeout(() => {
-        console.log('Auto-refreshing after user addition...');
-        queryClient.invalidateQueries({ queryKey: ['app-users'] });
-        refetch();
-      }, 1000);
-    }
-  }, [addUserMutation.isPending, addUserMutation.isSuccess, queryClient, refetch]);
 
   const handleDeleteUser = (id: string, userName: string) => {
     if (currentUser?.id === id) {
@@ -128,8 +113,14 @@ const UserManagement = () => {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Cargando usuarios...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Cargando usuarios...</p>
+          <button 
+            onClick={handleRefresh}
+            className="mt-4 text-sm text-primary hover:underline"
+          >
+            Recargar ahora
+          </button>
         </div>
       </div>
     );
