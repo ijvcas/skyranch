@@ -126,7 +126,10 @@ const HealthStatusForm = ({
                 }}
                 disabled={disabled || (!canDeclareDeaths && !isDeceased)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger 
+                  className="w-full"
+                  onClick={() => console.log('🔄 SelectTrigger clicked!')}
+                >
                   <SelectValue placeholder="Selecciona el estado de vida" />
                 </SelectTrigger>
                 <SelectContent 
@@ -134,13 +137,18 @@ const HealthStatusForm = ({
                   position="popper"
                   sideOffset={5}
                 >
-                  <SelectItem value="active" className="cursor-pointer hover:bg-gray-100">
+                  <SelectItem 
+                    value="active" 
+                    className="cursor-pointer hover:bg-gray-100"
+                    onClick={() => console.log('🔄 Active item clicked!')}
+                  >
                     Activo
                   </SelectItem>
                   <SelectItem 
                     value="deceased" 
                     disabled={!canDeclareDeaths && !isDeceased}
                     className="cursor-pointer hover:bg-red-50 text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => console.log('🔄 Deceased item clicked!')}
                   >
                     Fallecido
                   </SelectItem>
