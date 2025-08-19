@@ -1418,6 +1418,13 @@ export type Database = {
           recommended_exit_date: string
         }[]
       }
+      get_user_animal_stats_emergency: {
+        Args: { target_user_id: string }
+        Returns: {
+          species_counts: Json
+          total_count: number
+        }[]
+      }
       is_active_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
