@@ -25,9 +25,20 @@ export const useUserManagement = () => {
   // Mutations for user operations
   const addUserMutation = useMutation({
     mutationFn: addUser,
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['app-users'] });
       const userName = newUser.name;
+      
+      // Enhanced security logging for user creation
+      try {
+        const { SecurityService } = await import('@/services/securityService');
+        await SecurityService.logAdminOperation('user_created', undefined, {
+          new: { name: userName, email: newUser.email, role: newUser.role }
+        });
+      } catch (error) {
+        console.warn('Failed to log admin operation:', error);
+      }
+      
       setNewUser({ 
         name: '', 
         email: '', 

@@ -1359,6 +1359,10 @@ export type Database = {
         Args: { last_grazing_end_date: string; rest_days_required: number }
         Returns: string
       }
+      cleanup_old_connection_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cleanup_old_notifications: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1402,6 +1406,17 @@ export type Database = {
       is_active_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_admin_operation: {
+        Args: {
+          new_data?: Json
+          old_data?: Json
+          operation_type: string
+          reason?: string
+          record_id?: string
+          table_name: string
+        }
+        Returns: undefined
       }
       sync_auth_users_to_app_users: {
         Args: Record<PropertyKey, never>

@@ -11,6 +11,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
+import SecurityProvider from '@/components/security/SecurityProvider';
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
 import AnimalDetail from '@/pages/AnimalDetail';
 import AnimalEdit from '@/pages/AnimalEdit';
@@ -136,9 +137,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <SecurityProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </SecurityProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
