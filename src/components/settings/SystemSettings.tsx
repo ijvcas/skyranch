@@ -7,7 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import UserActivityLogs from './UserActivityLogs';
 import DashboardBannerSettings from './DashboardBannerSettings';
 import FarmProfileSettings from './FarmProfileSettings';
-import DeploymentVersionDisplay from '../app-info/DeploymentVersionDisplay';
+
 import DatabaseVersionDisplay from '../app-info/DatabaseVersionDisplay';
 
 const SystemSettings = () => {
@@ -29,32 +29,18 @@ const SystemSettings = () => {
 
   return (
     <div className="space-y-8">
-      {/* Version Information */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Code className="w-5 h-5" />
-              Sistema de Versionado Automático
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DeploymentVersionDisplay />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5" />
-              Base de Datos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DatabaseVersionDisplay />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Database Version Information */}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="w-5 h-5" />
+            Sistema de Versionado de Base de Datos
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DatabaseVersionDisplay />
+        </CardContent>
+      </Card>
 
       <Separator />
 

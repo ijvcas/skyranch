@@ -212,22 +212,22 @@ const UserActivityLogs: React.FC = () => {
                   ) : (
                     <ChevronRight className="w-4 h-4" />
                   )}
-                  <div className="flex-1">
-                    <div className="font-medium">{u.name || u.email}</div>
-                    <div className="text-xs text-muted-foreground">{u.email}</div>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Último inicio de sesión: {last ? new Date(last).toLocaleString() : '—'}
-                  </div>
+                   <div className="flex-1">
+                     <div className="text-sm font-medium">{u.name || u.email}</div>
+                     <div className="text-xs text-muted-foreground">{u.email}</div>
+                   </div>
+                   <div className="text-xs text-muted-foreground">
+                     Último inicio de sesión: {last ? new Date(last).toLocaleString() : '—'}
+                   </div>
                 </button>
 
                 {isOpen && (
                   <div className="mt-3 rounded-md bg-muted/30 p-3">
                     <div className="text-xs text-muted-foreground mb-2">Últimos eventos</div>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="text-left text-xs text-muted-foreground">
+                       <table className="w-full text-xs">
+                         <thead>
+                           <tr className="text-left text-xs text-muted-foreground">
                             <th className="py-2 pr-3">Fecha</th>
                             <th className="py-2 pr-3">Evento</th>
                             <th className="py-2 pr-3">Método</th>
