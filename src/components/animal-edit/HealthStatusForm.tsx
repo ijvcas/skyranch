@@ -33,13 +33,17 @@ const HealthStatusForm = ({
   const { hasAccess: canDeclareDeaths } = usePermissionCheck('animals_declare_death');
 
   const handleLifecycleChange = (value: string) => {
+    console.log('🔄 Lifecycle change requested:', value, 'Current:', formData.lifecycleStatus);
     if (value === 'deceased' && formData.lifecycleStatus !== 'deceased') {
       if (!canDeclareDeaths) {
+        console.log('❌ No permission to declare deaths');
         return; // Permission check will be handled by the UI
       }
+      console.log('🔄 Setting up death confirmation for:', value);
       setPendingLifecycleChange(value);
       setShowDeathConfirmation(true);
     } else {
+      console.log('🔄 Direct lifecycle change to:', value);
       onInputChange('lifecycleStatus', value);
     }
   };
@@ -126,6 +130,10 @@ const HealthStatusForm = ({
                 </SelectItem>
               </SelectContent>
             </Select>
+            {/* Debug info */}
+            <div className="text-xs text-gray-500 mt-1">
+              Debug: Current value = {formData.lifecycleStatus || 'active'}
+            </div>
           </div>
           <div>
             <Label htmlFor="dateOfDeath">Fecha de Fallecimiento</Label>

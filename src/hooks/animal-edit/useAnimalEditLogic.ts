@@ -148,7 +148,12 @@ export const useAnimalEditLogic = () => {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    console.log('🔄 handleInputChange called:', field, '=', value);
+    setFormData(prev => {
+      const newFormData = { ...prev, [field]: value };
+      console.log('🔄 FormData updated:', newFormData);
+      return newFormData;
+    });
   };
 
   const handleImageChange = (imageUrl: string) => {
