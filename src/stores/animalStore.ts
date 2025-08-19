@@ -72,12 +72,12 @@ export const useAnimalStore = create<AnimalStore>((set, get) => ({
     
     set({ isLoading: true });
     try {
-      console.log('🚨 Using emergency animal service...');
+      console.log('🚨 Using FIXED emergency animal service...');
       const result = await getAnimalsEmergency();
-      console.log('✅ Emergency fetch completed:', result);
+      console.log('✅ FIXED emergency fetch completed:', result);
       
-      // Convert to store format
-      const animals = result.animals.map(animal => ({
+      // Convert to store format  
+      const animals = result.animals.map((animal: any) => ({
         id: animal.id,
         name: animal.name || '',
         tag: animal.tag || '',
@@ -110,9 +110,10 @@ export const useAnimalStore = create<AnimalStore>((set, get) => ({
         causeOfDeath: ''
       }));
       
+      console.log('🎯 FIXED: Converted animals:', animals.length);
       set({ animals, isLoading: false });
     } catch (error) {
-      console.error('❌ Emergency service failed:', error);
+      console.error('❌ FIXED emergency service failed:', error);
       set({ isLoading: false, animals: [] });
     }
   },

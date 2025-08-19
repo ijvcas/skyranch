@@ -1425,6 +1425,16 @@ export type Database = {
           total_count: number
         }[]
       }
+      get_user_animals_basic: {
+        Args: { max_limit?: number; target_user_id: string }
+        Returns: {
+          id: string
+          name: string
+          species: string
+          tag: string
+          user_id: string
+        }[]
+      }
       is_active_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
