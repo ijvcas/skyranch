@@ -15,19 +15,13 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
 
     console.log('👤 ANIMALS: Authenticated as:', user.email);
 
-    // Add timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Animals query timeout')), 10000)
-    );
-
-    const queryPromise = supabase
+    console.log('🔄 ANIMALS: Executing query...');
+    const { data, error } = await supabase
       .from('animals')
       .select('*')
+      .eq('user_id', user.id)
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
-
-    console.log('🔄 ANIMALS: Executing query with timeout...');
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
     if (error) {
       console.error('❌ ANIMALS: Query error:', error);
@@ -108,9 +102,10 @@ export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'speci
     }
 
     console.log('🔄 Executing animals query...');
-    const { data, error } = await (supabase
-      .from('animals') as any)
+    const { data, error } = await supabase
+      .from('animals')
       .select('id,species')
+      .eq('user_id', user.id)
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
@@ -136,9 +131,10 @@ export const getAnimalsPage = async (limit = 50, offset = 0): Promise<Animal[]> 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await (supabase
-      .from('animals') as any)
+    const { data, error } = await supabase
+      .from('animals')
       .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url,lifecycle_status')
+      .eq('user_id', user.id)
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -194,10 +190,10 @@ export const getAnimal = async (id: string): Promise<Animal | null> => {
       return null;
     }
 
-    // Remove user_id filter - all authenticated users can see all animals
-    const { data, error } = await (supabase
-      .from('animals') as any)
+    const { data, error } = await supabase
+      .from('animals')
       .select('*')
+      .eq('user_id', user.id)
       .eq('id', id)
       .single();
 
