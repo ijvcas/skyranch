@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Database, Shield, Settings as SettingsIcon, Rocket } from 'lucide-react';
-import { usePermissions } from '@/hooks/usePermissions';
 
 interface SettingsLayoutProps {
   activeTab: string;
@@ -11,32 +10,8 @@ interface SettingsLayoutProps {
 }
 
 const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProps) => {
-  const { checkPermission } = usePermissions();
-  const [availableTabs, setAvailableTabs] = useState<string[]>([]);
-
-  useEffect(() => {
-    const checkTabPermissions = async () => {
-      const tabs = [];
-      
-      // Check permissions for each tab
-      if (await checkPermission('users_manage')) {
-        tabs.push('users');
-      }
-      if (await checkPermission('system_settings')) {
-        tabs.push('backup', 'permissions', 'system');
-      }
-      
-      setAvailableTabs(tabs);
-      
-      // If current active tab is not available, switch to first available
-      if (tabs.length > 0 && !tabs.includes(activeTab)) {
-        onTabChange(tabs[0]);
-      }
-    };
-
-    checkTabPermissions();
-    // Remove checkPermission from dependencies to prevent infinite loops
-  }, []); // Only run once on mount
+  // Static tabs to avoid permission checking loops
+  const availableTabs = ['users', 'backup', 'permissions', 'system'];
 
   return (
     <div className="page-with-logo">
@@ -51,30 +26,22 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
 
         <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
           <TabsList className="flex flex-col w-full gap-2 h-auto p-2">
-            {availableTabs.includes('users') && (
-              <TabsTrigger value="users" className="flex items-center gap-2 w-full justify-center">
-                <Users className="w-4 h-4" />
-                Usuarios
-              </TabsTrigger>
-            )}
-            {availableTabs.includes('backup') && (
-              <TabsTrigger value="backup" className="flex items-center gap-2 w-full justify-center">
-                <Database className="w-4 h-4" />
-                Backup
-              </TabsTrigger>
-            )}
-            {availableTabs.includes('permissions') && (
-              <TabsTrigger value="permissions" className="flex items-center gap-2 w-full justify-center">
-                <Shield className="w-4 h-4" />
-                Permisos
-              </TabsTrigger>
-            )}
-            {availableTabs.includes('system') && (
-              <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-center">
-                <SettingsIcon className="w-4 h-4" />
-                Sistema
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="users" className="flex items-center gap-2 w-full justify-center">
+              <Users className="w-4 h-4" />
+              Usuarios
+            </TabsTrigger>
+            <TabsTrigger value="backup" className="flex items-center gap-2 w-full justify-center">
+              <Database className="w-4 h-4" />
+              Backup
+            </TabsTrigger>
+            <TabsTrigger value="permissions" className="flex items-center gap-2 w-full justify-center">
+              <Shield className="w-4 h-4" />
+              Permisos
+            </TabsTrigger>
+            <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-center">
+              <SettingsIcon className="w-4 h-4" />
+              Sistema
+            </TabsTrigger>
           </TabsList>
 
           {children}
