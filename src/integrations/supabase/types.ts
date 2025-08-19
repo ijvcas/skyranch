@@ -1391,6 +1391,16 @@ export type Database = {
           user_count: number
         }[]
       }
+      get_animals_list_bypass: {
+        Args: { max_limit?: number; target_user_id: string }
+        Returns: {
+          id: string
+          name: string
+          species: string
+          tag: string
+          user_id: string
+        }[]
+      }
       get_auth_users: {
         Args: Record<PropertyKey, never>
         Returns: {

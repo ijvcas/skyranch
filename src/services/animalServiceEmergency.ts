@@ -14,33 +14,33 @@ export const getAnimalsEmergency = async () => {
     
     console.log('✅ EMERGENCY: User authenticated:', user.id);
     
-    // Use the new database function with explicit user ID
-    const { data: statsData, error: statsError } = await supabase.rpc('get_user_animal_stats_emergency', {
+    // Use the bypass functions that skip auth context
+    const { data: statsData, error: statsError } = await supabase.rpc('get_animal_stats_bypass', {
       target_user_id: user.id
     });
     
     if (statsError) {
-      console.error('❌ EMERGENCY: Stats function error:', statsError);
+      console.error('❌ EMERGENCY: Stats bypass error:', statsError);
       return { animals: [], stats: { total_count: 0, species_counts: {} } };
     }
     
-    console.log('✅ EMERGENCY: Got stats data:', statsData);
+    console.log('✅ EMERGENCY: Got bypass stats:', statsData);
     
-    // Get basic animal list with explicit user ID
-    const { data: animalsData, error: animalsError } = await supabase.rpc('get_user_animals_basic', {
+    // Get basic animal list with bypass function
+    const { data: animalsData, error: animalsError } = await supabase.rpc('get_animals_list_bypass', {
       target_user_id: user.id,
       max_limit: 100
     });
     
     if (animalsError) {
-      console.error('❌ EMERGENCY: Animals function error:', animalsError);
+      console.error('❌ EMERGENCY: Animals bypass error:', animalsError);
       return { 
         animals: [], 
         stats: statsData?.[0] || { total_count: 0, species_counts: {} } 
       };
     }
     
-    console.log('✅ EMERGENCY: Got animals data:', animalsData?.length);
+    console.log('✅ EMERGENCY: Got bypass animals:', animalsData?.length);
     
     return {
       animals: animalsData || [],
