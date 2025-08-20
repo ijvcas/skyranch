@@ -168,10 +168,10 @@ const UserActivityLogs: React.FC = () => {
                     <ChevronRight className="w-4 h-4" />
                   )}
                   <div className="flex-1">
-                    <div className="font-medium">{u.name || u.email}</div>
+                    <div className="text-sm font-medium">{u.name || u.email}</div>
                     <div className="text-xs text-muted-foreground">{u.email}</div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-xs text-muted-foreground">
                     Último inicio de sesión: {last ? new Date(last).toLocaleString() : '—'}
                   </div>
                 </button>
