@@ -1,8 +1,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, ChevronDown, ChevronRight, RefreshCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { getUserRoleSecure, getAuthenticatedUser } from '@/services/coreDataService';
+import { Search, ChevronDown, ChevronRight, RefreshCcw } from 'lucide-react';
 
 interface AppUser {
   id: string;
@@ -32,35 +31,18 @@ const UserActivityLogs: React.FC = () => {
   const [recentEvents, setRecentEvents] = useState<Record<string, ConnectionLog[]>>({});
   const [lastLogins, setLastLogins] = useState<Record<string, string>>({});
   const [refreshKey, setRefreshKey] = useState(0);
-  const [hasPermission, setHasPermission] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    
-    const initializeComponent = async () => {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
+    // Fetch users and latest sign-in logs in parallel
+    const fetchData = async () => {
       try {
-        // Check authentication and permissions first
-        const user = await getAuthenticatedUser();
-        if (!user) {
-          throw new Error('No authenticated user');
-        }
-
-        const role = await getUserRoleSecure();
-        const isAdmin = role === 'admin';
-        setHasPermission(isAdmin);
-
-        if (!isAdmin) {
-          setError('Se requieren permisos de administrador para ver los registros de actividad');
-          return;
-        }
-
-        // Fetch data only if user has permission
         const [usersRes, signinsRes] = await Promise.all([
           supabase.from('app_users').select('id, name, email'),
-          supabase
+          (supabase as any)
             .from('user_connection_logs')
             .select('user_id, event, created_at')
             .eq('event', 'signed_in')
@@ -70,15 +52,8 @@ const UserActivityLogs: React.FC = () => {
 
         if (!isMounted) return;
 
-        if (usersRes.error) {
-          console.error('Users query error:', usersRes.error);
-          throw new Error(`Error cargando usuarios: ${usersRes.error.message}`);
-        }
-        
-        if (signinsRes.error) {
-          console.error('Sign-ins query error:', signinsRes.error);
-          throw new Error(`Error cargando histórico de accesos: ${signinsRes.error.message}`);
-        }
+        if (usersRes.error) throw usersRes.error;
+        if (signinsRes.error) throw signinsRes.error;
 
         const usersData = (usersRes.data || []) as AppUser[];
         setUsers(usersData);
@@ -92,21 +67,15 @@ const UserActivityLogs: React.FC = () => {
           }
         }
         setLastLogins(lastMap);
-
       } catch (e: any) {
         console.error('[UserActivityLogs] Load error', e);
-        if (isMounted) {
-          setError(e?.message || 'Error loading data');
-        }
+        setError(e?.message || 'Error loading data');
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
 
-    initializeComponent();
-    
+    fetchData();
     return () => {
       isMounted = false;
     };
@@ -131,30 +100,23 @@ const UserActivityLogs: React.FC = () => {
   }, [users, search, lastLogins]);
 
   const toggleExpand = async (userId: string) => {
-    if (!hasPermission) return;
-    
     const isSame = expandedUserId === userId;
     const nextId = isSame ? null : userId;
     setExpandedUserId(nextId);
 
     if (nextId && !recentEvents[nextId]) {
-      try {
-        // lazy-load latest 10 events for this user
-        const { data, error } = await supabase
-          .from('user_connection_logs')
-          .select('id, user_id, event, created_at, method, path, referrer, user_agent, success, error_code')
-          .eq('user_id', nextId)
-          .order('created_at', { ascending: false })
-          .limit(10);
-          
-        if (error) {
-          console.warn('[UserActivityLogs] Load user events error', error);
-          return;
-        }
-        setRecentEvents(prev => ({ ...prev, [nextId]: data as ConnectionLog[] }));
-      } catch (error) {
-        console.warn('[UserActivityLogs] Exception loading user events', error);
+      // lazy-load latest 10 events for this user
+      const { data, error } = await (supabase as any)
+        .from('user_connection_logs')
+        .select('id, user_id, event, created_at, method, path, referrer, user_agent, success, error_code')
+        .eq('user_id', nextId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) {
+        console.warn('[UserActivityLogs] Load user events error', error);
+        return;
       }
+      setRecentEvents(prev => ({ ...prev, [nextId]: data as ConnectionLog[] }));
     }
   };
 
@@ -183,20 +145,13 @@ const UserActivityLogs: React.FC = () => {
       </div>
 
       {loading && (
-        <div className="text-sm text-muted-foreground">Cargando usuarios...</div>
+        <div className="text-sm text-muted-foreground">Cargando usuarios…</div>
       )}
       {error && (
-        <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border">
-          {error}
-        </div>
-      )}
-      {!hasPermission && !loading && !error && (
-        <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-          Se requieren permisos de administrador para acceder a esta función.
-        </div>
+        <div className="text-sm text-red-600">{error}</div>
       )}
 
-      {!loading && !error && hasPermission && filteredUsers.length > 0 && (
+      {!loading && !error && (
         <div className="divide-y rounded-md border">
           {filteredUsers.map((u) => {
             const last = lastLogins[u.id];
@@ -212,22 +167,22 @@ const UserActivityLogs: React.FC = () => {
                   ) : (
                     <ChevronRight className="w-4 h-4" />
                   )}
-                   <div className="flex-1">
-                     <div className="text-sm font-medium">{u.name || u.email}</div>
-                     <div className="text-xs text-muted-foreground">{u.email}</div>
-                   </div>
-                   <div className="text-xs text-muted-foreground">
-                     Último inicio de sesión: {last ? new Date(last).toLocaleString() : '—'}
-                   </div>
+                  <div className="flex-1">
+                    <div className="font-medium">{u.name || u.email}</div>
+                    <div className="text-xs text-muted-foreground">{u.email}</div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Último inicio de sesión: {last ? new Date(last).toLocaleString() : '—'}
+                  </div>
                 </button>
 
                 {isOpen && (
                   <div className="mt-3 rounded-md bg-muted/30 p-3">
                     <div className="text-xs text-muted-foreground mb-2">Últimos eventos</div>
                     <div className="overflow-x-auto">
-                       <table className="w-full text-xs">
-                         <thead>
-                           <tr className="text-left text-xs text-muted-foreground">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-left text-xs text-muted-foreground">
                             <th className="py-2 pr-3">Fecha</th>
                             <th className="py-2 pr-3">Evento</th>
                             <th className="py-2 pr-3">Método</th>
@@ -260,12 +215,6 @@ const UserActivityLogs: React.FC = () => {
               </article>
             );
           })}
-        </div>
-      )}
-      
-      {!loading && !error && hasPermission && filteredUsers.length === 0 && (
-        <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-          No se encontraron usuarios.
         </div>
       )}
     </section>

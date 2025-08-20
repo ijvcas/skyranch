@@ -1,115 +1,280 @@
-import React, { useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAuthGuard } from '@/hooks/useAuthGuard';
-import WeatherWidget from '@/components/weather/WeatherWidget';
-import DashboardBanner from '@/components/dashboard/DashboardBanner';
-import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions';
+import { useToast } from '@/hooks/use-toast';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getAnimalsLean } from '@/services/animalService';
+import { checkPermission } from '@/services/permissionService';
+import { getCurrentUser } from '@/services/userService';
+import { dashboardBannerService } from '@/services/dashboardBannerService';
+import { networkDiagnostics } from '@/utils/networkDiagnostics';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent } from '@/components/ui/card';
+import ImageUpload from '@/components/ImageUpload';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardStats from '@/components/dashboard/DashboardStats';
-import { useAnimalStore } from '@/stores/animalStore';
-import { getAnimalsEmergency } from '@/services/animalServiceEmergency';
-import LoadingState from '@/components/ui/LoadingState';
-import ErrorState from '@/components/ui/ErrorState';
-import ErrorBoundary from '@/components/ui/ErrorBoundary';
+import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions';
+import DashboardLoadingState from '@/components/dashboard/DashboardLoadingState';
+import DashboardErrorState from '@/components/dashboard/DashboardErrorState';
+import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
+import { applySEO, injectJSONLD } from '@/utils/seo';
+
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const { isReady, shouldWait } = useAuthGuard();
-  const { animals, isLoading, loadAnimals } = useAnimalStore();
-  const [stats, setStats] = React.useState({ total_count: 0, species_counts: {} });
-
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [bannerImage, setBannerImage] = useState<string>('/lovable-uploads/d3c33c19-f7cd-441e-884f-371ed6481179.png');
+  const [userName, setUserName] = useState<string>('');
+  // SEO metadata
   useEffect(() => {
-    if (isReady && !isLoading && animals.length === 0) {
-      console.log('🔄 Dashboard: Loading animals for authenticated user');
-      loadAnimals();
-      
-      // Also load stats with user ID
-      const loadStats = async () => {
-        try {
-          const result = await getAnimalsEmergency(user?.id);
-          setStats(result.stats);
-        } catch (error) {
-          console.error('Failed to load stats:', error);
-        }
-      };
-      loadStats();
-    }
-  }, [isReady, loadAnimals, isLoading, animals.length]);
-
-  const handleForceRefresh = async () => {
-    console.log('🔄 DASHBOARD: Force refresh triggered!');
-    loadAnimals();
+    applySEO({
+      title: 'SKYRANCH Dashboard — Farm management',
+      description: 'Gestiona animales, lotes y rotaciones en tiempo real en SKYRANCH.',
+      canonical: window.location.href
+    });
     
-    // Also refresh stats with user ID
+    injectJSONLD({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'SKYRANCH',
+      url: window.location.origin,
+      description: 'Gestión moderna de granjas: animales, lotes y rotaciones.'
+    });
+  }, []);
+  
+  // Load banner image and user data
+  useEffect(() => {
+    // Run network diagnostics on component mount
+    networkDiagnostics.runDiagnostics().then(({ network, supabase }) => {
+      if (!network) {
+        console.error('🔴 Network connectivity issues detected');
+        toast({
+          title: "Problema de Conexión",
+          description: "Se detectaron problemas de conectividad de red",
+          variant: "destructive"
+        });
+      }
+      if (!supabase) {
+        console.error('🔴 Supabase connectivity issues detected');
+        toast({
+          title: "Problema de Base de Datos",
+          description: "No se puede conectar a la base de datos",
+          variant: "destructive"
+        });
+      }
+    });
+    
+    const loadBanner = async () => {
+      try {
+        const bannerData = await dashboardBannerService.getBanner();
+        if (bannerData?.image_url) {
+          setBannerImage(bannerData.image_url);
+        }
+      } catch (error) {
+        console.error('Error loading banner:', error);
+        // Keep default fallback image
+      }
+    };
+    
+    const loadUserData = async () => {
+      try {
+        const userData = await getCurrentUser();
+        if (userData?.name) {
+          setUserName(userData.name);
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        // Fallback to email if name not available
+      }
+    };
+    
+    loadBanner();
+    loadUserData();
+  }, [toast]);
+  
+  // Enhanced query with admin fallback and better error handling
+  const { data: allAnimals = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['animals', 'all-users'],
+    queryFn: async () => {
+      try {
+        console.log('🔍 Starting animal data fetch...');
+        
+        // Use the auth context user instead of calling getCurrentUser()
+        if (!user) {
+          console.log('❌ No authenticated user found');
+          return [];
+        }
+        
+        console.log('👤 Auth user:', user.email);
+        
+        // Get user role from app_users table directly
+        let userRole = null;
+        let shouldBypassPermissions = false;
+        
+        try {
+          const { data: appUser, error } = await supabase
+            .from('app_users')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle();
+          
+          if (!error && appUser) {
+            userRole = appUser.role;
+            console.log('👤 User role:', userRole);
+            
+            // If user is admin or manager, allow bypass
+            if (userRole === 'admin' || userRole === 'manager') {
+              shouldBypassPermissions = true;
+              console.log('🔓 Admin/Manager detected - enabling fallback access');
+            }
+          }
+        } catch (userError) {
+          console.error('❌ Error getting user role:', userError);
+        }
+        
+        // Try permission check, but don't block dashboard for new users
+        if (!shouldBypassPermissions) {
+          try {
+            await checkPermission('animals_view', user);
+            console.log('✅ Permission granted for animals_view');
+          } catch (permissionError) {
+            console.warn('⚠️ Permission check failed for animals_view, continuing in read-only mode:', permissionError);
+            // Continue without throwing to avoid blocking first login experiences
+          }
+        } else {
+          console.log('🔓 Bypassing permission check for admin/manager');
+        }
+        
+        console.log('🔄 Fetching animals (lean) data...');
+        const animals = await getAnimalsLean();
+        console.log('✅ Animals (lean) fetched successfully:', animals.length);
+        return animals;
+      } catch (error) {
+        console.error('❌ Error fetching animals:', error);
+        // Don’t break the dashboard for transient or permission issues
+        return [];
+      }
+    },
+    enabled: !!user,
+    staleTime: 30000, // 30 seconds
+    gcTime: 300000, // 5 minutes
+    retry: (failureCount, error) => {
+      // Only retry up to 2 times for certain errors
+      if (failureCount >= 2) return false;
+      return true;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    refetchOnMount: true,
+    refetchOnWindowFocus: false, // Disable to prevent excessive requests
+  });
+
+  // Force a complete refresh of all data with user sync retry
+  const handleForceRefresh = async () => {
+    console.log('🔄 Force refreshing all data with user sync...');
+    
     try {
-      const result = await getAnimalsEmergency(user?.id);
-      setStats(result.stats);
+      // Clear cache and run diagnostics
+      networkDiagnostics.clearCache();
+      networkDiagnostics.runDiagnostics();
+      
+      // Force user sync retry
+      console.log('🔄 Forcing user sync retry...');
+      const { syncAuthUsersToAppUsers } = await import('@/services/user/userQueries');
+      await syncAuthUsersToAppUsers();
+      console.log('✅ User sync completed');
+      
+      // Clear React Query cache and refetch
+      queryClient.clear();
+      await refetch();
+      
+      toast({
+        title: "Datos actualizados",
+        description: "Se han recargado todos los datos del sistema.",
+      });
     } catch (error) {
-      console.error('Failed to refresh stats:', error);
+      console.error('❌ Error during force refresh:', error);
+      toast({
+        title: "Error al actualizar",
+        description: "Hubo un problema al recargar los datos. Intenta de nuevo.",
+        variant: "destructive"
+      });
     }
   };
 
-  if (shouldWait) {
-    return (
-      <div className="page-with-logo">
-        <DashboardBanner />
-        <LoadingState message="Autenticando usuario..." />
-      </div>
-    );
-  }
+  // Calculate all stats from the single query result
+  const totalAnimals = allAnimals.length;
+  const speciesCounts = allAnimals.reduce((counts, animal) => {
+    counts[animal.species] = (counts[animal.species] || 0) + 1;
+    return counts;
+  }, {} as Record<string, number>);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente.",
+      });
+      navigate('/login');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error al cerrar sesión.",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (isLoading) {
-    return (
-      <div className="page-with-logo">
-        <DashboardBanner />
-        <LoadingState message="Cargando animales..." />
-      </div>
-    );
+    return <DashboardLoadingState userEmail={user?.email} />;
   }
 
-  return (
-    <ErrorBoundary>
-      <div className="page-with-logo">
-        <DashboardBanner />
-        
-        <div className="container mx-auto py-6 space-y-6">
-          <ErrorBoundary>
-            <DashboardStats 
-              totalAnimals={stats.total_count || animals.length}
-              speciesCounts={stats.species_counts || {}}
-            />
-          </ErrorBoundary>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3 space-y-6">
-              <ErrorBoundary>
-                <DashboardHeader 
-                  userName={user?.user_metadata?.full_name}
-                  userEmail={user?.email}
-                  totalAnimals={stats.total_count || animals.length}
-                  onForceRefresh={handleForceRefresh}
-                />
-              </ErrorBoundary>
-              
-              <ErrorBoundary>
-                <DashboardQuickActions />
-              </ErrorBoundary>
-            </div>
+  if (error) {
+    console.warn('⚠️ Non-blocking dashboard error:', error);
+    // Continue rendering with whatever data we have (may be empty)
+  }
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              <ErrorBoundary fallback={
-                <div className="text-sm text-muted-foreground">
-                  Widget del clima no disponible
-                </div>
-              }>
-                <WeatherWidget />
-              </ErrorBoundary>
-            </div>
+
+  return (
+    <div className="min-h-screen">
+      {/* Full-width banner without white frame and more top spacing */}
+      <div className="w-full px-3 md:px-4 pt-8 md:pt-12 pb-4 md:pb-6 bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="rounded-lg overflow-hidden">
+            <ImageUpload
+              currentImage={bannerImage}
+              onImageChange={() => {}} // Read-only mode
+              disabled={true}
+            />
           </div>
         </div>
       </div>
-    </ErrorBoundary>
+      
+      {/* Main content */}
+      <div className="bg-gradient-to-br from-green-50 to-blue-50 pt-2 md:pt-4 pb-20 min-h-screen">
+        <div className="max-w-7xl mx-auto px-3 md:px-4">
+          <DashboardHeader 
+            userEmail={user?.email}
+            userName={userName}
+            totalAnimals={totalAnimals}
+            onForceRefresh={handleForceRefresh}
+          />
+
+          <DashboardStats 
+            totalAnimals={totalAnimals}
+            speciesCounts={speciesCounts}
+          />
+
+          <DashboardQuickActions />
+          
+          
+          <DashboardSupportInfo />
+        </div>
+      </div>
+    </div>
   );
 };
 

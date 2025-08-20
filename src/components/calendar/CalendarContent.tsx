@@ -49,9 +49,9 @@ const CalendarContent = ({
                 className="rounded-md border w-full max-w-md mx-auto"
                 showNavigationHeader={true}
                 events={events.map(event => ({
-                  eventDate: event.event_date,
+                  eventDate: event.eventDate,
                   title: event.title,
-                  eventType: event.event_type
+                  eventType: event.eventType
                 }))}
               />
             </div>

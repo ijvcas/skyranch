@@ -1,53 +1,38 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Permission, UserRole } from '@/services/permissionService';
-
-// Simplified role-based permissions to avoid async database calls
-const ROLE_PERMISSIONS: Record<UserRole | 'none', Permission[]> = {
-  admin: [
-    'animals_view', 'animals_edit', 'animals_delete', 'animals_create', 'animals_declare_death',
-    'lots_manage', 'health_records', 'breeding_records', 'calendar_manage',
-    'users_manage', 'system_settings'
-  ],
-  manager: [
-    'animals_view', 'animals_edit', 'animals_delete', 'animals_create', 'animals_declare_death',
-    'lots_manage', 'health_records', 'breeding_records', 'calendar_manage',
-    'users_manage'
-  ],
-  worker: [
-    'animals_view', 'animals_edit', 'animals_delete', 'animals_create',
-    'lots_manage', 'health_records', 'breeding_records', 'calendar_manage'
-  ],
-  none: ['animals_view'] // Basic view access for unauthenticated users
-};
+import { Permission, UserRole, getCurrentUserRole, hasPermission } from '@/services/permissionService';
 
 export const usePermissions = () => {
-  const { user, loading: authLoading } = useAuth();
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user) {
-      setUserRole(null);
-      setLoading(false);
-      return;
+    const loadUserRole = async () => {
+      try {
+        console.log('🔄 Loading user role...');
+        setError(null);
+        const role = await getCurrentUserRole();
+        setUserRole(role);
+        console.log('✅ User role loaded:', role);
+      } catch (error) {
+        console.error('❌ Error loading user role:', error);
+        setError('No se pudo cargar el rol del usuario');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserRole();
+  }, []);
+
+  const checkPermission = async (permission: Permission): Promise<boolean> => {
+    try {
+      return await hasPermission(permission);
+    } catch (error) {
+      console.error('❌ Error checking permission:', error);
+      return false;
     }
-
-    // Get role from user metadata or default to worker
-    const role = (user.user_metadata?.role || 'worker') as UserRole;
-    setUserRole(role);
-    setLoading(false);
-    console.log('✅ User role set from metadata:', role);
-  }, [user, authLoading]);
-
-  const checkPermission = (permission: Permission): boolean => {
-    if (!userRole) return false;
-    const rolePermissions = ROLE_PERMISSIONS[userRole] || [];
-    return rolePermissions.includes(permission);
   };
 
   return {
@@ -55,24 +40,34 @@ export const usePermissions = () => {
     loading,
     error,
     checkPermission,
-    hasPermission: checkPermission // Sync version
+    hasPermission: (permission: Permission) => hasPermission(permission)
   };
 };
 
 export const usePermissionCheck = (permission: Permission) => {
-  const { checkPermission, loading: permLoading } = usePermissions();
-  const [hasAccess, setHasAccess] = useState<boolean>(true);
-  const [loading, setLoading] = useState(false);
+  const [hasAccess, setHasAccess] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (permLoading) return;
-    
-    const allowed = checkPermission(permission);
-    setHasAccess(allowed);
-    setLoading(false);
-    console.log(`${allowed ? '✅' : '❌'} Permission check result:`, { permission, allowed });
-  }, [permission, checkPermission, permLoading]);
+    const checkAccess = async () => {
+      try {
+        console.log('🔍 Checking access for permission:', permission);
+        setError(null);
+        const allowed = await hasPermission(permission);
+        setHasAccess(allowed);
+        console.log(`${allowed ? '✅' : '❌'} Access check result:`, { permission, allowed });
+      } catch (error) {
+        console.error('❌ Error checking permission:', error);
+        setHasAccess(false);
+        setError('Error al verificar permisos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAccess();
+  }, [permission]);
 
   return { hasAccess, loading, error };
 };

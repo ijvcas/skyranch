@@ -11,7 +11,6 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
-import SecurityProvider from '@/components/security/SecurityProvider';
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
 import AnimalDetail from '@/pages/AnimalDetail';
 import AnimalEdit from '@/pages/AnimalEdit';
@@ -26,30 +25,16 @@ import Settings from '@/pages/Settings';
 import HealthRecords from '@/pages/HealthRecords';
 import NotFound from '@/pages/NotFound';
 import './App.css';
-import AppErrorBoundary from '@/components/AppErrorBoundary';
+import AppErrorBoundary from '@/components/common/AppErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 15, // 15 minutes - longer cache to fix dashboard reloading
-      gcTime: 1000 * 60 * 60, // 60 minutes - keep data in memory longer
-      refetchOnWindowFocus: false, // Prevent refetch on focus to maintain data stability
-      retry: 3, // Add retry logic for failed requests
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes
     },
   },
 });
-
-// Make queryClient globally accessible for cache management
-declare global {
-  interface Window {
-    queryClient: QueryClient;
-  }
-}
-
-// Assign to window for global access
-if (typeof window !== 'undefined') {
-  window.queryClient = queryClient;
-}
 
 function AppContent() {
   useDeepLinking();
@@ -151,11 +136,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <SecurityProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </SecurityProvider>
+        <Router>
+          <AppContent />
+        </Router>
       </AuthProvider>
     </QueryClientProvider>
   );

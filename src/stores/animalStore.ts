@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { getAnimalsEmergency } from '@/services/animalServiceEmergency';
-import { supabase } from '@/integrations/supabase/client';
+import { getAllAnimals as fetchAllAnimals, getAnimal as fetchAnimal } from '@/services/animalService';
 
 export interface Animal {
   id: string;
@@ -65,59 +64,13 @@ export const useAnimalStore = create<AnimalStore>((set, get) => ({
   getAnimal: (id) => get().animals.find((animal) => animal.id === id),
   getAllAnimals: () => get().animals,
   loadAnimals: async () => {
-    const { isLoading } = get();
-    if (isLoading) {
-      console.log('🔄 Animals already loading, skipping duplicate request');
-      return;
-    }
-    
     set({ isLoading: true });
     try {
-      console.log('🚨 Using FIXED emergency animal service...');
-      // Get user ID from current session
-      const { data: { session } } = await supabase.auth.getSession();
-      const result = await getAnimalsEmergency(session?.user?.id);
-      console.log('✅ FIXED emergency fetch completed:', result);
-      
-      // Convert to store format  
-      const animals = result.animals.map((animal: any) => ({
-        id: animal.id,
-        name: animal.name || '',
-        tag: animal.tag || '',
-        species: animal.species || '',
-        breed: '',
-        birthDate: '',
-        gender: '',
-        weight: '',
-        color: '',
-        motherId: '',
-        fatherId: '',
-        maternalGrandmotherId: '',
-        maternalGrandfatherId: '',
-        paternalGrandmotherId: '',
-        paternalGrandfatherId: '',
-        maternalGreatGrandmotherMaternalId: '',
-        maternalGreatGrandfatherMaternalId: '',
-        maternalGreatGrandmotherPaternalId: '',
-        maternalGreatGrandfatherPaternalId: '',
-        paternalGreatGrandmotherMaternalId: '',
-        paternalGreatGrandfatherMaternalId: '',
-        paternalGreatGrandmotherPaternalId: '',
-        paternalGreatGrandfatherPaternalId: '',
-        healthStatus: 'healthy',
-        notes: '',
-        image: null,
-        current_lot_id: undefined,
-        lifecycleStatus: 'active',
-        dateOfDeath: '',
-        causeOfDeath: ''
-      }));
-      
-      console.log('🎯 FIXED: Converted animals:', animals.length);
+      const animals = await fetchAllAnimals();
       set({ animals, isLoading: false });
     } catch (error) {
-      console.error('❌ FIXED emergency service failed:', error);
-      set({ isLoading: false, animals: [] });
+      console.error('Error loading animals:', error);
+      set({ isLoading: false });
     }
   },
   setAnimals: (animals) => set({ animals }),

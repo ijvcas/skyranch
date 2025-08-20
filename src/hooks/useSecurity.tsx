@@ -53,18 +53,8 @@ export const useSecurity = () => {
         ...metadata,
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
-        referrer: document.referrer,
-        screen: `${screen.width}x${screen.height}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        language: navigator.language
+        ip: 'client-side' // Would be captured server-side in real implementation
       }
-    });
-  };
-
-  const logFailedLogin = async (email: string, reason: string) => {
-    await SecurityService.logFailedLogin(email, reason, {
-      userAgent: navigator.userAgent,
-      timestamp: new Date().toISOString()
     });
   };
 
@@ -78,10 +68,8 @@ export const useSecurity = () => {
     resetRateLimit,
     validatePasswordSecure,
     logSecurityEvent,
-    logFailedLogin,
     checkAdminPermissions,
-    invalidateUserSessions: SecurityService.invalidateUserSessions,
-    logAdminOperation: SecurityService.logAdminOperation
+    invalidateUserSessions: SecurityService.invalidateUserSessions
   };
 };
 

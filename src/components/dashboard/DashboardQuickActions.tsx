@@ -8,7 +8,7 @@ import { usePermissionCheck } from '@/hooks/usePermissions';
 
 const DashboardQuickActions = () => {
   const navigate = useNavigate();
-  // Simplified: always allow access to avoid permission check loops
+  const { hasAccess: canAccessSettings } = usePermissionCheck('system_settings');
 
   const quickActions = [
     { 
@@ -26,13 +26,13 @@ const DashboardQuickActions = () => {
       action: () => navigate('/calendar'),
       color: 'bg-orange-600 hover:bg-orange-700'
     },
-    { 
+    ...(canAccessSettings ? [{ 
       title: 'Configuración', 
       description: 'Ajustes del sistema',
       icon: Settings,
       action: () => navigate('/settings'),
       color: 'bg-gray-600 hover:bg-gray-700'
-    },
+    }] : []),
   ];
 
   return (

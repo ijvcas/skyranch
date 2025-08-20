@@ -32,7 +32,7 @@ const EventForm = ({
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
-    eventType: 'appointment',
+    eventType: 'appointment' as CalendarEvent['eventType'],
     animalIds: [] as string[],
     eventDate: '',
     startTime: '09:00',

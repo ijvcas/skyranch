@@ -34,14 +34,14 @@ export const useCalendarEventOperations = (sendNotificationsToUsers: (selectedUs
         await sendNotificationsToUsers(
           selectedUserIds, 
           eventData.title, 
-          eventData.event_date, 
+          eventData.eventDate, 
           false, 
           eventData.description
         );
         console.log('📅 [CREATE EVENT DEBUG] Notification process completed');
 
         // Check if this is a breeding-related event and setup pregnancy notifications
-        if (eventData.event_type === 'breeding' && eventData.animal_id) {
+        if (eventData.eventType === 'breeding' && eventData.animalId) {
           console.log('🤰 Setting up pregnancy notifications for breeding event');
           try {
             await setupPregnancyNotifications(eventId);
@@ -89,7 +89,7 @@ export const useCalendarEventOperations = (sendNotificationsToUsers: (selectedUs
         await sendNotificationsToUsers(
           selectedUserIds, 
           eventData.title || 'Evento', 
-          eventData.event_date || '', 
+          eventData.eventDate || '', 
           true, 
           eventData.description
         );

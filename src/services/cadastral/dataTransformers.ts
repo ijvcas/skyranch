@@ -63,7 +63,6 @@ export const transformPropertyFromDB = (item: any): Property => ({
   zoomLevel: item.zoom_level || 16,
   isActive: item.is_active,
   isMainProperty: item.is_main_property,
-  userId: item.user_id, // Added user_id field for security
   createdAt: item.created_at,
   updatedAt: item.updated_at
 });
@@ -77,7 +76,6 @@ export const transformPropertyToDB = (property: Omit<Property, 'id' | 'createdAt
     zoom_level: property.zoomLevel || 16,
     is_active: property.isActive,
     is_main_property: property.isMainProperty,
-    user_id: property.userId, // Added user_id field for security
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };

@@ -11,7 +11,6 @@ export interface Property {
   zoomLevel?: number;
   isActive: boolean;
   isMainProperty: boolean;
-  userId: string; // Added for security - property ownership
   createdAt: string;
   updatedAt: string;
 }

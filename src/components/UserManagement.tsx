@@ -6,7 +6,6 @@ import {
   getCurrentUser,
   type AppUser
 } from '@/services/userService';
-import { getUsersData } from '@/services/coreDataService';
 import EditUserDialog from './EditUserDialog';
 import UserManagementHeader from './user-management/UserManagementHeader';
 import AddUserForm from './user-management/AddUserForm';
@@ -36,40 +35,41 @@ const UserManagement = () => {
     syncUsersMutation
   } = useUserManagement();
 
-  // Enhanced users fetching with core service fallback
+  // Fetch users from Supabase with aggressive refetching
   const { data: users = [], isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['users-enhanced'],
-    queryFn: async () => {
-      console.log('👥 USER_MGMT: Fetching users...');
-      try {
-        const usersData = await getUsersData();
-        console.log('👥 USER_MGMT: Core service success:', usersData?.length || 0);
-        return usersData?.map(user => ({
-          ...user,
-          role: user.role as 'admin' | 'manager' | 'worker',
-          phone: user.phone || '',
-        })) || [];
-      } catch (error) {
-        console.error('👥 USER_MGMT: Core service failed, trying fallback');
-        return await getAllUsers();
-      }
-    },
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
-    retry: 2,
-    refetchOnWindowFocus: false,
-    refetchOnMount: 'always',
+    queryKey: ['app-users'],
+    queryFn: getAllUsers,
+    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
     queryFn: getCurrentUser,
-    staleTime: 60000, // Current user changes less frequently
-    gcTime: 5 * 60 * 1000,
-    retry: 2,
-    refetchOnWindowFocus: false,
-    refetchOnMount: 'always',
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
+
+  // Force refresh on component mount and when navigating to settings
+  useEffect(() => {
+    console.log('UserManagement component mounted, forcing refresh...');
+    queryClient.invalidateQueries({ queryKey: ['app-users'] });
+    queryClient.invalidateQueries({ queryKey: ['current-user'] });
+    refetch();
+  }, [refetch, queryClient]);
+
+  // Auto-refresh after user operations
+  useEffect(() => {
+    if (!addUserMutation.isPending && addUserMutation.isSuccess) {
+      setTimeout(() => {
+        console.log('Auto-refreshing after user addition...');
+        queryClient.invalidateQueries({ queryKey: ['app-users'] });
+        refetch();
+      }, 1000);
+    }
+  }, [addUserMutation.isPending, addUserMutation.isSuccess, queryClient, refetch]);
 
   const handleDeleteUser = (id: string, userName: string) => {
     if (currentUser?.id === id) {
@@ -128,14 +128,8 @@ const UserManagement = () => {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Cargando usuarios...</p>
-          <button 
-            onClick={handleRefresh}
-            className="mt-4 text-sm text-primary hover:underline"
-          >
-            Recargar ahora
-          </button>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Cargando usuarios...</p>
         </div>
       </div>
     );

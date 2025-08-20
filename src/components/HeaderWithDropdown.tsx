@@ -41,16 +41,11 @@ const HeaderWithDropdown = () => {
   ];
 
   const handleSignOut = async () => {
-    console.log('🚪 SIGN OUT CLICKED');
     try {
-      console.log('🔄 Calling signOut function...');
       await signOut();
-      console.log('✅ Sign out successful, navigating to login...');
       navigate('/login');
     } catch (error) {
-      console.error('❌ Error signing out:', error);
-      // Force navigation anyway
-      navigate('/login');
+      console.error('Error signing out:', error);
     }
   };
 
@@ -92,12 +87,15 @@ const HeaderWithDropdown = () => {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={handleSignOut}
-                className="flex items-center px-3 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 cursor-pointer w-full"
-              >
-                <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
-                Cerrar Sesión
+              <DropdownMenuItem asChild>
+                <Button
+                  variant="ghost"
+                  onClick={handleSignOut}
+                  className="flex items-center px-3 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 cursor-pointer w-full justify-start"
+                >
+                  <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
+                  Cerrar Sesión
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

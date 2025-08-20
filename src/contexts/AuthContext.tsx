@@ -33,22 +33,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log('🔄 [AUTH CONTEXT] Initializing auth...');
-    let mounted = true;
 
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (!mounted) return;
-        
         console.log('🔄 [AUTH CONTEXT] Auth state changed:', event, session?.user?.email || 'No user');
 
-        // Handle auth events synchronously only
-        setSession(session);
-        setUser(session?.user ?? null);
-        
         if (event === 'PASSWORD_RECOVERY') {
           setLoading(false);
           return;
+        }
+
+        if (event === 'TOKEN_REFRESHED') {
+          // Throttled to avoid noise
+          logTokenRefreshedThrottled().catch((e) => console.warn('[AUTH CONTEXT] token refresh log failed', e));
         }
 
         if (event === 'SIGNED_OUT') {
@@ -60,38 +57,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
 
-        // Defer any async operations
-        if (event === 'TOKEN_REFRESHED') {
-          setTimeout(() => {
-            logTokenRefreshedThrottled().catch((e) => console.warn('[AUTH CONTEXT] token refresh log failed', e));
-          }, 0);
-        }
-
+        setSession(session);
+        setUser(session?.user ?? null);
         setLoading(false);
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession()
       .then(({ data: { session }, error }) => {
-        if (!mounted) return;
-        
         console.log('📋 [AUTH CONTEXT] Initial session check:', session?.user?.email || 'No session');
         if (error) {
           console.error('❌ [AUTH CONTEXT] Error getting initial session:', error);
         }
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
       })
       .catch((error) => {
-        if (!mounted) return;
         console.error('❌ [AUTH CONTEXT] Exception getting initial session:', error);
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
 
     return () => {
-      mounted = false;
       console.log('🧹 [AUTH CONTEXT] Cleaning up auth subscription');
       subscription.unsubscribe();
     };
@@ -116,9 +102,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('❌ [AUTH CONTEXT] Sign up error:', error);
     } else {
       console.log('✅ [AUTH CONTEXT] Sign up successful for:', email);
-      // Remove post-signup sync to avoid database connection bottleneck
-      // Sync will happen automatically via UserManagement component when needed
-      console.log('🔄 [AUTH CONTEXT] Skipping post-signup sync to avoid connection issues');
+      try {
+        const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
+        if (syncError) {
+          console.warn('⚠️ [AUTH CONTEXT] Post-signup sync failed:', syncError);
+        } else {
+          console.log('🔄 [AUTH CONTEXT] Post-signup sync completed');
+        }
+      } catch (e) {
+        console.warn('⚠️ [AUTH CONTEXT] Post-signup sync exception:', e);
+      }
     }
     
     return { error };
@@ -127,20 +120,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     console.log('🔐 [AUTH CONTEXT] Attempting sign in for:', email);
 
-    // Temporarily bypass session clearing to fix login issue
-    // if (email === 'jvcas@mac.com') {
-    //   console.log('🧹 [AUTH CONTEXT] Special handling for jvcas@mac.com - clearing corrupted session first');
-    //   await clearCorruptedSession();
-    //   await new Promise(resolve => setTimeout(resolve, 500));
-    // }
+    if (email === 'jvcas@mac.com') {
+      console.log('🧹 [AUTH CONTEXT] Special handling for jvcas@mac.com - clearing corrupted session first');
+      await clearCorruptedSession();
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
     
-    console.log('🔄 [AUTH CONTEXT] Calling supabase.auth.signInWithPassword...');
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
-    
-    console.log('📋 [AUTH CONTEXT] signInWithPassword result:', { error });
     
     if (error) {
       console.error('❌ [AUTH CONTEXT] Sign in error for', email, ':', error);
@@ -153,15 +142,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       console.log('✅ [AUTH CONTEXT] Sign in successful for:', email);
       // Lightweight connection log
+      await logConnection('signed_in', { method: 'password' });
       try {
-        await logConnection('signed_in', { method: 'password' });
-      } catch (logError) {
-        console.warn('⚠️ [AUTH CONTEXT] Connection log failed:', logError);
+        const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
+        if (syncError) {
+          console.warn('⚠️ [AUTH CONTEXT] Post-signin sync failed:', syncError);
+        } else {
+          console.log('🔄 [AUTH CONTEXT] Post-signin sync completed');
+        }
+      } catch (e) {
+        console.warn('⚠️ [AUTH CONTEXT] Post-signin sync exception:', e);
       }
-      
-      // Remove post-signin sync to avoid database connection bottleneck
-      // Sync will happen automatically via UserManagement component when needed
-      console.log('🔄 [AUTH CONTEXT] Skipping post-signin sync to avoid connection issues');
     }
     
     return { error };
@@ -169,27 +160,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     console.log('🚪 [AUTH CONTEXT] Signing out...');
-    
-    // Force reset state immediately
-    setSession(null);
-    setUser(null);
-    console.log('🔄 [AUTH CONTEXT] Auth state reset immediately');
-    
-    try {
-      console.log('🔄 [AUTH CONTEXT] Calling supabase.auth.signOut()...');
-      await supabase.auth.signOut();
-      console.log('✅ [AUTH CONTEXT] Supabase signOut completed');
-    } catch (signOutError) {
-      console.error('❌ [AUTH CONTEXT] SignOut error (ignoring):', signOutError);
-    }
-    
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-      console.log('🧹 [AUTH CONTEXT] Storage cleared');
-    } catch (storageError) {
-      console.warn('⚠️ [AUTH CONTEXT] Storage clear failed (ignoring):', storageError);
-    }
+    // Log before signing out so RLS still allows insert
+    await logConnection('signed_out');
+    await supabase.auth.signOut();
+    localStorage.removeItem('supabase.auth.token');
+    sessionStorage.clear();
   };
 
   const resetPassword = async (email: string) => {
@@ -311,16 +286,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('🧹 Clearing corrupted session data...');
     
     try {
-      // Sign out completely first
-      console.log('🔄 Calling supabase.auth.signOut()...');
+      // Sign out completely
       await supabase.auth.signOut();
       
       // Clear all storage
-      console.log('🗑️ Clearing localStorage and sessionStorage...');
       localStorage.clear();
       sessionStorage.clear();
       
-      // Clear specific Supabase keys (in case clear() didn't work)
+      // Clear specific Supabase keys
       const allKeys = Object.keys(localStorage);
       allKeys.forEach(key => {
         if (key.includes('supabase') || key.includes('auth')) {
@@ -330,7 +303,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       // Reset auth state
-      console.log('🔄 Resetting auth state...');
       setSession(null);
       setUser(null);
       

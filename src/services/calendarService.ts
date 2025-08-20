@@ -1,201 +1,242 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
-// Calendar Event interface
 export interface CalendarEvent {
   id: string;
-  user_id: string;
-  animal_id?: string;
-  event_date: string;
-  end_date?: string;
-  all_day?: boolean;
-  recurring?: boolean;
-  reminder_minutes?: number;
-  cost?: number;
-  created_at: string;
-  updated_at: string;
+  userId: string;
+  animalId?: string; // Keep for backward compatibility
+  animalIds?: string[]; // New field for multiple animals
   title: string;
   description?: string;
-  event_type: string;
-  recurrence_pattern?: string;
-  status?: string;
+  eventType: 'vaccination' | 'checkup' | 'breeding' | 'feeding' | 'treatment' | 'appointment' | 'reminder';
+  eventDate: string;
+  endDate?: string;
+  allDay: boolean;
+  recurring: boolean;
+  recurrencePattern?: string;
+  status: 'scheduled' | 'completed' | 'cancelled' | 'missed';
+  reminderMinutes: number;
   veterinarian?: string;
   location?: string;
+  cost?: number;
   notes?: string;
-  animal_ids?: string[];
+  createdAt: string;
+  updatedAt: string;
+  createdByName?: string;
 }
 
-// Enhanced calendar service with all required exports
-export const getAllEvents = async (): Promise<CalendarEvent[]> => {
+export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
   try {
-    console.log('📅 CALENDAR_SERVICE: Fetching all calendar events...');
+    console.log('🔄 Fetching calendar events...');
     
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.log('❌ CALENDAR_SERVICE: No authenticated user');
-      return [];
-    }
-
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Calendar query timeout')), 10000)
-    );
-
-    const queryPromise = supabase
+    // First get the events
+    const { data: events, error: eventsError } = await supabase
       .from('calendar_events')
       .select('*')
       .order('event_date', { ascending: true });
 
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+    if (eventsError) {
+      console.error('❌ Error fetching calendar events:', eventsError);
+      throw eventsError;
+    }
 
-    if (error) {
-      console.error('❌ CALENDAR_SERVICE: Query error:', error);
+    console.log('✅ Calendar events fetched:', events?.length || 0);
+
+    if (!events || events.length === 0) {
       return [];
     }
 
-    console.log('✅ CALENDAR_SERVICE: Events fetched:', data?.length || 0);
-    return data || [];
+    // Get unique user IDs
+    const userIds = [...new Set(events.map(e => e.user_id))];
+    console.log('🔍 Fetching user names for event creators:', userIds);
+
+    // Get user names
+    const { data: users, error: usersError } = await supabase
+      .from('app_users')
+      .select('id, name')
+      .in('id', userIds);
+
+    if (usersError) {
+      console.error('⚠️ Error fetching user names:', usersError);
+      // Don't throw, just continue without names
+    }
+
+    console.log('✅ Users fetched for events:', users?.length || 0);
+
+    // Map events with creator names
+    return events.map(event => ({
+      id: event.id,
+      userId: event.user_id,
+      animalId: event.animal_id || undefined,
+      animalIds: event.animal_ids || undefined,
+      title: event.title,
+      description: event.description || undefined,
+      eventType: event.event_type as CalendarEvent['eventType'],
+      eventDate: event.event_date,
+      endDate: event.end_date || undefined,
+      allDay: event.all_day || false,
+      recurring: event.recurring || false,
+      recurrencePattern: event.recurrence_pattern || undefined,
+      status: event.status as CalendarEvent['status'],
+      reminderMinutes: event.reminder_minutes || 60,
+      veterinarian: event.veterinarian || undefined,
+      location: event.location || undefined,
+      cost: event.cost || undefined,
+      notes: event.notes || undefined,
+      createdAt: event.created_at,
+      updatedAt: event.updated_at,
+      createdByName: users?.find(u => u.id === event.user_id)?.name
+    }));
   } catch (error) {
-    console.error('❌ CALENDAR_SERVICE: Exception:', error);
-    return [];
-  }
-};
-
-export const getEventsByDateRange = async (startDate: string, endDate: string): Promise<CalendarEvent[]> => {
-  try {
-    console.log('📅 CALENDAR_SERVICE: Fetching events in range:', startDate, 'to', endDate);
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.log('❌ CALENDAR_SERVICE: No authenticated user');
-      return [];
-    }
-
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Calendar range query timeout')), 10000)
-    );
-
-    const queryPromise = supabase
-      .from('calendar_events')
-      .select('*')
-      .gte('event_date', startDate)
-      .lte('event_date', endDate)
-      .order('event_date', { ascending: true });
-
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
-
-    if (error) {
-      console.error('❌ CALENDAR_SERVICE: Range query error:', error);
-      return [];
-    }
-
-    console.log('✅ CALENDAR_SERVICE: Range events fetched:', data?.length || 0);
-    return data || [];
-  } catch (error) {
-    console.error('❌ CALENDAR_SERVICE: Range exception:', error);
-    return [];
-  }
-};
-
-// Additional required functions for compatibility
-export const getCalendarEvents = getAllEvents;
-
-export const addCalendarEvent = async (eventData: Partial<CalendarEvent>, selectedUserIds?: string[]): Promise<string | null> => {
-  try {
-    console.log('📅 CALENDAR_SERVICE: Adding calendar event...');
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.log('❌ CALENDAR_SERVICE: No authenticated user');
-      return null;
-    }
-
-    const { data, error } = await supabase
-      .from('calendar_events')
-      .insert([{ 
-        title: eventData.title || 'Nuevo Evento',
-        event_type: eventData.event_type || 'general',
-        event_date: eventData.event_date || new Date().toISOString(),
-        user_id: user.id,
-        ...eventData 
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('❌ CALENDAR_SERVICE: Add event error:', error);
-      return null;
-    }
-
-    console.log('✅ CALENDAR_SERVICE: Event added successfully');
-    return data.id;
-  } catch (error) {
-    console.error('❌ CALENDAR_SERVICE: Add event exception:', error);
-    return null;
-  }
-};
-
-export const updateCalendarEvent = async (id: string, eventData: Partial<CalendarEvent>, selectedUserIds?: string[]): Promise<boolean> => {
-  try {
-    console.log('📅 CALENDAR_SERVICE: Updating calendar event:', id);
-    
-    const { data, error } = await supabase
-      .from('calendar_events')
-      .update(eventData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('❌ CALENDAR_SERVICE: Update event error:', error);
-      return null;
-    }
-
-    console.log('✅ CALENDAR_SERVICE: Event updated successfully');
-    return true;
-  } catch (error) {
-    console.error('❌ CALENDAR_SERVICE: Update event exception:', error);
-    return null;
-  }
-};
-
-export const deleteCalendarEvent = async (id: string): Promise<boolean> => {
-  try {
-    console.log('📅 CALENDAR_SERVICE: Deleting calendar event:', id);
-    
-    const { error } = await supabase
-      .from('calendar_events')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('❌ CALENDAR_SERVICE: Delete event error:', error);
-      return false;
-    }
-
-    console.log('✅ CALENDAR_SERVICE: Event deleted successfully');
-    return true;
-  } catch (error) {
-    console.error('❌ CALENDAR_SERVICE: Delete event exception:', error);
-    return false;
+    console.error('💥 Calendar events service error:', error);
+    throw error;
   }
 };
 
 export const getEventNotificationUsers = async (eventId: string): Promise<string[]> => {
-  try {
-    console.log('📅 CALENDAR_SERVICE: Getting notification users for event:', eventId);
-    
-    const { data, error } = await supabase
-      .from('event_notifications')
-      .select('user_id')
-      .eq('event_id', eventId);
+  const { data, error } = await supabase
+    .from('event_notifications')
+    .select('user_id')
+    .eq('event_id', eventId);
 
-    if (error) {
-      console.error('❌ CALENDAR_SERVICE: Get notification users error:', error);
-      return [];
-    }
-
-    return data?.map(n => n.user_id) || [];
-  } catch (error) {
-    console.error('❌ CALENDAR_SERVICE: Get notification users exception:', error);
+  if (error) {
+    console.error('Error fetching event notification users:', error);
     return [];
   }
+
+  return data?.map(item => item.user_id) || [];
+};
+
+export const addCalendarEvent = async (
+  event: Omit<CalendarEvent, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+  selectedUserIds: string[]
+): Promise<string | null> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    console.error('No authenticated user');
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('calendar_events')
+    .insert({
+      user_id: user.id,
+      animal_id: event.animalId || null,
+      animal_ids: event.animalIds || null,
+      title: event.title,
+      description: event.description || null,
+      event_type: event.eventType,
+      event_date: event.eventDate,
+      end_date: event.endDate || null,
+      all_day: event.allDay,
+      recurring: event.recurring,
+      recurrence_pattern: event.recurrencePattern || null,
+      status: event.status,
+      reminder_minutes: event.reminderMinutes,
+      veterinarian: event.veterinarian || null,
+      location: event.location || null,
+      cost: event.cost || null,
+      notes: event.notes || null
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('Error adding calendar event:', error);
+    return null;
+  }
+
+  const eventId = data.id;
+
+  // Add event notifications for selected users
+  if (selectedUserIds.length > 0) {
+    const notifications = selectedUserIds.map(userId => ({
+      event_id: eventId,
+      user_id: userId
+    }));
+
+    const { error: notificationError } = await supabase
+      .from('event_notifications')
+      .insert(notifications);
+
+    if (notificationError) {
+      console.error('Error adding event notifications:', notificationError);
+    }
+  }
+
+  return eventId;
+};
+
+export const updateCalendarEvent = async (
+  id: string, 
+  updatedData: Partial<Omit<CalendarEvent, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
+  selectedUserIds: string[]
+): Promise<boolean> => {
+  const { error } = await supabase
+    .from('calendar_events')
+    .update({
+      ...(updatedData.animalId !== undefined && { animal_id: updatedData.animalId || null }),
+      ...(updatedData.animalIds !== undefined && { animal_ids: updatedData.animalIds || null }),
+      ...(updatedData.title && { title: updatedData.title }),
+      ...(updatedData.description !== undefined && { description: updatedData.description || null }),
+      ...(updatedData.eventType && { event_type: updatedData.eventType }),
+      ...(updatedData.eventDate && { event_date: updatedData.eventDate }),
+      ...(updatedData.endDate !== undefined && { end_date: updatedData.endDate || null }),
+      ...(updatedData.allDay !== undefined && { all_day: updatedData.allDay }),
+      ...(updatedData.recurring !== undefined && { recurring: updatedData.recurring }),
+      ...(updatedData.recurrencePattern !== undefined && { recurrence_pattern: updatedData.recurrencePattern || null }),
+      ...(updatedData.status && { status: updatedData.status }),
+      ...(updatedData.reminderMinutes !== undefined && { reminder_minutes: updatedData.reminderMinutes }),
+      ...(updatedData.veterinarian !== undefined && { veterinarian: updatedData.veterinarian || null }),
+      ...(updatedData.location !== undefined && { location: updatedData.location || null }),
+      ...(updatedData.cost !== undefined && { cost: updatedData.cost || null }),
+      ...(updatedData.notes !== undefined && { notes: updatedData.notes || null }),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating calendar event:', error);
+    return false;
+  }
+
+  // Update event notifications
+  // First, delete existing notifications
+  await supabase
+    .from('event_notifications')
+    .delete()
+    .eq('event_id', id);
+
+  // Then, add new notifications for selected users
+  if (selectedUserIds.length > 0) {
+    const notifications = selectedUserIds.map(userId => ({
+      event_id: id,
+      user_id: userId
+    }));
+
+    const { error: notificationError } = await supabase
+      .from('event_notifications')
+      .insert(notifications);
+
+    if (notificationError) {
+      console.error('Error updating event notifications:', notificationError);
+    }
+  }
+
+  return true;
+};
+
+export const deleteCalendarEvent = async (id: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('calendar_events')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting calendar event:', error);
+    return false;
+  }
+
+  return true;
 };
