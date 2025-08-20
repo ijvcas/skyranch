@@ -10,6 +10,7 @@ import { CalendarEvent } from '@/services/calendarService';
 import { getAllAnimals } from '@/services/animalService';
 import { useQuery } from '@tanstack/react-query';
 import UserSelector from '@/components/notifications/UserSelector';
+import AnimalMultiSelect from './AnimalMultiSelect';
 
 interface EventEditDialogProps {
   event: CalendarEvent | null;
@@ -35,7 +36,7 @@ const EventEditDialog = ({
     title: '',
     description: '',
     eventType: 'appointment' as CalendarEvent['eventType'],
-    animalId: '',
+    animalIds: [] as string[],
     eventDate: '',
     startTime: '09:00',
     endTime: '',
@@ -68,11 +69,14 @@ const EventEditDialog = ({
         }
       }
 
+      // Handle backward compatibility for single animalId and new animalIds array
+      const animalIds = event.animalIds || (event.animalId ? [event.animalId] : []);
+      
       setEditedEvent({
         title: event.title,
         description: event.description || '',
         eventType: event.eventType,
-        animalId: event.animalId || '',
+        animalIds: animalIds,
         eventDate: eventDateOnly,
         startTime: startTime,
         endTime: endTime,
@@ -253,24 +257,12 @@ const EventEditDialog = ({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Animal (Opcional)</Label>
-              <Select 
-                value={editedEvent.animalId} 
-                onValueChange={(value) => setEditedEvent(prev => ({ ...prev, animalId: value }))}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar animal" />
-                </SelectTrigger>
-                <SelectContent>
-                  {animals.map(animal => (
-                    <SelectItem key={animal.id} value={animal.id}>
-                      {animal.name} (#{animal.tag})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <AnimalMultiSelect
+              animals={animals}
+              selectedAnimalIds={editedEvent.animalIds}
+              onChange={(selectedIds) => setEditedEvent(prev => ({ ...prev, animalIds: selectedIds }))}
+              label="Animales (Opcional)"
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
