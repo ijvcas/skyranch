@@ -56,6 +56,7 @@ export const transformCadastralParcelToDB = (parcel: Omit<CadastralParcel, 'id' 
 
 export const transformPropertyFromDB = (item: any): Property => ({
   id: item.id,
+  userId: item.user_id,
   name: item.name,
   description: item.description,
   centerLat: Number(item.center_lat),
@@ -69,6 +70,7 @@ export const transformPropertyFromDB = (item: any): Property => ({
 
 export const transformPropertyToDB = (property: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) => {
   return {
+    user_id: property.userId,
     name: property.name,
     description: property.description,
     center_lat: property.centerLat,

@@ -4,6 +4,7 @@ import type { ParcelStatus } from '@/utils/cadastral/types';
 
 export interface Property {
   id: string;
+  userId: string;
   name: string;
   description?: string;
   centerLat: number;
