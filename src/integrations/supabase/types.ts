@@ -1452,6 +1452,14 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_by_email: {
+        Args: { user_email: string }
+        Returns: {
+          id: string
+          is_active: boolean
+          role: string
+        }[]
+      }
       is_active_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean

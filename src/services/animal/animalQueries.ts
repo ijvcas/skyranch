@@ -8,14 +8,75 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
     console.log('🔍 Fetching all animals...');
     const { data: { user } } = await supabase.auth.getUser();
     
-    if (!user) {
+    if (!user || !user.email) {
       console.log('❌ No authenticated user');
       return [];
     }
 
-    const { data, error } = await (supabase
-      .from('animals') as any)
+    // First try to get the user's app_users record
+    const { data: appUser, error: userError } = await supabase
+      .from('app_users')
+      .select('id')
+      .eq('email', user.email)
+      .maybeSingle();
+
+    if (userError || !appUser) {
+      console.log('❌ User not found in app_users, trying direct query');
+      // Try direct query as fallback
+      const { data, error } = await supabase
+        .from('animals')
+        .select('*')
+        .neq('lifecycle_status', 'deceased')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error fetching animals:', error);
+        return [];
+      }
+
+      // Filter by user ID on client side
+      const filteredData = (data || []).filter(animal => animal.user_id === user.id);
+      console.log('✅ Successfully fetched animals (fallback):', filteredData.length);
+      
+      return filteredData.map(animal => ({
+        id: animal.id,
+        name: animal.name,
+        tag: animal.tag,
+        species: animal.species,
+        breed: animal.breed || '',
+        birthDate: animal.birth_date || '',
+        gender: animal.gender || '',
+        weight: animal.weight?.toString() || '',
+        color: animal.color || '',
+        motherId: animal.mother_id || '',
+        fatherId: animal.father_id || '',
+        maternalGrandmotherId: animal.maternal_grandmother_id || '',
+        maternalGrandfatherId: animal.maternal_grandfather_id || '',
+        paternalGrandmotherId: animal.paternal_grandmother_id || '',
+        paternalGrandfatherId: animal.paternal_grandfather_id || '',
+        maternalGreatGrandmotherMaternalId: animal.maternal_great_grandmother_maternal_id || '',
+        maternalGreatGrandfatherMaternalId: animal.maternal_great_grandfather_maternal_id || '',
+        maternalGreatGrandmotherPaternalId: animal.maternal_great_grandmother_paternal_id || '',
+        maternalGreatGrandfatherPaternalId: animal.maternal_great_grandfather_paternal_id || '',
+        paternalGreatGrandmotherMaternalId: animal.paternal_great_grandmother_maternal_id || '',
+        paternalGreatGrandfatherMaternalId: animal.paternal_great_grandfather_maternal_id || '',
+        paternalGreatGrandmotherPaternalId: animal.paternal_great_grandmother_paternal_id || '',
+        paternalGreatGrandfatherPaternalId: animal.paternal_great_grandfather_paternal_id || '',
+        healthStatus: animal.health_status || 'healthy',
+        notes: animal.notes || '',
+        image: animal.image_url,
+        current_lot_id: animal.current_lot_id,
+        lifecycleStatus: animal.lifecycle_status || 'active',
+        dateOfDeath: animal.date_of_death || '',
+        causeOfDeath: animal.cause_of_death || ''
+      }));
+    }
+
+    // Use the correct user_id from app_users
+    const { data, error } = await supabase
+      .from('animals')
       .select('*')
+      .eq('user_id', appUser.id)
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
@@ -68,11 +129,42 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
 export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'species'>>> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    if (!user || !user.email) {
+      console.log('❌ No authenticated user for getAnimalsLean');
+      return [];
+    }
 
-    const { data, error } = await (supabase
-      .from('animals') as any)
+    // First try to get the user's app_users record to get their user_id
+    const { data: appUser, error: userError } = await supabase
+      .from('app_users')
+      .select('id')
+      .eq('email', user.email)
+      .maybeSingle();
+
+    if (userError || !appUser) {
+      console.log('❌ User not found in app_users, trying direct query');
+      // Try direct query without user_id filter as fallback
+      const { data, error } = await supabase
+        .from('animals')
+        .select('id,species,user_id')
+        .neq('lifecycle_status', 'deceased')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error in getAnimalsLean fallback:', error);
+        return [];
+      }
+
+      // Filter by user ID on client side if we have the user
+      const filteredData = (data || []).filter(a => a.user_id === user.id);
+      return filteredData.map(a => ({ id: a.id, species: a.species }));
+    }
+
+    // Use the correct user_id from app_users
+    const { data, error } = await supabase
+      .from('animals')
       .select('id,species')
+      .eq('user_id', appUser.id)
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
