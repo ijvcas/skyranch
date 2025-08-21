@@ -117,9 +117,11 @@ const EventDetailDialog = ({
     }
   };
 
-  const animalName = event.animalId 
-    ? animals.find(a => a.id === event.animalId)?.name 
-    : null;
+  // Get animals for this event (support both old animalId and new animalIds)
+  const eventAnimals = React.useMemo(() => {
+    const animalIds = event.animalIds || (event.animalId ? [event.animalId] : []);
+    return animals.filter(animal => animalIds.includes(animal.id));
+  }, [event.animalIds, event.animalId, animals]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -159,10 +161,21 @@ const EventDetailDialog = ({
               </div>
             )}
 
-            {animalName && (
-              <div className="flex items-center space-x-2">
-                <User className="w-4 h-4 text-gray-500" />
-                <span className="text-sm">Animal: {animalName}</span>
+            {eventAnimals.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-medium">
+                    Animales ({eventAnimals.length}):
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1 ml-6">
+                  {eventAnimals.map(animal => (
+                    <Badge key={animal.id} variant="outline" className="text-xs">
+                      {animal.name}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -173,27 +173,33 @@ export const updateCalendarEvent = async (
   updatedData: Partial<Omit<CalendarEvent, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
   selectedUserIds: string[]
 ): Promise<boolean> => {
+  console.log('📅 [UPDATE SERVICE] Updating event with animalIds:', updatedData.animalIds);
+  
+  const updatePayload = {
+    ...(updatedData.animalId !== undefined && { animal_id: updatedData.animalId || null }),
+    ...(updatedData.animalIds !== undefined && { animal_ids: updatedData.animalIds || null }),
+    ...(updatedData.title && { title: updatedData.title }),
+    ...(updatedData.description !== undefined && { description: updatedData.description || null }),
+    ...(updatedData.eventType && { event_type: updatedData.eventType }),
+    ...(updatedData.eventDate && { event_date: updatedData.eventDate }),
+    ...(updatedData.endDate !== undefined && { end_date: updatedData.endDate || null }),
+    ...(updatedData.allDay !== undefined && { all_day: updatedData.allDay }),
+    ...(updatedData.recurring !== undefined && { recurring: updatedData.recurring }),
+    ...(updatedData.recurrencePattern !== undefined && { recurrence_pattern: updatedData.recurrencePattern || null }),
+    ...(updatedData.status && { status: updatedData.status }),
+    ...(updatedData.reminderMinutes !== undefined && { reminder_minutes: updatedData.reminderMinutes }),
+    ...(updatedData.veterinarian !== undefined && { veterinarian: updatedData.veterinarian || null }),
+    ...(updatedData.location !== undefined && { location: updatedData.location || null }),
+    ...(updatedData.cost !== undefined && { cost: updatedData.cost || null }),
+    ...(updatedData.notes !== undefined && { notes: updatedData.notes || null }),
+    updated_at: new Date().toISOString()
+  };
+
+  console.log('📅 [UPDATE SERVICE] Final update payload:', updatePayload);
+  
   const { error } = await supabase
     .from('calendar_events')
-    .update({
-      ...(updatedData.animalId !== undefined && { animal_id: updatedData.animalId || null }),
-      ...(updatedData.animalIds !== undefined && { animal_ids: updatedData.animalIds || null }),
-      ...(updatedData.title && { title: updatedData.title }),
-      ...(updatedData.description !== undefined && { description: updatedData.description || null }),
-      ...(updatedData.eventType && { event_type: updatedData.eventType }),
-      ...(updatedData.eventDate && { event_date: updatedData.eventDate }),
-      ...(updatedData.endDate !== undefined && { end_date: updatedData.endDate || null }),
-      ...(updatedData.allDay !== undefined && { all_day: updatedData.allDay }),
-      ...(updatedData.recurring !== undefined && { recurring: updatedData.recurring }),
-      ...(updatedData.recurrencePattern !== undefined && { recurrence_pattern: updatedData.recurrencePattern || null }),
-      ...(updatedData.status && { status: updatedData.status }),
-      ...(updatedData.reminderMinutes !== undefined && { reminder_minutes: updatedData.reminderMinutes }),
-      ...(updatedData.veterinarian !== undefined && { veterinarian: updatedData.veterinarian || null }),
-      ...(updatedData.location !== undefined && { location: updatedData.location || null }),
-      ...(updatedData.cost !== undefined && { cost: updatedData.cost || null }),
-      ...(updatedData.notes !== undefined && { notes: updatedData.notes || null }),
-      updated_at: new Date().toISOString()
-    })
+    .update(updatePayload)
     .eq('id', id);
 
   if (error) {
