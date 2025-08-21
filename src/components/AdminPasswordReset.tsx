@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const AdminPasswordReset = () => {
   const { toast } = useToast();
   const { resetPassword, forcePasswordUpdate, clearCorruptedSession } = useAuth();
-  const [email, setEmail] = useState('jvcas@mac.com');
+  const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [isResetting, setIsResetting] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
