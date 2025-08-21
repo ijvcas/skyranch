@@ -34,8 +34,8 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
         return [];
       }
 
-      // Filter by user ID on client side
-      const filteredData = (data || []).filter(animal => animal.user_id === user.id);
+      // No need to filter - RLS policies handle access control
+      const filteredData = data || [];
       console.log('✅ Successfully fetched animals (fallback):', filteredData.length);
       
       return filteredData.map(animal => ({
@@ -72,11 +72,10 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
       }));
     }
 
-    // Use the correct user_id from app_users
+    // Get all animals (shared data) - RLS policies handle access control
     const { data, error } = await supabase
       .from('animals')
       .select('*')
-      .eq('user_id', appUser.id)
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
@@ -155,16 +154,15 @@ export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'speci
         return [];
       }
 
-      // Filter by user ID on client side if we have the user
-      const filteredData = (data || []).filter(a => a.user_id === user.id);
+      // No need to filter - RLS policies handle access control
+      const filteredData = data || [];
       return filteredData.map(a => ({ id: a.id, species: a.species }));
     }
 
-    // Use the correct user_id from app_users
+    // Get all animals (shared data) - RLS policies handle access control
     const { data, error } = await supabase
       .from('animals')
       .select('id,species')
-      .eq('user_id', appUser.id)
       .neq('lifecycle_status', 'deceased')
       .order('created_at', { ascending: false });
 
