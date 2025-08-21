@@ -41,6 +41,12 @@ export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
     }
 
     console.log('✅ Calendar events fetched:', events?.length || 0);
+    
+    // Log the specific event we're interested in
+    const vaccinationEvent = events?.find(e => e.title === 'Vacunación Ovinos');
+    if (vaccinationEvent) {
+      console.log('🐄 [DEBUG] Vaccination event animal_ids from DB:', vaccinationEvent.animal_ids);
+    }
 
     if (!events || events.length === 0) {
       return [];
@@ -175,9 +181,8 @@ export const updateCalendarEvent = async (
 ): Promise<boolean> => {
   console.log('📅 [UPDATE SERVICE] Updating event with animalIds:', updatedData.animalIds);
   
-  const updatePayload = {
+  const updatePayload: any = {
     ...(updatedData.animalId !== undefined && { animal_id: updatedData.animalId || null }),
-    ...(updatedData.animalIds !== undefined && { animal_ids: updatedData.animalIds }), // Don't use || null here, empty arrays are valid
     ...(updatedData.title && { title: updatedData.title }),
     ...(updatedData.description !== undefined && { description: updatedData.description || null }),
     ...(updatedData.eventType && { event_type: updatedData.eventType }),
@@ -195,16 +200,36 @@ export const updateCalendarEvent = async (
     updated_at: new Date().toISOString()
   };
 
+  // Handle animalIds separately to ensure proper array handling
+  if (updatedData.animalIds !== undefined) {
+    updatePayload.animal_ids = updatedData.animalIds && updatedData.animalIds.length > 0 ? updatedData.animalIds : null;
+  }
+
   console.log('📅 [UPDATE SERVICE] Final update payload:', updatePayload);
   
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('calendar_events')
     .update(updatePayload)
-    .eq('id', id);
+    .eq('id', id)
+    .select('id, animal_ids')
+    .single();
 
   if (error) {
-    console.error('Error updating calendar event:', error);
+    console.error('❌ [UPDATE SERVICE] Database update error:', error);
     return false;
+  }
+
+  console.log('✅ [UPDATE SERVICE] Database update successful, result:', data);
+  
+  // Verify the update by checking what was actually saved
+  const { data: verifyData, error: verifyError } = await supabase
+    .from('calendar_events')
+    .select('animal_ids')
+    .eq('id', id)
+    .single();
+    
+  if (!verifyError && verifyData) {
+    console.log('🔍 [UPDATE SERVICE] Verification: animal_ids in DB after update:', verifyData.animal_ids);
   }
 
   // Update event notifications
