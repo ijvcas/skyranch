@@ -111,13 +111,21 @@ const EventEditDialog = ({
     }
 
     const eventData = {
-      ...editedEvent,
+      title: editedEvent.title,
+      description: editedEvent.description,
+      eventType: editedEvent.eventType,
+      animalIds: editedEvent.animalIds, // Explicitly include animalIds
       eventDate: eventDateTime.toISOString(),
       endDate: endDateTime ? endDateTime.toISOString() : undefined,
+      allDay: editedEvent.allDay,
       reminderMinutes: Number(editedEvent.reminderMinutes),
-      cost: editedEvent.cost ? parseFloat(editedEvent.cost) : undefined
+      veterinarian: editedEvent.veterinarian,
+      location: editedEvent.location,
+      cost: editedEvent.cost ? parseFloat(editedEvent.cost) : undefined,
+      notes: editedEvent.notes
     };
 
+    console.log('📅 [EDIT DIALOG] Saving event with animalIds:', eventData.animalIds);
     await onSave(eventData, selectedUserIds);
     setIsSubmitting(false);
   };
