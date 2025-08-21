@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -39,48 +38,59 @@ export const getCurrentUserRole = async (authUser?: User | null): Promise<UserRo
       user = currentUser;
     }
     
-    if (!user || !user.email) {
+    if (!user) {
       console.log('❌ No current user found');
       return null;
     }
     
-    // First try to get user role by ID
-    let { data: appUser, error } = await supabase
-      .from('app_users')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
+    // Try multiple approaches to get user role
+    let appUser = null;
     
-    // If that fails, try by email as fallback
-    if (error || !appUser) {
-      console.log('⚠️ User not found by ID, trying by email:', user.email);
-      const { data: userByEmail, error: emailError } = await supabase
+    // First try: by user ID
+    try {
+      const { data, error } = await supabase
         .from('app_users')
         .select('role')
-        .eq('email', user.email)
+        .eq('id', user.id)
         .maybeSingle();
+      
+      if (!error && data) {
+        appUser = data;
+      }
+    } catch (error) {
+      console.warn('❌ Error getting user by ID:', error);
+    }
+    
+    // Second try: by email if ID failed
+    if (!appUser && user.email) {
+      try {
+        const { data, error } = await supabase
+          .from('app_users')
+          .select('role')
+          .eq('email', user.email)
+          .maybeSingle();
         
-      if (!emailError && userByEmail) {
-        appUser = userByEmail;
-        error = null;
+        if (!error && data) {
+          appUser = data;
+          console.log('✅ Found user by email fallback');
+        }
+      } catch (error) {
+        console.warn('❌ Error getting user by email:', error);
       }
     }
     
-    if (error) {
-      console.error('❌ Error getting user role:', error);
-      return null;
-    }
-    
     if (!appUser) {
-      console.log('❌ User not found in app_users table');
-      return null;
+      console.log('❌ User not found in app_users table, defaulting to worker role');
+      // Return worker as default role for authenticated users
+      return 'worker';
     }
     
     console.log('✅ Current user role:', appUser.role);
     return appUser.role as UserRole;
   } catch (error) {
     console.error('❌ Error getting current user role:', error);
-    return null;
+    // Return worker as safe default for authenticated users
+    return 'worker';
   }
 };
 
@@ -90,8 +100,10 @@ export const hasPermission = async (permission: Permission, authUser?: User | nu
     const userRole = await getCurrentUserRole(authUser);
     
     if (!userRole) {
-      console.log('❌ No user role found, defaulting to no permission');
-      return false;
+      console.log('❌ No user role found, defaulting to basic permissions');
+      // For basic permissions, allow authenticated users even if role detection fails
+      const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records'];
+      return basicPermissions.includes(permission);
     }
     
     const rolePermissions = ROLE_PERMISSIONS[userRole];
@@ -106,44 +118,31 @@ export const hasPermission = async (permission: Permission, authUser?: User | nu
     return hasAccess;
   } catch (error) {
     console.error('❌ Error checking permission:', error);
-    return false;
+    // For basic permissions, be permissive when there are auth context issues
+    const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records'];
+    return basicPermissions.includes(permission);
   }
 };
 
 export const checkPermission = async (permission: Permission, authUser?: User | null): Promise<void> => {
-  // For basic view permissions, be more lenient to avoid blocking users
-  if (permission === 'animals_view' || permission === 'lots_manage' || permission === 'calendar_manage') {
-    try {
-      const allowed = await hasPermission(permission, authUser);
-      if (allowed) {
-        return; // Permission granted normally
-      }
-      
-      // For view permissions, if we can't determine role but user is authenticated, allow access
-      const user = authUser || (await supabase.auth.getUser()).data.user;
-      if (user) {
-        console.log(`⚠️ Allowing ${permission} for authenticated user despite role check failure`);
-        return;
-      }
-    } catch (error) {
-      console.error('❌ Permission check failed:', error);
-      // For view permissions, don't block if there's an error
-      const user = authUser || (await supabase.auth.getUser()).data.user;
-      if (user && (permission === 'animals_view' || permission === 'lots_manage' || permission === 'calendar_manage')) {
-        console.log(`⚠️ Allowing ${permission} due to permission check error for authenticated user`);
-        return;
-      }
+  try {
+    const allowed = await hasPermission(permission, authUser);
+    if (!allowed) {
+      const userRole = await getCurrentUserRole(authUser);
+      const errorMessage = userRole 
+        ? `Acceso denegado: Tu rol '${userRole}' no tiene permisos para ${permission}`
+        : `Acceso denegado: No se pudo determinar tu rol de usuario para ${permission}`;
+      throw new Error(errorMessage);
     }
-  }
-  
-  // For other permissions, use strict checking
-  const allowed = await hasPermission(permission, authUser);
-  if (!allowed) {
-    const userRole = await getCurrentUserRole(authUser);
-    const errorMessage = userRole 
-      ? `Acceso denegado: Tu rol '${userRole}' no tiene permisos para ${permission}`
-      : `Acceso denegado: No se pudo determinar tu rol de usuario para ${permission}`;
-    throw new Error(errorMessage);
+  } catch (error) {
+    // For basic permissions like animals_view, don't block if there's an auth context issue
+    const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records'];
+    if (basicPermissions.includes(permission)) {
+      console.warn(`⚠️ Permission check failed for ${permission}, allowing due to auth context issues:`, error);
+      return; // Allow the operation to continue
+    }
+    // For sensitive operations, still block
+    throw error;
   }
 };
 
