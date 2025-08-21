@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateUser, type AppUser } from '@/services/userService';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UseUserEditProps {
   user: AppUser;
@@ -81,7 +82,7 @@ export const useUserEdit = ({ user, onClose }: UseUserEditProps) => {
     return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate phone number
@@ -90,8 +91,9 @@ export const useUserEdit = ({ user, onClose }: UseUserEditProps) => {
       return;
     }
     
-    // Prevent editing admin users' roles
-    const isAdminUser = user.email === 'juan.casanova@skyranch.com' || user.email === 'jvcas@mac.com';
+    // Prevent editing super admin users' roles (check if current user is admin)
+    const { data: currentUserRole } = await supabase.rpc('get_current_app_role');
+    const isAdminUser = user.role === 'admin' && currentUserRole !== 'admin';
     
     // Include phone in update data
     const updateData: Partial<AppUser> = {
@@ -106,7 +108,7 @@ export const useUserEdit = ({ user, onClose }: UseUserEditProps) => {
     updateMutation.mutate(updateData);
   };
 
-  const isAdminUser = user.email === 'juan.casanova@skyranch.com' || user.email === 'jvcas@mac.com';
+  const isAdminUser = user.role === 'admin';
 
   return {
     formData,
