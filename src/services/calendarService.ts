@@ -202,10 +202,34 @@ export const updateCalendarEvent = async (
 
   // Handle animalIds separately to ensure proper array handling
   if (updatedData.animalIds !== undefined) {
-    updatePayload.animal_ids = updatedData.animalIds && updatedData.animalIds.length > 0 ? updatedData.animalIds : null;
+    // Ensure we're passing a proper array, even if empty
+    if (Array.isArray(updatedData.animalIds)) {
+      updatePayload.animal_ids = updatedData.animalIds.length > 0 ? updatedData.animalIds : null;
+    } else {
+      updatePayload.animal_ids = null;
+    }
   }
 
   console.log('📅 [UPDATE SERVICE] Final update payload:', updatePayload);
+  
+  // Test if user can update this specific event first
+  const { data: eventCheck, error: checkError } = await supabase
+    .from('calendar_events')
+    .select('id, user_id')
+    .eq('id', id)
+    .single();
+    
+  if (checkError) {
+    console.error('❌ [UPDATE SERVICE] Cannot find event to update:', checkError);
+    return false;
+  }
+  
+  if (!eventCheck) {
+    console.error('❌ [UPDATE SERVICE] Event not found');
+    return false;
+  }
+  
+  console.log('✅ [UPDATE SERVICE] Event found, user_id:', eventCheck.user_id);
   
   const { data, error } = await supabase
     .from('calendar_events')
@@ -216,6 +240,12 @@ export const updateCalendarEvent = async (
 
   if (error) {
     console.error('❌ [UPDATE SERVICE] Database update error:', error);
+    console.error('❌ [UPDATE SERVICE] Error details:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    });
     return false;
   }
 
