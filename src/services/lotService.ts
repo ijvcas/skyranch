@@ -4,7 +4,7 @@ import type { Lot, LotAssignment, LotRotation } from '@/stores/lotStore';
 
 export const getAllLots = async (): Promise<Lot[]> => {
   try {
-    console.log('🔍 Fetching all lots (shared across all users)...');
+    console.log('🔍 Fetching all lots (SHARED data for all active users)...');
     const { data, error } = await supabase
       .from('lots')
       .select(`

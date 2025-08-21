@@ -21,6 +21,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getPolygonDataForLots, syncAllLotAreasWithPolygons } from '@/services/lotPolygonService';
 import { applySEO } from '@/utils/seo';
 import { syncCadastralParcelsToLots } from '@/services/cadastralLotSyncService';
+import { CacheCleanupService } from '@/services/cacheCleanupService';
 
 const Lots = () => {
   const { lots, loadLots, deleteLot, isLoading, setSelectedLot } = useLotStore();
@@ -42,7 +43,13 @@ const Lots = () => {
 
 // Load lots and polygon data + ensure property lots are synced for this user
   useEffect(() => {
-    console.log('🔄 Loading lots and polygon data...');
+    console.log('🔄 Loading SHARED lots and polygon data...');
+
+    // Clear cached data if needed to ensure fresh shared data
+    if (CacheCleanupService.shouldClearCache()) {
+      console.log('🗑️ Clearing cached polygon data to load fresh shared data');
+      CacheCleanupService.clearAllCaches();
+    }
 
     // Load lots first
     loadLots();

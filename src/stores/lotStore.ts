@@ -85,7 +85,9 @@ export const useLotStore = create<LotStore>((set, get) => ({
   loadLots: async () => {
     set({ isLoading: true });
     try {
+      console.log('🔄 Loading shared lots for all users...');
       const lots = await getAllLots();
+      console.log(`✅ Loaded ${lots.length} shared lots`);
       set({ lots, isLoading: false });
     } catch (error) {
       console.error('Error loading lots:', error);
