@@ -183,12 +183,53 @@ export const updateCalendarEvent = async (
   console.log('📅 [UPDATE SERVICE] Updating event with animalIds:', updatedData.animalIds);
   
   try {
-    // Build update payload with careful array handling
+    // Get current user and session info for debugging
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    console.log('🔐 [AUTH DEBUG] Current user:', user?.id);
+    console.log('🔐 [AUTH DEBUG] Session exists:', !!session);
+    console.log('🔐 [AUTH DEBUG] User error:', userError);
+    console.log('🔐 [AUTH DEBUG] Session error:', sessionError);
+
+    if (userError || !user) {
+      console.error('❌ [UPDATE SERVICE] Authentication failed:', userError);
+      throw new Error('Usuario no autenticado');
+    }
+
+    // Check the event exists and get its details  
+    const { data: eventCheck, error: checkError } = await supabase
+      .from('calendar_events')
+      .select('id, user_id, title')
+      .eq('id', id)
+      .single();
+      
+    console.log('🔍 [EVENT DEBUG] Event check result:', eventCheck);
+    console.log('🔍 [EVENT DEBUG] Check error:', checkError);
+      
+    if (checkError) {
+      console.error('❌ [UPDATE SERVICE] Event lookup failed:', checkError);
+      if (checkError.code === 'PGRST116') {
+        throw new Error('Evento no encontrado');
+      }
+      throw new Error('Error al buscar el evento');
+    }
+    
+    if (!eventCheck) {
+      console.error('❌ [UPDATE SERVICE] Event not found');
+      throw new Error('Evento no encontrado');
+    }
+    
+    console.log('📊 [PERMISSION DEBUG] Event owner:', eventCheck.user_id);
+    console.log('📊 [PERMISSION DEBUG] Current user:', user.id);
+    console.log('📊 [PERMISSION DEBUG] Match:', eventCheck.user_id === user.id);
+
+    // Build update payload
     const updatePayload: any = {
       updated_at: new Date().toISOString()
     };
 
-    // Add fields only if they are defined
+    // Only add fields that are actually changing
     if (updatedData.title !== undefined) updatePayload.title = updatedData.title;
     if (updatedData.description !== undefined) updatePayload.description = updatedData.description || null;
     if (updatedData.eventType !== undefined) updatePayload.event_type = updatedData.eventType;
@@ -201,25 +242,28 @@ export const updateCalendarEvent = async (
     if (updatedData.cost !== undefined) updatePayload.cost = updatedData.cost || null;
     if (updatedData.notes !== undefined) updatePayload.notes = updatedData.notes || null;
     
-    // Handle animal IDs with special care
+    // Handle animal IDs
     if (updatedData.animalIds !== undefined) {
       if (Array.isArray(updatedData.animalIds) && updatedData.animalIds.length > 0) {
         updatePayload.animal_ids = updatedData.animalIds;
       } else {
         updatePayload.animal_ids = null;
       }
-      console.log('📅 [UPDATE SERVICE] Setting animal_ids to:', updatePayload.animal_ids);
+      console.log('🐄 [ANIMAL DEBUG] Setting animal_ids to:', updatePayload.animal_ids);
     }
 
-    console.log('📅 [UPDATE SERVICE] Final update payload:', updatePayload);
+    console.log('📦 [UPDATE DEBUG] Final payload:', updatePayload);
     
-    // Perform the update directly - let RLS handle permissions
+    // Try the update with detailed error handling
     const { data, error } = await supabase
       .from('calendar_events')
       .update(updatePayload)
       .eq('id', id)
-      .select('id, animal_ids, title')
+      .select('id, animal_ids, title, user_id')
       .single();
+
+    console.log('📤 [UPDATE DEBUG] Update response data:', data);
+    console.log('📤 [UPDATE DEBUG] Update response error:', error);
 
     if (error) {
       console.error('❌ [UPDATE SERVICE] Database update failed:', {
@@ -229,27 +273,29 @@ export const updateCalendarEvent = async (
         code: error.code
       });
       
-      // Provide user-friendly error messages
+      // Provide more specific error messages
       if (error.code === 'PGRST116') {
-        throw new Error('No se pudo actualizar el evento');
-      } else if (error.message.includes('permission') || error.message.includes('policy')) {
+        throw new Error('No se encontró el evento para actualizar');
+      } else if (error.code === '42501' || error.message.includes('permission')) {
         throw new Error('Sin permisos para actualizar este evento');
+      } else if (error.code === 'PGRST301') {
+        throw new Error('Datos de actualización inválidos');
       } else {
-        throw new Error(`Error de base de datos: ${error.message}`);
+        throw new Error(`No se pudo actualizar el evento: ${error.message}`);
       }
+    }
+
+    if (!data) {
+      console.error('❌ [UPDATE SERVICE] No data returned from update');
+      throw new Error('No se pudo verificar la actualización del evento');
     }
 
     console.log('✅ [UPDATE SERVICE] Update successful:', data);
     
-    // Verify the update actually worked
-    const { data: verifyData, error: verifyError } = await supabase
-      .from('calendar_events')  
-      .select('animal_ids')
-      .eq('id', id)
-      .single();
-      
-    if (!verifyError && verifyData) {
-      console.log('🔍 [UPDATE SERVICE] Final verification - animal_ids in DB:', verifyData.animal_ids);
+    // Verify the animal IDs were saved correctly
+    if (updatedData.animalIds !== undefined) {
+      console.log('🔍 [VERIFICATION] Expected animal_ids:', updatePayload.animal_ids);
+      console.log('🔍 [VERIFICATION] Actual animal_ids in response:', data.animal_ids);
     }
 
     // Update event notifications
