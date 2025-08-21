@@ -183,33 +183,6 @@ export const updateCalendarEvent = async (
   console.log('📅 [UPDATE SERVICE] Updating event with animalIds:', updatedData.animalIds);
   
   try {
-    // First, get current user to verify permissions
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error('❌ [UPDATE SERVICE] No authenticated user:', userError);
-      throw new Error('Usuario no autenticado');
-    }
-    console.log('✅ [UPDATE SERVICE] User authenticated:', user.id);
-
-    // Check if event exists and user owns it
-    const { data: eventCheck, error: checkError } = await supabase
-      .from('calendar_events')
-      .select('id, user_id, title')
-      .eq('id', id)
-      .single();
-      
-    if (checkError) {
-      console.error('❌ [UPDATE SERVICE] Cannot find event:', checkError);
-      throw new Error('Evento no encontrado');
-    }
-    
-    if (eventCheck.user_id !== user.id) {
-      console.error('❌ [UPDATE SERVICE] Permission denied - user does not own event');
-      throw new Error('Sin permisos para actualizar este evento');
-    }
-    
-    console.log('✅ [UPDATE SERVICE] Permission check passed for event:', eventCheck.title);
-
     // Build update payload with careful array handling
     const updatePayload: any = {
       updated_at: new Date().toISOString()
@@ -240,7 +213,7 @@ export const updateCalendarEvent = async (
 
     console.log('📅 [UPDATE SERVICE] Final update payload:', updatePayload);
     
-    // Perform the update
+    // Perform the update directly - let RLS handle permissions
     const { data, error } = await supabase
       .from('calendar_events')
       .update(updatePayload)
@@ -255,7 +228,15 @@ export const updateCalendarEvent = async (
         hint: error.hint,
         code: error.code
       });
-      throw new Error(`Error de base de datos: ${error.message}`);
+      
+      // Provide user-friendly error messages
+      if (error.code === 'PGRST116') {
+        throw new Error('No se pudo actualizar el evento');
+      } else if (error.message.includes('permission') || error.message.includes('policy')) {
+        throw new Error('Sin permisos para actualizar este evento');
+      } else {
+        throw new Error(`Error de base de datos: ${error.message}`);
+      }
     }
 
     console.log('✅ [UPDATE SERVICE] Update successful:', data);
