@@ -1,8 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { TabsContent } from '@/components/ui/tabs';
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import SupportInfoSettings from './SupportInfoSettings';
 import DashboardBannerSettings from './DashboardBannerSettings';
 import TimezoneSettings from '@/components/TimezoneSettings';
@@ -13,17 +11,7 @@ import UserActivityLogs from './UserActivityLogs';
 
 const SystemSettings = () => {
   const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const checkAdminRole = async () => {
-      if (user) {
-        const { data } = await supabase.rpc('get_current_app_role');
-        setIsAdmin(data === 'admin');
-      }
-    };
-    checkAdminRole();
-  }, [user]);
+  const isAdmin = user?.email === 'jvcas@mac.com';
 
   return (
     <div className="space-y-6">

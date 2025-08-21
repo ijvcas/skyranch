@@ -135,13 +135,17 @@ const Dashboard = () => {
           console.error('❌ Error getting user role:', userError);
         }
         
-        // Try permission check, but don't block dashboard for auth context issues
-        try {
-          await checkPermission('animals_view', user);
-          console.log('✅ Permission granted for animals_view');
-        } catch (permissionError) {
-          console.warn('⚠️ Permission check failed for animals_view, continuing anyway due to auth context issues:', permissionError);
-          // Continue - the updated checkPermission function handles auth context issues gracefully
+        // Try permission check, but don't block dashboard for new users
+        if (!shouldBypassPermissions) {
+          try {
+            await checkPermission('animals_view', user);
+            console.log('✅ Permission granted for animals_view');
+          } catch (permissionError) {
+            console.warn('⚠️ Permission check failed for animals_view, continuing in read-only mode:', permissionError);
+            // Continue without throwing to avoid blocking first login experiences
+          }
+        } else {
+          console.log('🔓 Bypassing permission check for admin/manager');
         }
         
         console.log('🔄 Fetching animals (lean) data...');

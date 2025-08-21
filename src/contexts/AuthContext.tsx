@@ -119,6 +119,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     console.log('🔐 [AUTH CONTEXT] Attempting sign in for:', email);
+
+    if (email === 'jvcas@mac.com') {
+      console.log('🧹 [AUTH CONTEXT] Special handling for jvcas@mac.com - clearing corrupted session first');
+      await clearCorruptedSession();
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
     
     const { error } = await supabase.auth.signInWithPassword({
       email,

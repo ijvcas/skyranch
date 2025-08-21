@@ -1359,10 +1359,6 @@ export type Database = {
         Args: { last_grazing_end_date: string; rest_days_required: number }
         Returns: string
       }
-      cleanup_old_connection_logs: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       cleanup_old_notifications: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1374,31 +1370,6 @@ export type Database = {
           lots_deleted: number
           message: string
           success: boolean
-        }[]
-      }
-      get_animal_stats_bypass: {
-        Args: { target_user_id: string }
-        Returns: {
-          species_counts: Json
-          total_count: number
-        }[]
-      }
-      get_animals_lean_with_timeout: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          id: string
-          species: string
-          user_count: number
-        }[]
-      }
-      get_animals_list_bypass: {
-        Args: { max_limit?: number; target_user_id: string }
-        Returns: {
-          id: string
-          name: string
-          species: string
-          tag: string
-          user_id: string
         }[]
       }
       get_auth_users: {
@@ -1414,13 +1385,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_dashboard_animal_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          species_counts: Json
-          total_count: number
-        }[]
-      }
       get_lot_grazing_metrics: {
         Args: { lot_id_param: string }
         Returns: {
@@ -1435,53 +1399,13 @@ export type Database = {
           recommended_exit_date: string
         }[]
       }
-      get_user_animal_stats_emergency: {
-        Args: { target_user_id: string }
-        Returns: {
-          species_counts: Json
-          total_count: number
-        }[]
-      }
-      get_user_animals_basic: {
-        Args: { max_limit?: number; target_user_id: string }
-        Returns: {
-          id: string
-          name: string
-          species: string
-          tag: string
-          user_id: string
-        }[]
-      }
-      get_user_by_email: {
-        Args: { user_email: string }
-        Returns: {
-          id: string
-          is_active: boolean
-          role: string
-        }[]
-      }
       is_active_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      log_admin_operation: {
-        Args: {
-          new_data?: Json
-          old_data?: Json
-          operation_type: string
-          reason?: string
-          record_id?: string
-          table_name: string
-        }
-        Returns: undefined
-      }
       sync_auth_users_to_app_users: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      system_health_check: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
       }
       trigger_daily_grazing_notifications: {
         Args: Record<PropertyKey, never>
@@ -1494,10 +1418,6 @@ export type Database = {
       validate_password_server_side: {
         Args: { email?: string; full_name?: string; password: string }
         Returns: Json
-      }
-      validate_strong_password: {
-        Args: { password: string }
-        Returns: boolean
       }
     }
     Enums: {
