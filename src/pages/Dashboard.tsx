@@ -182,8 +182,9 @@ const Dashboard = () => {
       await syncAuthUsersToAppUsers();
       console.log('✅ User sync completed');
       
-      // Clear React Query cache and refetch
-      queryClient.clear();
+      // Only clear animal-related queries, keep weather and other data
+      queryClient.removeQueries({ queryKey: ['animals'] });
+      queryClient.removeQueries({ queryKey: ['animal-stats'] });
       await refetch();
       
       toast({
