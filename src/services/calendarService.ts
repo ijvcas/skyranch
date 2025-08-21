@@ -179,113 +179,129 @@ export const updateCalendarEvent = async (
   updatedData: Partial<Omit<CalendarEvent, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
   selectedUserIds: string[]
 ): Promise<boolean> => {
+  console.log('📅 [UPDATE SERVICE] Starting update for event:', id);
   console.log('📅 [UPDATE SERVICE] Updating event with animalIds:', updatedData.animalIds);
   
-  const updatePayload: any = {
-    ...(updatedData.animalId !== undefined && { animal_id: updatedData.animalId || null }),
-    ...(updatedData.title && { title: updatedData.title }),
-    ...(updatedData.description !== undefined && { description: updatedData.description || null }),
-    ...(updatedData.eventType && { event_type: updatedData.eventType }),
-    ...(updatedData.eventDate && { event_date: updatedData.eventDate }),
-    ...(updatedData.endDate !== undefined && { end_date: updatedData.endDate || null }),
-    ...(updatedData.allDay !== undefined && { all_day: updatedData.allDay }),
-    ...(updatedData.recurring !== undefined && { recurring: updatedData.recurring }),
-    ...(updatedData.recurrencePattern !== undefined && { recurrence_pattern: updatedData.recurrencePattern || null }),
-    ...(updatedData.status && { status: updatedData.status }),
-    ...(updatedData.reminderMinutes !== undefined && { reminder_minutes: updatedData.reminderMinutes }),
-    ...(updatedData.veterinarian !== undefined && { veterinarian: updatedData.veterinarian || null }),
-    ...(updatedData.location !== undefined && { location: updatedData.location || null }),
-    ...(updatedData.cost !== undefined && { cost: updatedData.cost || null }),
-    ...(updatedData.notes !== undefined && { notes: updatedData.notes || null }),
-    updated_at: new Date().toISOString()
-  };
-
-  // Handle animalIds separately to ensure proper array handling
-  if (updatedData.animalIds !== undefined) {
-    // Ensure we're passing a proper array, even if empty
-    if (Array.isArray(updatedData.animalIds)) {
-      updatePayload.animal_ids = updatedData.animalIds.length > 0 ? updatedData.animalIds : null;
-    } else {
-      updatePayload.animal_ids = null;
+  try {
+    // First, get current user to verify permissions
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error('❌ [UPDATE SERVICE] No authenticated user:', userError);
+      throw new Error('Usuario no autenticado');
     }
-  }
+    console.log('✅ [UPDATE SERVICE] User authenticated:', user.id);
 
-  console.log('📅 [UPDATE SERVICE] Final update payload:', updatePayload);
-  
-  // Test if user can update this specific event first
-  const { data: eventCheck, error: checkError } = await supabase
-    .from('calendar_events')
-    .select('id, user_id')
-    .eq('id', id)
-    .single();
+    // Check if event exists and user owns it
+    const { data: eventCheck, error: checkError } = await supabase
+      .from('calendar_events')
+      .select('id, user_id, title')
+      .eq('id', id)
+      .single();
+      
+    if (checkError) {
+      console.error('❌ [UPDATE SERVICE] Cannot find event:', checkError);
+      throw new Error('Evento no encontrado');
+    }
     
-  if (checkError) {
-    console.error('❌ [UPDATE SERVICE] Cannot find event to update:', checkError);
-    return false;
-  }
-  
-  if (!eventCheck) {
-    console.error('❌ [UPDATE SERVICE] Event not found');
-    return false;
-  }
-  
-  console.log('✅ [UPDATE SERVICE] Event found, user_id:', eventCheck.user_id);
-  
-  const { data, error } = await supabase
-    .from('calendar_events')
-    .update(updatePayload)
-    .eq('id', id)
-    .select('id, animal_ids')
-    .single();
-
-  if (error) {
-    console.error('❌ [UPDATE SERVICE] Database update error:', error);
-    console.error('❌ [UPDATE SERVICE] Error details:', {
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code
-    });
-    return false;
-  }
-
-  console.log('✅ [UPDATE SERVICE] Database update successful, result:', data);
-  
-  // Verify the update by checking what was actually saved
-  const { data: verifyData, error: verifyError } = await supabase
-    .from('calendar_events')
-    .select('animal_ids')
-    .eq('id', id)
-    .single();
+    if (eventCheck.user_id !== user.id) {
+      console.error('❌ [UPDATE SERVICE] Permission denied - user does not own event');
+      throw new Error('Sin permisos para actualizar este evento');
+    }
     
-  if (!verifyError && verifyData) {
-    console.log('🔍 [UPDATE SERVICE] Verification: animal_ids in DB after update:', verifyData.animal_ids);
-  }
+    console.log('✅ [UPDATE SERVICE] Permission check passed for event:', eventCheck.title);
 
-  // Update event notifications
-  // First, delete existing notifications
-  await supabase
-    .from('event_notifications')
-    .delete()
-    .eq('event_id', id);
+    // Build update payload with careful array handling
+    const updatePayload: any = {
+      updated_at: new Date().toISOString()
+    };
 
-  // Then, add new notifications for selected users
-  if (selectedUserIds.length > 0) {
-    const notifications = selectedUserIds.map(userId => ({
-      event_id: id,
-      user_id: userId
-    }));
+    // Add fields only if they are defined
+    if (updatedData.title !== undefined) updatePayload.title = updatedData.title;
+    if (updatedData.description !== undefined) updatePayload.description = updatedData.description || null;
+    if (updatedData.eventType !== undefined) updatePayload.event_type = updatedData.eventType;
+    if (updatedData.eventDate !== undefined) updatePayload.event_date = updatedData.eventDate;
+    if (updatedData.endDate !== undefined) updatePayload.end_date = updatedData.endDate || null;
+    if (updatedData.allDay !== undefined) updatePayload.all_day = updatedData.allDay;
+    if (updatedData.reminderMinutes !== undefined) updatePayload.reminder_minutes = updatedData.reminderMinutes;
+    if (updatedData.veterinarian !== undefined) updatePayload.veterinarian = updatedData.veterinarian || null;
+    if (updatedData.location !== undefined) updatePayload.location = updatedData.location || null;
+    if (updatedData.cost !== undefined) updatePayload.cost = updatedData.cost || null;
+    if (updatedData.notes !== undefined) updatePayload.notes = updatedData.notes || null;
+    
+    // Handle animal IDs with special care
+    if (updatedData.animalIds !== undefined) {
+      if (Array.isArray(updatedData.animalIds) && updatedData.animalIds.length > 0) {
+        updatePayload.animal_ids = updatedData.animalIds;
+      } else {
+        updatePayload.animal_ids = null;
+      }
+      console.log('📅 [UPDATE SERVICE] Setting animal_ids to:', updatePayload.animal_ids);
+    }
 
-    const { error: notificationError } = await supabase
+    console.log('📅 [UPDATE SERVICE] Final update payload:', updatePayload);
+    
+    // Perform the update
+    const { data, error } = await supabase
+      .from('calendar_events')
+      .update(updatePayload)
+      .eq('id', id)
+      .select('id, animal_ids, title')
+      .single();
+
+    if (error) {
+      console.error('❌ [UPDATE SERVICE] Database update failed:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      throw new Error(`Error de base de datos: ${error.message}`);
+    }
+
+    console.log('✅ [UPDATE SERVICE] Update successful:', data);
+    
+    // Verify the update actually worked
+    const { data: verifyData, error: verifyError } = await supabase
+      .from('calendar_events')  
+      .select('animal_ids')
+      .eq('id', id)
+      .single();
+      
+    if (!verifyError && verifyData) {
+      console.log('🔍 [UPDATE SERVICE] Final verification - animal_ids in DB:', verifyData.animal_ids);
+    }
+
+    // Update event notifications
+    // First, delete existing notifications
+    await supabase
       .from('event_notifications')
-      .insert(notifications);
+      .delete()
+      .eq('event_id', id);
 
-    if (notificationError) {
-      console.error('Error updating event notifications:', notificationError);
+    // Then, add new notifications for selected users
+    if (selectedUserIds.length > 0) {
+      const notifications = selectedUserIds.map(userId => ({
+        event_id: id,
+        user_id: userId
+      }));
+
+      const { error: notificationError } = await supabase
+        .from('event_notifications')
+        .insert(notifications);
+
+      if (notificationError) {
+        console.error('⚠️ [UPDATE SERVICE] Notification update failed (non-critical):', notificationError);
+      } else {
+        console.log('✅ [UPDATE SERVICE] Notifications updated successfully');
+      }
     }
-  }
 
-  return true;
+    return true;
+
+  } catch (error: any) {
+    console.error('💥 [UPDATE SERVICE] Caught exception:', error);
+    throw error;
+  }
 };
 
 export const deleteCalendarEvent = async (id: string): Promise<boolean> => {
