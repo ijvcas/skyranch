@@ -119,7 +119,17 @@ const EventDetailDialog = ({
 
   // Get animals for this event (support both old animalId and new animalIds)
   const eventAnimals = React.useMemo(() => {
-    const animalIds = event.animalIds || (event.animalId ? [event.animalId] : []);
+    const animalIds = event.animalIds && event.animalIds.length > 0 
+      ? event.animalIds 
+      : (event.animalId ? [event.animalId] : []);
+    
+    console.log('🐄 [EVENT DETAIL] Event animals data:', { 
+      eventAnimalIds: event.animalIds, 
+      eventAnimalId: event.animalId, 
+      calculatedIds: animalIds,
+      availableAnimals: animals.length 
+    });
+    
     return animals.filter(animal => animalIds.includes(animal.id));
   }, [event.animalIds, event.animalId, animals]);
 

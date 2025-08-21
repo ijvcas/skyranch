@@ -63,12 +63,12 @@ export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
 
     console.log('✅ Users fetched for events:', users?.length || 0);
 
-    // Map events with creator names
+    // Map events with creator names and ensure proper animal data retrieval
     return events.map(event => ({
       id: event.id,
       userId: event.user_id,
       animalId: event.animal_id || undefined,
-      animalIds: event.animal_ids || undefined,
+      animalIds: event.animal_ids || [], // Ensure empty array instead of undefined
       title: event.title,
       description: event.description || undefined,
       eventType: event.event_type as CalendarEvent['eventType'],
@@ -177,7 +177,7 @@ export const updateCalendarEvent = async (
   
   const updatePayload = {
     ...(updatedData.animalId !== undefined && { animal_id: updatedData.animalId || null }),
-    ...(updatedData.animalIds !== undefined && { animal_ids: updatedData.animalIds || null }),
+    ...(updatedData.animalIds !== undefined && { animal_ids: updatedData.animalIds }), // Don't use || null here, empty arrays are valid
     ...(updatedData.title && { title: updatedData.title }),
     ...(updatedData.description !== undefined && { description: updatedData.description || null }),
     ...(updatedData.eventType && { event_type: updatedData.eventType }),
