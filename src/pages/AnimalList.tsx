@@ -11,7 +11,7 @@ import AnimalListHeader from '@/components/animal-list/AnimalListHeader';
 import AnimalListFilters from '@/components/animal-list/AnimalListFilters';
 import AnimalSpeciesGroup from '@/components/animal-list/AnimalSpeciesGroup';
 import AnimalListEmptyState from '@/components/animal-list/AnimalListEmptyState';
-import AnimalListStats from '@/components/animal-list/AnimalListStats';
+import AnimalListStats, { FilterType } from '@/components/animal-list/AnimalListStats';
 import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
 import { useInfiniteAnimals } from '@/hooks/useInfiniteAnimals';
 
@@ -32,9 +32,9 @@ const AnimalList = () => {
   });
   
   const [useMockData, setUseMockData] = useState(false);
-  const [includeDeceased, setIncludeDeceased] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
   
-  // Infinite animals with lightweight pages
+  // Infinite animals with lightweight pages - always fetch both active and deceased
   const {
     animals = [],
     isLoading,
@@ -44,7 +44,7 @@ const AnimalList = () => {
     isFetchingNextPage,
     clearAndRefetch,
     isUsingMock,
-  } = useInfiniteAnimals(includeDeceased);
+  } = useInfiniteAnimals();
 
   console.log('🔧 About to call useAnimalFiltering with animals:', animals?.length);
   const {
@@ -55,7 +55,7 @@ const AnimalList = () => {
     selectedStatus,
     setSelectedStatus,
     groupedAnimals
-  } = useAnimalFiltering(animals);
+  } = useAnimalFiltering(animals, selectedFilter);
 
   const handleForceRefresh = () => {
     console.log('🔄 Force refreshing animal list...');
@@ -116,8 +116,6 @@ const AnimalList = () => {
           onSpeciesChange={setSelectedSpecies}
           selectedStatus={selectedStatus}
           onStatusChange={setSelectedStatus}
-          includeDeceased={includeDeceased}
-          onIncludeDeceasedChange={setIncludeDeceased}
         />
 
         {Object.keys(groupedAnimals).length === 0 ? (
@@ -152,7 +150,11 @@ const AnimalList = () => {
           </div>
         )}
 
-        <AnimalListStats animals={animals} />
+        <AnimalListStats 
+          animals={animals} 
+          selectedFilter={selectedFilter}
+          onFilterChange={setSelectedFilter}
+        />
       </div>
 
       <AnimalDeleteDialog

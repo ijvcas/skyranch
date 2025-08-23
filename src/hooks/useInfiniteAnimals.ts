@@ -6,11 +6,11 @@ import type { Animal } from '@/stores/animalStore';
 
 const PAGE_SIZE = 50;
 
-export const useInfiniteAnimals = (includeDeceased = false) => {
+export const useInfiniteAnimals = () => {
   const queryClient = useQueryClient();
 
   const query = useInfiniteQuery<Animal[], Error>({
-    queryKey: ['animals', 'farm-wide', 'infinite', includeDeceased],
+    queryKey: ['animals', 'farm-wide', 'infinite', 'all'], // Always fetch both active and deceased
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const offset = typeof pageParam === 'number' ? pageParam : 0;
@@ -21,7 +21,7 @@ export const useInfiniteAnimals = (includeDeceased = false) => {
         return mockAnimals;
       }
 
-      const animals = await getAnimalsPage(PAGE_SIZE, offset, includeDeceased);
+      const animals = await getAnimalsPage(PAGE_SIZE, offset, true); // Always include deceased
       return animals;
     },
     getNextPageParam: (lastPage, allPages) => {

@@ -3,53 +3,76 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Animal } from '@/stores/animalStore';
 
+export type FilterType = 'all' | 'healthy' | 'pregnant' | 'sick' | 'treatment' | 'deceased';
+
 interface AnimalListStatsProps {
   animals: Animal[];
+  selectedFilter: FilterType;
+  onFilterChange: (filter: FilterType) => void;
 }
 
-const AnimalListStats = ({ animals }: AnimalListStatsProps) => {
+const AnimalListStats = ({ animals, selectedFilter, onFilterChange }: AnimalListStatsProps) => {
   if (animals.length === 0) return null;
 
+  // Separate active and deceased animals for proper counting
+  const activeAnimals = animals.filter(a => a.lifecycleStatus !== 'deceased');
+  const deceasedAnimals = animals.filter(a => a.lifecycleStatus === 'deceased');
+
+  const stats = [
+    {
+      key: 'all' as FilterType,
+      count: activeAnimals.length,
+      label: 'Total Animales',
+      colorClass: 'text-foreground'
+    },
+    {
+      key: 'healthy' as FilterType,
+      count: activeAnimals.filter(a => a.healthStatus === 'healthy').length,
+      label: 'Saludables',
+      colorClass: 'text-green-600'
+    },
+    {
+      key: 'pregnant' as FilterType,
+      count: activeAnimals.filter(a => a.healthStatus === 'pregnant' || a.healthStatus === 'pregnant-healthy' || a.healthStatus === 'pregnant-sick').length,
+      label: 'Gestantes',
+      colorClass: 'text-blue-600'
+    },
+    {
+      key: 'sick' as FilterType,
+      count: activeAnimals.filter(a => a.healthStatus === 'sick' || a.healthStatus === 'pregnant-sick').length,
+      label: 'Enfermos',
+      colorClass: 'text-red-600'
+    },
+    {
+      key: 'treatment' as FilterType,
+      count: activeAnimals.filter(a => a.healthStatus === 'treatment').length,
+      label: 'En Tratamiento',
+      colorClass: 'text-yellow-600'
+    },
+    {
+      key: 'deceased' as FilterType,
+      count: deceasedAnimals.length,
+      label: 'Fallecidos',
+      colorClass: 'text-muted-foreground'
+    }
+  ];
+
   return (
-    <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4">
-      <Card className="shadow-lg">
-        <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-gray-900">{animals.length}</div>
-          <div className="text-sm text-gray-600">Total Animales</div>
-        </CardContent>
-      </Card>
-      <Card className="shadow-lg">
-        <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">
-            {animals.filter(a => a.healthStatus === 'healthy').length}
-          </div>
-          <div className="text-sm text-gray-600">Saludables</div>
-        </CardContent>
-      </Card>
-      <Card className="shadow-lg">
-        <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">
-            {animals.filter(a => a.healthStatus === 'pregnant' || a.healthStatus === 'pregnant-healthy' || a.healthStatus === 'pregnant-sick').length}
-          </div>
-          <div className="text-sm text-gray-600">Gestantes</div>
-        </CardContent>
-      </Card>
-      <Card className="shadow-lg">
-        <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-red-600">
-            {animals.filter(a => a.healthStatus === 'sick' || a.healthStatus === 'pregnant-sick').length}
-          </div>
-          <div className="text-sm text-gray-600">Enfermos</div>
-        </CardContent>
-      </Card>
-      <Card className="shadow-lg">
-        <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-600">
-            {animals.filter(a => a.healthStatus === 'treatment').length}
-          </div>
-          <div className="text-sm text-gray-600">En Tratamiento</div>
-        </CardContent>
-      </Card>
+    <div className="mt-8 grid grid-cols-2 md:grid-cols-6 gap-4">
+      {stats.map(stat => (
+        <Card 
+          key={stat.key}
+          className={`shadow-lg cursor-pointer transition-all hover:shadow-xl ${
+            selectedFilter === stat.key ? 'ring-2 ring-primary' : ''
+          }`}
+          onClick={() => onFilterChange(stat.key)}
+        >
+          <CardContent className="p-4 text-center">
+            <div className={`text-2xl font-bold ${stat.colorClass}`}>{stat.count}</div>
+            <div className="text-sm text-muted-foreground">{stat.label}</div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };

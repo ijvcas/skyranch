@@ -4,8 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 
 interface AnimalListFiltersProps {
   searchTerm: string;
@@ -14,8 +12,6 @@ interface AnimalListFiltersProps {
   onSpeciesChange: (value: string) => void;
   selectedStatus: string;
   onStatusChange: (value: string) => void;
-  includeDeceased: boolean;
-  onIncludeDeceasedChange: (value: boolean) => void;
 }
 
 const AnimalListFilters = ({
@@ -24,9 +20,7 @@ const AnimalListFilters = ({
   selectedSpecies,
   onSpeciesChange,
   selectedStatus,
-  onStatusChange,
-  includeDeceased,
-  onIncludeDeceasedChange
+  onStatusChange
 }: AnimalListFiltersProps) => {
   return (
     <Card className="shadow-lg">
@@ -34,7 +28,7 @@ const AnimalListFilters = ({
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Buscar por nombre o etiqueta..."
                 value={searchTerm}
@@ -74,10 +68,6 @@ const AnimalListFilters = ({
                   <SelectItem value="treatment">En Tratamiento</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex items-center gap-2 pl-2">
-              <Switch checked={includeDeceased} onCheckedChange={onIncludeDeceasedChange} id="include-deceased" />
-              <Label htmlFor="include-deceased" className="text-sm leading-tight whitespace-normal break-words">Mostrar fallecidos</Label>
             </div>
           </div>
         </div>

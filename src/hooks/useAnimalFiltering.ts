@@ -3,12 +3,12 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Animal } from '@/stores/animalStore';
 import { fetchBreedingRecords } from '@/services/breeding/breedingQueries';
+import type { FilterType } from '@/components/animal-list/AnimalListStats';
 
-export const useAnimalFiltering = (animals: Animal[]) => {
+export const useAnimalFiltering = (animals: Animal[], selectedFilter: FilterType) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecies, setSelectedSpecies] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [includeDeceased, setIncludeDeceased] = useState(false);
 
   // Fetch breeding records to determine pregnancy status
   const { data: breedingRecords = [] } = useQuery({
@@ -54,18 +54,43 @@ export const useAnimalFiltering = (animals: Animal[]) => {
       
       const matchesSpecies = selectedSpecies === 'all' || animal.species === selectedSpecies;
       
-      // Exclude deceased by default unless explicitly included
+      // Filter based on selectedFilter from statistics cards
       const isDeceased = animal.lifecycleStatus === 'deceased';
-      if (!includeDeceased && isDeceased) return false;
       
-      // Enhanced status matching with pregnancy computation
+      // Apply filter based on selected statistic card
+      let matchesFilter = true;
+      switch (selectedFilter) {
+        case 'all':
+          matchesFilter = !isDeceased; // Only active animals
+          break;
+        case 'healthy':
+          matchesFilter = !isDeceased && animal.healthStatus === 'healthy';
+          break;
+        case 'pregnant':
+          const computedStatus = getComputedStatus(animal);
+          matchesFilter = !isDeceased && (computedStatus === 'pregnant' || computedStatus === 'pregnant-healthy' || computedStatus === 'pregnant-sick');
+          break;
+        case 'sick':
+          matchesFilter = !isDeceased && (animal.healthStatus === 'sick' || animal.healthStatus === 'pregnant-sick');
+          break;
+        case 'treatment':
+          matchesFilter = !isDeceased && animal.healthStatus === 'treatment';
+          break;
+        case 'deceased':
+          matchesFilter = isDeceased; // Only deceased animals
+          break;
+        default:
+          matchesFilter = !isDeceased;
+      }
+      
+      // Enhanced status matching with pregnancy computation (for the status filter dropdown)
       const computedStatus = getComputedStatus(animal);
       const matchesStatus = selectedStatus === 'all' || 
         computedStatus === selectedStatus ||
         // Also match base pregnancy status for any pregnant-* selection
         (selectedStatus === 'pregnant' && computedStatus.startsWith('pregnant'));
       
-      return matchesSearch && matchesSpecies && matchesStatus;
+      return matchesSearch && matchesSpecies && matchesStatus && matchesFilter;
     });
 
     // Group by species
@@ -84,7 +109,7 @@ export const useAnimalFiltering = (animals: Animal[]) => {
     });
 
     return grouped;
-  }, [animals, searchTerm, selectedSpecies, selectedStatus, breedingRecords, includeDeceased]);
+  }, [animals, searchTerm, selectedSpecies, selectedStatus, breedingRecords, selectedFilter]);
 
   return {
     searchTerm,
@@ -93,8 +118,6 @@ export const useAnimalFiltering = (animals: Animal[]) => {
     setSelectedSpecies,
     selectedStatus,
     setSelectedStatus,
-    includeDeceased,
-    setIncludeDeceased,
     groupedAnimals
   };
 };
