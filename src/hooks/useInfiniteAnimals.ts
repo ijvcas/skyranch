@@ -39,7 +39,9 @@ export const useInfiniteAnimals = () => {
 
   const clearAndRefetch = async () => {
     networkDiagnostics.clearCache();
-    await queryClient.invalidateQueries({ queryKey: ['animals', 'farm-wide', 'infinite'] });
+    // Reset the query completely and refetch from scratch
+    queryClient.removeQueries({ queryKey: ['animals', 'farm-wide', 'infinite'] });
+    await queryClient.invalidateQueries({ queryKey: ['animals'] });
     await query.refetch();
   };
 

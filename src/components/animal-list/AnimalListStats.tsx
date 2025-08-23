@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Animal } from '@/stores/animalStore';
+import { fetchBreedingRecords } from '@/services/breeding/breedingQueries';
 
 export type FilterType = 'all' | 'healthy' | 'pregnant' | 'sick' | 'treatment' | 'deceased';
 
@@ -12,11 +14,28 @@ interface AnimalListStatsProps {
 }
 
 const AnimalListStats = ({ animals, selectedFilter, onFilterChange }: AnimalListStatsProps) => {
+  // Fetch breeding records for pregnancy calculation
+  const { data: breedingRecords = [] } = useQuery({
+    queryKey: ['breeding-records'],
+    queryFn: fetchBreedingRecords,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   if (animals.length === 0) return null;
 
   // Separate active and deceased animals for proper counting
   const activeAnimals = animals.filter(a => a.lifecycleStatus !== 'deceased');
   const deceasedAnimals = animals.filter(a => a.lifecycleStatus === 'deceased');
+
+  // Helper function to determine if an animal is pregnant using breeding records
+  const isAnimalPregnant = (animalId: string) => {
+    return breedingRecords.some(record => 
+      record.motherId === animalId && 
+      (record.pregnancyConfirmed || record.status === 'confirmed_pregnant') &&
+      !record.actualBirthDate &&
+      record.status !== 'birth_completed'
+    );
+  };
 
   const stats = [
     {
@@ -33,7 +52,7 @@ const AnimalListStats = ({ animals, selectedFilter, onFilterChange }: AnimalList
     },
     {
       key: 'pregnant' as FilterType,
-      count: activeAnimals.filter(a => a.healthStatus === 'pregnant' || a.healthStatus === 'pregnant-healthy' || a.healthStatus === 'pregnant-sick').length,
+      count: activeAnimals.filter(a => isAnimalPregnant(a.id)).length,
       label: 'Gestantes',
       colorClass: 'text-blue-600'
     },
