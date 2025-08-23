@@ -3,12 +3,16 @@ import React from 'react';
 import type { Animal } from '@/stores/animalStore';
 import { format, differenceInYears, differenceInMonths, differenceInDays, addYears, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTimezone } from '@/hooks/useTimezone';
 
 interface AnimalInfoProps {
   animal: Animal;
 }
 
 const AnimalInfo: React.FC<AnimalInfoProps> = ({ animal }) => {
+  const { formatDateInput } = useTimezone();
+  const isDeceased = animal.lifecycleStatus === 'deceased';
+  
   const formatAge = (dateStr?: string | null) => {
     if (!dateStr) return null;
     try {
@@ -29,41 +33,42 @@ const AnimalInfo: React.FC<AnimalInfoProps> = ({ animal }) => {
     }
   };
 
-  const birthDateFormatted = animal.birthDate
-    ? format(new Date(animal.birthDate), 'dd/MM/yyyy', { locale: es })
-    : null;
   const ageText = formatAge(animal.birthDate);
 
   return (
-    <div className="space-y-2">
-      {birthDateFormatted && (
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Fecha de Nacimiento:</span>
-          <span className="font-medium">{birthDateFormatted}</span>
+    <div className="space-y-2 mb-4">
+      {isDeceased && animal.dateOfDeath && (
+        <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-200">
+          <span className="font-medium">Fecha de fallecimiento:</span> {formatDateInput(animal.dateOfDeath)}
+          {animal.causeOfDeath && (
+            <div className="mt-1">
+              <span className="font-medium">Causa:</span> {animal.causeOfDeath}
+            </div>
+          )}
         </div>
       )}
-      {ageText && (
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Edad:</span>
-          <span className="font-medium">{ageText}</span>
+      {animal.birthDate && (
+        <div className={`flex justify-between text-sm ${isDeceased ? 'text-gray-500' : 'text-gray-600'}`}>
+          <span className="font-medium">Fecha de Nacimiento:</span>
+          <span>{formatDateInput(animal.birthDate)} {ageText && `(${ageText})`}</span>
         </div>
       )}
       {animal.breed && (
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Raza:</span>
-          <span className="font-medium">{animal.breed}</span>
+        <div className={`flex justify-between text-sm ${isDeceased ? 'text-gray-500' : 'text-gray-600'}`}>
+          <span className="font-medium">Raza:</span>
+          <span>{animal.breed}</span>
         </div>
       )}
-      <div className="flex justify-between text-sm">
-        <span className="text-gray-600">Sexo:</span>
-        <span className="font-medium">
+      <div className={`flex justify-between text-sm ${isDeceased ? 'text-gray-500' : 'text-gray-600'}`}>
+        <span className="font-medium">Sexo:</span>
+        <span>
           {animal.gender === 'macho' ? 'Macho' : animal.gender === 'hembra' ? 'Hembra' : 'No especificado'}
         </span>
       </div>
       {animal.weight && (
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Peso:</span>
-          <span className="font-medium">{animal.weight} kg</span>
+        <div className={`flex justify-between text-sm ${isDeceased ? 'text-gray-500' : 'text-gray-600'}`}>
+          <span className="font-medium">Peso:</span>
+          <span>{animal.weight} kg</span>
         </div>
       )}
     </div>

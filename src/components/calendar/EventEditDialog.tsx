@@ -50,7 +50,7 @@ const EventEditDialog = ({
 
   const { data: animals = [] } = useQuery({
     queryKey: ['animals'],
-    queryFn: getAllAnimals
+    queryFn: () => getAllAnimals(false)
   });
 
   useEffect(() => {

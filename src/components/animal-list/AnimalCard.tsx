@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skull } from 'lucide-react';
 import { getStatusColor, getStatusText } from '@/utils/animalStatus';
 import { useImageTransform } from './hooks/useImageTransform';
 import AnimalImageEditor from './AnimalImageEditor';
@@ -27,16 +28,27 @@ const AnimalCard = ({ animal, onDelete }: AnimalCardProps) => {
     handleCancelEdit
   } = useImageTransform(animal);
 
+  const isDeceased = animal.lifecycleStatus === 'deceased';
+  
   return (
-    <Card className="shadow hover:shadow-lg transition-shadow">
+    <Card className={`shadow hover:shadow-lg transition-shadow ${isDeceased ? 'bg-gray-50 border-gray-300 opacity-90' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg text-gray-900">{animal.name}</CardTitle>
-            <p className="text-sm text-gray-600">#{animal.tag}</p>
+          <div className="flex items-center gap-2">
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle className={`text-lg ${isDeceased ? 'text-gray-600' : 'text-gray-900'}`}>
+                  {animal.name}
+                </CardTitle>
+                {isDeceased && (
+                  <Skull className="h-4 w-4 text-gray-500" />
+                )}
+              </div>
+              <p className={`text-sm ${isDeceased ? 'text-gray-500' : 'text-gray-600'}`}>#{animal.tag}</p>
+            </div>
           </div>
-          <Badge className={`${getStatusColor(animal.healthStatus)}`}>
-            {getStatusText(animal.healthStatus)}
+          <Badge className={`${getStatusColor(isDeceased ? 'deceased' : animal.healthStatus)}`}>
+            {getStatusText(isDeceased ? 'deceased' : animal.healthStatus)}
           </Badge>
         </div>
       </CardHeader>

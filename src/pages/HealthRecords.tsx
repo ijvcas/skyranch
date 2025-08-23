@@ -15,7 +15,7 @@ const HealthRecords: React.FC = () => {
 
   const { data: animals = [] } = useQuery({
     queryKey: ['animals'],
-    queryFn: getAllAnimals
+    queryFn: () => getAllAnimals(false)
   });
 
   // Get health records for all animals

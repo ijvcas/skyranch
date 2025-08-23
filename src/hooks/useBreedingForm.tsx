@@ -47,7 +47,7 @@ export const useBreedingForm = (onSuccess: () => void) => {
 
   const { data: animals = [] } = useQuery({
     queryKey: ['animals'],
-    queryFn: getAllAnimals
+    queryFn: () => getAllAnimals(false)
   });
 
   const createMutation = useMutation({

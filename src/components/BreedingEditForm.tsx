@@ -41,7 +41,7 @@ const BreedingEditForm: React.FC<BreedingEditFormProps> = ({ record, onSuccess }
 
   const { data: animals = [] } = useQuery({
     queryKey: ['animals'],
-    queryFn: getAllAnimals
+    queryFn: () => getAllAnimals(false)
   });
 
   const updateMutation = useMutation({

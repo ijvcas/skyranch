@@ -47,7 +47,7 @@ const EventForm = ({
 
   const { data: animals = [] } = useQuery({
     queryKey: ['animals'],
-    queryFn: getAllAnimals
+    queryFn: () => getAllAnimals(false)
   });
 
   // Set today's date when component mounts or selectedDate changes

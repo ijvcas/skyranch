@@ -31,7 +31,7 @@ const Breeding: React.FC = () => {
 
   const { data: animals = [] } = useQuery({
     queryKey: ['animals'],
-    queryFn: getAllAnimals
+    queryFn: () => getAllAnimals(false)
   });
 
   const deleteMutation = useMutation({

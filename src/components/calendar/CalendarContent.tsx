@@ -26,7 +26,7 @@ const CalendarContent = ({
 }: CalendarContentProps) => {
   const { data: animals = [] } = useQuery({
     queryKey: ['animals'],
-    queryFn: getAllAnimals
+    queryFn: () => getAllAnimals(false)
   });
 
   return (

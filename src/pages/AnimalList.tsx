@@ -32,6 +32,7 @@ const AnimalList = () => {
   });
   
   const [useMockData, setUseMockData] = useState(false);
+  const [includeDeceased, setIncludeDeceased] = useState(false);
   
   // Infinite animals with lightweight pages
   const {
@@ -43,7 +44,7 @@ const AnimalList = () => {
     isFetchingNextPage,
     clearAndRefetch,
     isUsingMock,
-  } = useInfiniteAnimals();
+  } = useInfiniteAnimals(includeDeceased);
 
   console.log('🔧 About to call useAnimalFiltering with animals:', animals?.length);
   const {
@@ -53,8 +54,6 @@ const AnimalList = () => {
     setSelectedSpecies,
     selectedStatus,
     setSelectedStatus,
-    includeDeceased,
-    setIncludeDeceased,
     groupedAnimals
   } = useAnimalFiltering(animals);
 

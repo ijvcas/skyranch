@@ -71,7 +71,7 @@ const SystemBackupManager: React.FC = () => {
 
   const { data: animals = [] } = useQuery({
     queryKey: ['backup-animals'],
-    queryFn: getAllAnimals,
+    queryFn: () => getAllAnimals(true),
     enabled: selectedData.animals,
   });
 

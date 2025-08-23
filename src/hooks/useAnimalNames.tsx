@@ -6,7 +6,7 @@ import { getAllAnimals } from '@/services/animalService';
 export const useAnimalNames = () => {
   const { data: allAnimals = [] } = useQuery({
     queryKey: ['animals', 'all-users'],
-    queryFn: getAllAnimals,
+    queryFn: () => getAllAnimals(false),
   });
 
   // Create a simple map of registered animal IDs to their display names

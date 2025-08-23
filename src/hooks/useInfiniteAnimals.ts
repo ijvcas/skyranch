@@ -1,4 +1,3 @@
-
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { getAnimalsPage } from '@/services/animal/animalQueries';
 import { networkDiagnostics } from '@/utils/networkDiagnostics';
@@ -7,11 +6,11 @@ import type { Animal } from '@/stores/animalStore';
 
 const PAGE_SIZE = 50;
 
-export const useInfiniteAnimals = () => {
+export const useInfiniteAnimals = (includeDeceased = false) => {
   const queryClient = useQueryClient();
 
   const query = useInfiniteQuery<Animal[], Error>({
-    queryKey: ['animals', 'farm-wide', 'infinite'],
+    queryKey: ['animals', 'farm-wide', 'infinite', includeDeceased],
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const offset = typeof pageParam === 'number' ? pageParam : 0;
@@ -22,7 +21,7 @@ export const useInfiniteAnimals = () => {
         return mockAnimals;
       }
 
-      const animals = await getAnimalsPage(PAGE_SIZE, offset);
+      const animals = await getAnimalsPage(PAGE_SIZE, offset, includeDeceased);
       return animals;
     },
     getNextPageParam: (lastPage, allPages) => {

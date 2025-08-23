@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Animal } from '@/stores/animalStore';
 
 // Fetch full animals (legacy, used in several areas)
-export const getAllAnimals = async (): Promise<Animal[]> => {
+export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> => {
   try {
     console.log('🔍 Fetching all animals...');
     const { data: { user } } = await supabase.auth.getUser();
@@ -23,10 +23,15 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
     if (userError || !appUser) {
       console.log('❌ User not found in app_users, trying direct query');
       // Try direct query as fallback
-      const { data, error } = await supabase
+      let query = supabase
         .from('animals')
-        .select('*')
-        .neq('lifecycle_status', 'deceased')
+        .select('*');
+      
+      if (!includeDeceased) {
+        query = query.neq('lifecycle_status', 'deceased');
+      }
+      
+      const { data, error } = await query
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -73,10 +78,15 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
     }
 
     // Get all animals (shared data) - RLS policies handle access control
-    const { data, error } = await supabase
+    let query = supabase
       .from('animals')
-      .select('*')
-      .neq('lifecycle_status', 'deceased')
+      .select('*');
+    
+    if (!includeDeceased) {
+      query = query.neq('lifecycle_status', 'deceased');
+    }
+    
+    const { data, error } = await query
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -125,7 +135,7 @@ export const getAllAnimals = async (): Promise<Animal[]> => {
 };
 
 // Lean fetch for Dashboard stats: only id and species
-export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'species'>>> => {
+export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pick<Animal, 'id' | 'species'>>> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !user.email) {
@@ -143,10 +153,15 @@ export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'speci
     if (userError || !appUser) {
       console.log('❌ User not found in app_users, trying direct query');
       // Try direct query without user_id filter as fallback
-      const { data, error } = await supabase
+      let query = supabase
         .from('animals')
-        .select('id,species,user_id')
-        .neq('lifecycle_status', 'deceased')
+        .select('id,species,user_id');
+      
+      if (!includeDeceased) {
+        query = query.neq('lifecycle_status', 'deceased');
+      }
+      
+      const { data, error } = await query
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -160,10 +175,15 @@ export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'speci
     }
 
     // Get all animals (shared data) - RLS policies handle access control
-    const { data, error } = await supabase
+    let query = supabase
       .from('animals')
-      .select('id,species')
-      .neq('lifecycle_status', 'deceased')
+      .select('id,species');
+    
+    if (!includeDeceased) {
+      query = query.neq('lifecycle_status', 'deceased');
+    }
+    
+    const { data, error } = await query
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -179,15 +199,20 @@ export const getAnimalsLean = async (): Promise<Array<Pick<Animal, 'id' | 'speci
 };
 
 // Paged fetch for Animals list with minimal columns needed for the cards
-export const getAnimalsPage = async (limit = 50, offset = 0): Promise<Animal[]> => {
+export const getAnimalsPage = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await (supabase
+    let query = (supabase
       .from('animals') as any)
-      .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url,lifecycle_status')
-      .neq('lifecycle_status', 'deceased')
+      .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url,lifecycle_status,date_of_death,cause_of_death');
+    
+    if (!includeDeceased) {
+      query = query.neq('lifecycle_status', 'deceased');
+    }
+    
+    const { data, error } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -225,6 +250,8 @@ export const getAnimalsPage = async (limit = 50, offset = 0): Promise<Animal[]> 
       image: animal.image_url || null,
       current_lot_id: undefined,
       lifecycleStatus: animal.lifecycle_status || 'active',
+      dateOfDeath: animal.date_of_death || '',
+      causeOfDeath: animal.cause_of_death || ''
     }));
   } catch (e) {
     console.error('❌ Unexpected error in getAnimalsPage:', e);

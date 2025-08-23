@@ -35,7 +35,7 @@ const CalendarDialogs = ({
 }: CalendarDialogsProps) => {
   const { data: animals = [] } = useQuery({
     queryKey: ['animals'],
-    queryFn: getAllAnimals
+    queryFn: () => getAllAnimals(false)
   });
 
   return (
