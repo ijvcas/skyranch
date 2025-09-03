@@ -158,8 +158,11 @@ export class UniversalBreedingAnalysisService {
             try {
               const analysis = await this.analyzeUniversalPair(male, female);
               
-              // Only include recommendations with acceptable compatibility scores
-              if (analysis.compatibilityScore >= 30 && !analysis.relationshipWarning) {
+              // Only include recommendations with acceptable compatibility scores and exclude deceased animals
+              if (analysis.compatibilityScore >= 30 && 
+                  !analysis.relationshipWarning && 
+                  male.lifecycleStatus !== 'deceased' && 
+                  female.lifecycleStatus !== 'deceased') {
                 const speciesConfig = SpeciesConfigService.getSpeciesConfig(species);
                 
                 const recommendation: UniversalBreedingRecommendation = {

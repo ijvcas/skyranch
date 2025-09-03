@@ -77,11 +77,21 @@ const BreedingRecommendationsCard: React.FC = () => {
     
     const allAnimals = [...breedingPairs.males, ...breedingPairs.females];
     const animal = allAnimals.find(a => a.name === animalName);
+    
+    // Check if animal is deceased first
+    if (animal?.lifecycleStatus === 'deceased') {
+      return 'deceased';
+    }
+    
     return animal?.healthStatus || 'healthy';
   };
 
   const getPlanningBadge = (animalName: string) => {
     const healthStatus = getAnimalHealthStatus(animalName);
+    
+    if (healthStatus === 'deceased') {
+      return <Badge className="bg-red-100 text-red-800">⚠️ Animal Fallecido</Badge>;
+    }
     if (healthStatus === 'pregnant') {
       return <Badge className="bg-purple-100 text-purple-800">Planificar post-parto</Badge>;
     }

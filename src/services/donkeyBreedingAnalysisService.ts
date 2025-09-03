@@ -41,6 +41,7 @@ export class DonkeyBreedingAnalysisService {
         .from('animals')
         .select('*')
         .eq('species', 'equino')
+        .neq('lifecycle_status', 'deceased') // Exclude deceased animals
         .in('health_status', ['healthy', 'good']);
 
       if (!animals) {

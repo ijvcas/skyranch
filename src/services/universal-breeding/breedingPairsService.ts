@@ -10,7 +10,8 @@ export class BreedingPairsService {
     try {
       let query = supabase
         .from('animals')
-        .select('*');
+        .select('*')
+        .neq('lifecycle_status', 'deceased'); // Exclude deceased animals
 
       if (species) {
         query = query.eq('species', species);
