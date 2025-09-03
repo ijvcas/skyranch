@@ -11,12 +11,12 @@ const BreedingPlanningTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="recommendations" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="recommendations">Recomendaciones</TabsTrigger>
-          <TabsTrigger value="analysis">Análisis Individual</TabsTrigger>
-          <TabsTrigger value="analytics">Analíticas</TabsTrigger>
-          <TabsTrigger value="goals">Objetivos</TabsTrigger>
-          <TabsTrigger value="seasonal">Planificación Estacional</TabsTrigger>
+        <TabsList className="flex flex-col h-auto w-full md:grid md:grid-cols-5 md:h-10">
+          <TabsTrigger value="recommendations" className="w-full justify-start md:justify-center">Recomendaciones</TabsTrigger>
+          <TabsTrigger value="analysis" className="w-full justify-start md:justify-center">Análisis Individual</TabsTrigger>
+          <TabsTrigger value="analytics" className="w-full justify-start md:justify-center">Analíticas</TabsTrigger>
+          <TabsTrigger value="goals" className="w-full justify-start md:justify-center">Objetivos</TabsTrigger>
+          <TabsTrigger value="seasonal" className="w-full justify-start md:justify-center">Planificación Estacional</TabsTrigger>
         </TabsList>
 
         <TabsContent value="recommendations" className="space-y-6">

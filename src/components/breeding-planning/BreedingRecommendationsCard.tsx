@@ -153,7 +153,7 @@ const BreedingRecommendationsCard: React.FC = () => {
         </CardTitle>
         
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <div className="flex flex-col gap-4 mt-4 sm:grid sm:grid-cols-1 md:grid-cols-3">
           <div className="space-y-2">
             <label className="text-sm font-medium">Filtrar por especie</label>
             <Select value={selectedSpecies} onValueChange={setSelectedSpecies}>
@@ -292,7 +292,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <h4 className="font-medium text-lg">
             {recommendation.maleName} × {recommendation.femaleName}
           </h4>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex flex-col gap-2 mt-1 sm:flex-row sm:items-center sm:gap-2">
             <div className="flex items-center gap-1">
               <div 
                 className={`w-3 h-3 rounded-full ${getCompatibilityColor(recommendation.compatibilityScore)}`}
@@ -301,27 +301,29 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 {recommendation.compatibilityScore}% compatibilidad
               </span>
             </div>
-            <Badge className={getCompatibilityBadgeColor(recommendation.compatibilityScore)}>
-              {recommendation.compatibilityScore >= 80 ? 'Excelente' : 
-               recommendation.compatibilityScore >= 60 ? 'Buena' : 'Moderada'}
-            </Badge>
-            {index === 0 && (
-              <Badge className="bg-yellow-100 text-yellow-800">
-                <Star className="w-3 h-3 mr-1" />
-                Top Recomendación
+            <div className="flex flex-wrap gap-1">
+              <Badge className={getCompatibilityBadgeColor(recommendation.compatibilityScore)}>
+                {recommendation.compatibilityScore >= 80 ? 'Excelente' : 
+                 recommendation.compatibilityScore >= 60 ? 'Buena' : 'Moderada'}
               </Badge>
-            )}
-            {recommendation.isSpecialBreed && (
-              <Badge className="bg-purple-100 text-purple-800">
-                Raza Especial
-              </Badge>
-            )}
+              {index === 0 && (
+                <Badge className="bg-yellow-100 text-yellow-800">
+                  <Star className="w-3 h-3 mr-1" />
+                  Top Recomendación
+                </Badge>
+              )}
+              {recommendation.isSpecialBreed && (
+                <Badge className="bg-purple-100 text-purple-800">
+                  Raza Especial
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Animal Health Status */}
-      <div className="grid grid-cols-2 gap-4 mb-3">
+      <div className="flex flex-col gap-2 mb-3 sm:grid sm:grid-cols-2 sm:gap-4">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">♂ {recommendation.maleName}:</span>
           <Badge className={getStatusColor(maleHealthStatus)}>
@@ -343,7 +345,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       </div>
 
       {/* Key Information */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-3">
+      <div className="flex flex-col gap-2 text-sm mb-3 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-3">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-blue-500" />
           <span className="text-gray-600">Época:</span>
