@@ -185,4 +185,31 @@ export class SpeciesConfigService {
 
     return advice;
   }
+
+  static calculateOffspringBreed(maleBreed?: string, femaleBreed?: string): string {
+    // Handle cases where breeds are not specified
+    if (!maleBreed && !femaleBreed) {
+      return 'Mestizo';
+    }
+    
+    if (!maleBreed) return femaleBreed || 'Mestizo';
+    if (!femaleBreed) return maleBreed || 'Mestizo';
+    
+    // Normalize breed names for comparison
+    const normalizedMale = maleBreed.toLowerCase().trim();
+    const normalizedFemale = femaleBreed.toLowerCase().trim();
+    
+    // Same breed - pure breeding
+    if (normalizedMale === normalizedFemale) {
+      return maleBreed;
+    }
+    
+    // Cross-breeding cases
+    return `Cruza de ${maleBreed} x ${femaleBreed}`;
+  }
+
+  static getSpeciesDisplayName(species: string): string {
+    const config = this.getSpeciesConfig(species);
+    return config?.name || species.charAt(0).toUpperCase() + species.slice(1);
+  }
 }

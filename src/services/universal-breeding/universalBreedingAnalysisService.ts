@@ -165,12 +165,18 @@ export class UniversalBreedingAnalysisService {
                   female.lifecycleStatus !== 'deceased') {
                 const speciesConfig = SpeciesConfigService.getSpeciesConfig(species);
                 
+                const expectedOffspringBreed = SpeciesConfigService.calculateOffspringBreed(male.breed, female.breed);
+                
                 const recommendation: UniversalBreedingRecommendation = {
                   pairId: `${male.id}-${female.id}`,
                   maleName: male.name,
                   femaleName: female.name,
                   species,
-                  breed: male.breed || female.breed,
+                  breed: expectedOffspringBreed, // Expected offspring breed
+                  parentBreeds: {
+                    male: male.breed,
+                    female: female.breed
+                  },
                   compatibilityScore: analysis.compatibilityScore,
                   breedingWindow: analysis.optimalBreedingWindow,
                   seasonalAdvice: analysis.speciesSpecificAdvice.slice(0, 3),

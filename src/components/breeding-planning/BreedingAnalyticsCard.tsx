@@ -135,7 +135,7 @@ const BreedingAnalyticsCard = () => {
           <div>
             <h4 className="font-medium mb-2 flex items-center gap-2">
               <Heart className="w-4 h-4" />
-              Mejores Hembras Reproductoras (Burras)
+              Mejores Hembras Reproductoras
             </h4>
             <div className="space-y-2">
               {analytics.topPerformingFemales.slice(0, 3).map((female, index) => (
@@ -156,7 +156,7 @@ const BreedingAnalyticsCard = () => {
           <div>
             <h4 className="font-medium mb-2 flex items-center gap-2">
               <BarChart className="w-4 h-4" />
-              Estado de Reproducciones de Burros
+              Estado de Reproducciones
             </h4>
             <div className="grid grid-cols-2 gap-4 text-center">
               {analytics.breedingsByStatus.map((status, index) => (
@@ -171,12 +171,12 @@ const BreedingAnalyticsCard = () => {
           </div>
         )}
 
-        {/* Seasonal Trends for Donkeys */}
+        {/* Seasonal Trends */}
         {analytics.seasonalTrends.recommendations.length > 0 && (
           <div>
             <h4 className="font-medium mb-2 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              Tendencias Estacionales para Burros
+              Tendencias Estacionales
             </h4>
             <div className="space-y-1">
               {analytics.seasonalTrends.recommendations.map((recommendation, index) => (
@@ -191,7 +191,7 @@ const BreedingAnalyticsCard = () => {
         {/* Monthly Performance */}
         {analytics.breedingsByMonth.some(m => m.breedings > 0) && (
           <div>
-            <h4 className="font-medium mb-2">Rendimiento Mensual de Burros</h4>
+            <h4 className="font-medium mb-2">Rendimiento Mensual</h4>
             <div className="grid grid-cols-6 gap-1 text-xs">
               {analytics.breedingsByMonth
                 .filter(month => month.breedings > 0)
@@ -211,7 +211,7 @@ const BreedingAnalyticsCard = () => {
             <Heart className="w-8 h-8 mx-auto mb-2 text-gray-300" />
             <p>Registra apareamientos de cualquier especie para ver análisis detallados</p>
             <p className="text-sm mt-1">
-              Sistema optimizado para Baudet de Poitou 🐴, Nez Noir du Valais 🐑, bovinos 🐄, caprinos 🐐 y más
+              Sistema universal para todas las especies: equinos, ovinos, bovinos, caprinos y más
             </p>
           </div>
         )}

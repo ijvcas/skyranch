@@ -21,26 +21,7 @@ interface BreedingGoal {
 }
 
 const BreedingGoalsCard: React.FC = () => {
-  const [goals, setGoals] = useState<BreedingGoal[]>([
-    {
-      id: '1',
-      title: 'Mejorar Ganado Holstein',
-      targetBreedings: 20,
-      currentBreedings: 12,
-      targetDate: '2025-12-31',
-      species: 'bovino',
-      description: 'Aumentar la producción lechera mediante apareamientos selectivos'
-    },
-    {
-      id: '2',
-      title: 'Diversificar Líneas Genéticas',
-      targetBreedings: 15,
-      currentBreedings: 8,
-      targetDate: '2025-10-15',
-      species: 'bovino',
-      description: 'Introducir nueva genética para mejorar resistencia a enfermedades'
-    }
-  ]);
+  const [goals, setGoals] = useState<BreedingGoal[]>([]);
   
   const [showForm, setShowForm] = useState(false);
   const [newGoal, setNewGoal] = useState({

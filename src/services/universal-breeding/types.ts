@@ -28,7 +28,11 @@ export interface UniversalBreedingRecommendation {
   maleName: string;
   femaleName: string;
   species: string;
-  breed?: string;
+  breed?: string; // Expected offspring breed
+  parentBreeds?: {
+    male?: string;
+    female?: string;
+  };
   compatibilityScore: number;
   breedingWindow: string;
   seasonalAdvice: string[];
