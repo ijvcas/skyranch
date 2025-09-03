@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { KeyRound, RefreshCw, UserCog, Zap, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import PermissionGuard from '@/components/PermissionGuard';
 
 const AdminPasswordReset = () => {
   const { toast } = useToast();
@@ -131,7 +132,8 @@ const AdminPasswordReset = () => {
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <PermissionGuard permission="system_settings">
+      <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <KeyRound className="w-5 h-5" />
@@ -247,6 +249,7 @@ const AdminPasswordReset = () => {
         </div>
       </CardContent>
     </Card>
+    </PermissionGuard>
   );
 };
 

@@ -239,35 +239,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('🔧 Force updating password for:', email);
     
     try {
-      // First, clear any corrupted sessions
-      await clearCorruptedSession();
-      
-      // Use listUsers to find the user by email
-      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-      
-      if (listError) {
-        console.error('❌ Error listing users:', listError);
-        return { error: { message: 'Error al buscar usuarios' } };
-      }
-      
-      const foundUser = users?.find((u: any) => u.email === email);
-      
-      if (!foundUser) {
-        console.error('❌ User not found');
-        return { error: { message: 'Usuario no encontrado' } };
-      }
-      
-      // Use admin API to update password
-      const { error: updateError } = await supabase.auth.admin.updateUserById(foundUser.id, {
-        password: newPassword
+      // Use secure edge function for admin operations
+      const { data, error } = await supabase.functions.invoke('admin-user-management', {
+        body: { 
+          action: 'force_password_update',
+          email, 
+          newPassword 
+        }
       });
       
-      if (updateError) {
-        console.error('❌ Admin password update failed:', updateError);
-        return { error: updateError };
+      if (error) {
+        console.error('❌ Admin password update failed:', error);
+        return { error: { message: error.message || 'Error al actualizar contraseña' } };
       }
       
-      console.log('✅ Password force updated successfully');
+      if (!data?.success) {
+        return { error: { message: data?.error || 'Error al actualizar contraseña' } };
+      }
+      
+      console.log('✅ Password force updated successfully via secure edge function');
       return { error: null };
       
     } catch (error) {
