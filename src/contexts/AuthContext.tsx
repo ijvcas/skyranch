@@ -164,8 +164,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const resetPassword = async (email: string) => {
     console.log('🔑 [AUTH CONTEXT] Sending password reset for:', email);
     
-    // Use the production URL for reset with enhanced logging
-    const redirectUrl = `https://skyranch.lovable.app/reset-password`;
+    // Use dynamic redirect URL based on environment
+    const redirectUrl = `${window.location.origin}/reset-password`;
     
     console.log('📧 [AUTH CONTEXT] Using redirect URL:', redirectUrl);
     console.log('📧 [AUTH CONTEXT] Current window origin:', window.location.origin);

@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { KeyRound, RefreshCw, UserCog, Zap, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import PermissionGuard from '@/components/PermissionGuard';
+import AdminRoute from '@/components/AdminRoute';
+import { useSecurity } from '@/hooks/useSecurity';
 
 const AdminPasswordReset = () => {
   const { toast } = useToast();
   const { resetPassword, forcePasswordUpdate, clearCorruptedSession } = useAuth();
+  const { csrfToken } = useSecurity();
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [isResetting, setIsResetting] = useState(false);
@@ -132,7 +134,7 @@ const AdminPasswordReset = () => {
   };
 
   return (
-    <PermissionGuard permission="system_settings">
+    <AdminRoute>
       <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -249,7 +251,7 @@ const AdminPasswordReset = () => {
         </div>
       </CardContent>
     </Card>
-    </PermissionGuard>
+    </AdminRoute>
   );
 };
 
