@@ -59,7 +59,7 @@ export const useTimezone = (): TimezoneHook => {
     currency,
     setCurrency,
     formatDate: (date: Date | string) => formatDate(date, timezone),
-    formatDateTime: (date: Date | string) => formatDateTime(date, timezone),
+    formatDateTime: (date: Date | string) => formatDateTime(date, timezone, dateFormat),
     formatDateInput: (date: string) => formatDateInput(date, dateFormat),
     parseDateInput: (input: string) => parseDateInput(input, dateFormat),
     formatCurrency: (amount: number) => formatCurrency(amount, currency)

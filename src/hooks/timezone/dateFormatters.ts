@@ -16,17 +16,36 @@ export const formatDate = (date: Date | string, timezone: string): string => {
   }
 };
 
-export const formatDateTime = (date: Date | string, timezone: string): string => {
+export const formatDateTime = (date: Date | string, timezone: string, dateFormat: DateFormat = 'dd/mm/yyyy'): string => {
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return new Intl.DateTimeFormat('es-ES', {
+    
+    // Get locale based on date format preference
+    let locale = 'es-ES'; // default
+    let options: Intl.DateTimeFormatOptions = {
       timeZone: timezone,
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    }).format(dateObj);
+    };
+
+    // Set date format options based on user preference
+    switch (dateFormat) {
+      case 'mm/dd/yyyy':
+        locale = 'en-US';
+        options = { ...options, year: 'numeric', month: '2-digit', day: '2-digit' };
+        break;
+      case 'yyyy-mm-dd':
+        locale = 'sv-SE'; // Uses ISO format
+        options = { ...options, year: 'numeric', month: '2-digit', day: '2-digit' };
+        break;
+      case 'dd/mm/yyyy':
+      default:
+        locale = 'es-ES';
+        options = { ...options, year: 'numeric', month: '2-digit', day: '2-digit' };
+        break;
+    }
+    
+    return new Intl.DateTimeFormat(locale, options).format(dateObj);
   } catch (error) {
     console.error('Error formatting datetime:', error);
     return 'Fecha inválida';
