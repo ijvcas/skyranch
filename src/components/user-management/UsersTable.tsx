@@ -7,6 +7,7 @@ import { Edit, UserMinus, Trash2 } from 'lucide-react';
 import { type AppUser } from '@/services/userService';
 import CompleteDeleteDialog from './CompleteDeleteDialog';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useTimezone } from '@/hooks/useTimezone';
 
 interface UsersTableProps {
   users: AppUser[];
@@ -33,6 +34,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   isDeleting,
   isCompleteDeleting
 }) => {
+  const { formatDateInput } = useTimezone();
   const [completeDeleteDialog, setCompleteDeleteDialog] = useState<{
     isOpen: boolean;
     userId: string;
@@ -149,7 +151,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                             </div>
                           </TableCell>
                           <TableCell>
-                            {new Date(user.created_at).toLocaleDateString()}
+                            {formatDateInput(new Date(user.created_at).toISOString().split('T')[0])}
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-1">

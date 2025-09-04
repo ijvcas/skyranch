@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronRight, Edit, UserMinus, Trash2, Phone, Mail, Calendar } from 'lucide-react';
 import { type AppUser } from '@/services/userService';
 import CompleteDeleteDialog from './CompleteDeleteDialog';
+import { useTimezone } from '@/hooks/useTimezone';
 
 interface ExpandableUsersListProps {
   users: AppUser[];
@@ -32,6 +33,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
   isCompleteDeleting
 }) => {
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+  const { formatDateInput } = useTimezone();
   const [completeDeleteDialog, setCompleteDeleteDialog] = useState<{
     isOpen: boolean;
     userId: string;
@@ -138,7 +140,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="w-4 h-4 text-gray-400" />
                         <span className="text-gray-600">
-                          Registrado: {new Date(user.created_at).toLocaleDateString()}
+                          Registrado: {formatDateInput(new Date(user.created_at).toISOString().split('T')[0])}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
