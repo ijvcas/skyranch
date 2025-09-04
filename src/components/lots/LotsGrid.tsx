@@ -29,6 +29,7 @@ const LotsGrid: React.FC<LotsGridProps> = ({
             onSelect={onLotSelect}
             onDelete={onDeleteLot}
             polygonData={polygonData}
+            allLots={lots}
           />
         </div>
       ))}

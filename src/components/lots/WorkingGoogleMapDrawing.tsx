@@ -151,11 +151,15 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
       lat /= pathLength;
       lng /= pathLength;
       
-      // Create or update label with the full lot name
+      // Create or update label - remove "Lote" prefix for property lots
+      const displayText = isPropertyLot && lot.name.startsWith('Lote ') 
+        ? lot.name.replace('Lote ', '') 
+        : lot.name;
+        
       if (labelsRef.current[lot.id]) {
         labelsRef.current[lot.id].setPosition({ lat, lng });
         labelsRef.current[lot.id].setLabel({
-          text: lot.name,
+          text: displayText,
           color: '#ffffff',
           fontSize: '12px',
           fontWeight: '700'
@@ -165,7 +169,7 @@ const WorkingGoogleMapDrawing = ({ lots, onLotSelect }: WorkingGoogleMapDrawingP
           position: { lat, lng },
           map: mapInstance,
           label: {
-            text: lot.name,
+            text: displayText,
             color: '#ffffff',
             fontSize: '12px',
             fontWeight: '700'

@@ -20,6 +20,8 @@ export interface Lot {
   lastGrazingEndDate?: string;
   maxGrazingDays?: number;
   restDaysRequired?: number;
+  createdAt?: string;
+  userId?: string;
 }
 
 export interface LotAssignment {

@@ -43,7 +43,9 @@ export const getAllLots = async (): Promise<Lot[]> => {
       lotType: (lot.lot_type === 'property' || lot.lot_type === 'pasture') ? lot.lot_type : 'pasture',
       lastGrazingEndDate: lot.last_grazing_end_date,
       maxGrazingDays: lot.max_grazing_days,
-      restDaysRequired: lot.rest_days_required
+      restDaysRequired: lot.rest_days_required,
+      createdAt: lot.created_at,
+      userId: lot.user_id
     }));
   } catch (error) {
     console.error('❌ Unexpected error in getAllLots:', error);
