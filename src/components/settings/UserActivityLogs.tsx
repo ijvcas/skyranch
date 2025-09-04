@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Search, ChevronDown, ChevronRight, RefreshCcw } from 'lucide-react';
+import { useTimezone } from '@/hooks/useTimezone';
 
 interface AppUser {
   id: string;
@@ -23,6 +24,7 @@ interface ConnectionLog {
 }
 
 const UserActivityLogs: React.FC = () => {
+  const { formatDateTime } = useTimezone();
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -172,7 +174,7 @@ const UserActivityLogs: React.FC = () => {
                     <div className="text-xs text-muted-foreground">{u.email}</div>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Último inicio de sesión: {last ? new Date(last).toLocaleString() : '—'}
+                    Último inicio de sesión: {last ? formatDateTime(last) : '—'}
                   </div>
                 </button>
 
@@ -194,7 +196,7 @@ const UserActivityLogs: React.FC = () => {
                         <tbody>
                           {(recentEvents[u.id] || []).map(ev => (
                             <tr key={ev.id || ev.created_at} className="border-t">
-                              <td className="py-2 pr-3 whitespace-nowrap">{ev.created_at ? new Date(ev.created_at).toLocaleString() : ''}</td>
+                              <td className="py-2 pr-3 whitespace-nowrap">{ev.created_at ? formatDateTime(ev.created_at) : ''}</td>
                               <td className="py-2 pr-3">{ev.event}</td>
                               <td className="py-2 pr-3">{ev.method || '-'}</td>
                               <td className="py-2 pr-3">{ev.path || '-'}</td>
