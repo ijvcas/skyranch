@@ -3,34 +3,70 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BreedingAnalyticsCard from './BreedingAnalyticsCard';
 import BreedingRecommendationsCard from './BreedingRecommendationsCard';
+import OptimizedBreedingRecommendationsList from './OptimizedBreedingRecommendationsList';
 import BreedingGoalsCard from './BreedingGoalsCard';
 import SeasonalPlanningCard from './SeasonalPlanningCard';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const BreedingPlanningTabs = () => {
+  const isMobile = useIsMobile();
+  
   return (
-    <Tabs defaultValue="analytics" className="space-y-6">
-      <TabsList>
-        <TabsTrigger value="analytics">Análisis Real</TabsTrigger>
-        <TabsTrigger value="recommendations">Análisis Genético</TabsTrigger>
-        <TabsTrigger value="goals">Objetivos</TabsTrigger>
-        <TabsTrigger value="seasonal">Planificación Estacional</TabsTrigger>
+    <Tabs defaultValue="analytics" className="space-y-4 md:space-y-6">
+      <TabsList className={cn(
+        "grid w-full",
+        isMobile ? "grid-cols-2 gap-1" : "grid-cols-4"
+      )}>
+        <TabsTrigger 
+          value="analytics" 
+          className={cn(
+            "text-xs md:text-sm",
+            isMobile && "px-2 py-1"
+          )}
+        >
+          {isMobile ? "Real" : "Análisis Real"}
+        </TabsTrigger>
+        <TabsTrigger 
+          value="recommendations" 
+          className={cn(
+            "text-xs md:text-sm",
+            isMobile && "px-2 py-1"
+          )}
+        >
+          {isMobile ? "Genético" : "Análisis Genético"}
+        </TabsTrigger>
+        {!isMobile && (
+          <>
+            <TabsTrigger value="goals" className="text-sm">
+              Objetivos
+            </TabsTrigger>
+            <TabsTrigger value="seasonal" className="text-sm">
+              Planificación Estacional
+            </TabsTrigger>
+          </>
+        )}
       </TabsList>
 
-      <TabsContent value="analytics" className="space-y-6">
+      <TabsContent value="analytics" className="space-y-4 md:space-y-6">
         <BreedingAnalyticsCard />
       </TabsContent>
 
-      <TabsContent value="recommendations" className="space-y-6">
-        <BreedingRecommendationsCard />
+      <TabsContent value="recommendations" className="space-y-4 md:space-y-6">
+        <OptimizedBreedingRecommendationsList />
       </TabsContent>
 
-      <TabsContent value="goals" className="space-y-6">
-        <BreedingGoalsCard />
-      </TabsContent>
+      {!isMobile && (
+        <>
+          <TabsContent value="goals" className="space-y-6">
+            <BreedingGoalsCard />
+          </TabsContent>
 
-      <TabsContent value="seasonal" className="space-y-6">
-        <SeasonalPlanningCard />
-      </TabsContent>
+          <TabsContent value="seasonal" className="space-y-6">
+            <SeasonalPlanningCard />
+          </TabsContent>
+        </>
+      )}
     </Tabs>
   );
 };

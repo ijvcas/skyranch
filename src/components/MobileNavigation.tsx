@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Home, 
@@ -13,9 +13,12 @@ import {
   MapPin
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTouch } from '@/hooks/use-touch';
 import NotificationBell from './NotificationBell';
 
 const MobileNavigation = () => {
+  const { onTouchStart, onTouchMove, onTouchEnd } = useTouch();
+  
   const navItems = [
     { to: '/dashboard', icon: Home, label: 'Panel' },
     { to: '/animals', icon: Users, label: 'Animales' },
@@ -23,6 +26,30 @@ const MobileNavigation = () => {
     { to: '/breeding', icon: Heart, label: 'Reproducción' },
     { to: '/calendar', icon: Calendar, label: 'Calendario' },
   ];
+
+  // Enhanced touch handler with haptic feedback
+  const handleNavTouch = useCallback((event: React.TouchEvent) => {
+    onTouchStart(event);
+    // Add visual feedback
+    const target = event.currentTarget as HTMLElement;
+    target.style.transform = 'scale(0.95)';
+    target.style.transition = 'transform 0.1s ease';
+    
+    // Provide haptic feedback if available
+    if (navigator.vibrate) {
+      navigator.vibrate(10); // Very short vibration
+    }
+  }, [onTouchStart]);
+
+  const handleNavTouchEnd = useCallback((event: React.TouchEvent) => {
+    onTouchEnd();
+    // Reset visual feedback
+    const target = event.currentTarget as HTMLElement;
+    target.style.transform = 'scale(1)';
+    setTimeout(() => {
+      target.style.transition = '';
+    }, 100);
+  }, [onTouchEnd]);
 
   return (
     <>
@@ -63,9 +90,13 @@ const MobileNavigation = () => {
             <NavLink
               key={item.to}
               to={item.to}
+              onTouchStart={handleNavTouch}
+              onTouchEnd={handleNavTouchEnd}
+              onTouchMove={onTouchMove}
               className={({ isActive }) =>
                 cn(
-                  'flex flex-col items-center justify-center px-1 text-xs font-medium transition-colors h-full mobile-tap-target touch-manipulation',
+                  'flex flex-col items-center justify-center px-1 text-xs font-medium transition-all duration-150 h-full mobile-tap-target touch-manipulation',
+                  'hover:bg-gray-50 active:bg-green-100',
                   isActive
                     ? 'text-green-600 bg-green-50'
                     : 'text-gray-600'
