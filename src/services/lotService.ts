@@ -9,6 +9,7 @@ export const getAllLots = async (): Promise<Lot[]> => {
       .from('lots')
       .select(`
         *,
+        app_users!user_id(name),
         animal_lot_assignments!left(
           id,
           animal_id,
@@ -45,6 +46,7 @@ export const getAllLots = async (): Promise<Lot[]> => {
       maxGrazingDays: lot.max_grazing_days,
       restDaysRequired: lot.rest_days_required,
       createdAt: lot.created_at,
+      createdBy: (lot as any).app_users?.name || 'Usuario Desconocido',
       userId: lot.user_id
     }));
   } catch (error) {
@@ -235,6 +237,19 @@ export const assignAnimalToLot = async (
     if (!user) {
       console.error('No authenticated user');
       return false;
+    }
+
+    // Check if animal is already assigned to another lot
+    const { data: existingAssignment } = await supabase
+      .from('animal_lot_assignments')
+      .select('lot_id, lots(name)')
+      .eq('animal_id', animalId)
+      .is('removed_date', null)
+      .single();
+
+    if (existingAssignment && existingAssignment.lot_id !== lotId) {
+      const lotName = (existingAssignment as any).lots?.name || 'Desconocido';
+      throw new Error(`Animal ya está asignado al lote: ${lotName}. Remuévelo primero.`);
     }
 
     // First, remove animal from current lot if any

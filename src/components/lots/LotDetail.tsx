@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, Users, MapPin, Activity, Calendar, Plus, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Edit, Users, MapPin, Activity, Calendar, Plus, Clock, AlertTriangle, CheckCircle2, UserX } from 'lucide-react';
 import { useLotStore, type Lot } from '@/stores/lotStore';
 import { useAnimalStore } from '@/stores/animalStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -21,6 +21,7 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
   const { animals, loadAnimals } = useAnimalStore();
   const [showEditForm, setShowEditForm] = useState(false);
   const [showAssignForm, setShowAssignForm] = useState(false);
+  const [isRemovingAllAnimals, setIsRemovingAllAnimals] = useState(false);
 
   useEffect(() => {
     loadAssignments(lot.id);
@@ -50,6 +51,39 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
       toast.success('Animal removido del lote exitosamente');
     } else {
       toast.error('Error al remover el animal del lote');
+    }
+  };
+
+  const handleRemoveAllAnimals = async () => {
+    if (!assignedAnimals.length) return;
+    
+    setIsRemovingAllAnimals(true);
+    try {
+      const removePromises = assignedAnimals.map(assignment => 
+        removeAnimal(assignment.animalId, lot.id)
+      );
+      
+      const results = await Promise.all(removePromises);
+      const successCount = results.filter(result => result).length;
+      
+      if (successCount === assignedAnimals.length) {
+        toast.success(`Se removieron ${successCount} animales del potrero`);
+        await loadAssignments(lot.id);
+        await loadGrazingMetrics(lot.id);
+        await loadLots();
+      } else if (successCount > 0) {
+        toast.warning(`Se removieron ${successCount} de ${assignedAnimals.length} animales`);
+        await loadAssignments(lot.id);
+        await loadGrazingMetrics(lot.id);
+        await loadLots();
+      } else {
+        toast.error('No se pudieron remover los animales');
+      }
+    } catch (error) {
+      toast.error('Error al remover los animales');
+      console.error('Error removing all animals:', error);
+    } finally {
+      setIsRemovingAllAnimals(false);
     }
   };
   const getStatusColor = (status: string) => {
@@ -222,6 +256,20 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
                 <span className="font-medium">{assignedAnimals.length}</span>
               </div>
               
+              {lot.createdBy && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Creado por</span>
+                  <span className="text-sm">{lot.createdBy}</span>
+                </div>
+              )}
+              
+              {lot.createdAt && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Fecha de Creación</span>
+                  <span className="text-sm">{formatDate(lot.createdAt)}</span>
+                </div>
+              )}
+              
               {grazingMetrics?.entryDate && (
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Fecha de Entrada</span>
@@ -278,7 +326,7 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
                 Animales en el Lote ({assignedAnimals.length})
               </CardTitle>
               
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center space-x-4 mt-4">
                 <Button 
                   onClick={() => setShowAssignForm(true)}
                   className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white border-0"
@@ -286,6 +334,17 @@ const LotDetail = ({ lot, onBack }: LotDetailProps) => {
                   <Plus className="w-4 h-4 mr-2" />
                   {assignedAnimals.length === 0 ? 'Asignar Primer Animal' : 'Agregar Más Animales'}
                 </Button>
+                
+                {assignedAnimals.length > 0 && (
+                  <Button 
+                    variant="destructive"
+                    onClick={handleRemoveAllAnimals}
+                    disabled={isRemovingAllAnimals}
+                  >
+                    <UserX className="w-4 h-4 mr-2" />
+                    {isRemovingAllAnimals ? 'Removiendo...' : `Remover Todos (${assignedAnimals.length})`}
+                  </Button>
+                )}
               </div>
               
               {/* Rest Period Information */}

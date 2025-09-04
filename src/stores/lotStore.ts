@@ -21,6 +21,7 @@ export interface Lot {
   maxGrazingDays?: number;
   restDaysRequired?: number;
   createdAt?: string;
+  createdBy?: string;
   userId?: string;
 }
 
