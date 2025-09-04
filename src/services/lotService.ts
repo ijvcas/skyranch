@@ -9,7 +9,6 @@ export const getAllLots = async (): Promise<Lot[]> => {
       .from('lots')
       .select(`
         *,
-        app_users!user_id(name),
         animal_lot_assignments!left(
           id,
           animal_id,
@@ -46,7 +45,7 @@ export const getAllLots = async (): Promise<Lot[]> => {
       maxGrazingDays: lot.max_grazing_days,
       restDaysRequired: lot.rest_days_required,
       createdAt: lot.created_at,
-      createdBy: (lot as any).app_users?.name || 'Usuario Desconocido',
+      createdBy: 'Usuario',
       userId: lot.user_id
     }));
   } catch (error) {
