@@ -22,12 +22,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissionCheck } from '@/hooks/usePermissions';
 import NotificationBell from './NotificationBell';
 import PWAInstallButton from './PWAInstallButton';
 
 const HeaderWithDropdown = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { hasAccess: canAccessSettings } = usePermissionCheck('system_settings');
 
   const navItems = [
     { to: '/dashboard', icon: Home, label: 'Panel' },
@@ -37,7 +39,7 @@ const HeaderWithDropdown = () => {
     { to: '/calendar', icon: Calendar, label: 'Calendario' },
     { to: '/reports', icon: FileText, label: 'Reportes' },
     { to: '/notifications', icon: Bell, label: 'Notificaciones' },
-    { to: '/settings', icon: Settings, label: 'Configuración' },
+    ...(canAccessSettings ? [{ to: '/settings', icon: Settings, label: 'Configuración' }] : []),
   ];
 
   const handleSignOut = async () => {

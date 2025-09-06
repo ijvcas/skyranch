@@ -26,13 +26,6 @@ const DashboardQuickActions = () => {
       action: () => navigate('/calendar'),
       color: 'bg-orange-600 hover:bg-orange-700'
     },
-    ...(canAccessSettings ? [{ 
-      title: 'Configuración', 
-      description: 'Ajustes del sistema',
-      icon: Settings,
-      action: () => navigate('/settings'),
-      color: 'bg-gray-600 hover:bg-gray-700'
-    }] : []),
   ];
 
   return (
