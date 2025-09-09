@@ -1,7 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { BreedingRecommendation, GeneticDiversityScore, InbreedingAnalysis } from './types';
 import type { Animal } from '@/stores/animalStore';
-import { FamilyRelationshipService } from '@/services/universal-breeding/familyRelationshipService';
 
 export class OptimizedBreedingRecommendationGenerator {
   private static cache: Map<string, { data: BreedingRecommendation[], timestamp: number }> = new Map();
@@ -168,24 +167,34 @@ export class OptimizedBreedingRecommendationGenerator {
         return null; // Skip inter-species breeding for now
       }
 
-      // CRITICAL: Check for family relationships FIRST to prevent incest
-      console.log(`🔍 Checking family relationship: ${male.name} (${male.id}) × ${female.name} (${female.id})`);
+      // OPTIMIZED: Check for direct family relationships without database calls
+      // This avoids the timeout issue by using data we already have
+      console.log(`🔍 Quick family check: ${male.name} (${male.id}) × ${female.name} (${female.id})`);
       
-      // Special logging for the SHIVA case to verify fix
-      if ((male.name === 'CRÍA DE SHIVA Y JAZZ' && female.name === 'SHIVA') ||
-          (female.name === 'CRÍA DE SHIVA Y JAZZ' && male.name === 'SHIVA')) {
-        console.log(`🚨 CRITICAL TEST CASE: CRÍA DE SHIVA Y JAZZ × SHIVA`);
-        console.log(`   CRÍA ID: ${male.name === 'CRÍA DE SHIVA Y JAZZ' ? male.id : female.id}`);
-        console.log(`   CRÍA mother: ${male.name === 'CRÍA DE SHIVA Y JAZZ' ? male.motherId : female.motherId}`);
-        console.log(`   SHIVA ID: ${male.name === 'SHIVA' ? male.id : female.id}`);
-        console.log(`   Should be BLOCKED because SHIVA is the mother of CRÍA!`);
+      // Direct parent-child check (CRITICAL for incest prevention)
+      if (male.id === female.motherId || male.id === female.fatherId) {
+        console.log(`🚫 BLOCKED: ${male.name} is parent of ${female.name}`);
+        return null;
+      }
+      if (female.id === male.motherId || female.id === male.fatherId) {
+        console.log(`🚫 BLOCKED: ${female.name} is parent of ${male.name}`);
+        return null;
       }
       
-      const familyRelationship = await FamilyRelationshipService.detectFamilyRelationship(male, female);
+      // Sibling check (same parents)
+      if (male.motherId && female.motherId && male.motherId === female.motherId) {
+        console.log(`🚫 BLOCKED: Siblings - same mother ${male.motherId}`);
+        return null;
+      }
+      if (male.fatherId && female.fatherId && male.fatherId === female.fatherId) {
+        console.log(`🚫 BLOCKED: Siblings - same father ${male.fatherId}`);
+        return null;
+      }
       
-      if (familyRelationship.shouldBlock) {
-        console.log(`🚫 BLOCKING incestuous pairing: ${male.name} × ${female.name} - ${familyRelationship.details}`);
-        return null; // NEVER recommend incestuous pairings
+      // Special logging for the SHIVA case
+      if ((male.name === 'CRÍA DE SHIVA Y JAZZ' && female.name === 'SHIVA') ||
+          (female.name === 'CRÍA DE SHIVA Y JAZZ' && male.name === 'SHIVA')) {
+        console.log(`🚨 SHIVA TEST: CRÍA mother=${male.name === 'CRÍA DE SHIVA Y JAZZ' ? male.motherId : female.motherId}, SHIVA ID=${female.name === 'SHIVA' ? female.id : male.id}`);
       }
 
       // Calculate simplified inbreeding risk using limited pedigree data
