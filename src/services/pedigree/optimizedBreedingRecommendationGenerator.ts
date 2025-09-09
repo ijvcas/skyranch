@@ -60,21 +60,27 @@ export class OptimizedBreedingRecommendationGenerator {
 
       console.log(`📊 Found ${animals.length} total animals for analysis`);
       
+      // First, log ALL animal genders to see what we're working with
+      console.log('🔍 All animal genders in database:');
+      animals.forEach(animal => {
+        console.log(`  - ${animal.name}: gender="${animal.gender}" (raw), species="${animal.species}", health="${animal.health_status}"`);
+      });
+      
       // Normalize gender values and filter with better logging
       const males = animals.filter(a => {
         const gender = a.gender?.toLowerCase().trim();
-        const isMale = gender === 'male' || gender === 'macho';
-        if (isMale) {
-          console.log(`♂️ Male found: ${a.name} (${a.species}) - Health: ${a.health_status}`);
+        const isMale = gender === 'male' || gender === 'macho' || gender === 'm' || gender === 'masculino';
+        if (a.gender) {
+          console.log(`🔍 ${a.name}: raw="${a.gender}" -> normalized="${gender}" -> isMale=${isMale}`);
         }
         return isMale;
       });
       
       const females = animals.filter(a => {
         const gender = a.gender?.toLowerCase().trim();
-        const isFemale = gender === 'female' || gender === 'hembra';
-        if (isFemale) {
-          console.log(`♀️ Female found: ${a.name} (${a.species}) - Health: ${a.health_status}`);
+        const isFemale = gender === 'female' || gender === 'hembra' || gender === 'f' || gender === 'femenino';
+        if (a.gender) {
+          console.log(`🔍 ${a.name}: raw="${a.gender}" -> normalized="${gender}" -> isFemale=${isFemale}`);
         }
         return isFemale;
       });

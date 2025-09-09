@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UniversalPedigreeAnalysisCard from './UniversalPedigreeAnalysisCard';
-import BreedingRecommendationsCard from './BreedingRecommendationsCard';
+import OptimizedBreedingRecommendationsList from './OptimizedBreedingRecommendationsList';
 import BreedingAnalyticsCard from './BreedingAnalyticsCard';
 import BreedingGoalsCard from './BreedingGoalsCard';
 import SeasonalPlanningCard from './SeasonalPlanningCard';
@@ -20,7 +20,7 @@ const BreedingPlanningTab: React.FC = () => {
         </TabsList>
 
         <TabsContent value="recommendations" className="space-y-6">
-          <BreedingRecommendationsCard />
+          <OptimizedBreedingRecommendationsList />
         </TabsContent>
 
         <TabsContent value="analysis" className="space-y-6">

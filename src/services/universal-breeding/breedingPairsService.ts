@@ -28,14 +28,14 @@ export class BreedingPairsService {
       // Enhanced gender filtering with better logging
       const males = convertedAnimals.filter(a => {
         const gender = a.gender?.toLowerCase().trim();
-        const isMale = gender === 'male' || gender === 'macho';
+        const isMale = gender === 'male' || gender === 'macho' || gender === 'm' || gender === 'masculino';
         console.log(`🔍 Animal ${a.name} (${a.tag}) - Gender: "${a.gender}" -> Normalized: "${gender}" -> Is Male: ${isMale} - Health: ${a.healthStatus}`);
         return isMale;
       });
       
       const females = convertedAnimals.filter(a => {
         const gender = a.gender?.toLowerCase().trim();
-        const isFemale = gender === 'female' || gender === 'hembra';
+        const isFemale = gender === 'female' || gender === 'hembra' || gender === 'f' || gender === 'femenino';
         console.log(`🔍 Animal ${a.name} (${a.tag}) - Gender: "${a.gender}" -> Normalized: "${gender}" -> Is Female: ${isFemale} - Health: ${a.healthStatus}`);
         return isFemale;
       });
@@ -47,7 +47,8 @@ export class BreedingPairsService {
       // Log animals that weren't categorized
       const uncategorized = convertedAnimals.filter(a => {
         const gender = a.gender?.toLowerCase().trim();
-        return !(gender === 'male' || gender === 'macho' || gender === 'female' || gender === 'hembra');
+        return !(gender === 'male' || gender === 'macho' || gender === 'female' || gender === 'hembra' || 
+                gender === 'm' || gender === 'masculino' || gender === 'f' || gender === 'femenino');
       });
       
       if (uncategorized.length > 0) {

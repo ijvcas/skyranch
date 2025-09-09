@@ -137,7 +137,10 @@ export class UniversalBreedingAnalysisService {
       const { males, females } = await this.getBreedingPairsBySpecies();
       
       if (males.length === 0 || females.length === 0) {
-        console.log('No valid breeding pairs found - insufficient males or females');
+        console.log(`⚠️ No valid breeding pairs found - insufficient males or females (Males: ${males.length}, Females: ${females.length})`);
+        console.log('📝 Available animals by gender:');
+        console.log('   Males:', males.map(m => `${m.name} (${m.gender})`));
+        console.log('   Females:', females.map(f => `${f.name} (${f.gender})`));
         return [];
       }
 
