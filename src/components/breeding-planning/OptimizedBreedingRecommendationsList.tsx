@@ -3,10 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Star, RefreshCw, Loader2, AlertTriangle } from 'lucide-react';
-import { useOptimizedBreedingRecommendations, useClearBreedingCache } from '@/hooks/useOptimizedBreedingRecommendations';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouch } from '@/hooks/use-touch';
+import { SimpleBreedingRecommendations, SimpleBreedingRecommendation } from '@/services/pedigree/simpleBreedingRecommendations';
 import { BlockedPairingAlert } from './BlockedPairingAlert';
 
 // Skeleton loader component
@@ -110,15 +110,13 @@ RecommendationItem.displayName = 'RecommendationItem';
 // Main component
 const OptimizedBreedingRecommendationsList: React.FC = () => {
   const isMobile = useIsMobile();
-  const queryClient = useQueryClient();
-  const clearCache = useClearBreedingCache();
   const [blockedPairings, setBlockedPairings] = useState<Array<{
     maleName: string;
     femaleName: string;
     reason: string;
   }>>([]);
   
-  console.log('🔧 DEBUG: OptimizedBreedingRecommendationsList component mounted');
+  console.log('🔥 SIMPLE: Component mounting...');
   
   const { 
     data: breedingRecommendations = [], 
@@ -126,9 +124,14 @@ const OptimizedBreedingRecommendationsList: React.FC = () => {
     isError,
     refetch,
     isRefetching 
-  } = useOptimizedBreedingRecommendations();
+  } = useQuery<SimpleBreedingRecommendation[]>({
+    queryKey: ['simple-breeding-recommendations'],
+    queryFn: SimpleBreedingRecommendations.generateRecommendations,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2
+  });
   
-  console.log('🔧 DEBUG: Hook results:', { 
+  console.log('🔥 SIMPLE: Hook results:', { 
     recommendationsLength: breedingRecommendations.length, 
     isLoading, 
     isError, 
@@ -136,8 +139,7 @@ const OptimizedBreedingRecommendationsList: React.FC = () => {
   });
 
   const handleRefresh = async () => {
-    clearCache();
-    await queryClient.invalidateQueries({ queryKey: ['breeding-recommendations'] });
+    console.log('🔥 SIMPLE: Refreshing...');
     refetch();
   };
 
