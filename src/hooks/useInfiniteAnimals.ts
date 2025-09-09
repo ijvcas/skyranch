@@ -14,34 +14,40 @@ export const useInfiniteAnimals = () => {
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const offset = typeof pageParam === 'number' ? pageParam : 0;
-      const { network, supabase } = await networkDiagnostics.runDiagnostics();
-
-      if (!network || !supabase) {
-        // Offline or DB issue: return mock data as a single page
+      
+      // Skip network diagnostics for better performance - rely on RLS and error handling
+      try {
+        const animals = await getAnimalsPage(PAGE_SIZE, offset, true); // Always include deceased
+        return animals;
+      } catch (error) {
+        console.warn('❌ Database query failed, using mock data:', error);
+        // Only fallback to mock on actual database errors
         return mockAnimals;
       }
-
-      const animals = await getAnimalsPage(PAGE_SIZE, offset, true); // Always include deceased
-      return animals;
     },
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage) return undefined;
       // If we received a full page, assume there may be more
       return lastPage.length === PAGE_SIZE ? allPages.flat().length : undefined;
     },
-    staleTime: 60_000, // cache for 1 min
-    gcTime: 10 * 60_000, // 10 minutes
+    staleTime: 5 * 60_000, // 5 minutes - longer cache for better performance
+    gcTime: 15 * 60_000, // 15 minutes - keep data longer
     refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      // Only retry on network errors, not auth errors
+      if (error?.message?.includes('auth') || error?.message?.includes('JWT')) {
+        return false;
+      }
+      return failureCount < 2; // Max 2 retries
+    },
   });
 
   const animals = (query.data?.pages || []).flat();
   const isUsingMock = query.data?.pages?.[0] === mockAnimals;
 
   const clearAndRefetch = async () => {
-    networkDiagnostics.clearCache();
-    // Reset the query completely and refetch from scratch
-    queryClient.removeQueries({ queryKey: ['animals', 'farm-wide', 'infinite'] });
-    await queryClient.invalidateQueries({ queryKey: ['animals'] });
+    // Smart cache invalidation - only clear animal-related queries
+    queryClient.removeQueries({ queryKey: ['animals'] });
     await query.refetch();
   };
 

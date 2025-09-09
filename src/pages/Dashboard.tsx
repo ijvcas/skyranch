@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAnimalsLean } from '@/services/animalService';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { getAnimalsLean } from '@/services/animal/animalQueries';
 import { checkPermission } from '@/services/permissionService';
 import { getCurrentUser } from '@/services/userService';
 import { dashboardBannerService } from '@/services/dashboardBannerService';
@@ -18,6 +18,8 @@ import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions'
 import DashboardLoadingState from '@/components/dashboard/DashboardLoadingState';
 import DashboardErrorState from '@/components/dashboard/DashboardErrorState';
 import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
+import DashboardSkeletonLoader from '@/components/dashboard/DashboardSkeletonLoader';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { applySEO, injectJSONLD } from '@/utils/seo';
 
 
@@ -96,7 +98,11 @@ const Dashboard = () => {
   }, [toast]);
   
   // Enhanced query with admin fallback and better error handling
-  const { data: allAnimals = [], isLoading, error, refetch } = useQuery({
+  // Use optimized dashboard stats hook
+  const { data: statsData, isLoading, error, refetch } = useDashboardStats();
+
+  // Legacy query for compatibility - will be removed in next phase
+  const { data: allAnimals = [] } = useQuery({
     queryKey: ['animals', 'all-users'],
     queryFn: async () => {
       try {
@@ -201,12 +207,9 @@ const Dashboard = () => {
     }
   };
 
-  // Calculate all stats from the single query result
-  const totalAnimals = allAnimals.length;
-  const speciesCounts = allAnimals.reduce((counts, animal) => {
-    counts[animal.species] = (counts[animal.species] || 0) + 1;
-    return counts;
-  }, {} as Record<string, number>);
+  // Extract stats from optimized hook
+  const totalAnimals = statsData?.totalAnimals || 0;
+  const speciesCounts = statsData?.speciesCounts || {};
 
   const handleSignOut = async () => {
     try {
@@ -226,7 +229,7 @@ const Dashboard = () => {
   };
 
   if (isLoading) {
-    return <DashboardLoadingState userEmail={user?.email} />;
+    return <DashboardSkeletonLoader />;
   }
 
   if (error) {

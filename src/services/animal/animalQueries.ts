@@ -1,83 +1,12 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import type { Animal } from '@/stores/animalStore';
 
-// Fetch full animals (legacy, used in several areas)
+// Optimized fetch - RLS policies handle all access control
 export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> => {
   try {
-    console.log('🔍 Fetching all animals...');
-    const { data: { user } } = await supabase.auth.getUser();
+    console.log('🔍 [OPTIMIZED] Fetching all animals...');
     
-    if (!user || !user.email) {
-      console.log('❌ No authenticated user');
-      return [];
-    }
-
-    // First try to get the user's app_users record
-    const { data: appUser, error: userError } = await supabase
-      .from('app_users')
-      .select('id')
-      .eq('email', user.email)
-      .maybeSingle();
-
-    if (userError || !appUser) {
-      console.log('❌ User not found in app_users, trying direct query');
-      // Try direct query as fallback
-      let query = supabase
-        .from('animals')
-        .select('*');
-      
-      if (!includeDeceased) {
-        query = query.neq('lifecycle_status', 'deceased');
-      }
-      
-      const { data, error } = await query
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ Error fetching animals:', error);
-        return [];
-      }
-
-      // No need to filter - RLS policies handle access control
-      const filteredData = data || [];
-      console.log('✅ Successfully fetched animals (fallback):', filteredData.length);
-      
-      return filteredData.map(animal => ({
-        id: animal.id,
-        name: animal.name,
-        tag: animal.tag,
-        species: animal.species,
-        breed: animal.breed || '',
-        birthDate: animal.birth_date || '',
-        gender: animal.gender || '',
-        weight: animal.weight?.toString() || '',
-        color: animal.color || '',
-        motherId: animal.mother_id || '',
-        fatherId: animal.father_id || '',
-        maternalGrandmotherId: animal.maternal_grandmother_id || '',
-        maternalGrandfatherId: animal.maternal_grandfather_id || '',
-        paternalGrandmotherId: animal.paternal_grandmother_id || '',
-        paternalGrandfatherId: animal.paternal_grandfather_id || '',
-        maternalGreatGrandmotherMaternalId: animal.maternal_great_grandmother_maternal_id || '',
-        maternalGreatGrandfatherMaternalId: animal.maternal_great_grandfather_maternal_id || '',
-        maternalGreatGrandmotherPaternalId: animal.maternal_great_grandmother_paternal_id || '',
-        maternalGreatGrandfatherPaternalId: animal.maternal_great_grandfather_paternal_id || '',
-        paternalGreatGrandmotherMaternalId: animal.paternal_great_grandmother_maternal_id || '',
-        paternalGreatGrandfatherMaternalId: animal.paternal_great_grandfather_maternal_id || '',
-        paternalGreatGrandmotherPaternalId: animal.paternal_great_grandmother_paternal_id || '',
-        paternalGreatGrandfatherPaternalId: animal.paternal_great_grandfather_paternal_id || '',
-        healthStatus: animal.health_status || 'healthy',
-        notes: animal.notes || '',
-        image: animal.image_url,
-        current_lot_id: animal.current_lot_id,
-        lifecycleStatus: animal.lifecycle_status || 'active',
-        dateOfDeath: animal.date_of_death || '',
-        causeOfDeath: animal.cause_of_death || ''
-      }));
-    }
-
-    // Get all animals (shared data) - RLS policies handle access control
+    // Skip user lookup - RLS policies handle access control
     let query = supabase
       .from('animals')
       .select('*');
@@ -94,7 +23,7 @@ export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> 
       return [];
     }
 
-    console.log('✅ Successfully fetched animals:', data?.length || 0);
+    console.log('✅ [OPTIMIZED] Successfully fetched animals:', data?.length || 0);
     
     return (data || []).map(animal => ({
       id: animal.id,
@@ -134,47 +63,12 @@ export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> 
   }
 };
 
-// Lean fetch for Dashboard stats: only id and species
+// Ultra-lean fetch for Dashboard stats - optimized
 export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pick<Animal, 'id' | 'species'>>> => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !user.email) {
-      console.log('❌ No authenticated user for getAnimalsLean');
-      return [];
-    }
-
-    // First try to get the user's app_users record to get their user_id
-    const { data: appUser, error: userError } = await supabase
-      .from('app_users')
-      .select('id')
-      .eq('email', user.email)
-      .maybeSingle();
-
-    if (userError || !appUser) {
-      console.log('❌ User not found in app_users, trying direct query');
-      // Try direct query without user_id filter as fallback
-      let query = supabase
-        .from('animals')
-        .select('id,species,user_id');
-      
-      if (!includeDeceased) {
-        query = query.neq('lifecycle_status', 'deceased');
-      }
-      
-      const { data, error } = await query
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ Error in getAnimalsLean fallback:', error);
-        return [];
-      }
-
-      // No need to filter - RLS policies handle access control
-      const filteredData = data || [];
-      return filteredData.map(a => ({ id: a.id, species: a.species }));
-    }
-
-    // Get all animals (shared data) - RLS policies handle access control
+    console.log('🔍 [ULTRA-LEAN] Fetching animals for stats...');
+    
+    // Skip user lookup - RLS policies handle access control
     let query = supabase
       .from('animals')
       .select('id,species');
@@ -191,6 +85,7 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
       return [];
     }
 
+    console.log('✅ [ULTRA-LEAN] Fetched animals for stats:', data?.length || 0);
     return (data || []).map(a => ({ id: a.id, species: a.species }));
   } catch (e) {
     console.error('❌ Unexpected error in getAnimalsLean:', e);
@@ -198,14 +93,14 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
   }
 };
 
-// Paged fetch for Animals list with minimal columns needed for the cards
+// High-performance paged fetch for Animals list - minimal columns
 export const getAnimalsPage = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
-
-    let query = (supabase
-      .from('animals') as any)
+    console.log(`🔍 [PAGED] Fetching animals page: offset ${offset}, limit ${limit}`);
+    
+    // Skip user auth check - RLS handles access control
+    let query = supabase
+      .from('animals')
       .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url,lifecycle_status,date_of_death,cause_of_death');
     
     if (!includeDeceased) {
@@ -220,6 +115,8 @@ export const getAnimalsPage = async (limit = 50, offset = 0, includeDeceased = f
       console.error('❌ Error in getAnimalsPage:', error);
       return [];
     }
+
+    console.log(`✅ [PAGED] Fetched ${data?.length || 0} animals`);
 
     return (data || []).map(animal => ({
       id: animal.id,
@@ -261,17 +158,11 @@ export const getAnimalsPage = async (limit = 50, offset = 0, includeDeceased = f
 
 export const getAnimal = async (id: string): Promise<Animal | null> => {
   try {
-    console.log('🔍 Fetching animal with ID:', id);
-    const { data: { user } } = await supabase.auth.getUser();
+    console.log('🔍 [SINGLE] Fetching animal with ID:', id);
     
-    if (!user) {
-      console.log('❌ No authenticated user for getAnimal');
-      return null;
-    }
-
-    // Remove user_id filter - all authenticated users can see all animals
-    const { data, error } = await (supabase
-      .from('animals') as any)
+    // Skip user check - RLS handles access control
+    const { data, error } = await supabase
+      .from('animals')
       .select('*')
       .eq('id', id)
       .single();
@@ -286,7 +177,7 @@ export const getAnimal = async (id: string): Promise<Animal | null> => {
       return null;
     }
 
-    console.log('✅ Successfully fetched animal:', data.name);
+    console.log('✅ [SINGLE] Successfully fetched animal:', data.name);
     
     return {
       id: data.id,
