@@ -21,11 +21,31 @@ export const useAnimalNames = () => {
   // Returns "Name (TAG)" for registered animals; otherwise returns the value as-is
   const getDisplayName = React.useCallback((parentId: string | undefined): string | null => {
     if (!parentId) return null;
+    
+    // Debug logging for parent resolution
+    if (parentId && parentId.includes('-')) { // UUID check
+      console.log(`🔍 useAnimalNames Debug - parentId: ${parentId}:`, {
+        inMap: !!animalNamesMap[parentId],
+        mapValue: animalNamesMap[parentId],
+        totalAnimalsInMap: Object.keys(animalNamesMap).length,
+        allAnimalIds: Object.keys(animalNamesMap).slice(0, 5) // First 5 IDs for debugging
+      });
+    }
+    
     if (animalNamesMap[parentId]) {
       return animalNamesMap[parentId];
     }
+    
+    // If not found in map but looks like UUID, try to find in allAnimals array
+    const animal = allAnimals.find(a => a.id === parentId);
+    if (animal) {
+      console.log(`🔧 Found animal directly: ${animal.name} (${animal.tag})`);
+      return `${animal.name} (${animal.tag})`;
+    }
+    
+    // Return the parentId as-is for external animals (non-UUID strings)
     return parentId;
-  }, [animalNamesMap]);
+  }, [animalNamesMap, allAnimals]);
 
   // Returns just the name for registered animals; otherwise returns the value as-is
   const getNameOnly = React.useCallback((parentId: string | undefined): string | null => {

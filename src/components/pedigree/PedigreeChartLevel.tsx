@@ -31,12 +31,26 @@ const PedigreeChartLevel = ({
     const name = getDisplayName(id);
     const isRegisteredAnimal = id && isValidUUID(id) && animalNamesMap[id];
     
-    if (!name) {
+    // Debug logging for parent resolution
+    if (id && label.includes('Madre') || label.includes('Padre')) {
+      console.log(`🔍 Pedigree Debug - ${label}:`, {
+        id,
+        name,
+        isValidUUID: isValidUUID(id),
+        inAnimalNamesMap: !!animalNamesMap[id],
+        animalNamesMapEntry: animalNamesMap[id],
+        animalNamesMapKeys: Object.keys(animalNamesMap).slice(0, 3) // First 3 keys for debugging
+      });
+    }
+    
+    if (!name || name === id) {
       return (
-        <div className="p-2 border-2 border-dashed border-gray-200 rounded-lg text-center text-gray-400 text-xs">
+        <div className="p-2 border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-500 text-xs">
           {label}
           <br />
-          <span className="text-xs">No registrado</span>
+          <span className="text-xs">
+            {id && isValidUUID(id) ? 'Cargando...' : 'No registrado'}
+          </span>
         </div>
       );
     }
