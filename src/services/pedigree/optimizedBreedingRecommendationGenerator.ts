@@ -21,18 +21,16 @@ export class OptimizedBreedingRecommendationGenerator {
     try {
       console.log('🔍 Fetching animals for breeding recommendations...');
       
-      // Single optimized query to get all breeding-capable animals with full Animal interface
+      // OPTIMIZED: Minimal data query to prevent timeout
       const { data: rawAnimals, error } = await supabase
         .from('animals')
         .select(`
-          id, name, tag, species, breed, gender, color, birth_date, weight, 
-          health_status, lifecycle_status, mother_id, father_id, notes, image_url,
-          maternal_grandmother_id, maternal_grandfather_id,
-          paternal_grandmother_id, paternal_grandfather_id,
-          current_lot_id, date_of_death, cause_of_death
+          id, name, species, gender, health_status,
+          mother_id, father_id
         `)
-        .neq('lifecycle_status', 'deceased') // Exclude deceased animals
-        .not('gender', 'is', null);
+        .eq('lifecycle_status', 'active')
+        .not('gender', 'is', null)
+        .limit(100); // Limit to prevent timeout
 
       if (error) {
         console.error('❌ Database error:', error);
@@ -44,30 +42,27 @@ export class OptimizedBreedingRecommendationGenerator {
         return [];
       }
 
-      // Convert snake_case to camelCase to match Animal interface
+      // Convert to simple format for breeding analysis
       const animals: Animal[] = rawAnimals.map(animal => ({
         id: animal.id,
         name: animal.name,
-        tag: animal.tag || '',
+        tag: animal.name, // Use name as tag for simplicity
         species: animal.species,
-        breed: animal.breed || '',
+        breed: '',
         gender: animal.gender,
-        color: animal.color || '',
-        birthDate: animal.birth_date || '',
-        weight: (animal.weight || '').toString(),
+        color: '',
+        birthDate: '',
+        weight: '',
         healthStatus: animal.health_status || 'healthy',
-        lifecycleStatus: animal.lifecycle_status || 'active',
+        lifecycleStatus: 'active',
         motherId: animal.mother_id || '',
         fatherId: animal.father_id || '',
-        maternalGrandmotherId: animal.maternal_grandmother_id || '',
-        maternalGrandfatherId: animal.maternal_grandfather_id || '',
-        paternalGrandmotherId: animal.paternal_grandmother_id || '',
-        paternalGrandfatherId: animal.paternal_grandfather_id || '',
-        notes: animal.notes || '',
-        image: animal.image_url || null,
-        current_lot_id: animal.current_lot_id || undefined,
-        dateOfDeath: animal.date_of_death || undefined,
-        causeOfDeath: animal.cause_of_death || undefined
+        maternalGrandmotherId: '',
+        maternalGrandfatherId: '',
+        paternalGrandmotherId: '',
+        paternalGrandfatherId: '',
+        notes: '',
+        image: null
       }));
 
 
@@ -107,20 +102,18 @@ export class OptimizedBreedingRecommendationGenerator {
 
       const recommendations: BreedingRecommendation[] = [];
 
-      // Optimize combinations based on device capabilities
-      const maxMales = Math.min(males.length, maxDepth <= 2 ? 8 : 12);
-      const maxFemales = Math.min(females.length, maxDepth <= 2 ? 8 : 12);
-      const maxCombinations = Math.min(maxMales * maxFemales, maxDepth <= 2 ? 25 : 50);
+      // Optimize combinations for better performance  
+      const maxCombinations = Math.min(males.length * females.length, 20); // Much smaller limit
       
-      console.log(`🎯 Processing up to ${maxCombinations} combinations (${maxMales} males × ${maxFemales} females)`);
+      console.log(`🎯 Processing up to ${maxCombinations} combinations (${males.length} males × ${females.length} females)`);
 
       let combinationCount = 0;
       let successfulRecommendations = 0;
 
-      // Process combinations more efficiently
-      outerLoop: for (let m = 0; m < maxMales && m < males.length; m++) {
+      // Process fewer combinations more efficiently
+      outerLoop: for (let m = 0; m < males.length && combinationCount < maxCombinations; m++) {
         const male = males[m];
-        for (let f = 0; f < maxFemales && f < females.length; f++) {
+        for (let f = 0; f < females.length && combinationCount < maxCombinations; f++) {
           const female = females[f];
           
           if (combinationCount >= maxCombinations) break outerLoop;
@@ -140,7 +133,7 @@ export class OptimizedBreedingRecommendationGenerator {
       // Sort by compatibility score (highest first) and limit results
       const sortedRecommendations = recommendations
         .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
-        .slice(0, 20); // Limit to top 20 recommendations
+        .slice(0, 10); // Smaller limit for better performance
 
       // Cache the results
       this.cache.set(cacheKey, {
