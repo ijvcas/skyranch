@@ -34,8 +34,10 @@ export class OptimizedBreedingRecommendationGenerator {
     }
 
     try {
+      console.log('🔍 Fetching animals for breeding recommendations...');
+      
       // Single optimized query to get all breeding-capable animals with minimal pedigree data
-      const { data: animals } = await supabase
+      const { data: animals, error } = await supabase
         .from('animals')
         .select(`
           id, name, species, gender, health_status,
@@ -43,40 +45,78 @@ export class OptimizedBreedingRecommendationGenerator {
           maternal_grandmother_id, maternal_grandfather_id,
           paternal_grandmother_id, paternal_grandfather_id
         `)
-        .in('health_status', ['healthy', 'good'])
-        .not('gender', 'is', null)
-        .eq('lifecycle_status', 'active');
+        .neq('lifecycle_status', 'deceased') // Exclude deceased animals
+        .not('gender', 'is', null);
 
-      if (!animals || animals.length < 2) {
+      if (error) {
+        console.error('❌ Database error:', error);
         return [];
       }
 
-      const males = animals.filter(a => a.gender === 'male' || a.gender === 'macho');
-      const females = animals.filter(a => a.gender === 'female' || a.gender === 'hembra');
+      if (!animals || animals.length < 2) {
+        console.log('⚠️ Not enough animals found:', animals?.length || 0);
+        return [];
+      }
+
+      console.log(`📊 Found ${animals.length} total animals for analysis`);
+      
+      // Normalize gender values and filter with better logging
+      const males = animals.filter(a => {
+        const gender = a.gender?.toLowerCase().trim();
+        const isMale = gender === 'male' || gender === 'macho';
+        if (isMale) {
+          console.log(`♂️ Male found: ${a.name} (${a.species}) - Health: ${a.health_status}`);
+        }
+        return isMale;
+      });
+      
+      const females = animals.filter(a => {
+        const gender = a.gender?.toLowerCase().trim();
+        const isFemale = gender === 'female' || gender === 'hembra';
+        if (isFemale) {
+          console.log(`♀️ Female found: ${a.name} (${a.species}) - Health: ${a.health_status}`);
+        }
+        return isFemale;
+      });
+
+      console.log(`📈 Gender distribution: ${males.length} males, ${females.length} females`);
 
       if (males.length === 0 || females.length === 0) {
+        console.log('❌ Missing gender group - no recommendations possible');
         return [];
       }
 
       const recommendations: BreedingRecommendation[] = [];
 
-      // Limit combinations for better performance
-      const maxCombinations = Math.min(males.length * females.length, 50);
-      let combinationCount = 0;
+      // Optimize combinations based on device capabilities
+      const maxMales = Math.min(males.length, maxDepth <= 2 ? 8 : 12);
+      const maxFemales = Math.min(females.length, maxDepth <= 2 ? 8 : 12);
+      const maxCombinations = Math.min(maxMales * maxFemales, maxDepth <= 2 ? 25 : 50);
+      
+      console.log(`🎯 Processing up to ${maxCombinations} combinations (${maxMales} males × ${maxFemales} females)`);
 
-      for (const male of males) {
-        for (const female of females) {
-          if (combinationCount >= maxCombinations) break;
+      let combinationCount = 0;
+      let successfulRecommendations = 0;
+
+      // Process combinations more efficiently
+      outerLoop: for (let m = 0; m < maxMales && m < males.length; m++) {
+        const male = males[m];
+        for (let f = 0; f < maxFemales && f < females.length; f++) {
+          const female = females[f];
+          
+          if (combinationCount >= maxCombinations) break outerLoop;
           if (male.id === female.id) continue;
 
           const recommendation = this.analyzeBreedingPairOptimized(male, female, maxDepth);
           if (recommendation) {
             recommendations.push(recommendation);
-            combinationCount++;
+            successfulRecommendations++;
           }
+          combinationCount++;
         }
-        if (combinationCount >= maxCombinations) break;
       }
+
+      console.log(`✅ Processed ${combinationCount} combinations, generated ${successfulRecommendations} recommendations`);
 
       // Sort by compatibility score (highest first) and limit results
       const sortedRecommendations = recommendations
@@ -176,11 +216,25 @@ export class OptimizedBreedingRecommendationGenerator {
   ): number {
     let score = 50; // Base score
     
-    // Health status bonus
-    if (male.health_status === 'healthy' && female.health_status === 'healthy') {
+    // Normalize health status values for comparison
+    const normalizeHealth = (status: string) => {
+      if (!status) return 'unknown';
+      const normalized = status.toLowerCase().trim();
+      return normalized;
+    };
+    
+    const maleHealth = normalizeHealth(male.health_status);
+    const femaleHealth = normalizeHealth(female.health_status);
+    
+    // Health status bonus (more flexible matching)
+    if (maleHealth === 'healthy' && femaleHealth === 'healthy') {
       score += 30;
-    } else if (male.health_status === 'good' && female.health_status === 'good') {
+    } else if ((maleHealth === 'healthy' || maleHealth === 'good') && 
+               (femaleHealth === 'healthy' || femaleHealth === 'good')) {
       score += 20;
+    } else if (maleHealth !== 'sick' && femaleHealth !== 'sick' && 
+               maleHealth !== 'treatment' && femaleHealth !== 'treatment') {
+      score += 10; // Both animals are at least stable
     }
     
     // Inbreeding risk penalty
@@ -193,6 +247,14 @@ export class OptimizedBreedingRecommendationGenerator {
     // Species match bonus
     if (male.species === female.species) {
       score += 10;
+    }
+    
+    // Penalize if either animal is sick or in treatment
+    if (maleHealth === 'sick' || femaleHealth === 'sick') {
+      score -= 20;
+    }
+    if (maleHealth === 'treatment' || femaleHealth === 'treatment') {
+      score -= 15;
     }
     
     return Math.round(Math.min(100, Math.max(0, score)));

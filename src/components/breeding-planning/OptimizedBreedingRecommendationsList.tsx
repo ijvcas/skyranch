@@ -196,11 +196,24 @@ const OptimizedBreedingRecommendationsList: React.FC = () => {
           <div className="text-center py-6 md:py-8">
             <Heart className="w-8 h-8 md:w-12 md:h-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-base md:text-lg font-medium text-gray-900 mb-2">
-              No hay suficientes animales
+              No hay animales suficientes para apareamiento
             </h3>
-            <p className="text-sm md:text-base text-gray-500">
-              Necesitas al menos un macho y una hembra por especie para generar recomendaciones.
+            <p className="text-sm md:text-base text-gray-500 mb-4">
+              Para generar recomendaciones necesitas:
             </p>
+            <ul className="text-sm text-gray-500 space-y-1 mb-4">
+              <li>• Al menos un macho y una hembra</li>
+              <li>• Animales con estado de salud registrado</li>
+              <li>• Género definido correctamente (macho/hembra)</li>
+            </ul>
+            <Button 
+              onClick={handleRefresh}
+              variant="outline"
+              className="mobile-tap-target"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Verificar Animales
+            </Button>
           </div>
         </CardContent>
       </Card>
