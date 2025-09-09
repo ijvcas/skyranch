@@ -6,6 +6,7 @@ import OptimizedBreedingRecommendationsList from './OptimizedBreedingRecommendat
 import BreedingAnalyticsCard from './BreedingAnalyticsCard';
 import BreedingGoalsCard from './BreedingGoalsCard';
 import SeasonalPlanningCard from './SeasonalPlanningCard';
+import { BreedingTestPanel } from './BreedingTestPanel';
 
 const BreedingPlanningTab: React.FC = () => {
   return (
@@ -21,6 +22,7 @@ const BreedingPlanningTab: React.FC = () => {
 
         <TabsContent value="recommendations" className="space-y-6">
           <OptimizedBreedingRecommendationsList />
+          <BreedingTestPanel />
         </TabsContent>
 
         <TabsContent value="analysis" className="space-y-6">

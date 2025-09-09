@@ -34,14 +34,23 @@ export class FamilyRelationshipService {
         return nameToIdMap.get(normalizedName) || null;
       };
 
-      // Resolve parent IDs for both animals
-      const animal1MotherId = resolveParentId(animal1.motherId);
-      const animal1FatherId = resolveParentId(animal1.fatherId);
-      const animal2MotherId = resolveParentId(animal2.motherId);
-      const animal2FatherId = resolveParentId(animal2.fatherId);
+      // Handle both camelCase (from store) and snake_case (from database) field names
+      const animal1MotherId = resolveParentId(animal1.motherId || (animal1 as any).mother_id);
+      const animal1FatherId = resolveParentId(animal1.fatherId || (animal1 as any).father_id);
+      const animal2MotherId = resolveParentId(animal2.motherId || (animal2 as any).mother_id);
+      const animal2FatherId = resolveParentId(animal2.fatherId || (animal2 as any).father_id);
 
       console.log(`${animal1.name} parents: mother=${animal1MotherId}, father=${animal1FatherId}`);
       console.log(`${animal2.name} parents: mother=${animal2MotherId}, father=${animal2FatherId}`);
+      
+      // CRITICAL INCEST CHECK: Log the specific case that was failing
+      if (animal1.name === 'CRÍA DE SHIVA Y JAZZ' && animal2.name === 'SHIVA') {
+        console.log(`🚨 SPECIFIC INCEST CHECK: CRÍA DE SHIVA Y JAZZ × SHIVA`);
+        console.log(`   CRÍA parents: mother=${animal1MotherId}, father=${animal1FatherId}`);
+        console.log(`   SHIVA ID: ${animal2.id}`);
+        console.log(`   Is SHIVA the mother? ${animal2.id === animal1MotherId}`);
+        console.log(`   Is SHIVA the father? ${animal2.id === animal1FatherId}`);
+      }
 
       // Check if one is the parent of the other
       if (animal1.id === animal2MotherId || animal1.id === animal2FatherId) {
@@ -81,10 +90,10 @@ export class FamilyRelationshipService {
 
       // Check for grandparent-grandchild relationships
       const animal1Grandparents = [
-        resolveParentId(animal1.paternalGrandfatherId),
-        resolveParentId(animal1.paternalGrandmotherId),
-        resolveParentId(animal1.maternalGrandfatherId),
-        resolveParentId(animal1.maternalGrandmotherId)
+        resolveParentId(animal1.paternalGrandfatherId || (animal1 as any).paternal_grandfather_id),
+        resolveParentId(animal1.paternalGrandmotherId || (animal1 as any).paternal_grandmother_id),
+        resolveParentId(animal1.maternalGrandfatherId || (animal1 as any).maternal_grandfather_id),
+        resolveParentId(animal1.maternalGrandmotherId || (animal1 as any).maternal_grandmother_id)
       ].filter(Boolean);
 
       if (animal1Grandparents.includes(animal2.id)) {
@@ -96,10 +105,10 @@ export class FamilyRelationshipService {
       }
 
       const animal2Grandparents = [
-        resolveParentId(animal2.paternalGrandfatherId),
-        resolveParentId(animal2.paternalGrandmotherId),
-        resolveParentId(animal2.maternalGrandfatherId),
-        resolveParentId(animal2.maternalGrandmotherId)
+        resolveParentId(animal2.paternalGrandfatherId || (animal2 as any).paternal_grandfather_id),
+        resolveParentId(animal2.paternalGrandmotherId || (animal2 as any).paternal_grandmother_id),
+        resolveParentId(animal2.maternalGrandfatherId || (animal2 as any).maternal_grandfather_id),
+        resolveParentId(animal2.maternalGrandmotherId || (animal2 as any).maternal_grandmother_id)
       ].filter(Boolean);
 
       if (animal2Grandparents.includes(animal1.id)) {

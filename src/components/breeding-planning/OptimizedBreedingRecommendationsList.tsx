@@ -1,12 +1,13 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Star, RefreshCw, Loader2 } from 'lucide-react';
+import { Heart, Star, RefreshCw, Loader2, AlertTriangle } from 'lucide-react';
 import { useOptimizedBreedingRecommendations, useClearBreedingCache } from '@/hooks/useOptimizedBreedingRecommendations';
 import { useQueryClient } from '@tanstack/react-query';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTouch } from '@/hooks/use-touch';
+import { BlockedPairingAlert } from './BlockedPairingAlert';
 
 // Skeleton loader component
 const RecommendationSkeleton = memo(() => (
@@ -111,6 +112,11 @@ const OptimizedBreedingRecommendationsList: React.FC = () => {
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
   const clearCache = useClearBreedingCache();
+  const [blockedPairings, setBlockedPairings] = useState<Array<{
+    maleName: string;
+    femaleName: string;
+    reason: string;
+  }>>([]);
   
   const { 
     data: breedingRecommendations = [], 
@@ -238,6 +244,27 @@ const OptimizedBreedingRecommendationsList: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Show blocked pairings alerts if any */}
+        {blockedPairings.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-destructive" />
+              Apareamientos Bloqueados ({blockedPairings.length})
+            </h4>
+            {blockedPairings.map((blocked, index) => (
+              <BlockedPairingAlert
+                key={index}
+                maleName={blocked.maleName}
+                femaleName={blocked.femaleName}
+                reason={blocked.reason}
+                onDismiss={() => {
+                  setBlockedPairings(prev => prev.filter((_, i) => i !== index));
+                }}
+              />
+            ))}
+          </div>
+        )}
+        
         <div className="space-y-3 md:space-y-4">
           {displayedRecommendations.map((recommendation, index) => (
             <RecommendationItem

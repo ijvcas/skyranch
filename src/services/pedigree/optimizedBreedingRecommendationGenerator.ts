@@ -1,21 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { BreedingRecommendation, GeneticDiversityScore, InbreedingAnalysis } from './types';
-import { useIsMobile } from '@/hooks/use-mobile';
-
-interface OptimizedAnimal {
-  id: string;
-  name: string;
-  species: string;
-  gender: string;
-  health_status: string;
-  mother_id?: string;
-  father_id?: string;
-  // Minimal pedigree data for mobile
-  maternal_grandmother_id?: string;
-  maternal_grandfather_id?: string;
-  paternal_grandmother_id?: string;
-  paternal_grandfather_id?: string;
-}
+import type { Animal } from '@/stores/animalStore';
+import { FamilyRelationshipService } from '@/services/universal-breeding/familyRelationshipService';
 
 export class OptimizedBreedingRecommendationGenerator {
   private static cache: Map<string, { data: BreedingRecommendation[], timestamp: number }> = new Map();
@@ -36,14 +22,15 @@ export class OptimizedBreedingRecommendationGenerator {
     try {
       console.log('🔍 Fetching animals for breeding recommendations...');
       
-      // Single optimized query to get all breeding-capable animals with minimal pedigree data
-      const { data: animals, error } = await supabase
+      // Single optimized query to get all breeding-capable animals with full Animal interface
+      const { data: rawAnimals, error } = await supabase
         .from('animals')
         .select(`
-          id, name, species, gender, health_status,
-          mother_id, father_id,
+          id, name, tag, species, breed, gender, color, birth_date, weight, 
+          health_status, lifecycle_status, mother_id, father_id, notes, image_url,
           maternal_grandmother_id, maternal_grandfather_id,
-          paternal_grandmother_id, paternal_grandfather_id
+          paternal_grandmother_id, paternal_grandfather_id,
+          current_lot_id, date_of_death, cause_of_death
         `)
         .neq('lifecycle_status', 'deceased') // Exclude deceased animals
         .not('gender', 'is', null);
@@ -53,17 +40,44 @@ export class OptimizedBreedingRecommendationGenerator {
         return [];
       }
 
-      if (!animals || animals.length < 2) {
-        console.log('⚠️ Not enough animals found:', animals?.length || 0);
+      if (!rawAnimals || rawAnimals.length < 2) {
+        console.log('⚠️ Not enough animals found:', rawAnimals?.length || 0);
         return [];
       }
+
+      // Convert snake_case to camelCase to match Animal interface
+      const animals: Animal[] = rawAnimals.map(animal => ({
+        id: animal.id,
+        name: animal.name,
+        tag: animal.tag || '',
+        species: animal.species,
+        breed: animal.breed || '',
+        gender: animal.gender,
+        color: animal.color || '',
+        birthDate: animal.birth_date || '',
+        weight: (animal.weight || '').toString(),
+        healthStatus: animal.health_status || 'healthy',
+        lifecycleStatus: animal.lifecycle_status || 'active',
+        motherId: animal.mother_id || '',
+        fatherId: animal.father_id || '',
+        maternalGrandmotherId: animal.maternal_grandmother_id || '',
+        maternalGrandfatherId: animal.maternal_grandfather_id || '',
+        paternalGrandmotherId: animal.paternal_grandmother_id || '',
+        paternalGrandfatherId: animal.paternal_grandfather_id || '',
+        notes: animal.notes || '',
+        image: animal.image_url || null,
+        current_lot_id: animal.current_lot_id || undefined,
+        dateOfDeath: animal.date_of_death || undefined,
+        causeOfDeath: animal.cause_of_death || undefined
+      }));
+
 
       console.log(`📊 Found ${animals.length} total animals for analysis`);
       
       // First, log ALL animal genders to see what we're working with
       console.log('🔍 All animal genders in database:');
       animals.forEach(animal => {
-        console.log(`  - ${animal.name}: gender="${animal.gender}" (raw), species="${animal.species}", health="${animal.health_status}"`);
+        console.log(`  - ${animal.name}: gender="${animal.gender}" (raw), species="${animal.species}", health="${animal.healthStatus}"`);
       });
       
       // Normalize gender values and filter with better logging
@@ -113,7 +127,7 @@ export class OptimizedBreedingRecommendationGenerator {
           if (combinationCount >= maxCombinations) break outerLoop;
           if (male.id === female.id) continue;
 
-          const recommendation = this.analyzeBreedingPairOptimized(male, female, maxDepth);
+          const recommendation = await this.analyzeBreedingPairOptimized(male, female, maxDepth);
           if (recommendation) {
             recommendations.push(recommendation);
             successfulRecommendations++;
@@ -143,15 +157,35 @@ export class OptimizedBreedingRecommendationGenerator {
     }
   }
 
-  private static analyzeBreedingPairOptimized(
-    male: OptimizedAnimal, 
-    female: OptimizedAnimal, 
+  private static async analyzeBreedingPairOptimized(
+    male: Animal, 
+    female: Animal, 
     maxDepth: number
-  ): BreedingRecommendation | null {
+  ): Promise<BreedingRecommendation | null> {
     try {
       // Quick compatibility check based on species
       if (male.species !== female.species) {
         return null; // Skip inter-species breeding for now
+      }
+
+      // CRITICAL: Check for family relationships FIRST to prevent incest
+      console.log(`🔍 Checking family relationship: ${male.name} (${male.id}) × ${female.name} (${female.id})`);
+      
+      // Special logging for the SHIVA case to verify fix
+      if ((male.name === 'CRÍA DE SHIVA Y JAZZ' && female.name === 'SHIVA') ||
+          (female.name === 'CRÍA DE SHIVA Y JAZZ' && male.name === 'SHIVA')) {
+        console.log(`🚨 CRITICAL TEST CASE: CRÍA DE SHIVA Y JAZZ × SHIVA`);
+        console.log(`   CRÍA ID: ${male.name === 'CRÍA DE SHIVA Y JAZZ' ? male.id : female.id}`);
+        console.log(`   CRÍA mother: ${male.name === 'CRÍA DE SHIVA Y JAZZ' ? male.motherId : female.motherId}`);
+        console.log(`   SHIVA ID: ${male.name === 'SHIVA' ? male.id : female.id}`);
+        console.log(`   Should be BLOCKED because SHIVA is the mother of CRÍA!`);
+      }
+      
+      const familyRelationship = await FamilyRelationshipService.detectFamilyRelationship(male, female);
+      
+      if (familyRelationship.shouldBlock) {
+        console.log(`🚫 BLOCKING incestuous pairing: ${male.name} × ${female.name} - ${familyRelationship.details}`);
+        return null; // NEVER recommend incestuous pairings
       }
 
       // Calculate simplified inbreeding risk using limited pedigree data
@@ -182,15 +216,34 @@ export class OptimizedBreedingRecommendationGenerator {
   }
 
   private static calculateSimplifiedInbreedingRisk(
-    male: OptimizedAnimal, 
-    female: OptimizedAnimal, 
+    male: Animal, 
+    female: Animal, 
     maxDepth: number
   ): 'low' | 'moderate' | 'high' {
-    // Quick checks for immediate family relationships
-    if (male.mother_id === female.mother_id && male.mother_id) return 'high';
-    if (male.father_id === female.father_id && male.father_id) return 'high';
-    if (male.id === female.mother_id || male.id === female.father_id) return 'high';
-    if (female.id === male.mother_id || female.id === male.father_id) return 'high';
+    console.log(`🧬 Calculating inbreeding risk for ${male.name} × ${female.name}`);
+    console.log(`   Male parents: mother=${male.motherId}, father=${male.fatherId}`);
+    console.log(`   Female parents: mother=${female.motherId}, father=${female.fatherId}`);
+    
+    // CRITICAL: Check for immediate family relationships (these should already be blocked by family service)
+    // Parent-Child relationships (INCEST - should be blocked)
+    if (male.id === female.motherId || male.id === female.fatherId) {
+      console.log(`🚫 CRITICAL: ${male.name} is parent of ${female.name} - INCEST DETECTED!`);
+      return 'high';
+    }
+    if (female.id === male.motherId || female.id === male.fatherId) {
+      console.log(`🚫 CRITICAL: ${female.name} is parent of ${male.name} - INCEST DETECTED!`);
+      return 'high';
+    }
+    
+    // Sibling relationships (same parents)
+    if (male.motherId && female.motherId && male.motherId === female.motherId) {
+      console.log(`🚫 SIBLINGS: Both share mother ${male.motherId}`);
+      return 'high';
+    }
+    if (male.fatherId && female.fatherId && male.fatherId === female.fatherId) {
+      console.log(`🚫 SIBLINGS: Both share father ${male.fatherId}`);
+      return 'high';
+    }
 
     // For mobile (depth 1-2), skip complex grandparent checks
     if (maxDepth <= 2) {
@@ -199,25 +252,28 @@ export class OptimizedBreedingRecommendationGenerator {
 
     // Check grandparent relationships for deeper analysis
     const maleGrandparents = [
-      male.maternal_grandmother_id, male.maternal_grandfather_id,
-      male.paternal_grandmother_id, male.paternal_grandfather_id
+      male.maternalGrandmotherId, male.maternalGrandfatherId,
+      male.paternalGrandmotherId, male.paternalGrandfatherId
     ].filter(Boolean);
 
     const femaleGrandparents = [
-      female.maternal_grandmother_id, female.maternal_grandfather_id,
-      female.paternal_grandmother_id, female.paternal_grandfather_id
+      female.maternalGrandmotherId, female.maternalGrandfatherId,
+      female.paternalGrandmotherId, female.paternalGrandfatherId
     ].filter(Boolean);
 
     const commonGrandparents = maleGrandparents.filter(gp => femaleGrandparents.includes(gp!));
     
-    if (commonGrandparents.length > 0) return 'moderate';
+    if (commonGrandparents.length > 0) {
+      console.log(`⚠️ Common grandparents detected: ${commonGrandparents.join(', ')}`);
+      return 'moderate';
+    }
     
     return 'low';
   }
 
   private static calculateQuickCompatibilityScore(
-    male: OptimizedAnimal, 
-    female: OptimizedAnimal, 
+    male: Animal, 
+    female: Animal, 
     inbreedingRisk: 'low' | 'moderate' | 'high'
   ): number {
     let score = 50; // Base score
@@ -229,8 +285,8 @@ export class OptimizedBreedingRecommendationGenerator {
       return normalized;
     };
     
-    const maleHealth = normalizeHealth(male.health_status);
-    const femaleHealth = normalizeHealth(female.health_status);
+    const maleHealth = normalizeHealth(male.healthStatus);
+    const femaleHealth = normalizeHealth(female.healthStatus);
     
     // Health status bonus (more flexible matching)
     if (maleHealth === 'healthy' && femaleHealth === 'healthy') {
@@ -267,8 +323,8 @@ export class OptimizedBreedingRecommendationGenerator {
   }
 
   private static generateQuickRecommendations(
-    male: OptimizedAnimal, 
-    female: OptimizedAnimal, 
+    male: Animal, 
+    female: Animal, 
     inbreedingRisk: 'low' | 'moderate' | 'high',
     compatibilityScore: number
   ): string[] {
@@ -293,7 +349,7 @@ export class OptimizedBreedingRecommendationGenerator {
     }
 
     // Health status
-    if (male.health_status === 'healthy' && female.health_status === 'healthy') {
+    if (male.healthStatus === 'healthy' && female.healthStatus === 'healthy') {
       recommendations.push('💪 Ambos animales en excelente estado de salud');
     }
 
