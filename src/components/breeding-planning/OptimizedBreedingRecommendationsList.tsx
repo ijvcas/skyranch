@@ -118,6 +118,8 @@ const OptimizedBreedingRecommendationsList: React.FC = () => {
     reason: string;
   }>>([]);
   
+  console.log('🔧 DEBUG: OptimizedBreedingRecommendationsList component mounted');
+  
   const { 
     data: breedingRecommendations = [], 
     isLoading, 
@@ -125,6 +127,13 @@ const OptimizedBreedingRecommendationsList: React.FC = () => {
     refetch,
     isRefetching 
   } = useOptimizedBreedingRecommendations();
+  
+  console.log('🔧 DEBUG: Hook results:', { 
+    recommendationsLength: breedingRecommendations.length, 
+    isLoading, 
+    isError, 
+    isRefetching 
+  });
 
   const handleRefresh = async () => {
     clearCache();
