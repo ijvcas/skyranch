@@ -67,7 +67,13 @@ export class SimpleBreedingRecommendations {
         // Skip if same animal
         if (male.id === female.id) continue;
 
-        // Breed compatibility check - prevent incompatible breed crosses
+        // Species compatibility check - CRITICAL: different species cannot breed
+        if (male.species !== female.species) {
+          console.log(`🔥 SIMPLE: BLOCKED different species: ${male.name} (${male.species}) x ${female.name} (${female.species})`);
+          continue;
+        }
+
+        // Breed compatibility check - prevent incompatible breed crosses within same species
         const isBreedCompatible = SimpleBreedingRecommendations.checkBreedCompatibility(male, female);
         if (!isBreedCompatible) {
           console.log(`🔥 SIMPLE: BLOCKED incompatible breeds: ${male.name} x ${female.name}`);
