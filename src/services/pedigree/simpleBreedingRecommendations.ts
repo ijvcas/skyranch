@@ -68,7 +68,7 @@ export class SimpleBreedingRecommendations {
         if (male.id === female.id) continue;
 
         // Breed compatibility check - prevent incompatible breed crosses
-        const isBreedCompatible = this.checkBreedCompatibility(male, female);
+        const isBreedCompatible = SimpleBreedingRecommendations.checkBreedCompatibility(male, female);
         if (!isBreedCompatible) {
           console.log(`🔥 SIMPLE: BLOCKED incompatible breeds: ${male.name} x ${female.name}`);
           continue;
@@ -144,8 +144,8 @@ export class SimpleBreedingRecommendations {
 
   static checkBreedCompatibility(male: any, female: any): boolean {
     // Get breed names - they might be in breed field or extracted from name
-    const maleBreed = this.extractBreed(male);
-    const femaleBreed = this.extractBreed(female);
+    const maleBreed = SimpleBreedingRecommendations.extractBreed(male);
+    const femaleBreed = SimpleBreedingRecommendations.extractBreed(female);
 
     console.log(`🔥 SIMPLE: Checking breeds: ${maleBreed} x ${femaleBreed}`);
 
