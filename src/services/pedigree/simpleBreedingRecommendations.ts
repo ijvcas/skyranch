@@ -38,108 +38,127 @@ export class SimpleBreedingRecommendations {
         return [];
       }
 
-      // Filter males and females
-      const males = animals.filter(a => {
-        const gender = a.gender?.toLowerCase();
-        return gender === 'male' || gender === 'macho' || gender === 'm';
-      });
-
-      const females = animals.filter(a => {
-        const gender = a.gender?.toLowerCase();
-        return gender === 'female' || gender === 'hembra' || gender === 'f';
-      });
-
-      console.log('🔥 SIMPLE: Males:', males.length, 'Females:', females.length);
-
-      if (males.length === 0 || females.length === 0) {
-        console.log('🔥 SIMPLE: Missing gender groups');
-        return [];
-      }
-
       const recommendations: SimpleBreedingRecommendation[] = [];
 
-      // Generate simple recommendations
-      for (let i = 0; i < Math.min(males.length, 3); i++) {
-        for (let j = 0; j < Math.min(females.length, 3); j++) {
-          const male = males[i];
-          const female = females[j];
+      // Group animals by species to generate recommendations within each species
+      const speciesGroups = new Map<string, { males: any[], females: any[] }>();
+      
+      // Organize animals by species
+      for (const animal of animals) {
+        if (!speciesGroups.has(animal.species)) {
+          speciesGroups.set(animal.species, { males: [], females: [] });
+        }
+        
+        const group = speciesGroups.get(animal.species)!;
+        const gender = animal.gender?.toLowerCase();
+        
+        if (gender === 'male' || gender === 'macho' || gender === 'm') {
+          group.males.push(animal);
+        } else if (gender === 'female' || gender === 'hembra' || gender === 'f') {
+          group.females.push(animal);
+        }
+      }
 
-        // Skip if same animal
-        if (male.id === female.id) continue;
+      console.log('🔥 SIMPLE: Species groups:', Array.from(speciesGroups.entries()).map(([species, group]) => 
+        `${species}: ${group.males.length}M/${group.females.length}F`
+      ));
 
-        // Species compatibility check - CRITICAL: different species cannot breed
-        if (male.species !== female.species) {
-          console.log(`🔥 SIMPLE: BLOCKED different species: ${male.name} (${male.species}) x ${female.name} (${female.species})`);
+      // Generate recommendations for each species group
+      for (const [species, group] of speciesGroups) {
+        const { males, females } = group;
+        
+        if (males.length === 0 || females.length === 0) {
+          console.log(`🔥 SIMPLE: Skipping ${species} - not enough animals (${males.length}M/${females.length}F)`);
           continue;
         }
 
-        // Breed compatibility check - prevent incompatible breed crosses within same species
-        const isBreedCompatible = SimpleBreedingRecommendations.checkBreedCompatibility(male, female);
-        if (!isBreedCompatible) {
-          console.log(`🔥 SIMPLE: BLOCKED incompatible breeds: ${male.name} x ${female.name}`);
-          continue;
-        }
+        console.log(`🔥 SIMPLE: Generating recommendations for ${species}: ${males.length} males x ${females.length} females`);
 
-        // Simple incest check
-        let inbreedingRisk: 'low' | 'moderate' | 'high' = 'low';
-        let blocked = false;
+        // Generate recommendations within this species (limit to 3x3 for performance)
+        for (let i = 0; i < Math.min(males.length, 3); i++) {
+          for (let j = 0; j < Math.min(females.length, 3); j++) {
+            const male = males[i];
+            const female = females[j];
 
-          // Check if one is parent of the other
-          if (male.id === female.mother_id || male.id === female.father_id ||
-              female.id === male.mother_id || female.id === male.father_id) {
-            console.log(`🔥 SIMPLE: BLOCKED parent-child: ${male.name} x ${female.name}`);
-            blocked = true;
+            // Skip if same animal
+            if (male.id === female.id) continue;
+
+            // Breed compatibility check - prevent incompatible breed crosses within same species
+            const isBreedCompatible = SimpleBreedingRecommendations.checkBreedCompatibility(male, female);
+            if (!isBreedCompatible) {
+              console.log(`🔥 SIMPLE: BLOCKED incompatible breeds: ${male.name} x ${female.name}`);
+              continue;
+            }
+
+            // Simple incest check
+            let inbreedingRisk: 'low' | 'moderate' | 'high' = 'low';
+            let blocked = false;
+
+            // Check if one is parent of the other
+            if (male.id === female.mother_id || male.id === female.father_id ||
+                female.id === male.mother_id || female.id === male.father_id) {
+              console.log(`🔥 SIMPLE: BLOCKED parent-child: ${male.name} x ${female.name}`);
+              blocked = true;
+            }
+
+            // Check if siblings
+            if (male.mother_id && female.mother_id && male.mother_id === female.mother_id) {
+              console.log(`🔥 SIMPLE: BLOCKED siblings (same mother): ${male.name} x ${female.name}`);
+              blocked = true;
+            }
+
+            if (male.father_id && female.father_id && male.father_id === female.father_id) {
+              console.log(`🔥 SIMPLE: BLOCKED siblings (same father): ${male.name} x ${female.name}`);
+              blocked = true;
+            }
+
+            // Skip blocked pairings
+            if (blocked) continue;
+
+            // Simple compatibility score
+            let score = 50;
+            if (male.health_status === 'healthy' && female.health_status === 'healthy') {
+              score += 30;
+            }
+            if (male.species === female.species) {
+              score += 20;
+            }
+
+            const recommendation: SimpleBreedingRecommendation = {
+              id: `${male.id}-${female.id}`,
+              maleId: male.id,
+              maleName: male.name,
+              femaleId: female.id,
+              femaleName: female.name,
+              compatibilityScore: score,
+              geneticDiversityGain: Math.round(score * 0.8),
+              inbreedingRisk,
+              recommendations: [
+                '✅ Apareamiento recomendado',
+                `🧬 Compatibilidad: ${score}%`,
+                `🐑 Especie: ${species}`
+              ],
+              reasoning: [
+                `Macho: ${male.name}`,
+                `Hembra: ${female.name}`,
+                `Especie: ${species}`,
+                'Análisis básico completado'
+              ]
+            };
+
+            recommendations.push(recommendation);
           }
-
-          // Check if siblings
-          if (male.mother_id && female.mother_id && male.mother_id === female.mother_id) {
-            console.log(`🔥 SIMPLE: BLOCKED siblings (same mother): ${male.name} x ${female.name}`);
-            blocked = true;
-          }
-
-          if (male.father_id && female.father_id && male.father_id === female.father_id) {
-            console.log(`🔥 SIMPLE: BLOCKED siblings (same father): ${male.name} x ${female.name}`);
-            blocked = true;
-          }
-
-          // Skip blocked pairings
-          if (blocked) continue;
-
-          // Simple compatibility score
-          let score = 50;
-          if (male.health_status === 'healthy' && female.health_status === 'healthy') {
-            score += 30;
-          }
-          if (male.species === female.species) {
-            score += 20;
-          }
-
-          const recommendation: SimpleBreedingRecommendation = {
-            id: `${male.id}-${female.id}`,
-            maleId: male.id,
-            maleName: male.name,
-            femaleId: female.id,
-            femaleName: female.name,
-            compatibilityScore: score,
-            geneticDiversityGain: Math.round(score * 0.8),
-            inbreedingRisk,
-            recommendations: [
-              '✅ Apareamiento recomendado',
-              `🧬 Compatibilidad: ${score}%`,
-              `🐑 Especies: ${male.species}`
-            ],
-            reasoning: [
-              `Macho: ${male.name}`,
-              `Hembra: ${female.name}`,
-              'Análisis básico completado'
-            ]
-          };
-
-          recommendations.push(recommendation);
         }
       }
 
       console.log('🔥 SIMPLE: Generated', recommendations.length, 'recommendations');
+      console.log('🔥 SIMPLE: Recommendations by species:', 
+        Array.from(speciesGroups.keys()).map(species => {
+          const speciesRecs = recommendations.filter(r => r.recommendations.some(rec => rec.includes(species)));
+          return `${species}: ${speciesRecs.length}`;
+        })
+      );
+      
       return recommendations.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
 
     } catch (error) {
