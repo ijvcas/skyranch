@@ -16,7 +16,7 @@ const DashboardStats = ({ totalAnimals, speciesCounts }: DashboardStatsProps) =>
   };
 
   const handleSpeciesClick = (species: string) => {
-    navigate(`/animals?species=${species}`);
+    navigate(`/animals?species=${species}&expand=true`);
   };
 
   const getSpeciesDisplayName = (species: string) => {

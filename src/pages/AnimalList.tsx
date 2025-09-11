@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +21,11 @@ const AnimalList = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  
+  // Check if we should expand a specific species section
+  const shouldExpand = searchParams.get('expand') === 'true';
+  const targetSpecies = searchParams.get('species');
   
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
@@ -134,6 +140,7 @@ const AnimalList = () => {
                   species={species}
                   animals={speciesAnimals}
                   onDeleteAnimal={handleDeleteClick}
+                  initialExpanded={shouldExpand && species === targetSpecies}
                 />
               ))}
             {hasNextPage && (

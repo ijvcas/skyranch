@@ -12,10 +12,11 @@ interface AnimalSpeciesGroupProps {
   species: string;
   animals: Animal[];
   onDeleteAnimal: (animalId: string, animalName: string) => void;
+  initialExpanded?: boolean;
 }
 
-const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal }: AnimalSpeciesGroupProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal, initialExpanded = false }: AnimalSpeciesGroupProps) => {
+  const [isCollapsed, setIsCollapsed] = useState(!initialExpanded);
   const [deceasedCollapsed, setDeceasedCollapsed] = useState(false);
   const parentRef = useRef<HTMLDivElement | null>(null);
   
