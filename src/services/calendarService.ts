@@ -100,17 +100,25 @@ export const getCalendarEvents = async (): Promise<CalendarEvent[]> => {
 };
 
 export const getEventNotificationUsers = async (eventId: string): Promise<string[]> => {
+  console.log(`📅 [SERVICE DEBUG] Fetching event notification users for event: ${eventId}`);
+  
   const { data, error } = await supabase
     .from('event_notifications')
     .select('user_id')
     .eq('event_id', eventId);
 
+  console.log(`📅 [SERVICE DEBUG] Raw query result:`, { data, error });
+
   if (error) {
-    console.error('Error fetching event notification users:', error);
+    console.error('📅 [SERVICE DEBUG] Error fetching event notification users:', error);
     return [];
   }
 
-  return data?.map(item => item.user_id) || [];
+  const userIds = data?.map(item => item.user_id) || [];
+  console.log(`📅 [SERVICE DEBUG] Mapped user IDs:`, userIds);
+  console.log(`📅 [SERVICE DEBUG] Total users found: ${userIds.length}`);
+
+  return userIds;
 };
 
 export const addCalendarEvent = async (

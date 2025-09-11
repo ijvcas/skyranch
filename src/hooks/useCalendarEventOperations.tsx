@@ -136,8 +136,10 @@ export const useCalendarEventOperations = (sendNotificationsToUsers: (selectedUs
   };
 
   const getNotificationUsers = async (eventId: string): Promise<string[]> => {
+    console.log(`📅 [DEBUG] Fetching notification users for event ${eventId}`);
     const users = await getEventNotificationUsers(eventId);
-    console.log(`📅 Retrieved notification users for event ${eventId}:`, users);
+    console.log(`📅 [DEBUG] Retrieved notification users for event ${eventId}:`, users);
+    console.log(`📅 [DEBUG] Number of users returned: ${users.length}`);
     return users;
   };
 
