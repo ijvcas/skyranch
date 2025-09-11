@@ -51,7 +51,7 @@ const AnimalListFilters = ({
                   <SelectItem value="porcino">Porcino</SelectItem>
                   <SelectItem value="equino">Equino</SelectItem>
                   <SelectItem value="aviar">Aviar</SelectItem>
-                  <SelectItem value="canine">Canino</SelectItem>
+                  <SelectItem value="caninos">Canino</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={selectedStatus} onValueChange={onStatusChange}>
