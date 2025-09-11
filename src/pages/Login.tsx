@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Users, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { versionService } from '@/versionService';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -116,6 +117,16 @@ const Login = () => {
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
             SkyRanch
           </CardTitle>
+          <div className="text-xs text-gray-500 mb-3">
+            <p>Versión {versionService.getVersion()} • Build #{versionService.getBuildNumber()}</p>
+            <p>{new Date(import.meta.env.VITE_BUILD_TIME).toLocaleDateString('es-ES', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</p>
+          </div>
           <p className="text-gray-600 text-lg">
             Inicia sesión para gestionar tus animales
           </p>
