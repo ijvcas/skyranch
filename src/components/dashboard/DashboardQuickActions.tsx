@@ -10,21 +10,12 @@ const DashboardQuickActions = () => {
   const navigate = useNavigate();
   const { hasAccess: canAccessSettings } = usePermissionCheck('system_settings');
 
-  const quickActions = [
-    { 
-      title: 'Configuración', 
-      description: 'Ajustes del sistema y permisos',
-      icon: Settings,
-      action: () => navigate('/settings'),
-      color: 'bg-gray-600 hover:bg-gray-700'
-    },
-  ].filter(action => {
-    // Only show settings if user has access
-    if (action.title === 'Configuración') {
-      return canAccessSettings;
-    }
-    return true;
-  });
+  const quickActions: any[] = [];
+
+  // Return null if no quick actions to render
+  if (quickActions.length === 0) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
