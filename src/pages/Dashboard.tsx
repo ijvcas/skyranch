@@ -15,6 +15,7 @@ import ImageUpload from '@/components/ImageUpload';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import DashboardQuickActions from '@/components/dashboard/DashboardQuickActions';
+import DashboardWeeklyEvents from '@/components/dashboard/DashboardWeeklyEvents';
 import DashboardLoadingState from '@/components/dashboard/DashboardLoadingState';
 import DashboardErrorState from '@/components/dashboard/DashboardErrorState';
 import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
@@ -298,6 +299,8 @@ const Dashboard = () => {
             />
           )}
 
+          <DashboardWeeklyEvents />
+          
           <DashboardQuickActions />
           
           <DashboardSupportInfo />

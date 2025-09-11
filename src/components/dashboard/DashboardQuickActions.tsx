@@ -12,21 +12,19 @@ const DashboardQuickActions = () => {
 
   const quickActions = [
     { 
-      title: 'Ver Animales', 
-      description: 'Gestionar animales existentes',
-      icon: Users,
-      action: () => navigate('/animals'),
-      color: 'bg-blue-600 hover:bg-blue-700',
-      showAddButton: true
+      title: 'Configuración', 
+      description: 'Ajustes del sistema y permisos',
+      icon: Settings,
+      action: () => navigate('/settings'),
+      color: 'bg-gray-600 hover:bg-gray-700'
     },
-    { 
-      title: 'Calendario', 
-      description: 'Programar eventos y citas',
-      icon: Calendar,
-      action: () => navigate('/calendar'),
-      color: 'bg-orange-600 hover:bg-orange-700'
-    },
-  ];
+  ].filter(action => {
+    // Only show settings if user has access
+    if (action.title === 'Configuración') {
+      return canAccessSettings;
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -50,15 +48,6 @@ const DashboardQuickActions = () => {
                 >
                   Acceder
                 </Button>
-                {action.showAddButton && (
-                  <Button
-                    onClick={() => navigate('/animals/new')}
-                    className="h-10 md:h-12 px-3 md:px-4 bg-green-600 hover:bg-green-700 text-white transition-colors duration-200 mobile-tap-target"
-                    title="Agregar nuevo animal"
-                  >
-                    <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
-                  </Button>
-                )}
               </div>
             </CardContent>
           </Card>
