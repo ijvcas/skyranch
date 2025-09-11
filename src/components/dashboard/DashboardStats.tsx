@@ -15,8 +15,8 @@ const DashboardStats = ({ totalAnimals, speciesCounts }: DashboardStatsProps) =>
     navigate('/animals');
   };
 
-  const handleSpeciesClick = () => {
-    navigate('/animals');
+  const handleSpeciesClick = (species: string) => {
+    navigate(`/animals?species=${species}`);
   };
 
   const getSpeciesDisplayName = (species: string) => {
@@ -70,7 +70,7 @@ const DashboardStats = ({ totalAnimals, speciesCounts }: DashboardStatsProps) =>
         <Card 
           key={species} 
           className={`${getSpeciesColor(species)} shadow-lg border-opacity-20 hover:shadow-xl cursor-pointer transition-all duration-300 hover:scale-105`}
-          onClick={handleSpeciesClick}
+          onClick={() => handleSpeciesClick(species)}
         >
           <CardHeader className="pb-2 p-3 md:p-6">
             <CardTitle className="text-xs md:text-sm font-medium text-white uppercase tracking-wide opacity-90">
