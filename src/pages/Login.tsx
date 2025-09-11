@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Users, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { versionService } from '@/versionService';
+import { unifiedVersionManager } from '@/services/version-management';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,6 +20,27 @@ const Login = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [versionInfo, setVersionInfo] = useState<{ version: string; buildNumber: number; releaseDate?: string } | null>(null);
+
+  // Load version info
+  useEffect(() => {
+    const loadVersionInfo = async () => {
+      try {
+        const currentVersion = await unifiedVersionManager.getCurrentVersion();
+        if (currentVersion) {
+          setVersionInfo({
+            version: currentVersion.version,
+            buildNumber: currentVersion.buildNumber,
+            releaseDate: currentVersion.releaseDate
+          });
+        }
+      } catch (error) {
+        console.error('Error loading version info:', error);
+      }
+    };
+    
+    loadVersionInfo();
+  }, []);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -117,16 +138,20 @@ const Login = () => {
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
             SkyRanch
           </CardTitle>
-          <div className="text-xs text-gray-500 mb-3">
-            <p>Versión {versionService.getVersion()} • Build #{versionService.getBuildNumber()}</p>
-            <p>{new Date(import.meta.env.VITE_BUILD_TIME).toLocaleDateString('es-ES', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</p>
-          </div>
+          {versionInfo && (
+            <div className="text-xs text-gray-500 mb-3">
+              <p>Versión v{versionInfo.version} • Build #{versionInfo.buildNumber}</p>
+              {versionInfo.releaseDate && (
+                <p>{new Date(versionInfo.releaseDate).toLocaleDateString('es-ES', { 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</p>
+              )}
+            </div>
+          )}
           <p className="text-gray-600 text-lg">
             Inicia sesión para gestionar tus animales
           </p>
