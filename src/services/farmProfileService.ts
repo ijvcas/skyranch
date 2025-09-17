@@ -24,6 +24,7 @@ class FarmProfileService {
       .from('farm_profiles')
       .select('*')
       .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (error) {
