@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Users, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { unifiedVersionManager } from '@/services/version-management';
+import { farmProfileService } from '@/services/farmProfileService';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,11 +22,13 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [versionInfo, setVersionInfo] = useState<{ version: string; buildNumber: number; releaseDate?: string } | null>(null);
+  const [farmLogoUrl, setFarmLogoUrl] = useState<string | null>(null);
 
-  // Load version info
+  // Load version info and farm logo
   useEffect(() => {
-    const loadVersionInfo = async () => {
+    const loadAppData = async () => {
       try {
+        // Load version info
         const currentVersion = await unifiedVersionManager.getCurrentVersion();
         if (currentVersion) {
           setVersionInfo({
@@ -34,12 +37,18 @@ const Login = () => {
             releaseDate: currentVersion.releaseDate
           });
         }
+
+        // Load farm logo
+        const farmProfile = await farmProfileService.getFarmProfile();
+        if (farmProfile?.logo_url) {
+          setFarmLogoUrl(farmProfile.logo_url);
+        }
       } catch (error) {
-        console.error('Error loading version info:', error);
+        console.error('Error loading app data:', error);
       }
     };
     
-    loadVersionInfo();
+    loadAppData();
   }, []);
 
   // Redirect if already logged in
@@ -132,11 +141,19 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center pb-6">
-          <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Users className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden">
+            {farmLogoUrl ? (
+              <img 
+                src={farmLogoUrl} 
+                alt="Farm Logo" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Users className="w-10 h-10 text-white" />
+            )}
           </div>
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            SkyRanch
+            SKYRANCH
           </CardTitle>
           {versionInfo && (
             <div className="text-xs text-gray-500 mb-3">
