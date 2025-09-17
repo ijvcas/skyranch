@@ -85,7 +85,7 @@ export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased
   try {
     let query = supabase
       .from('animals')
-      .select('id,name,tag,species,health_status,lifecycle_status,created_at');
+      .select('id,name,tag,species,breed,gender,birth_date,health_status,lifecycle_status,created_at,image_url,weight,color');
     
     if (!includeDeceased) {
       query = query.neq('lifecycle_status', 'deceased');
@@ -104,11 +104,11 @@ export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased
       name: animal.name || '',
       tag: animal.tag || '',
       species: animal.species || 'bovino',
-      breed: '',
-      birthDate: '',
-      gender: '',
-      weight: '',
-      color: '',
+      breed: animal.breed || '',
+      birthDate: animal.birth_date || '',
+      gender: animal.gender || '',
+      weight: animal.weight ? animal.weight.toString() : '',
+      color: animal.color || '',
       motherId: '',
       fatherId: '',
       maternalGrandmotherId: '',
@@ -125,7 +125,7 @@ export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased
       paternalGreatGrandfatherPaternalId: '',
       healthStatus: animal.health_status || 'healthy',
       notes: '',
-      image: null,
+      image: animal.image_url || null,
       current_lot_id: undefined,
       lifecycleStatus: animal.lifecycle_status || 'active',
       dateOfDeath: '',
