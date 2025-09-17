@@ -53,7 +53,6 @@ const Dashboard = () => {
     // Run network diagnostics on component mount
     networkDiagnostics.runDiagnostics().then(({ network, supabase }) => {
       if (!network) {
-        console.error('🔴 Network connectivity issues detected');
         toast({
           title: "Problema de Conexión",
           description: "Se detectaron problemas de conectividad de red",
@@ -61,7 +60,6 @@ const Dashboard = () => {
         });
       }
       if (!supabase) {
-        console.error('🔴 Supabase connectivity issues detected');
         toast({
           title: "Problema de Base de Datos",
           description: "No se puede conectar a la base de datos",
@@ -77,7 +75,6 @@ const Dashboard = () => {
           setBannerImage(bannerData.image_url);
         }
       } catch (error) {
-        console.error('Error loading banner:', error);
         // Keep default fallback image
       }
     };
@@ -89,7 +86,6 @@ const Dashboard = () => {
           setUserName(userData.name);
         }
       } catch (error) {
-        console.error('Error loading user data:', error);
         // Fallback to email if name not available
       }
     };
@@ -176,18 +172,14 @@ const Dashboard = () => {
 
   // Force a complete refresh of all data with user sync retry
   const handleForceRefresh = async () => {
-    console.log('🔄 Force refreshing all data with user sync...');
-    
     try {
       // Clear cache and run diagnostics
       networkDiagnostics.clearCache();
       networkDiagnostics.runDiagnostics();
       
       // Force user sync retry
-      console.log('🔄 Forcing user sync retry...');
       const { syncAuthUsersToAppUsers } = await import('@/services/user/userQueries');
       await syncAuthUsersToAppUsers();
-      console.log('✅ User sync completed');
       
       // Only clear animal-related queries, keep weather and other data
       queryClient.removeQueries({ queryKey: ['animals'] });
@@ -199,7 +191,6 @@ const Dashboard = () => {
         description: "Se han recargado todos los datos del sistema.",
       });
     } catch (error) {
-      console.error('❌ Error during force refresh:', error);
       toast({
         title: "Error al actualizar",
         description: "Hubo un problema al recargar los datos. Intenta de nuevo.",
@@ -234,7 +225,6 @@ const Dashboard = () => {
   }
 
   if (error) {
-    console.warn('⚠️ Non-blocking dashboard error:', error);
     // Continue rendering with whatever data we have (may be empty)
   }
 

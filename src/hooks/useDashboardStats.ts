@@ -6,8 +6,8 @@ export const useDashboardStats = () => {
   return useQuery({
     queryKey: ['dashboard', 'stats', 'lean'],
     queryFn: () => getAnimalsLean(false), // Only active animals for stats
-    staleTime: 5 * 60_000, // 5 minutes
-    gcTime: 10 * 60_000, // 10 minutes 
+    staleTime: 2 * 60_000, // 2 minutes for faster updates
+    gcTime: 5 * 60_000, // 5 minutes
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       // Don't retry on auth errors

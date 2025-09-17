@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useAnimalFiltering } from '@/hooks/useAnimalFiltering';
+import { useOptimizedAnimalFiltering } from '@/hooks/useOptimizedAnimalFiltering';
 import PageLayout from '@/components/ui/page-layout';
 import LoadingState from '@/components/ui/loading-state';
 import ErrorState from '@/components/ui/error-state';
@@ -59,7 +59,7 @@ const AnimalList = () => {
     selectedStatus,
     setSelectedStatus,
     groupedAnimals
-  } = useAnimalFiltering(animals, selectedFilter);
+  } = useOptimizedAnimalFiltering(animals, selectedFilter);
 
   const handleForceRefresh = () => {
     setUseMockData(false);
