@@ -143,7 +143,7 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center pb-6">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden bg-white">
+          <div className="w-20 h-20 rounded-lg flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden bg-white">
             {farmLogoUrl ? (
               <img 
                 src={farmLogoUrl} 
@@ -152,7 +152,7 @@ const Login = () => {
                 onError={() => setFarmLogoUrl(null)}
               />
             ) : (
-              <div className="w-full h-full bg-green-600 rounded-full flex items-center justify-center">
+              <div className="w-full h-full bg-green-600 rounded-lg flex items-center justify-center">
                 <Users className="w-10 h-10 text-white" />
               </div>
             )}
