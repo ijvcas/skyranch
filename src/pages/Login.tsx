@@ -40,7 +40,9 @@ const Login = () => {
 
         // Load farm logo
         const farmProfile = await farmProfileService.getFarmProfile();
+        console.log('Farm profile loaded:', farmProfile);
         if (farmProfile?.logo_url) {
+          console.log('Setting farm logo URL:', farmProfile.logo_url);
           setFarmLogoUrl(farmProfile.logo_url);
         }
       } catch (error) {
@@ -141,15 +143,18 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center pb-6">
-          <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden bg-white">
             {farmLogoUrl ? (
               <img 
                 src={farmLogoUrl} 
-                alt="Farm Logo" 
-                className="w-full h-full object-cover"
+                alt="SKYRANCH Logo" 
+                className="w-full h-full object-contain"
+                onError={() => setFarmLogoUrl(null)}
               />
             ) : (
-              <Users className="w-10 h-10 text-white" />
+              <div className="w-full h-full bg-green-600 rounded-full flex items-center justify-center">
+                <Users className="w-10 h-10 text-white" />
+              </div>
             )}
           </div>
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
