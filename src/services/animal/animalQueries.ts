@@ -4,9 +4,6 @@ import type { Animal } from '@/stores/animalStore';
 // Optimized fetch - RLS policies handle all access control
 export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> => {
   try {
-    console.log('🔍 [OPTIMIZED] Fetching all animals...');
-    
-    // Skip user lookup - RLS policies handle access control
     let query = supabase
       .from('animals')
       .select('*');
@@ -19,11 +16,8 @@ export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> 
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Error fetching animals:', error);
-      return [];
+      throw new Error(`Database error: ${error.message}`);
     }
-
-    console.log('✅ [OPTIMIZED] Successfully fetched animals:', data?.length || 0);
     
     return (data || []).map(animal => ({
       id: animal.id,
@@ -58,17 +52,13 @@ export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> 
       causeOfDeath: animal.cause_of_death || ''
     }));
   } catch (error) {
-    console.error('❌ Unexpected error in getAllAnimals:', error);
-    return [];
+    throw error;
   }
 };
 
 // Ultra-lean fetch for Dashboard stats - optimized
 export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pick<Animal, 'id' | 'species'>>> => {
   try {
-    console.log('🔍 [ULTRA-LEAN] Fetching animals for stats...');
-    
-    // Skip user lookup - RLS policies handle access control
     let query = supabase
       .from('animals')
       .select('id,species');
@@ -81,24 +71,74 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('❌ Error in getAnimalsLean:', error);
-      return [];
+      throw new Error(`Database error: ${error.message}`);
     }
 
-    console.log('✅ [ULTRA-LEAN] Fetched animals for stats:', data?.length || 0);
     return (data || []).map(a => ({ id: a.id, species: a.species }));
   } catch (e) {
-    console.error('❌ Unexpected error in getAnimalsLean:', e);
-    return [];
+    throw e;
+  }
+};
+
+// Ultra-lean fetch for Animals list - only essential display columns
+export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
+  try {
+    let query = supabase
+      .from('animals')
+      .select('id,name,tag,species,health_status,lifecycle_status,created_at');
+    
+    if (!includeDeceased) {
+      query = query.neq('lifecycle_status', 'deceased');
+    }
+    
+    const { data, error } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      throw new Error(`Database error: ${error.message}`);
+    }
+
+    return (data || []).map(animal => ({
+      id: animal.id,
+      name: animal.name || '',
+      tag: animal.tag || '',
+      species: animal.species || 'bovino',
+      breed: '',
+      birthDate: '',
+      gender: '',
+      weight: '',
+      color: '',
+      motherId: '',
+      fatherId: '',
+      maternalGrandmotherId: '',
+      maternalGrandfatherId: '',
+      paternalGrandmotherId: '',
+      paternalGrandfatherId: '',
+      maternalGreatGrandmotherMaternalId: '',
+      maternalGreatGrandfatherMaternalId: '',
+      maternalGreatGrandmotherPaternalId: '',
+      maternalGreatGrandfatherPaternalId: '',
+      paternalGreatGrandmotherMaternalId: '',
+      paternalGreatGrandfatherMaternalId: '',
+      paternalGreatGrandmotherPaternalId: '',
+      paternalGreatGrandfatherPaternalId: '',
+      healthStatus: animal.health_status || 'healthy',
+      notes: '',
+      image: null,
+      current_lot_id: undefined,
+      lifecycleStatus: animal.lifecycle_status || 'active',
+      dateOfDeath: '',
+      causeOfDeath: ''
+    }));
+  } catch (e) {
+    throw e;
   }
 };
 
 // High-performance paged fetch for Animals list - minimal columns
 export const getAnimalsPage = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
   try {
-    console.log(`🔍 [PAGED] Fetching animals page: offset ${offset}, limit ${limit}`);
-    
-    // Skip user auth check - RLS handles access control
     let query = supabase
       .from('animals')
       .select('id,name,tag,species,breed,birth_date,gender,weight,color,health_status,image_url,lifecycle_status,date_of_death,cause_of_death');
@@ -112,11 +152,8 @@ export const getAnimalsPage = async (limit = 50, offset = 0, includeDeceased = f
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('❌ Error in getAnimalsPage:', error);
-      return [];
+      throw new Error(`Database error: ${error.message}`);
     }
-
-    console.log(`✅ [PAGED] Fetched ${data?.length || 0} animals`);
 
     return (data || []).map(animal => ({
       id: animal.id,
@@ -151,16 +188,12 @@ export const getAnimalsPage = async (limit = 50, offset = 0, includeDeceased = f
       causeOfDeath: animal.cause_of_death || ''
     }));
   } catch (e) {
-    console.error('❌ Unexpected error in getAnimalsPage:', e);
-    return [];
+    throw e;
   }
 };
 
 export const getAnimal = async (id: string): Promise<Animal | null> => {
   try {
-    console.log('🔍 [SINGLE] Fetching animal with ID:', id);
-    
-    // Skip user check - RLS handles access control
     const { data, error } = await supabase
       .from('animals')
       .select('*')
@@ -168,16 +201,12 @@ export const getAnimal = async (id: string): Promise<Animal | null> => {
       .single();
 
     if (error) {
-      console.error('❌ Error fetching animal:', error);
-      return null;
+      throw new Error(`Database error: ${error.message}`);
     }
 
     if (!data) {
-      console.log('❌ No animal found with ID:', id);
       return null;
     }
-
-    console.log('✅ [SINGLE] Successfully fetched animal:', data.name);
     
     return {
       id: data.id,
@@ -212,7 +241,6 @@ export const getAnimal = async (id: string): Promise<Animal | null> => {
       causeOfDeath: data.cause_of_death || ''
     };
   } catch (error) {
-    console.error('❌ Unexpected error in getAnimal:', error);
-    return null;
+    throw error;
   }
 };

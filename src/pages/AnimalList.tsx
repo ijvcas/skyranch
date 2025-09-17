@@ -17,7 +17,6 @@ import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
 import { useInfiniteAnimals } from '@/hooks/useInfiniteAnimals';
 
 const AnimalList = () => {
-  console.log('🔧 AnimalList component starting...');
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -52,7 +51,6 @@ const AnimalList = () => {
     isUsingMock,
   } = useInfiniteAnimals();
 
-  console.log('🔧 About to call useAnimalFiltering with animals:', animals?.length);
   const {
     searchTerm,
     setSearchTerm,
@@ -64,7 +62,6 @@ const AnimalList = () => {
   } = useAnimalFiltering(animals, selectedFilter);
 
   const handleForceRefresh = () => {
-    console.log('🔄 Force refreshing animal list...');
     setUseMockData(false);
     clearAndRefetch();
     toast({
@@ -86,7 +83,6 @@ const AnimalList = () => {
   }
 
   if (error) {
-    console.error('Error loading animals:', error);
     return (
       <ErrorState
         title="Error al cargar animales"
