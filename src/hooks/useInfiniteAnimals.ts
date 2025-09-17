@@ -18,8 +18,8 @@ export const useInfiniteAnimals = () => {
         const animals = await getAnimalsPageLean(PAGE_SIZE, offset, true);
         return animals;
       } catch (error) {
-        // Only fallback to mock on actual database errors
-        return mockAnimals;
+        console.error('Error fetching animals page:', error);
+        throw error; // Let React Query handle the error properly
       }
     },
     getNextPageParam: (lastPage, allPages) => {
@@ -38,7 +38,7 @@ export const useInfiniteAnimals = () => {
   });
 
   const animals = (query.data?.pages || []).flat();
-  const isUsingMock = query.data?.pages?.[0] === mockAnimals;
+  const isUsingMock = false; // No longer using mock data
 
   const clearAndRefetch = async () => {
     queryClient.removeQueries({ queryKey: ['animals'] });

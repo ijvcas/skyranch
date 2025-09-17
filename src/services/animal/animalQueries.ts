@@ -83,17 +83,16 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
 // Ultra-lean fetch for Animals list - only essential display columns
 export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
   try {
-    // Use a much more optimized query with minimal columns for performance
     let query = supabase
       .from('animals')
-      .select('id,name,tag,species,health_status,lifecycle_status,gender,breed');
+      .select('id,name,tag,species,health_status,lifecycle_status,gender,breed,birth_date,image_url,weight,color');
     
     if (!includeDeceased) {
-      query = query.eq('lifecycle_status', 'active');
+      query = query.neq('lifecycle_status', 'deceased');
     }
     
     const { data, error } = await query
-      .order('name', { ascending: true }) // Sort by name instead of created_at for better performance
+      .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -111,10 +110,10 @@ export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased
       tag: animal.tag || '',
       species: animal.species || 'bovino',
       breed: animal.breed || '',
-      birthDate: '', // Will be filled by full query when needed
+      birthDate: animal.birth_date || '',
       gender: animal.gender || '',
-      weight: '',
-      color: '',
+      weight: animal.weight ? animal.weight.toString() : '',
+      color: animal.color || '',
       motherId: '',
       fatherId: '',
       maternalGrandmotherId: '',
@@ -131,7 +130,7 @@ export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased
       paternalGreatGrandfatherPaternalId: '',
       healthStatus: animal.health_status || 'healthy',
       notes: '',
-      image: null,
+      image: animal.image_url || null,
       current_lot_id: undefined,
       lifecycleStatus: animal.lifecycle_status || 'active',
       dateOfDeath: '',
