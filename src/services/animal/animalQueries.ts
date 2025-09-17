@@ -83,32 +83,38 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
 // Ultra-lean fetch for Animals list - only essential display columns
 export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
   try {
+    // Use a much more optimized query with minimal columns for performance
     let query = supabase
       .from('animals')
-      .select('id,name,tag,species,breed,gender,birth_date,health_status,lifecycle_status,created_at,image_url,weight,color');
+      .select('id,name,tag,species,health_status,lifecycle_status,gender,breed');
     
     if (!includeDeceased) {
-      query = query.neq('lifecycle_status', 'deceased');
+      query = query.eq('lifecycle_status', 'active');
     }
     
     const { data, error } = await query
-      .order('created_at', { ascending: false })
+      .order('name', { ascending: true }) // Sort by name instead of created_at for better performance
       .range(offset, offset + limit - 1);
 
     if (error) {
+      console.error('Database error in getAnimalsPageLean:', error);
       throw new Error(`Database error: ${error.message}`);
     }
 
-    return (data || []).map(animal => ({
+    if (!data) {
+      return [];
+    }
+
+    return data.map(animal => ({
       id: animal.id,
       name: animal.name || '',
       tag: animal.tag || '',
       species: animal.species || 'bovino',
       breed: animal.breed || '',
-      birthDate: animal.birth_date || '',
+      birthDate: '', // Will be filled by full query when needed
       gender: animal.gender || '',
-      weight: animal.weight ? animal.weight.toString() : '',
-      color: animal.color || '',
+      weight: '',
+      color: '',
       motherId: '',
       fatherId: '',
       maternalGrandmotherId: '',
@@ -125,13 +131,14 @@ export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased
       paternalGreatGrandfatherPaternalId: '',
       healthStatus: animal.health_status || 'healthy',
       notes: '',
-      image: animal.image_url || null,
+      image: null,
       current_lot_id: undefined,
       lifecycleStatus: animal.lifecycle_status || 'active',
       dateOfDeath: '',
       causeOfDeath: ''
     }));
   } catch (e) {
+    console.error('Error in getAnimalsPageLean:', e);
     throw e;
   }
 };
