@@ -20,19 +20,25 @@ export interface FarmProfileFormData {
 
 class FarmProfileService {
   async getFarmProfile(): Promise<FarmProfile | null> {
-    const { data, error } = await supabase
-      .from('farm_profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('farm_profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    if (error) {
-      console.error('Error fetching farm profile:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching farm profile:', error);
+        // Don't throw error, just return null for login page
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Unexpected error fetching farm profile:', error);
+      return null;
     }
-
-    return data;
   }
 
   async createFarmProfile(profileData: FarmProfileFormData): Promise<FarmProfile> {
