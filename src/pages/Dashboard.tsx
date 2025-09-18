@@ -173,6 +173,7 @@ const Dashboard = () => {
   // Force a complete refresh of all data with user sync retry
   const handleForceRefresh = async () => {
     try {
+      console.log('🔄 Force refresh initiated');
       // Clear cache and run diagnostics
       networkDiagnostics.clearCache();
       networkDiagnostics.runDiagnostics();
@@ -181,16 +182,21 @@ const Dashboard = () => {
       const { syncAuthUsersToAppUsers } = await import('@/services/user/userQueries');
       await syncAuthUsersToAppUsers();
       
-      // Only clear animal-related queries, keep weather and other data
+      // Clear ALL queries to ensure fresh data
       queryClient.removeQueries({ queryKey: ['animals'] });
       queryClient.removeQueries({ queryKey: ['animal-stats'] });
+      queryClient.removeQueries({ queryKey: ['dashboard'] });
+      
+      // Force refetch
       await refetch();
+      console.log('✅ Force refresh completed');
       
       toast({
         title: "Datos actualizados",
         description: "Se han recargado todos los datos del sistema.",
       });
     } catch (error) {
+      console.error('❌ Force refresh failed:', error);
       toast({
         title: "Error al actualizar",
         description: "Hubo un problema al recargar los datos. Intenta de nuevo.",
@@ -199,9 +205,11 @@ const Dashboard = () => {
     }
   };
 
-  // Extract stats from optimized hook
+  // Extract stats from optimized hook with debugging
+  console.log('📊 Dashboard stats data:', { statsData, isLoading, error });
   const totalAnimals = statsData?.totalAnimals || 0;
   const speciesCounts = statsData?.speciesCounts || {};
+  console.log('📊 Dashboard totals:', { totalAnimals, speciesCounts });
 
   const handleSignOut = async () => {
     try {
@@ -224,8 +232,17 @@ const Dashboard = () => {
     return <DashboardSkeletonLoader />;
   }
 
+  // Handle error state but continue with fallback data
   if (error) {
-    // Continue rendering with whatever data we have (may be empty)
+    console.error('❌ Dashboard stats error:', error);
+    // Continue rendering with fallback data
+  }
+
+  // Additional safety check for undefined statsData
+  if (!isLoading && !statsData) {
+    console.warn('⚠️ No stats data available, forcing refetch...');
+    // Trigger a refetch if data is missing
+    setTimeout(() => refetch(), 100);
   }
 
 

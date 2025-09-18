@@ -5,11 +5,17 @@ import { getAnimalsLean } from '@/services/animal/animalQueries';
 export const useDashboardStats = () => {
   return useQuery({
     queryKey: ['dashboard', 'stats', 'lean'],
-    queryFn: () => getAnimalsLean(false), // Only active animals for stats
+    queryFn: async () => {
+      console.log('🔄 Fetching dashboard stats...');
+      const animals = await getAnimalsLean(false); // Only active animals for stats
+      console.log('✅ Dashboard stats fetched:', animals.length, 'animals');
+      return animals;
+    },
     staleTime: 2 * 60_000, // 2 minutes for faster updates
     gcTime: 5 * 60_000, // 5 minutes
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
+      console.log('🔄 Dashboard stats retry attempt:', failureCount, error);
       // Don't retry on auth errors
       if (error?.message?.includes('auth') || error?.message?.includes('JWT')) {
         return false;
@@ -23,6 +29,8 @@ export const useDashboardStats = () => {
         counts[animal.species] = (counts[animal.species] || 0) + 1;
         return counts;
       }, {} as Record<string, number>);
+      
+      console.log('📊 Dashboard stats computed:', { totalAnimals, speciesCounts });
       
       return {
         totalAnimals,
