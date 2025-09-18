@@ -1,21 +1,21 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { getAnimalsPageLean } from '@/services/animal/animalQueries';
-import { mockAnimals } from '@/data/mockAnimals';
+import { getAnimalsPageUltraLean } from '@/services/animal/animalQueries';
+import { PERFORMANCE_CONFIG } from '@/utils/performanceConfig';
 import type { Animal } from '@/stores/animalStore';
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = PERFORMANCE_CONFIG.PAGINATION.DEFAULT_PAGE_SIZE;
 
 export const useInfiniteAnimals = () => {
   const queryClient = useQueryClient();
 
   const query = useInfiniteQuery<Animal[], Error>({
-    queryKey: ['animals', 'infinite-lean', 'all'],
+    queryKey: ['animals', 'infinite-ultra-lean', 'all'],
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const offset = typeof pageParam === 'number' ? pageParam : 0;
       
       try {
-        const animals = await getAnimalsPageLean(PAGE_SIZE, offset, true);
+        const animals = await getAnimalsPageUltraLean(PAGE_SIZE, offset, true);
         return animals;
       } catch (error) {
         console.error('Error fetching animals page:', error);
@@ -26,14 +26,14 @@ export const useInfiniteAnimals = () => {
       if (!lastPage) return undefined;
       return lastPage.length === PAGE_SIZE ? allPages.flat().length : undefined;
     },
-    staleTime: 3 * 60_000, // 3 minutes for faster data freshness
-    gcTime: 10 * 60_000, // 10 minutes
+    staleTime: PERFORMANCE_CONFIG.CACHE_TIMES.ANIMAL_LEAN,
+    gcTime: PERFORMANCE_CONFIG.GC_TIMES.EXTENDED,
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       if (error?.message?.includes('auth') || error?.message?.includes('JWT')) {
         return false;
       }
-      return failureCount < 2;
+      return failureCount < PERFORMANCE_CONFIG.RETRY.MAX_RETRIES;
     },
   });
 
@@ -41,6 +41,7 @@ export const useInfiniteAnimals = () => {
   const isUsingMock = false; // No longer using mock data
 
   const clearAndRefetch = async () => {
+    // Clear both ultra-lean and enhanced queries
     queryClient.removeQueries({ queryKey: ['animals'] });
     await query.refetch();
   };

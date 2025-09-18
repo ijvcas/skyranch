@@ -80,7 +80,73 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
   }
 };
 
-// Ultra-lean fetch for Animals list - only essential display columns
+// Ultra-lean fetch for Animals list - only essential display columns for fast loading
+export const getAnimalsPageUltraLean = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
+  const startTime = performance.now();
+  
+  try {
+    let query = supabase
+      .from('animals')
+      .select('id,name,tag,species,health_status,lifecycle_status,gender,breed');
+    
+    if (!includeDeceased) {
+      query = query.neq('lifecycle_status', 'deceased');
+    }
+    
+    const { data, error } = await query
+      .order('name', { ascending: true }) // Sort by name for better performance
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Database error in getAnimalsPageUltraLean:', error);
+      throw error;
+    }
+
+    const endTime = performance.now();
+    console.log(`⚡ Ultra-lean query took ${(endTime - startTime).toFixed(2)}ms`);
+
+    if (!data) return [];
+
+    return data.map((animal: any): Animal => ({
+      id: animal.id,
+      name: animal.name || 'Sin nombre',
+      tag: animal.tag || '',
+      species: animal.species || 'bovino',
+      breed: animal.breed || '',
+      birthDate: '', // Will be loaded progressively
+      gender: animal.gender || '',
+      weight: '',
+      color: '',
+      motherId: '',
+      fatherId: '',
+      maternalGrandmotherId: '',
+      maternalGrandfatherId: '',
+      paternalGrandmotherId: '',
+      paternalGrandfatherId: '',
+      maternalGreatGrandmotherMaternalId: '',
+      maternalGreatGrandfatherMaternalId: '',
+      maternalGreatGrandmotherPaternalId: '',
+      maternalGreatGrandfatherPaternalId: '',
+      paternalGreatGrandmotherMaternalId: '',
+      paternalGreatGrandfatherMaternalId: '',
+      paternalGreatGrandmotherPaternalId: '',
+      paternalGreatGrandfatherPaternalId: '',
+      healthStatus: animal.health_status || 'healthy',
+      notes: '',
+      image: null, // Will be loaded progressively
+      current_lot_id: undefined,
+      lifecycleStatus: animal.lifecycle_status || 'active',
+      dateOfDeath: '',
+      causeOfDeath: ''
+    }));
+  } catch (error) {
+    const endTime = performance.now();
+    console.error(`❌ Ultra-lean query failed after ${(endTime - startTime).toFixed(2)}ms:`, error);
+    throw error;
+  }
+};
+
+// Enhanced lean fetch with additional details for progressive loading
 export const getAnimalsPageLean = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
   try {
     let query = supabase
