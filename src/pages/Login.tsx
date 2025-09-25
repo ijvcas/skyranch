@@ -251,15 +251,6 @@ const Login = () => {
             </Button>
           </div>
 
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start space-x-2">
-              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">¿No puedes iniciar sesión?</p>
-                <p>Asegúrate de usar las credenciales correctas. Si no tienes cuenta, regístrate primero.</p>
-              </div>
-            </div>
-          </div>
 
           <div className="mt-6 text-center">
             <p className="text-base text-gray-600">
