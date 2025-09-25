@@ -174,9 +174,6 @@ const Login = () => {
               )}
             </div>
           )}
-          <p className="text-gray-600 text-lg">
-            Inicia sesión para gestionar tus animales
-          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
