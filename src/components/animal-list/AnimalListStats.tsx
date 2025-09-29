@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Animal } from '@/stores/animalStore';
 import { fetchBreedingRecords } from '@/services/breeding/breedingQueries';
 
-export type FilterType = 'all' | 'healthy' | 'pregnant' | 'sick' | 'treatment' | 'deceased';
+export type FilterType = 'all' | 'healthy' | 'pregnant' | 'sick' | 'sold' | 'deceased';
 
 interface AnimalListStatsProps {
   animals: Animal[];
@@ -63,10 +63,10 @@ const AnimalListStats = ({ animals, selectedFilter, onFilterChange }: AnimalList
       colorClass: 'text-red-600'
     },
     {
-      key: 'treatment' as FilterType,
-      count: activeAnimals.filter(a => a.healthStatus === 'treatment').length,
-      label: 'En Tratamiento',
-      colorClass: 'text-yellow-600'
+      key: 'sold' as FilterType,
+      count: activeAnimals.filter(a => a.lifecycleStatus === 'sold').length,
+      label: 'Vendidos',
+      colorClass: 'text-purple-600'
     },
     {
       key: 'deceased' as FilterType,

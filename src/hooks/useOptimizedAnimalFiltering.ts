@@ -94,8 +94,10 @@ export const useOptimizedAnimalFiltering = (animals: Animal[], selectedFilter: F
           return isAnimalPregnant(animal.id);
         case 'sick':
           return (animal.healthStatus === 'sick' || animal.healthStatus === 'pregnant-sick') && !isAnimalPregnant(animal.id);
-        case 'treatment':
-          return animal.healthStatus === 'treatment';
+      case 'treatment':
+        return animal.healthStatus === 'treatment';
+      case 'sold':
+        return animal.lifecycleStatus === 'sold';
         case 'deceased':
           return animal.lifecycleStatus === 'deceased';
         default:
