@@ -9,6 +9,7 @@ import { ParcelStatus, PARCEL_STATUS_LABELS, PARCEL_STATUS_COLORS } from '@/util
 import { ParcelEditForm } from './ParcelEditForm';
 import { getParcelNumber, hasFinancialInfo, isIncompletePropiedad } from '../utils/parcelUtils';
 import { useTimezone } from '@/hooks/useTimezone';
+import PermissionGuard from '@/components/PermissionGuard';
 
 interface ParcelCardProps {
   parcel: CadastralParcel;
@@ -79,54 +80,60 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
             )}
           </div>
           <div className="flex items-center space-x-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDetailEdit(parcel);
-              }}
-              className="h-6 w-6 p-0 text-blue-500 hover:text-blue-700"
-            >
-              <Settings className="w-3 h-3" />
-            </Button>
-            {isEditing ? (
-              <>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSaveEdit(parcel.id);
-                  }}
-                  className="h-6 w-6 p-0"
-                >
-                  <Save className="w-3 h-3" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCancelEdit();
-                  }}
-                  className="h-6 w-6 p-0"
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </>
-            ) : (
+            <PermissionGuard permission="cadastral_edit" showError={false}>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onStartEdit(parcel);
+                  onDetailEdit(parcel);
                 }}
-                className="h-6 w-6 p-0"
+                className="h-6 w-6 p-0 text-blue-500 hover:text-blue-700"
               >
-                <Edit2 className="w-3 h-3" />
+                <Settings className="w-3 h-3" />
               </Button>
+            </PermissionGuard>
+            {isEditing ? (
+              <PermissionGuard permission="cadastral_edit" showError={false}>
+                <>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSaveEdit(parcel.id);
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Save className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCancelEdit();
+                    }}
+                    className="h-6 w-6 p-0"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </>
+              </PermissionGuard>
+            ) : (
+              <PermissionGuard permission="cadastral_edit" showError={false}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStartEdit(parcel);
+                  }}
+                  className="h-6 w-6 p-0"
+                >
+                  <Edit2 className="w-3 h-3" />
+                </Button>
+              </PermissionGuard>
             )}
           </div>
         </div>

@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { CadastralParcel } from '@/services/cadastralService';
 import { ParcelStatus, PARCEL_STATUS_LABELS } from '@/utils/cadastral/types';
+import PermissionGuard from '@/components/PermissionGuard';
 
 interface ParcelAcquisitionFormProps {
   parcel: CadastralParcel;
@@ -256,9 +257,11 @@ const ParcelAcquisitionForm: React.FC<ParcelAcquisitionFormProps> = ({
           <Button variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
-            Guardar Cambios
-          </Button>
+          <PermissionGuard permission="cadastral_edit" showError={false}>
+            <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+              Guardar Cambios
+            </Button>
+          </PermissionGuard>
         </div>
       </CardContent>
     </Card>

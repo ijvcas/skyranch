@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import type { ParcelStatus } from '@/utils/cadastral/types';
+import { checkPermission } from './permissionService';
 
 export interface Property {
   id: string;
@@ -50,6 +51,9 @@ export { insertProperty as addProperty } from './cadastral/cadastralMutations';
 
 export const updateCadastralParcel = async (parcelId: string, updates: Partial<CadastralParcel>): Promise<boolean> => {
   try {
+    // Check permissions before allowing the update
+    await checkPermission('cadastral_edit');
+    
     console.log('Updating cadastral parcel:', parcelId, updates);
     
     // Map the interface fields to database column names
