@@ -1,15 +1,16 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit2, Save, X, MapPin, Settings, DollarSign, AlertCircle } from 'lucide-react';
+import { Edit2, Save, X, MapPin, Settings, DollarSign, AlertCircle, Users } from 'lucide-react';
 import type { CadastralParcel } from '@/services/cadastralService';
 import { ParcelStatus, PARCEL_STATUS_LABELS, PARCEL_STATUS_COLORS } from '@/utils/cadastral/types';
 import { ParcelEditForm } from './ParcelEditForm';
 import { getParcelNumber, hasFinancialInfo, isIncompletePropiedad } from '../utils/parcelUtils';
 import { useTimezone } from '@/hooks/useTimezone';
 import PermissionGuard from '@/components/PermissionGuard';
+import { getParcelOwners, ParcelOwner } from '@/services/parcelOwnersService';
 
 interface ParcelCardProps {
   parcel: CadastralParcel;
@@ -40,6 +41,26 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
   const { formatCurrency } = useTimezone();
   const parcelNumber = getParcelNumber(parcel);
   const showIncompleteWarning = isIncompletePropiedad(parcel);
+  const [owners, setOwners] = useState<ParcelOwner[]>([]);
+  const [loadingOwners, setLoadingOwners] = useState(false);
+
+  useEffect(() => {
+    const loadOwners = async () => {
+      if (parcel.status === 'PROPIEDAD') {
+        setLoadingOwners(true);
+        try {
+          const ownerData = await getParcelOwners(parcel.id);
+          setOwners(ownerData);
+        } catch (error) {
+          console.error('Error loading owners:', error);
+        } finally {
+          setLoadingOwners(false);
+        }
+      }
+    };
+
+    loadOwners();
+  }, [parcel.id, parcel.status]);
 
   const getStatusBadge = (status?: string) => {
     const parcelStatus = (status as ParcelStatus) || 'SHOPPING_LIST';
@@ -187,6 +208,28 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
               )}
               {parcel.acquisitionDate && (
                 <p>Fecha: {new Date(parcel.acquisitionDate).toLocaleDateString()}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Owner Information Preview */}
+        {parcel.status === 'PROPIEDAD' && owners.length > 0 && (
+          <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-1 mb-1">
+              <Users className="w-3 h-3 text-blue-600" />
+              <span className="text-xs font-medium text-gray-700">
+                {owners.length} Propietario{owners.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="text-xs text-gray-600">
+              {owners.slice(0, 2).map((owner, index) => (
+                <p key={owner.id}>
+                  {owner.owner_name} ({owner.ownership_percentage}%)
+                </p>
+              ))}
+              {owners.length > 2 && (
+                <p className="text-gray-500">+{owners.length - 2} más...</p>
               )}
             </div>
           </div>

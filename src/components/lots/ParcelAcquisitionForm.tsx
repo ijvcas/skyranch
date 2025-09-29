@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import type { CadastralParcel } from '@/services/cadastralService';
 import { ParcelStatus, PARCEL_STATUS_LABELS } from '@/utils/cadastral/types';
 import PermissionGuard from '@/components/PermissionGuard';
+import { ParcelOwnersManager } from './components/ParcelOwnersManager';
 
 interface ParcelAcquisitionFormProps {
   parcel: CadastralParcel;
@@ -236,6 +237,17 @@ const ParcelAcquisitionForm: React.FC<ParcelAcquisitionFormProps> = ({
                   rows={3}
                 />
               </div>
+            </div>
+
+            {/* Owner Management for PROPIEDAD status */}
+            <div className="pt-4">
+              <ParcelOwnersManager 
+                parcelId={parcel.id}
+                onOwnersChange={(owners) => {
+                  // Optional: Update parent component if needed
+                  console.log('Owners updated:', owners);
+                }}
+              />
             </div>
           </div>
         )}
