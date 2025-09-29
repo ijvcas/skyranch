@@ -20,7 +20,7 @@ const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal, initialExpanded 
   const [deceasedCollapsed, setDeceasedCollapsed] = useState(false);
   const parentRef = useRef<HTMLDivElement | null>(null);
   
-  // Separate active and deceased animals
+  // Separate active and deceased animals from the already filtered list
   const { activeAnimals, deceasedAnimals } = useMemo(() => {
     const active = animals.filter(animal => animal.lifecycleStatus !== 'deceased');
     const deceased = animals.filter(animal => animal.lifecycleStatus === 'deceased')
@@ -68,9 +68,11 @@ const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal, initialExpanded 
                   <ChevronDown className="w-5 h-5" />
                 )}
                 <span>{getSpeciesText(species)}</span>
-                <Badge variant="secondary" className="ml-2">
-                  {activeAnimals.length} activos
-                </Badge>
+                {activeAnimals.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">
+                    {activeAnimals.length} activos
+                  </Badge>
+                )}
                 {deceasedAnimals.length > 0 && (
                   <Badge variant="outline" className="ml-1 text-gray-600 border-gray-300">
                     {deceasedAnimals.length} fallecidos
