@@ -26,6 +26,8 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
 }) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [priceInput, setPriceInput] = useState('');
+  const [amountPaidInput, setAmountPaidInput] = useState('');
   const [formData, setFormData] = useState<SaleFormData>({
     sale_date: new Date().toISOString().split('T')[0],
     sale_price: 0,
@@ -154,15 +156,27 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
             <Input
               id="sale_price"
               type="text"
-              value={formData.sale_price ? formData.sale_price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
+              value={priceInput}
               onChange={(e) => {
-                const value = e.target.value.replace(/\./g, '').replace(',', '.');
-                handleInputChange('sale_price', parseFloat(value) || 0);
+                const value = e.target.value;
+                // Allow only numbers, comma and dot
+                if (/^[\d.,]*$/.test(value)) {
+                  setPriceInput(value);
+                  // Parse for validation
+                  const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+                  handleInputChange('sale_price', numValue);
+                }
               }}
               onBlur={(e) => {
-                // Reformat on blur to show thousands separator
-                if (formData.sale_price) {
-                  e.target.value = formData.sale_price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                // Format on blur
+                if (formData.sale_price > 0) {
+                  setPriceInput(formData.sale_price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                }
+              }}
+              onFocus={(e) => {
+                // Clear formatting on focus for easy editing
+                if (formData.sale_price > 0) {
+                  setPriceInput(formData.sale_price.toString().replace('.', ','));
                 }
               }}
               placeholder="0,00"
@@ -237,18 +251,29 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
             <Input
               id="amount_paid"
               type="text"
-              value={formData.amount_paid ? formData.amount_paid.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
+              value={amountPaidInput}
               onChange={(e) => {
-                const value = e.target.value.replace(/\./g, '').replace(',', '.');
-                const numValue = parseFloat(value) || 0;
-                if (numValue <= formData.sale_price) {
-                  handleInputChange('amount_paid', numValue);
+                const value = e.target.value;
+                // Allow only numbers, comma and dot
+                if (/^[\d.,]*$/.test(value)) {
+                  setAmountPaidInput(value);
+                  // Parse for validation
+                  const numValue = parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+                  if (numValue <= formData.sale_price) {
+                    handleInputChange('amount_paid', numValue);
+                  }
                 }
               }}
               onBlur={(e) => {
-                // Reformat on blur to show thousands separator
-                if (formData.amount_paid) {
-                  e.target.value = formData.amount_paid.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                // Format on blur
+                if (formData.amount_paid > 0) {
+                  setAmountPaidInput(formData.amount_paid.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                }
+              }}
+              onFocus={(e) => {
+                // Clear formatting on focus for easy editing
+                if (formData.amount_paid > 0) {
+                  setAmountPaidInput(formData.amount_paid.toString().replace('.', ','));
                 }
               }}
               placeholder="0,00"
