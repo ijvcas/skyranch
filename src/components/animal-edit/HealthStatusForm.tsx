@@ -33,7 +33,7 @@ const HealthStatusForm = ({
   const [showSaleConfirmation, setShowSaleConfirmation] = useState(false);
   const [pendingLifecycleChange, setPendingLifecycleChange] = useState<string | null>(null);
   const { hasAccess: canDeclareDeaths } = usePermissionCheck('animals_declare_death');
-  const { hasAccess: canDeclareSales } = usePermissionCheck('animals_declare_death');
+  const { hasAccess: canDeclareSales } = usePermissionCheck('animals_declare_sale');
 
   const handleLifecycleChange = (value: string) => {
     if (value === 'deceased' && formData.lifecycleStatus !== 'deceased') {

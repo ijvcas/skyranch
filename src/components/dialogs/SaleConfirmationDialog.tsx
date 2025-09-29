@@ -51,15 +51,6 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
       setIsSubmitting(true);
 
       // Validation
-      if (!animalId || animalId.trim() === '') {
-        toast({
-          title: 'Error',
-          description: 'ID de animal inválido',
-          variant: 'destructive'
-        });
-        return;
-      }
-
       if (!formData.sale_date || !formData.sale_price || !formData.buyer_name || !formData.payment_method) {
         toast({
           title: 'Error',
