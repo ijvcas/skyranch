@@ -112,7 +112,7 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-purple-600" />
@@ -120,7 +120,7 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto pr-2">
           {/* Sale Date */}
           <div className="space-y-2">
             <Label htmlFor="sale_date" className="flex items-center gap-2">
