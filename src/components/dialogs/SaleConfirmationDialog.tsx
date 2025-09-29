@@ -49,6 +49,15 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
       setIsSubmitting(true);
 
       // Validation
+      if (!animalId || animalId.trim() === '') {
+        toast({
+          title: 'Error',
+          description: 'ID de animal inválido',
+          variant: 'destructive'
+        });
+        return;
+      }
+
       if (!formData.sale_date || !formData.sale_price || !formData.buyer_name || !formData.payment_method) {
         toast({
           title: 'Error',
@@ -144,12 +153,19 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
             </Label>
             <Input
               id="sale_price"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.sale_price || ''}
-              onChange={(e) => handleInputChange('sale_price', parseFloat(e.target.value) || 0)}
-              placeholder="0.00"
+              type="text"
+              value={formData.sale_price ? formData.sale_price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\./g, '').replace(',', '.');
+                handleInputChange('sale_price', parseFloat(value) || 0);
+              }}
+              onBlur={(e) => {
+                // Reformat on blur to show thousands separator
+                if (formData.sale_price) {
+                  e.target.value = formData.sale_price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+              }}
+              placeholder="0,00"
               required
               className="text-right"
             />
@@ -220,13 +236,22 @@ const SaleConfirmationDialog: React.FC<SaleConfirmationDialogProps> = ({
             <Label htmlFor="amount_paid">Monto Pagado (€)</Label>
             <Input
               id="amount_paid"
-              type="number"
-              min="0"
-              max={formData.sale_price}
-              step="0.01"
-              value={formData.amount_paid || ''}
-              onChange={(e) => handleInputChange('amount_paid', parseFloat(e.target.value) || 0)}
-              placeholder="0.00"
+              type="text"
+              value={formData.amount_paid ? formData.amount_paid.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\./g, '').replace(',', '.');
+                const numValue = parseFloat(value) || 0;
+                if (numValue <= formData.sale_price) {
+                  handleInputChange('amount_paid', numValue);
+                }
+              }}
+              onBlur={(e) => {
+                // Reformat on blur to show thousands separator
+                if (formData.amount_paid) {
+                  e.target.value = formData.amount_paid.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+              }}
+              placeholder="0,00"
               className="text-right"
             />
             <p className="text-xs text-gray-500">
