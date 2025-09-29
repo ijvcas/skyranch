@@ -1086,6 +1086,62 @@ export type Database = {
           },
         ]
       }
+      parcel_owners: {
+        Row: {
+          contact_address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          identification_number: string | null
+          is_primary_contact: boolean
+          notes: string | null
+          owner_name: string
+          owner_type: Database["public"]["Enums"]["owner_type"]
+          ownership_percentage: number
+          parcel_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          identification_number?: string | null
+          is_primary_contact?: boolean
+          notes?: string | null
+          owner_name: string
+          owner_type?: Database["public"]["Enums"]["owner_type"]
+          ownership_percentage?: number
+          parcel_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          identification_number?: string | null
+          is_primary_contact?: boolean
+          notes?: string | null
+          owner_name?: string
+          owner_type?: Database["public"]["Enums"]["owner_type"]
+          ownership_percentage?: number
+          parcel_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_owners_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "cadastral_parcels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -1501,7 +1557,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      owner_type: "individual" | "company" | "cooperative" | "government"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1628,6 +1684,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      owner_type: ["individual", "company", "cooperative", "government"],
+    },
   },
 } as const
