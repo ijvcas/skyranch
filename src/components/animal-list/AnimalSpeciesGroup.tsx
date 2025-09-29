@@ -20,6 +20,15 @@ const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal, initialExpanded 
   const [deceasedCollapsed, setDeceasedCollapsed] = useState(false);
   const parentRef = useRef<HTMLDivElement | null>(null);
   
+  
+  // Debug logging to see what animals are being passed to this component
+  console.log(`AnimalSpeciesGroup for ${species} received ${animals.length} animals:`, animals.map(a => ({
+    id: a.id,
+    name: a.name,
+    healthStatus: a.healthStatus,
+    lifecycleStatus: a.lifecycleStatus
+  })));
+  
   // Separate active and deceased animals from the already filtered list
   const { activeAnimals, deceasedAnimals } = useMemo(() => {
     const active = animals.filter(animal => animal.lifecycleStatus !== 'deceased');
@@ -31,8 +40,10 @@ const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal, initialExpanded 
         }
         return 0;
       });
+    
+    console.log(`AnimalSpeciesGroup for ${species}: ${active.length} active, ${deceased.length} deceased`);
     return { activeAnimals: active, deceasedAnimals: deceased };
-  }, [animals]);
+  }, [animals, species]);
 
   // Use virtualization for large lists (more than 30 animals)
   const shouldVirtualizeActive = activeAnimals.length > 30;

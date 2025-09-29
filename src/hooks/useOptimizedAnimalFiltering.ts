@@ -89,7 +89,9 @@ export const useOptimizedAnimalFiltering = (animals: Animal[], selectedFilter: F
       // Filter type (from stats cards)
       switch (selectedFilter) {
         case 'healthy':
-          return animal.healthStatus === 'healthy' && !isAnimalPregnant(animal.id);
+          const isHealthy = animal.healthStatus === 'healthy' && !isAnimalPregnant(animal.id);
+          console.log(`Animal ${animal.name} (${animal.id}): healthStatus=${animal.healthStatus}, lifecycleStatus=${animal.lifecycleStatus}, isPregnant=${isAnimalPregnant(animal.id)}, passes healthy filter=${isHealthy}`);
+          return isHealthy;
         case 'pregnant':
           return isAnimalPregnant(animal.id);
         case 'sick':
