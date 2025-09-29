@@ -57,11 +57,6 @@ export const declareAnimalSold = async (animalId: string, saleData: SaleFormData
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('No authenticated user');
 
-    // Validate animal ID
-    if (!animalId || animalId.trim() === '') {
-      throw new Error('Invalid animal ID');
-    }
-
     // Validate sale data
     if (!saleData.sale_date || !saleData.sale_price || !saleData.buyer_name || !saleData.payment_method) {
       throw new Error('Missing required sale information');

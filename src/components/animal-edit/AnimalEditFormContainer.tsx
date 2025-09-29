@@ -46,7 +46,8 @@ const AnimalEditFormContainer: React.FC<AnimalEditFormContainerProps> = ({
           />
           
           <HealthStatusForm 
-            formData={formData} 
+            formData={formData}
+            animal={animal}
             onInputChange={onInputChange} 
           />
           

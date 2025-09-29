@@ -20,12 +20,17 @@ interface HealthStatusFormProps {
     dateOfDeath?: string;
     causeOfDeath?: string;
   };
+  animal?: {
+    id: string;
+    name: string;
+  };
   onInputChange: (field: string, value: string) => void;
   disabled?: boolean;
 }
 
 const HealthStatusForm = ({ 
-  formData, 
+  formData,
+  animal, 
   onInputChange, 
   disabled 
 }: HealthStatusFormProps) => {
@@ -217,8 +222,8 @@ const HealthStatusForm = ({
 
         <SaleConfirmationDialog
           isOpen={showSaleConfirmation}
-          animalId={formData.id || ''}
-          animalName={formData.name || 'Animal'}
+          animalId={animal?.id || formData.id || ''}
+          animalName={animal?.name || formData.name || 'Animal'}
           onClose={handleSaleCancel}
           onSaleConfirmed={handleSaleConfirmation}
         />
