@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js';
 export type Permission = 
   | 'animals_view' | 'animals_edit' | 'animals_delete' | 'animals_create' | 'animals_declare_death'
   | 'lots_manage' | 'health_records' | 'breeding_records' | 'calendar_manage'
+  | 'cadastral_view' | 'cadastral_edit' | 'cadastral_create' | 'cadastral_delete'
   | 'users_manage' | 'system_settings';
 
 export type UserRole = 'admin' | 'manager' | 'worker';
@@ -14,16 +15,19 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   admin: [
     'animals_view', 'animals_edit', 'animals_delete', 'animals_create', 'animals_declare_death',
     'lots_manage', 'health_records', 'breeding_records', 'calendar_manage',
+    'cadastral_view', 'cadastral_edit', 'cadastral_create', 'cadastral_delete',
     'users_manage', 'system_settings'
   ],
   manager: [
     'animals_view', 'animals_edit', 'animals_delete', 'animals_create', 'animals_declare_death',
     'lots_manage', 'health_records', 'breeding_records', 'calendar_manage',
+    'cadastral_view', 'cadastral_edit',
     'users_manage'
   ],
   worker: [
     'animals_view', 'animals_edit', 'animals_delete', 'animals_create',
-    'lots_manage', 'health_records', 'breeding_records', 'calendar_manage'
+    'lots_manage', 'health_records', 'breeding_records', 'calendar_manage',
+    'cadastral_view'
   ]
 };
 
@@ -102,7 +106,7 @@ export const hasPermission = async (permission: Permission, authUser?: User | nu
     if (!userRole) {
       console.log('❌ No user role found, defaulting to basic permissions');
       // For basic permissions, allow authenticated users even if role detection fails
-      const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records'];
+      const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records', 'cadastral_view'];
       return basicPermissions.includes(permission);
     }
     
@@ -119,7 +123,7 @@ export const hasPermission = async (permission: Permission, authUser?: User | nu
   } catch (error) {
     console.error('❌ Error checking permission:', error);
     // For basic permissions, be permissive when there are auth context issues
-    const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records'];
+    const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records', 'cadastral_view'];
     return basicPermissions.includes(permission);
   }
 };
@@ -136,7 +140,7 @@ export const checkPermission = async (permission: Permission, authUser?: User | 
     }
   } catch (error) {
     // For basic permissions like animals_view, don't block if there's an auth context issue
-    const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records'];
+    const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records', 'cadastral_view'];
     if (basicPermissions.includes(permission)) {
       console.warn(`⚠️ Permission check failed for ${permission}, allowing due to auth context issues:`, error);
       return; // Allow the operation to continue
