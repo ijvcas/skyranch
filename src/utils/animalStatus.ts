@@ -15,6 +15,8 @@ export const getStatusColor = (status: string) => {
       return 'bg-yellow-100 text-yellow-800';
     case 'deceased':
       return 'bg-gray-100 text-gray-600 border-gray-300';
+    case 'sold':
+      return 'bg-purple-100 text-purple-800 border-purple-300';
     default:
       return 'bg-gray-100 text-gray-800';
   }
@@ -36,6 +38,8 @@ export const getStatusText = (status: string) => {
       return 'En Tratamiento';
     case 'deceased':
       return 'Fallecido';
+    case 'sold':
+      return 'Vendido';
     default:
       return 'Saludable';
   }

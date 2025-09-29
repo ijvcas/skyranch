@@ -129,6 +129,7 @@ const HealthStatusForm = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
               >
                 <option value="active">Activo</option>
+                <option value="sold">Vendido</option>
                 <option 
                   value="deceased" 
                   disabled={!canDeclareDeaths && !isDeceased}

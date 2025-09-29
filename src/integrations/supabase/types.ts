@@ -104,6 +104,63 @@ export type Database = {
           },
         ]
       }
+      animal_sales: {
+        Row: {
+          amount_paid: number
+          amount_pending: number | null
+          animal_id: string
+          buyer_contact: string | null
+          buyer_email: string | null
+          buyer_name: string
+          created_at: string
+          id: string
+          payment_method: string
+          payment_status: string
+          sale_date: string
+          sale_notes: string | null
+          sale_price: number
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          amount_pending?: number | null
+          animal_id: string
+          buyer_contact?: string | null
+          buyer_email?: string | null
+          buyer_name: string
+          created_at?: string
+          id?: string
+          payment_method?: string
+          payment_status?: string
+          sale_date: string
+          sale_notes?: string | null
+          sale_price: number
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          amount_pending?: number | null
+          animal_id?: string
+          buyer_contact?: string | null
+          buyer_email?: string | null
+          buyer_name?: string
+          created_at?: string
+          id?: string
+          payment_method?: string
+          payment_status?: string
+          sale_date?: string
+          sale_notes?: string | null
+          sale_price?: number
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       animals: {
         Row: {
           birth_date: string | null
@@ -134,6 +191,7 @@ export type Database = {
           paternal_great_grandfather_paternal_id: string | null
           paternal_great_grandmother_maternal_id: string | null
           paternal_great_grandmother_paternal_id: string | null
+          sale_id: string | null
           species: string
           tag: string
           updated_at: string | null
@@ -169,6 +227,7 @@ export type Database = {
           paternal_great_grandfather_paternal_id?: string | null
           paternal_great_grandmother_maternal_id?: string | null
           paternal_great_grandmother_paternal_id?: string | null
+          sale_id?: string | null
           species: string
           tag: string
           updated_at?: string | null
@@ -204,6 +263,7 @@ export type Database = {
           paternal_great_grandfather_paternal_id?: string | null
           paternal_great_grandmother_maternal_id?: string | null
           paternal_great_grandmother_paternal_id?: string | null
+          sale_id?: string | null
           species?: string
           tag?: string
           updated_at?: string | null
@@ -216,6 +276,13 @@ export type Database = {
             columns: ["current_lot_id"]
             isOneToOne: false
             referencedRelation: "lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "animals_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "animal_sales"
             referencedColumns: ["id"]
           },
         ]
@@ -608,6 +675,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      farm_ledger: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          reference_id: string | null
+          reference_type: string | null
+          transaction_date: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       farm_profiles: {
         Row: {
@@ -1237,6 +1343,42 @@ export type Database = {
           name?: string
           report_type?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sale_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          reference_number: string | null
+          sale_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date: string
+          payment_method: string
+          reference_number?: string | null
+          sale_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          reference_number?: string | null
+          sale_id?: string
           user_id?: string
         }
         Relationships: []

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skull } from 'lucide-react';
+import { Skull, DollarSign } from 'lucide-react';
 import { getStatusColor, getStatusText } from '@/utils/animalStatus';
 import { useImageTransform } from './hooks/useImageTransform';
 import AnimalImageEditor from './AnimalImageEditor';
@@ -65,6 +65,13 @@ const AnimalCard = ({ animal, onDelete }: AnimalCardProps) => {
           onSaveImage={handleSaveImage}
           onCancelEdit={handleCancelEdit}
         />
+        
+        {/* Sold animal indicator */}
+        {animal.lifecycleStatus === 'sold' && (
+          <div className="absolute top-2 right-2">
+            <DollarSign className="w-6 h-6 text-purple-600" />
+          </div>
+        )}
         
         <AnimalInfo animal={animal} />
         
