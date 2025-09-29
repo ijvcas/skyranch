@@ -79,13 +79,13 @@ export const declareAnimalSold = async (animalId: string, saleData: SaleFormData
         sale_date: saleData.sale_date,
         sale_price: saleData.sale_price,
         buyer_name: saleData.buyer_name,
-        buyer_contact: saleData.buyer_contact,
-        buyer_email: saleData.buyer_email,
+        buyer_contact: saleData.buyer_contact || null,
+        buyer_email: saleData.buyer_email || null,
         payment_method: saleData.payment_method,
         total_amount: saleData.sale_price,
         amount_paid: amountPaid,
         payment_status: amountPaid >= saleData.sale_price ? 'paid' : amountPaid > 0 ? 'partial' : 'pending',
-        sale_notes: saleData.sale_notes,
+        sale_notes: saleData.sale_notes || null,
         user_id: user.id
       })
       .select()
