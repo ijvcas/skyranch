@@ -21,14 +21,6 @@ const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal, initialExpanded 
   const parentRef = useRef<HTMLDivElement | null>(null);
   
   
-  // Debug logging to see what animals are being passed to this component
-  console.log(`AnimalSpeciesGroup for ${species} received ${animals.length} animals:`, animals.map(a => ({
-    id: a.id,
-    name: a.name,
-    healthStatus: a.healthStatus,
-    lifecycleStatus: a.lifecycleStatus
-  })));
-  
   // Separate active and deceased animals from the already filtered list
   const { activeAnimals, deceasedAnimals } = useMemo(() => {
     const active = animals.filter(animal => animal.lifecycleStatus !== 'deceased');
@@ -41,9 +33,8 @@ const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal, initialExpanded 
         return 0;
       });
     
-    console.log(`AnimalSpeciesGroup for ${species}: ${active.length} active, ${deceased.length} deceased`);
     return { activeAnimals: active, deceasedAnimals: deceased };
-  }, [animals, species]);
+  }, [animals]);
 
   // Use virtualization for large lists (more than 30 animals)
   const shouldVirtualizeActive = activeAnimals.length > 30;
@@ -82,11 +73,6 @@ const AnimalSpeciesGroup = ({ species, animals, onDeleteAnimal, initialExpanded 
                 {activeAnimals.length > 0 && (
                   <Badge variant="secondary" className="ml-2">
                     {activeAnimals.length} activos
-                  </Badge>
-                )}
-                {deceasedAnimals.length > 0 && (
-                  <Badge variant="outline" className="ml-1 text-gray-600 border-gray-300">
-                    {deceasedAnimals.length} fallecidos
                   </Badge>
                 )}
               </CardTitle>
