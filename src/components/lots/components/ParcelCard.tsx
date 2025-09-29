@@ -46,21 +46,19 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
 
   useEffect(() => {
     const loadOwners = async () => {
-      if (parcel.status === 'PROPIEDAD') {
-        setLoadingOwners(true);
-        try {
-          const ownerData = await getParcelOwners(parcel.id);
-          setOwners(ownerData);
-        } catch (error) {
-          console.error('Error loading owners:', error);
-        } finally {
-          setLoadingOwners(false);
-        }
+      setLoadingOwners(true);
+      try {
+        const ownerData = await getParcelOwners(parcel.id);
+        setOwners(ownerData);
+      } catch (error) {
+        console.error('Error loading owners:', error);
+      } finally {
+        setLoadingOwners(false);
       }
     };
 
     loadOwners();
-  }, [parcel.id, parcel.status]);
+  }, [parcel.id]);
 
   const getStatusBadge = (status?: string) => {
     const parcelStatus = (status as ParcelStatus) || 'SHOPPING_LIST';
@@ -214,12 +212,12 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
         )}
 
         {/* Owner Information Preview */}
-        {parcel.status === 'PROPIEDAD' && owners.length > 0 && (
+        {owners.length > 0 && (
           <div className="mt-2 pt-2 border-t border-gray-100">
             <div className="flex items-center gap-1 mb-1">
               <Users className="w-3 h-3 text-blue-600" />
               <span className="text-xs font-medium text-gray-700">
-                {owners.length} Propietario{owners.length !== 1 ? 's' : ''}
+                {owners.length} {parcel.status === 'PROPIEDAD' ? 'Propietario' : 'Contacto'}{owners.length !== 1 ? 's' : ''}
               </span>
             </div>
             <div className="text-xs text-gray-600">

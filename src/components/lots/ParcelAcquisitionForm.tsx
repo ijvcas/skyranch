@@ -238,19 +238,27 @@ const ParcelAcquisitionForm: React.FC<ParcelAcquisitionFormProps> = ({
                 />
               </div>
             </div>
-
-            {/* Owner Management for PROPIEDAD status */}
-            <div className="pt-4">
-              <ParcelOwnersManager 
-                parcelId={parcel.id}
-                onOwnersChange={(owners) => {
-                  // Optional: Update parent component if needed
-                  console.log('Owners updated:', owners);
-                }}
-              />
-            </div>
           </div>
         )}
+
+        {/* Owner Management - Available for all parcels */}
+        <div className="space-y-4 border-t pt-4">
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-gray-900">Propietarios y Contactos</h3>
+            {!isPropiedad && (
+              <span className="text-xs text-gray-500">
+                ({formData.status === 'SHOPPING_LIST' ? 'Contactos para negociación' : 'Propietarios actuales'})
+              </span>
+            )}
+          </div>
+          <ParcelOwnersManager 
+            parcelId={parcel.id}
+            onOwnersChange={(owners) => {
+              // Optional: Update parent component if needed
+              console.log('Owners updated:', owners);
+            }}
+          />
+        </div>
 
         {/* General Notes */}
         <div>
