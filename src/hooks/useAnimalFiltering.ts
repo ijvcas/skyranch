@@ -73,8 +73,8 @@ export const useAnimalFiltering = (animals: Animal[], selectedFilter: FilterType
         case 'sick':
           matchesFilter = !isDeceased && (animal.healthStatus === 'sick' || animal.healthStatus === 'pregnant-sick');
           break;
-        case 'treatment':
-          matchesFilter = !isDeceased && animal.healthStatus === 'treatment';
+        case 'sold':
+          matchesFilter = !isDeceased && animal.lifecycleStatus === 'sold';
           break;
         case 'deceased':
           matchesFilter = isDeceased; // Only deceased animals

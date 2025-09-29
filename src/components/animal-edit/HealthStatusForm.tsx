@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,9 +8,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { AlertTriangle } from 'lucide-react';
 import DeathConfirmationDialog from './DeathConfirmationDialog';
+import SaleConfirmationDialog from '@/components/dialogs/SaleConfirmationDialog';
 
 interface HealthStatusFormProps {
   formData: {
+    id?: string;
     name?: string;
     healthStatus: string;
     notes: string;
@@ -28,52 +29,59 @@ const HealthStatusForm = ({
   onInputChange, 
   disabled 
 }: HealthStatusFormProps) => {
-  console.log('🏥 HealthStatusForm RENDERED with formData:', formData);
-  console.log('🏥 HealthStatusForm lifecycle status:', formData.lifecycleStatus);
   const [showDeathConfirmation, setShowDeathConfirmation] = useState(false);
+  const [showSaleConfirmation, setShowSaleConfirmation] = useState(false);
   const [pendingLifecycleChange, setPendingLifecycleChange] = useState<string | null>(null);
   const { hasAccess: canDeclareDeaths } = usePermissionCheck('animals_declare_death');
+  const { hasAccess: canDeclareSales } = usePermissionCheck('animals_declare_death');
 
   const handleLifecycleChange = (value: string) => {
-    console.log('🔄 Lifecycle change requested:', value, 'Current:', formData.lifecycleStatus);
     if (value === 'deceased' && formData.lifecycleStatus !== 'deceased') {
       if (!canDeclareDeaths) {
-        console.log('❌ No permission to declare deaths');
-        return; // Permission check will be handled by the UI
+        return;
       }
-      console.log('🔄 Setting up death confirmation for:', value);
       setPendingLifecycleChange(value);
       setShowDeathConfirmation(true);
+    } else if (value === 'sold' && formData.lifecycleStatus !== 'sold') {
+      if (!canDeclareSales) {
+        return;
+      }
+      setPendingLifecycleChange(value);
+      setShowSaleConfirmation(true);
     } else {
-      console.log('🔄 Direct lifecycle change to:', value);
       onInputChange('lifecycleStatus', value);
     }
   };
 
   const handleDeathConfirmation = () => {
     if (pendingLifecycleChange) {
-      console.log('🔄 Death confirmation - changing lifecycle status to:', pendingLifecycleChange);
-      
-      // Update the lifecycle status first
       onInputChange('lifecycleStatus', pendingLifecycleChange);
       
-      // Clear fields if reverting back to active
       if (pendingLifecycleChange === 'active') {
         onInputChange('dateOfDeath', '');
         onInputChange('causeOfDeath', '');
       }
       
-      // Close dialog and reset state
       setShowDeathConfirmation(false);
       setPendingLifecycleChange(null);
-      
-      // Force a re-render by logging the new status
-      console.log('✅ Lifecycle status updated to:', pendingLifecycleChange);
     }
   };
 
   const handleDeathCancel = () => {
     setShowDeathConfirmation(false);
+    setPendingLifecycleChange(null);
+  };
+
+  const handleSaleConfirmation = () => {
+    if (pendingLifecycleChange) {
+      onInputChange('lifecycleStatus', pendingLifecycleChange);
+      setShowSaleConfirmation(false);
+      setPendingLifecycleChange(null);
+    }
+  };
+
+  const handleSaleCancel = () => {
+    setShowSaleConfirmation(false);
     setPendingLifecycleChange(null);
   };
 
@@ -117,19 +125,28 @@ const HealthStatusForm = ({
                 </AlertDescription>
               </Alert>
             )}
+            {!canDeclareSales && formData.lifecycleStatus !== 'sold' && (
+              <Alert className="mb-2 border-blue-200 bg-blue-50">
+                <AlertTriangle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  No tienes permisos para declarar ventas. Solo administradores y gerentes pueden hacerlo.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="relative">
-              {/* Temporary simple dropdown to bypass render issues */}
               <select
                 value={formData.lifecycleStatus || 'active'}
-                onChange={(e) => {
-                  console.log('🔄 Native select changed to:', e.target.value);
-                  handleLifecycleChange(e.target.value);
-                }}
-                disabled={disabled || (!canDeclareDeaths && !isDeceased)}
+                onChange={(e) => handleLifecycleChange(e.target.value)}
+                disabled={disabled}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white"
               >
                 <option value="active">Activo</option>
-                <option value="sold">Vendido</option>
+                <option 
+                  value="sold"
+                  disabled={!canDeclareSales && formData.lifecycleStatus !== 'sold'}
+                >
+                  Vendido
+                </option>
                 <option 
                   value="deceased" 
                   disabled={!canDeclareDeaths && !isDeceased}
@@ -137,10 +154,6 @@ const HealthStatusForm = ({
                   Fallecido
                 </option>
               </select>
-            </div>
-            {/* Debug info */}
-            <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-50 rounded">
-              Debug: Current value = {formData.lifecycleStatus || 'active'} | canDeclareDeaths = {canDeclareDeaths.toString()} | isDeceased = {isDeceased.toString()}
             </div>
           </div>
           <div>
@@ -200,6 +213,14 @@ const HealthStatusForm = ({
           onClose={handleDeathCancel}
           onConfirm={handleDeathConfirmation}
           animalName={formData.name || 'el animal'}
+        />
+
+        <SaleConfirmationDialog
+          isOpen={showSaleConfirmation}
+          animalId={formData.id || ''}
+          animalName={formData.name || 'Animal'}
+          onClose={handleSaleCancel}
+          onSaleConfirmed={handleSaleConfirmation}
         />
       </CardContent>
     </Card>

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Animal } from '@/stores/animalStore';
 
-export type FilterType = 'all' | 'healthy' | 'pregnant' | 'sick' | 'treatment' | 'deceased';
+export type FilterType = 'all' | 'healthy' | 'pregnant' | 'sick' | 'sold' | 'deceased';
 
 // Optimized animal filtering with memoization and performance improvements
 export const useOptimizedAnimalFiltering = (animals: Animal[], selectedFilter: FilterType) => {
@@ -94,10 +94,8 @@ export const useOptimizedAnimalFiltering = (animals: Animal[], selectedFilter: F
           return isAnimalPregnant(animal.id);
         case 'sick':
           return (animal.healthStatus === 'sick' || animal.healthStatus === 'pregnant-sick') && !isAnimalPregnant(animal.id);
-      case 'treatment':
-        return animal.healthStatus === 'treatment';
-      case 'sold':
-        return animal.lifecycleStatus === 'sold';
+        case 'sold':
+          return animal.lifecycleStatus === 'sold';
         case 'deceased':
           return animal.lifecycleStatus === 'deceased';
         default:
