@@ -135,18 +135,24 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
     if (enableWeatherContext) {
       console.log('🌤️ Fetching weather context...');
       
-      // Get weather settings (location)
-      const { data: weatherSettings } = await supabase
-        .from('weather_settings')
-        .select('lat, lng, display_name')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      try {
+        // Get weather settings (location) with timeout
+        const weatherSettingsPromise = supabase
+          .from('weather_settings')
+          .select('lat, lng, display_name')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-      if (weatherSettings?.lat && weatherSettings?.lng) {
-        try {
-          // Call weather-current edge function
-          const weatherResponse = await fetch(`${supabaseUrl}/functions/v1/weather-current`, {
+        const timeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Weather settings timeout')), 3000)
+        );
+
+        const { data: weatherSettings } = await Promise.race([weatherSettingsPromise, timeout]) as any;
+
+        if (weatherSettings?.lat && weatherSettings?.lng) {
+          // Call weather-current edge function with timeout
+          const weatherPromise = fetch(`${supabaseUrl}/functions/v1/weather-current`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${supabaseKey}`,
@@ -159,6 +165,12 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
               unitSystem: 'metric'
             }),
           });
+
+          const weatherTimeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Weather API timeout')), 5000)
+          );
+
+          const weatherResponse = await Promise.race([weatherPromise, weatherTimeout]) as Response;
 
           if (weatherResponse.ok) {
             const weatherData = await weatherResponse.json();
@@ -175,13 +187,12 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
             };
             console.log('✅ Weather context added');
           } else {
-            console.warn('⚠️ Weather API returned non-OK status:', weatherResponse.status);
+            console.log('⚠️ Weather API non-OK status, continuing without weather');
           }
-        } catch (weatherError) {
-          console.error('❌ Error fetching weather:', weatherError);
         }
-      } else {
-        console.log('⚠️ No weather settings configured');
+      } catch (weatherError) {
+        console.log('⚠️ Weather context skipped:', weatherError.message);
+        // Continue without weather - don't block AI chat
       }
     }
 
