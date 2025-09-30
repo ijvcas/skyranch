@@ -53,39 +53,64 @@ export const getLedgerEntries = async (dateRange?: { start: string; end: string 
 // Get ledger summary
 export const getLedgerSummary = async (dateRange?: { start: string; end: string }): Promise<LedgerSummary> => {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
     const entries = await getLedgerEntries(dateRange);
     
-    const summary: LedgerSummary = {
-      totalRevenue: 0,
-      totalExpenses: 0,
-      netIncome: 0,
-      totalSales: 0,
-      totalPayments: 0,
-      outstandingAmount: 0
-    };
-
+    // Calculate expenses from ledger
+    let totalExpenses = 0;
     entries.forEach(entry => {
-      switch (entry.transaction_type) {
-        case 'sale':
-          summary.totalSales += entry.amount;
-          summary.totalRevenue += entry.amount;
-          break;
-        case 'payment':
-          summary.totalPayments += entry.amount;
-          break;
-        case 'income':
-          summary.totalRevenue += entry.amount;
-          break;
-        case 'expense':
-          summary.totalExpenses += entry.amount;
-          break;
+      if (entry.transaction_type === 'expense') {
+        totalExpenses += entry.amount;
       }
     });
-
-    summary.netIncome = summary.totalRevenue - summary.totalExpenses;
-    summary.outstandingAmount = summary.totalSales - summary.totalPayments;
-
-    return summary;
+    
+    // Get actual payments received from sale_payments table
+    let paymentsQuery = supabase
+      .from('sale_payments')
+      .select('amount, payment_date')
+      .eq('user_id', user.id);
+    
+    if (dateRange) {
+      paymentsQuery = paymentsQuery
+        .gte('payment_date', dateRange.start)
+        .lte('payment_date', dateRange.end);
+    }
+    
+    const { data: paymentsData } = await paymentsQuery;
+    const totalPayments = paymentsData?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
+    
+    // Get sales summary
+    let salesQuery = supabase
+      .from('animal_sales')
+      .select('total_amount, sale_date')
+      .eq('user_id', user.id);
+    
+    if (dateRange) {
+      salesQuery = salesQuery
+        .gte('sale_date', dateRange.start)
+        .lte('sale_date', dateRange.end);
+    }
+    
+    const { data: salesData } = await salesQuery;
+    const totalSales = salesData?.reduce((sum, sale) => sum + sale.total_amount, 0) || 0;
+    
+    // Calculate outstanding amount
+    const outstandingAmount = totalSales - totalPayments;
+    
+    // Revenue is only actual payments received
+    const totalRevenue = totalPayments;
+    const netIncome = totalRevenue - totalExpenses;
+    
+    return {
+      totalRevenue,
+      totalExpenses,
+      netIncome,
+      totalSales,
+      totalPayments,
+      outstandingAmount
+    };
   } catch (error) {
     console.error('Error calculating ledger summary:', error);
     return {

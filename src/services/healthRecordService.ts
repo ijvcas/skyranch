@@ -80,6 +80,31 @@ export const addHealthRecord = async (record: Omit<HealthRecord, 'id' | 'userId'
     return false;
   }
 
+  // If there's a cost, create a farm ledger entry
+  if (record.cost && record.cost > 0) {
+    const { error: ledgerError } = await supabase
+      .from('farm_ledger')
+      .insert({
+        user_id: user.id,
+        transaction_type: 'expense',
+        amount: record.cost,
+        transaction_date: record.dateAdministered,
+        description: `Gasto Veterinario: ${record.title}`,
+        reference_type: 'health_record',
+        metadata: {
+          record_type: record.recordType,
+          veterinarian: record.veterinarian,
+          medication: record.medication,
+          animal_id: record.animalId
+        }
+      });
+
+    if (ledgerError) {
+      console.error('Error creating ledger entry:', ledgerError);
+      // Don't fail the health record creation if ledger entry fails
+    }
+  }
+
   return true;
 };
 
