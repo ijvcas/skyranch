@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
@@ -18,6 +18,7 @@ interface DatePickerFieldProps {
 }
 
 const DatePickerField = ({ value, onChange, label, placeholder = "Seleccionar fecha", required = false }: DatePickerFieldProps) => {
+  const [open, setOpen] = useState(false);
   const selectedDate = value ? new Date(value) : undefined;
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -25,6 +26,7 @@ const DatePickerField = ({ value, onChange, label, placeholder = "Seleccionar fe
       // Format date as YYYY-MM-DD for consistency
       const formattedDate = format(date, 'yyyy-MM-dd');
       onChange(formattedDate);
+      setOpen(false); // Close popover after selection
     } else {
       onChange('');
     }
@@ -35,7 +37,7 @@ const DatePickerField = ({ value, onChange, label, placeholder = "Seleccionar fe
       <Label htmlFor={label.toLowerCase().replace(/\s+/g, '-')}>
         {label} {required && '*'}
       </Label>
-      <Popover modal={true}>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
