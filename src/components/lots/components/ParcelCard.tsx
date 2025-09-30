@@ -11,6 +11,8 @@ import { getParcelNumber, hasFinancialInfo, isIncompletePropiedad } from '../uti
 import { useTimezone } from '@/hooks/useTimezone';
 import PermissionGuard from '@/components/PermissionGuard';
 import { getParcelOwners, ParcelOwner } from '@/services/parcelOwnersService';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface ParcelCardProps {
   parcel: CadastralParcel;
@@ -205,7 +207,7 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
                 <p>Vendedor: {parcel.sellerName}</p>
               )}
               {parcel.acquisitionDate && (
-                <p>Fecha: {new Date(parcel.acquisitionDate).toLocaleDateString()}</p>
+                <p>Fecha: {format(new Date(parcel.acquisitionDate), 'dd/MM/yyyy', { locale: es })}</p>
               )}
             </div>
           </div>
