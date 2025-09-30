@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -11,6 +11,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
+import { createOptimizedQueryClient } from '@/utils/queryConfig';
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
 const SoldAnimals = lazy(() => import('@/pages/SoldAnimals'));
 import AnimalDetail from '@/pages/AnimalDetail';
@@ -28,14 +29,8 @@ import NotFound from '@/pages/NotFound';
 import './App.css';
 import AppErrorBoundary from '@/components/common/AppErrorBoundary';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes
-    },
-  },
-});
+// Create optimized query client with performance monitoring
+const queryClient = createOptimizedQueryClient();
 
 function AppContent() {
   useDeepLinking();

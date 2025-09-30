@@ -98,77 +98,8 @@ const Dashboard = () => {
   // Use optimized dashboard stats hook
   const { data: statsData, isLoading, error, refetch } = useDashboardStats();
 
-  // Legacy query for compatibility - will be removed in next phase
-  const { data: allAnimals = [] } = useQuery({
-    queryKey: ['animals', 'all-users'],
-    queryFn: async () => {
-      try {
-        console.log('🔍 Starting animal data fetch...');
-        
-        // Use the auth context user instead of calling getCurrentUser()
-        if (!user) {
-          console.log('❌ No authenticated user found');
-          return [];
-        }
-        
-        console.log('👤 Auth user:', user.email);
-        
-        // Get user role from app_users table directly
-        let userRole = null;
-        let shouldBypassPermissions = false;
-        
-        try {
-          const { data: appUser, error } = await supabase
-            .from('app_users')
-            .select('role')
-            .eq('id', user.id)
-            .maybeSingle();
-          
-          if (!error && appUser) {
-            userRole = appUser.role;
-            console.log('👤 User role:', userRole);
-            
-            // If user is admin or manager, allow bypass
-            if (userRole === 'admin' || userRole === 'manager') {
-              shouldBypassPermissions = true;
-              console.log('🔓 Admin/Manager detected - enabling fallback access');
-            }
-          }
-        } catch (userError) {
-          console.error('❌ Error getting user role:', userError);
-        }
-        
-        // Try permission check, but don't block dashboard for auth context issues
-        try {
-          await checkPermission('animals_view', user);
-          console.log('✅ Permission granted for animals_view');
-        } catch (permissionError) {
-          console.warn('⚠️ Permission check failed for animals_view, continuing anyway due to auth context issues:', permissionError);
-          // Continue - the updated checkPermission function handles auth context issues gracefully
-        }
-        
-        console.log('🔄 Fetching animals (lean) data...');
-        const animals = await getAnimalsLean();
-        console.log('✅ Animals (lean) fetched successfully:', animals.length);
-        return animals;
-      } catch (error) {
-        console.error('❌ Error fetching animals:', error);
-        // Don’t break the dashboard for transient or permission issues
-        return [];
-      }
-    },
-    enabled: !!user,
-    staleTime: 30000, // 30 seconds
-    gcTime: 300000, // 5 minutes
-    retry: (failureCount, error) => {
-      // Only retry up to 2 times for certain errors
-      if (failureCount >= 2) return false;
-      return true;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
-    refetchOnMount: true,
-    refetchOnWindowFocus: false, // Disable to prevent excessive requests
-  });
+  // Use statsData for display (removed duplicate legacy query)
+  const allAnimals = statsData?.animals || [];
 
   // Force a complete refresh of all data with user sync retry
   const handleForceRefresh = async () => {

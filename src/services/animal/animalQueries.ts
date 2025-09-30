@@ -1,8 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Animal } from '@/stores/animalStore';
+import { queryPerformanceMonitor } from '@/utils/queryConfig';
 
 // Optimized fetch - RLS policies handle all access control
 export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> => {
+  const queryKey = 'getAllAnimals';
+  queryPerformanceMonitor.markQueryStart(queryKey);
+  
   try {
     let query = supabase
       .from('animals')
@@ -52,12 +56,18 @@ export const getAllAnimals = async (includeDeceased = false): Promise<Animal[]> 
       causeOfDeath: animal.cause_of_death || ''
     }));
   } catch (error) {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
     throw error;
+  } finally {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
   }
 };
 
-// Ultra-lean fetch for Dashboard stats - optimized
+// Ultra-lean fetch for Dashboard stats - optimized with performance monitoring
 export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pick<Animal, 'id' | 'species'>>> => {
+  const queryKey = 'getAnimalsLean';
+  queryPerformanceMonitor.markQueryStart(queryKey);
+  
   try {
     let query = supabase
       .from('animals')
@@ -73,7 +83,10 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
 
     return (data || []).map(a => ({ id: a.id, species: a.species }));
   } catch (e) {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
     throw e;
+  } finally {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
   }
 };
 

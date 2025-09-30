@@ -154,6 +154,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     console.log('🚪 [AUTH CONTEXT] Signing out...');
+    // Clear permission cache on sign out
+    const { permissionCache } = await import('@/services/permissionCache');
+    permissionCache.clearAuthCache();
+    
     // Log before signing out so RLS still allows insert
     await logConnection('signed_out');
     await supabase.auth.signOut();

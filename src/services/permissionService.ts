@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { getCachedUserRole, setCachedUserRole, getCachedPermission, setCachedPermission } from './permissionCache';
 import type { User } from '@supabase/supabase-js';
 
 export type Permission = 
@@ -33,8 +34,6 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
 
 export const getCurrentUserRole = async (authUser?: User | null): Promise<UserRole | null> => {
   try {
-    console.log('🔍 Getting current user role...');
-    
     // If authUser is provided, use it; otherwise try to get from auth
     let user = authUser;
     if (!user) {
@@ -46,6 +45,15 @@ export const getCurrentUserRole = async (authUser?: User | null): Promise<UserRo
       console.log('❌ No current user found');
       return null;
     }
+
+    // Check cache first
+    const cachedRole = getCachedUserRole(user.id);
+    if (cachedRole) {
+      console.log('✅ Using cached user role:', cachedRole);
+      return cachedRole as UserRole;
+    }
+    
+    console.log('🔍 Getting current user role from database...');
     
     // Try multiple approaches to get user role
     let appUser = null;
@@ -85,12 +93,18 @@ export const getCurrentUserRole = async (authUser?: User | null): Promise<UserRo
     
     if (!appUser) {
       console.log('❌ User not found in app_users table, defaulting to worker role');
-      // Return worker as default role for authenticated users
+      // Cache the default role
+      if (user) setCachedUserRole(user.id, 'worker');
       return 'worker';
     }
     
-    console.log('✅ Current user role:', appUser.role);
-    return appUser.role as UserRole;
+    const role = appUser.role as UserRole;
+    console.log('✅ Current user role:', role);
+    
+    // Cache the role
+    if (user) setCachedUserRole(user.id, role);
+    
+    return role;
   } catch (error) {
     console.error('❌ Error getting current user role:', error);
     // Return worker as safe default for authenticated users
@@ -100,7 +114,23 @@ export const getCurrentUserRole = async (authUser?: User | null): Promise<UserRo
 
 export const hasPermission = async (permission: Permission, authUser?: User | null): Promise<boolean> => {
   try {
-    console.log('🔍 Checking permission:', permission);
+    // Get user for cache key
+    let user = authUser;
+    if (!user) {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      user = currentUser;
+    }
+    
+    // Check cache first
+    if (user) {
+      const cachedPermission = getCachedPermission(user.id, permission);
+      if (cachedPermission !== null) {
+        console.log('✅ Using cached permission:', permission, cachedPermission);
+        return cachedPermission;
+      }
+    }
+    
+    console.log('🔍 Checking permission from database:', permission);
     const userRole = await getCurrentUserRole(authUser);
     
     if (!userRole) {
@@ -118,6 +148,11 @@ export const hasPermission = async (permission: Permission, authUser?: User | nu
       userRole,
       hasAccess
     });
+    
+    // Cache the result
+    if (user) {
+      setCachedPermission(user.id, permission, hasAccess);
+    }
     
     return hasAccess;
   } catch (error) {
