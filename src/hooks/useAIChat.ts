@@ -56,11 +56,22 @@ export const useAIChat = () => {
       queryClient.invalidateQueries({ queryKey: ['chat-history'] });
 
       // Call AI edge function
+      console.log('🚀 Calling AI chat function...');
       const { data: aiResponse, error: aiError } = await supabase.functions.invoke('ai-chat', {
         body: { message },
       });
 
-      if (aiError) throw aiError;
+      console.log('AI Response:', aiResponse);
+      console.log('AI Error:', aiError);
+
+      if (aiError) {
+        console.error('Edge function error:', aiError);
+        throw new Error(aiError.message || 'Error al llamar al servicio de IA');
+      }
+
+      if (aiResponse?.error) {
+        throw new Error(aiResponse.error);
+      }
 
       // Save assistant response to history
       const { error: assistantError } = await supabase

@@ -8,12 +8,16 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('🤖 AI Chat function called');
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('📥 Parsing request body...');
     const { message } = await req.json();
+    console.log('📝 Message received:', message);
     
     if (!message) {
       return new Response(
@@ -48,6 +52,7 @@ serve(async (req) => {
     }
 
     // Get AI settings
+    console.log('⚙️ Fetching AI settings...');
     const { data: settings, error: settingsError } = await supabase
       .from('ai_settings')
       .select('*')
@@ -55,8 +60,10 @@ serve(async (req) => {
       .single();
 
     if (settingsError) {
-      console.error('Error fetching AI settings:', settingsError);
+      console.error('❌ Error fetching AI settings:', settingsError);
+      // Continue with defaults even if settings fetch fails
     }
+    console.log('✅ Settings loaded:', settings ? 'found' : 'using defaults');
 
     const aiProvider = settings?.ai_provider || 'lovable';
     const systemPrompt = settings?.system_prompt || 'Eres un asistente experto en gestión de ranchos ganaderos.';
@@ -126,14 +133,17 @@ serve(async (req) => {
     ];
 
     // Call Lovable AI (default)
+    console.log('🔑 Checking for LOVABLE_API_KEY...');
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
+      console.error('❌ LOVABLE_API_KEY not found in environment');
       return new Response(
-        JSON.stringify({ error: 'AI service not configured' }),
+        JSON.stringify({ error: 'AI service not configured. Please contact support.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    console.log('✅ API key found, calling Lovable AI...');
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -151,15 +161,25 @@ serve(async (req) => {
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI API error:', aiResponse.status, errorText);
+      console.error('❌ AI API error:', aiResponse.status, errorText);
+      
+      let errorMessage = 'Error del servicio de IA';
+      if (aiResponse.status === 429) {
+        errorMessage = 'Límite de solicitudes excedido. Por favor, intenta más tarde.';
+      } else if (aiResponse.status === 402) {
+        errorMessage = 'Se requiere pago. Por favor, agrega créditos a tu workspace de Lovable AI.';
+      }
+      
       return new Response(
-        JSON.stringify({ error: 'AI service error' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: errorMessage, details: errorText }),
+        { status: aiResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    console.log('✅ AI response received');
     const aiData = await aiResponse.json();
     const responseText = aiData.choices?.[0]?.message?.content || 'No response from AI';
+    console.log('📤 Sending response back to client');
 
     return new Response(
       JSON.stringify({
@@ -174,9 +194,13 @@ serve(async (req) => {
     );
 
   } catch (error: any) {
-    console.error('Error in ai-chat function:', error);
+    console.error('❌ Error in ai-chat function:', error);
+    console.error('Error stack:', error.stack);
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
+      JSON.stringify({ 
+        error: error.message || 'Error interno del servidor',
+        details: error.stack 
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
