@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { EnhancedCalendar } from '@/components/ui/enhanced-calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -49,12 +49,12 @@ const DatePickerField = ({ value, onChange, label, placeholder = "Seleccionar fe
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 z-[9999]" align="start">
-          <Calendar
+          <EnhancedCalendar
             mode="single"
             selected={selectedDate}
             onSelect={handleDateSelect}
-            initialFocus
-            className="p-3 pointer-events-auto"
+            showNavigationHeader={true}
+            className="pointer-events-auto"
           />
         </PopoverContent>
       </Popover>
