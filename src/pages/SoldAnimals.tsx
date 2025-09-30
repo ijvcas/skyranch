@@ -1,21 +1,29 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, ArrowLeft, User, Calendar, CreditCard, Search, Filter as FilterIcon, Edit } from 'lucide-react';
+import { DollarSign, ArrowLeft, User, Calendar, CreditCard, Search, Filter as FilterIcon, Edit, Trash2 } from 'lucide-react';
 import PageLayout from '@/components/ui/page-layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getSalesWithAnimals } from '@/services/animal/animalSalesService';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { getSalesWithAnimals, deleteSale } from '@/services/animal/animalSalesService';
 import { formatCostPerSqm } from '@/utils/financialFormatters';
+import { useToast } from '@/hooks/use-toast';
+import EditSaleDialog from '@/components/animal-sale/EditSaleDialog';
 
 const SoldAnimals: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
   const [methodFilter, setMethodFilter] = useState<string>('all');
+  const [editingSale, setEditingSale] = useState<any>(null);
+  const [deletingSaleId, setDeletingSaleId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const { data: sales = [], isLoading } = useQuery({
     queryKey: ['animal-sales'],
@@ -89,6 +97,38 @@ const SoldAnimals: React.FC = () => {
     setSearchQuery('');
     setPaymentFilter('all');
     setMethodFilter('all');
+  };
+
+  const handleDeleteSale = async () => {
+    if (!deletingSaleId) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteSale(deletingSaleId);
+      
+      toast({
+        title: 'Éxito',
+        description: 'Venta eliminada correctamente. El animal ha sido restaurado.',
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['animal-sales'] });
+      queryClient.invalidateQueries({ queryKey: ['animals'] });
+      setDeletingSaleId(null);
+    } catch (error) {
+      console.error('Error deleting sale:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar la venta',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleEditSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['animal-sales'] });
+    setEditingSale(null);
   };
 
   if (isLoading) {
@@ -251,9 +291,24 @@ const SoldAnimals: React.FC = () => {
                             )}
                           </div>
                         </div>
-                        <Button variant="outline" size="icon" className="flex-shrink-0 h-8 w-8">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => setEditingSale(sale)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => setDeletingSaleId(sale.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
 
                       {/* Details Grid */}
@@ -309,6 +364,39 @@ const SoldAnimals: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Edit Sale Dialog */}
+        {editingSale && (
+          <EditSaleDialog
+            sale={editingSale}
+            open={!!editingSale}
+            onOpenChange={(open) => !open && setEditingSale(null)}
+            onSuccess={handleEditSuccess}
+          />
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deletingSaleId} onOpenChange={(open) => !open && setDeletingSaleId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Eliminar venta?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción eliminará permanentemente el registro de venta. El animal será restaurado a estado activo.
+                También se eliminarán todos los pagos asociados y registros contables.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteSale}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </PageLayout>
   );

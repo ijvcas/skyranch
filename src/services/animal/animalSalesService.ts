@@ -356,3 +356,96 @@ const recordPaymentInLedger = async (saleId: string, amount: number, paymentDate
     console.error('Error recording payment in ledger:', error);
   }
 };
+
+// Update sale
+export const updateSale = async (saleId: string, saleData: Partial<SaleFormData>): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    const { error } = await supabase
+      .from('animal_sales')
+      .update({
+        ...(saleData.sale_date && { sale_date: saleData.sale_date }),
+        ...(saleData.sale_price !== undefined && { 
+          sale_price: saleData.sale_price,
+          total_amount: saleData.sale_price
+        }),
+        ...(saleData.buyer_name && { buyer_name: saleData.buyer_name }),
+        ...(saleData.buyer_contact !== undefined && { buyer_contact: saleData.buyer_contact || null }),
+        ...(saleData.buyer_email !== undefined && { buyer_email: saleData.buyer_email || null }),
+        ...(saleData.payment_method && { payment_method: saleData.payment_method }),
+        ...(saleData.sale_notes !== undefined && { sale_notes: saleData.sale_notes || null }),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', saleId);
+
+    if (error) {
+      console.error('Error updating sale:', error);
+      throw new Error('Failed to update sale');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating sale:', error);
+    throw error;
+  }
+};
+
+// Delete sale
+export const deleteSale = async (saleId: string): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No authenticated user');
+
+    // Get sale details first to update animal status
+    const { data: sale, error: fetchError } = await supabase
+      .from('animal_sales')
+      .select('animal_id')
+      .eq('id', saleId)
+      .single();
+
+    if (fetchError || !sale) {
+      throw new Error('Sale not found');
+    }
+
+    // Delete associated payments first
+    await supabase
+      .from('sale_payments')
+      .delete()
+      .eq('sale_id', saleId);
+
+    // Delete ledger entries
+    await supabase
+      .from('farm_ledger')
+      .delete()
+      .eq('reference_id', saleId)
+      .in('reference_type', ['animal_sale', 'animal_sale_payment']);
+
+    // Update animal to mark as active again
+    await supabase
+      .from('animals')
+      .update({
+        lifecycle_status: 'active',
+        sale_id: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', sale.animal_id);
+
+    // Delete the sale record
+    const { error: deleteError } = await supabase
+      .from('animal_sales')
+      .delete()
+      .eq('id', saleId);
+
+    if (deleteError) {
+      console.error('Error deleting sale:', deleteError);
+      throw new Error('Failed to delete sale');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting sale:', error);
+    throw error;
+  }
+};
