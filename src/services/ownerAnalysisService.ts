@@ -245,3 +245,153 @@ export const getOwnerParcels = async (ownerId: string): Promise<any[]> => {
     throw error;
   }
 };
+
+// Global Multi-Parcel Ownership Analysis
+export interface OwnershipGroup {
+  id: string;
+  representativeName: string;
+  owners: ParcelOwner[];
+  parcelIds: string[];
+  totalParcels: number;
+  totalArea: number;
+  totalValue: number;
+  confidence: number;
+  matchReasons: string[];
+  color: string;
+}
+
+export interface GlobalOwnershipAnalysis {
+  totalOwners: number;
+  uniqueOwnerGroups: number;
+  multiParcelOwners: number;
+  ownershipGroups: OwnershipGroup[];
+  unprocessedOwners: ParcelOwner[];
+}
+
+const OWNERSHIP_GROUP_COLORS = [
+  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
+  '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
+  '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+  '#ec4899', '#f43f5e'
+];
+
+export const analyzeMultiParcelOwnership = async (): Promise<GlobalOwnershipAnalysis> => {
+  try {
+    // Get all owners with their parcel information
+    const { data: allOwners, error } = await supabase
+      .from('parcel_owners')
+      .select(`
+        *,
+        cadastral_parcels (
+          id,
+          parcel_id,
+          display_name,
+          lot_number,
+          area_hectares,
+          total_cost,
+          status
+        )
+      `)
+      .order('owner_name');
+
+    if (error) {
+      console.error('Error fetching owners for multi-parcel analysis:', error);
+      throw error;
+    }
+
+    if (!allOwners || allOwners.length === 0) {
+      return {
+        totalOwners: 0,
+        uniqueOwnerGroups: 0,
+        multiParcelOwners: 0,
+        ownershipGroups: [],
+        unprocessedOwners: []
+      };
+    }
+
+    // Group owners by similarity
+    const ownershipGroups: OwnershipGroup[] = [];
+    const processedIds = new Set<string>();
+    let colorIndex = 0;
+
+    for (let i = 0; i < allOwners.length; i++) {
+      const owner1 = allOwners[i];
+      
+      if (processedIds.has(owner1.id)) continue;
+
+      const group: OwnershipGroup = {
+        id: `group-${i}`,
+        representativeName: owner1.owner_name,
+        owners: [owner1],
+        parcelIds: [owner1.parcel_id],
+        totalParcels: 1,
+        totalArea: owner1.cadastral_parcels?.area_hectares || 0,
+        totalValue: owner1.cadastral_parcels?.total_cost || 0,
+        confidence: 100,
+        matchReasons: [],
+        color: OWNERSHIP_GROUP_COLORS[colorIndex % OWNERSHIP_GROUP_COLORS.length]
+      };
+
+      processedIds.add(owner1.id);
+
+      // Find similar owners
+      for (let j = i + 1; j < allOwners.length; j++) {
+        const owner2 = allOwners[j];
+        
+        if (processedIds.has(owner2.id)) continue;
+
+        const score = calculateSimilarityScore(owner1, owner2);
+        
+        if (score >= 50) { // High confidence match
+          const matchReasons = getMatchReasons(owner1, owner2, score);
+          
+          group.owners.push(owner2);
+          group.parcelIds.push(owner2.parcel_id);
+          group.totalParcels++;
+          group.totalArea += owner2.cadastral_parcels?.area_hectares || 0;
+          group.totalValue += owner2.cadastral_parcels?.total_cost || 0;
+          group.matchReasons = [...new Set([...group.matchReasons, ...matchReasons])];
+          
+          processedIds.add(owner2.id);
+        }
+      }
+
+      // Only add groups with multiple parcels or single parcels with significant value
+      if (group.totalParcels > 1) {
+        ownershipGroups.push(group);
+        colorIndex++;
+      }
+    }
+
+    // Sort by number of parcels (descending)
+    ownershipGroups.sort((a, b) => b.totalParcels - a.totalParcels);
+
+    // Find unprocessed owners (those not in any group)
+    const unprocessedOwners = allOwners.filter(owner => !processedIds.has(owner.id));
+
+    const multiParcelOwners = ownershipGroups.filter(g => g.totalParcels > 1).length;
+
+    return {
+      totalOwners: allOwners.length,
+      uniqueOwnerGroups: ownershipGroups.length,
+      multiParcelOwners,
+      ownershipGroups,
+      unprocessedOwners
+    };
+  } catch (error) {
+    console.error('Error in multi-parcel ownership analysis:', error);
+    throw error;
+  }
+};
+
+export const getOwnershipColorMap = (groups: OwnershipGroup[]): Map<string, string> => {
+  const colorMap = new Map<string, string>();
+  
+  groups.forEach(group => {
+    group.parcelIds.forEach(parcelId => {
+      colorMap.set(parcelId, group.color);
+    });
+  });
+  
+  return colorMap;
+};

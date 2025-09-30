@@ -45,7 +45,7 @@ export class ParcelRenderer {
     return parcel.parcelId;
   }
 
-  renderParcel(parcel: CadastralParcel, bounds: google.maps.LatLngBounds, index: number = 0): boolean {
+  renderParcel(parcel: CadastralParcel, bounds: google.maps.LatLngBounds, index: number = 0, customColor?: string): boolean {
     // Ensure boundaryCoordinates exists and is an array
     if (!parcel.boundaryCoordinates || !Array.isArray(parcel.boundaryCoordinates) || parcel.boundaryCoordinates.length < 3) {
       console.warn(`❌ Parcel ${parcel.parcelId} has no valid boundary coordinates or insufficient coordinates`);
@@ -71,7 +71,8 @@ export class ParcelRenderer {
     console.log(`🗺️ Rendering parcel ${parcel.parcelId} as number ${displayNumber} with ${coordinates.length} coordinates`);
     console.log(`📍 Sample coordinate: ${coordinates[0].lat.toFixed(8)}, ${coordinates[0].lng.toFixed(8)}`);
 
-    const color = this.getParcelColor(parcel.status);
+    // Use custom color if provided, otherwise use status color
+    const color = customColor || this.getParcelColor(parcel.status);
     
     // Create polygon with clean styling
     const polygon = new google.maps.Polygon({

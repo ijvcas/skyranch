@@ -7,6 +7,7 @@ import { ParcelRenderer } from './cadastral-map/ParcelRenderer';
 import { loadGoogleMapsAPI } from '@/hooks/polygon/useGoogleMapsLoader';
 import FitBoundsButton from '@/components/common/FitBoundsButton';
 import MapContainer from '@/components/common/MapContainer';
+import type { OwnershipGroup } from '@/services/ownerAnalysisService';
 
 interface CadastralMapProps {
   isLoaded: boolean;
@@ -15,6 +16,7 @@ interface CadastralMapProps {
   statusFilter: ParcelStatus | 'ALL';
   onMapReady: (map: google.maps.Map) => void;
   onParcelClick: (parcel: CadastralParcel) => void;
+  ownershipGroup?: OwnershipGroup | null;
 }
 
 
@@ -24,7 +26,8 @@ const CadastralMap: React.FC<CadastralMapProps> = ({
   cadastralParcels,
   statusFilter,
   onMapReady,
-  onParcelClick
+  onParcelClick,
+  ownershipGroup
 }) => {
   const mapRef = useRef<google.maps.Map | null>(null);
   const parcelRendererRef = useRef<ParcelRenderer | null>(null);
@@ -81,7 +84,7 @@ useEffect(() => {
       console.log(`🎯 Rendering ${cadastralParcels.length} parcels`);
       displayCadastralParcels();
     }
-  }, [cadastralParcels, statusFilter, isMapInitialized]);
+  }, [cadastralParcels, statusFilter, isMapInitialized, ownershipGroup]);
 
   const displayCadastralParcels = () => {
     if (!parcelRendererRef.current || !mapRef.current) {
@@ -110,7 +113,12 @@ useEffect(() => {
     const bounds = new google.maps.LatLngBounds();
 
     filteredParcels.forEach((parcel, index) => {
-      if (parcelRendererRef.current?.renderParcel(parcel, bounds, index)) {
+      // Check if parcel belongs to selected ownership group
+      const customColor = ownershipGroup?.parcelIds.includes(parcel.id) 
+        ? ownershipGroup.color 
+        : undefined;
+      
+      if (parcelRendererRef.current?.renderParcel(parcel, bounds, index, customColor)) {
         renderedCount++;
       }
     });

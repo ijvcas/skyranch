@@ -8,13 +8,17 @@ const CadastralMap = lazy(() => import('./CadastralMap'));
 import EditableParcelsList from './EditableParcelsList';
 import FinancialSummaryCard from './FinancialSummaryCard';
 import CadastralSettingsDropdown from './CadastralSettingsDropdown';
+import MultiParcelOwnershipDialog from './components/MultiParcelOwnershipDialog';
 import { getAllProperties, getCadastralParcels, updateCadastralParcel, type CadastralParcel } from '@/services/cadastralService';
 import type { ParcelStatus } from '@/utils/cadastral/types';
+import type { OwnershipGroup } from '@/services/ownerAnalysisService';
 
 const CadastralMapView: React.FC = () => {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [showUpload, setShowUpload] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ParcelStatus | 'ALL'>('ALL');
+  const [showOwnershipAnalysis, setShowOwnershipAnalysis] = useState(false);
+  const [selectedOwnershipGroup, setSelectedOwnershipGroup] = useState<OwnershipGroup | null>(null);
 
   // Load properties
   const { data: properties = [], isLoading: isLoadingProperties } = useQuery({
@@ -96,6 +100,11 @@ const CadastralMapView: React.FC = () => {
     toast.success('Todas las parcelas han sido eliminadas');
   };
 
+  const handleOwnershipGroupSelect = (group: OwnershipGroup) => {
+    setSelectedOwnershipGroup(group);
+    toast.info(`Grupo seleccionado: ${group.representativeName} (${group.totalParcels} parcelas)`);
+  };
+
   const isLoading = isLoadingProperties || isLoadingParcels;
   const selectedProperty = properties.find(p => p.id === selectedPropertyId);
 
@@ -114,6 +123,7 @@ const CadastralMapView: React.FC = () => {
         onStatusFilterChange={setStatusFilter}
         onParcelsDeleted={handleParcelsDeleted}
         parcels={parcels}
+        onOpenOwnershipAnalysis={() => setShowOwnershipAnalysis(true)}
       />
 
       {/* Financial Summary - Show when there are parcels with financial data */}
@@ -132,6 +142,7 @@ const CadastralMapView: React.FC = () => {
                   statusFilter={statusFilter}
                   onMapReady={() => {}}
                   onParcelClick={handleParcelClick}
+                  ownershipGroup={selectedOwnershipGroup}
                 />
               </Suspense>
               <div className="absolute left-4 bottom-10 z-20 pointer-events-auto">
@@ -152,6 +163,12 @@ const CadastralMapView: React.FC = () => {
           />
         </div>
       </div>
+
+      <MultiParcelOwnershipDialog
+        open={showOwnershipAnalysis}
+        onClose={() => setShowOwnershipAnalysis(false)}
+        onGroupSelect={handleOwnershipGroupSelect}
+      />
     </div>
   );
 };
