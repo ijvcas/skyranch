@@ -69,20 +69,36 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
   queryPerformanceMonitor.markQueryStart(queryKey);
   
   try {
-    let query = supabase
-      .from('animals')
-      .select('id,species')
-      .eq('lifecycle_status', 'active'); // Only active animals
+    console.log('🔍 getAnimalsLean: Starting query...');
     
-    const { data, error } = await query
-      .order('created_at', { ascending: false });
+    // Create a timeout promise
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Query timeout after 10 seconds')), 10000);
+    });
+    
+    // Create the query promise
+    const queryPromise = (async () => {
+      let query = supabase
+        .from('animals')
+        .select('id,species')
+        .eq('lifecycle_status', 'active');
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
-    if (error) {
-      throw new Error(`Database error: ${error.message}`);
-    }
+      if (error) {
+        console.error('🔍 getAnimalsLean: Database error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
 
-    return (data || []).map(a => ({ id: a.id, species: a.species }));
+      console.log('🔍 getAnimalsLean: Query successful, rows:', data?.length || 0);
+      return (data || []).map(a => ({ id: a.id, species: a.species }));
+    })();
+    
+    // Race between query and timeout
+    const result = await Promise.race([queryPromise, timeoutPromise]);
+    return result;
   } catch (e) {
+    console.error('🔍 getAnimalsLean: Error:', e);
     queryPerformanceMonitor.markQueryEnd(queryKey);
     throw e;
   } finally {
