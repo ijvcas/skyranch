@@ -66,10 +66,22 @@ serve(async (req) => {
     console.log('✅ Settings loaded:', settings ? 'found' : 'using defaults');
 
     const aiProvider = settings?.ai_provider || 'lovable';
-    const systemPrompt = settings?.system_prompt || 'Eres un asistente experto en gestión de ranchos ganaderos.';
+    const defaultPrompt = `Eres un asistente experto en gestión de ranchos ganaderos. 
+
+Cuando tengas acceso a información meteorológica, proporciona advertencias y recomendaciones específicas sobre:
+- Impacto de condiciones climáticas extremas (calor, frío, lluvia, viento) en el ganado
+- Precauciones necesarias según el clima actual (refugio, agua adicional, protección)
+- Riesgos de enfermedades asociados al clima (estrés térmico, hipotermia, enfermedades respiratorias)
+- Ajustes recomendados en el manejo de pastoreo según las condiciones meteorológicas
+- Preparación anticipada para eventos climáticos significativos
+
+Siempre que menciones el clima, incluye recomendaciones prácticas y accionables para proteger la salud y bienestar de los animales.`;
+    
+    const systemPrompt = settings?.system_prompt || defaultPrompt;
     const enableAnimalContext = settings?.enable_animal_context ?? true;
     const enableBreedingContext = settings?.enable_breeding_context ?? true;
     const enableLotsContext = settings?.enable_lots_context ?? true;
+    const enableWeatherContext = settings?.enable_weather_context ?? true;
 
     // Build context based on settings
     let contextData: any = {};
@@ -117,6 +129,59 @@ serve(async (req) => {
           total: lots.length,
           active: lots.filter((l: any) => l.status === 'active').length,
         };
+      }
+    }
+
+    if (enableWeatherContext) {
+      console.log('🌤️ Fetching weather context...');
+      
+      // Get weather settings (location)
+      const { data: weatherSettings } = await supabase
+        .from('weather_settings')
+        .select('lat, lng, display_name')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (weatherSettings?.lat && weatherSettings?.lng) {
+        try {
+          // Call weather-current edge function
+          const weatherResponse = await fetch(`${supabaseUrl}/functions/v1/weather-current`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              lat: weatherSettings.lat,
+              lng: weatherSettings.lng,
+              language: 'es',
+              unitSystem: 'metric'
+            }),
+          });
+
+          if (weatherResponse.ok) {
+            const weatherData = await weatherResponse.json();
+            contextData.weather = {
+              location: weatherSettings.display_name,
+              coordinates: { lat: weatherSettings.lat, lng: weatherSettings.lng },
+              current: {
+                temperature: weatherData.temperatureC ? `${weatherData.temperatureC}°C` : null,
+                condition: weatherData.conditionText,
+                humidity: weatherData.humidity ? `${weatherData.humidity}%` : null,
+                wind: weatherData.windKph ? `${weatherData.windKph} km/h` : null,
+                precipitation: weatherData.precipitationChance ? `${weatherData.precipitationChance}%` : null,
+              },
+            };
+            console.log('✅ Weather context added');
+          } else {
+            console.warn('⚠️ Weather API returned non-OK status:', weatherResponse.status);
+          }
+        } catch (weatherError) {
+          console.error('❌ Error fetching weather:', weatherError);
+        }
+      } else {
+        console.log('⚠️ No weather settings configured');
       }
     }
 

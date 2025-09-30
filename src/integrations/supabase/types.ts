@@ -21,6 +21,7 @@ export type Database = {
           enable_animal_context: boolean | null
           enable_breeding_context: boolean | null
           enable_lots_context: boolean | null
+          enable_weather_context: boolean | null
           id: string
           language: string | null
           system_prompt: string | null
@@ -33,6 +34,7 @@ export type Database = {
           enable_animal_context?: boolean | null
           enable_breeding_context?: boolean | null
           enable_lots_context?: boolean | null
+          enable_weather_context?: boolean | null
           id?: string
           language?: string | null
           system_prompt?: string | null
@@ -45,6 +47,7 @@ export type Database = {
           enable_animal_context?: boolean | null
           enable_breeding_context?: boolean | null
           enable_lots_context?: boolean | null
+          enable_weather_context?: boolean | null
           id?: string
           language?: string | null
           system_prompt?: string | null

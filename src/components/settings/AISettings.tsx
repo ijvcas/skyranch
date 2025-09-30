@@ -192,6 +192,22 @@ const AISettings = () => {
                 }
               />
             </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="weather-context">Información Meteorológica</Label>
+                <p className="text-sm text-muted-foreground">
+                  Permite acceso a datos meteorológicos y alertas climáticas
+                </p>
+              </div>
+              <Switch
+                id="weather-context"
+                checked={settings.enable_weather_context ?? true}
+                onCheckedChange={(checked) => 
+                  setSettings({ ...settings, enable_weather_context: checked })
+                }
+              />
+            </div>
           </div>
         </div>
 
