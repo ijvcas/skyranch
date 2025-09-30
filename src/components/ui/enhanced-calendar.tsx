@@ -146,7 +146,8 @@ function EnhancedCalendar({
   };
 
   // Custom day component to show event indicators
-  const DayWithEvents = ({ date, ...dayProps }: any) => {
+  const DayWithEvents = (props: any) => {
+    const { date, ...buttonProps } = props;
     const hasEventsOnDate = hasEvents(date);
     const isToday = new Date().toDateString() === date.toDateString();
     
@@ -159,16 +160,16 @@ function EnhancedCalendar({
     }
     
     return (
-      <div 
-        {...dayProps}
+      <button 
+        {...buttonProps}
         className={cn(
-          dayProps.className,
+          buttonProps.className,
           bgClass,
           "rounded-md"
         )}
       >
         {date.getDate()}
-      </div>
+      </button>
     );
   };
 
