@@ -147,33 +147,7 @@ function EnhancedCalendar({
     return dateEvents[0].eventType;
   };
 
-  // Custom day component to show event indicators
-  const DayWithEvents = (props: any) => {
-    const { date, ...buttonProps } = props;
-    const hasEventsOnDate = hasEvents(date);
-    const isToday = new Date().toDateString() === date.toDateString();
-    
-    // Determine background class based on today and events
-    let bgClass = "";
-    if (isToday) {
-      bgClass = "bg-gradient-to-br from-blue-500 to-green-500 text-white";
-    } else if (hasEventsOnDate) {
-      bgClass = "bg-green-600 text-white";
-    }
-    
-    return (
-      <button 
-        {...buttonProps}
-        className={cn(
-          buttonProps.className,
-          bgClass,
-          "rounded-md"
-        )}
-      >
-        {date.getDate()}
-      </button>
-    );
-  };
+  // Note: Custom day rendering removed to preserve default click functionality
 
   // Custom header component
   const CustomHeader = () => (
@@ -314,12 +288,9 @@ function EnhancedCalendar({
       {showNavigationHeader && <CustomHeader />}
       <DayPicker
         showOutsideDays={showOutsideDays}
-        className={cn("p-3", className)}
+        className={cn("p-3 pointer-events-auto", className)}
         month={month}
         onMonthChange={setMonth}
-        components={{
-          Day: DayWithEvents
-        }}
         classNames={{
           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
           month: "space-y-4 w-full",
