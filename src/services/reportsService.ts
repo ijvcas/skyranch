@@ -34,7 +34,8 @@ export interface HealthReportData {
 }
 
 export const generateAnimalSummaryReport = async (): Promise<AnimalSummaryData> => {
-  const animals = await getAllAnimals();
+  const allAnimals = await getAllAnimals();
+  const animals = allAnimals.filter(animal => animal.lifecycleStatus === 'active');
   
   const bySpecies: Record<string, number> = {};
   const byHealthStatus: Record<string, number> = {};
@@ -76,7 +77,8 @@ export const generateAnimalSummaryReport = async (): Promise<AnimalSummaryData> 
 };
 
 export const generateHealthReport = async (): Promise<HealthReportData> => {
-  const animals = await getAllAnimals();
+  const allAnimals = await getAllAnimals();
+  const animals = allAnimals.filter(animal => animal.lifecycleStatus === 'active');
   const allHealthRecords = [];
   
   // Get health records for all animals
