@@ -109,15 +109,14 @@ const HeaderWithDropdown = () => {
           <div className="flex items-center space-x-3 h-full">
             <Button
               variant="ghost"
-              size="icon"
               onClick={() => setChatOpen(true)}
-              className="h-10 w-10 hover:bg-green-50"
+              className="h-14 w-14 p-0 hover:bg-green-50"
               aria-label="Abrir asistente de IA"
             >
               <img 
                 src={aiIcon} 
                 alt="AI Assistant" 
-                className="h-6 w-6"
+                className="h-14 w-14 rounded"
               />
             </Button>
             <div className="flex items-center h-full">
