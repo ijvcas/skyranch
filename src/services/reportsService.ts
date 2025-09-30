@@ -34,8 +34,14 @@ export interface HealthReportData {
 }
 
 export const generateAnimalSummaryReport = async (): Promise<AnimalSummaryData> => {
-  const allAnimals = await getAllAnimals();
-  const animals = allAnimals.filter(animal => animal.lifecycleStatus === 'active');
+  // Optimized: Only fetch needed fields
+  const { data, error } = await supabase
+    .from('animals')
+    .select('id, species, health_status, birth_date')
+    .eq('lifecycle_status', 'active');
+  
+  if (error) throw error;
+  const animals = data || [];
   
   const bySpecies: Record<string, number> = {};
   const byHealthStatus: Record<string, number> = {};
@@ -51,11 +57,11 @@ export const generateAnimalSummaryReport = async (): Promise<AnimalSummaryData> 
     bySpecies[animal.species] = (bySpecies[animal.species] || 0) + 1;
     
     // Count by health status
-    byHealthStatus[animal.healthStatus] = (byHealthStatus[animal.healthStatus] || 0) + 1;
+    byHealthStatus[animal.health_status] = (byHealthStatus[animal.health_status] || 0) + 1;
     
     // Calculate average age
-    if (animal.birthDate) {
-      const birthDate = new Date(animal.birthDate);
+    if (animal.birth_date) {
+      const birthDate = new Date(animal.birth_date);
       const age = currentDate.getFullYear() - birthDate.getFullYear();
       totalAge += age;
       animalsWithAge++;
@@ -77,11 +83,16 @@ export const generateAnimalSummaryReport = async (): Promise<AnimalSummaryData> 
 };
 
 export const generateHealthReport = async (): Promise<HealthReportData> => {
-  const allAnimals = await getAllAnimals();
-  const animals = allAnimals.filter(animal => animal.lifecycleStatus === 'active');
+  // Optimized: Direct query for active animals' IDs only
+  const { data: animals, error: animalsError } = await supabase
+    .from('animals')
+    .select('id')
+    .eq('lifecycle_status', 'active');
+  
+  if (animalsError) throw animalsError;
   
   // Optimized: Fetch all health records in a single query
-  const animalIds = animals.map(animal => animal.id);
+  const animalIds = (animals || []).map(animal => animal.id);
   const allHealthRecords = animalIds.length > 0 
     ? await getHealthRecordsForAnimals(animalIds)
     : [];

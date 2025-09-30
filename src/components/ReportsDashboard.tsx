@@ -16,32 +16,43 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 const ReportsDashboard: React.FC = () => {
   const [activeReport, setActiveReport] = useState<'animal' | 'health' | 'sales'>('animal');
 
-  const { data: animalSummary, isLoading: isLoadingAnimal } = useQuery({
+  const { data: animalSummary, isLoading: isLoadingAnimal, error: errorAnimal } = useQuery({
     queryKey: ['animal-summary-report'],
     queryFn: generateAnimalSummaryReport,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: 1000,
   });
 
-  const { data: healthReport, isLoading: isLoadingHealth } = useQuery({
+  const { data: healthReport, isLoading: isLoadingHealth, error: errorHealth } = useQuery({
     queryKey: ['health-report'],
     queryFn: generateHealthReport,
-    staleTime: 3 * 60 * 1000, // 3 minutes
+    staleTime: 3 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: 1000,
+    enabled: !isLoadingAnimal, // Load sequentially to avoid overload
   });
 
-  const { data: ledgerSummary, isLoading: isLoadingLedger } = useQuery({
+  const { data: ledgerSummary, isLoading: isLoadingLedger, error: errorLedger } = useQuery({
     queryKey: ['ledger-summary'],
     queryFn: () => getLedgerSummary(),
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: 1000,
+    enabled: !isLoadingHealth, // Load sequentially
   });
 
-  const { data: salesAnalytics, isLoading: isLoadingSales } = useQuery({
+  const { data: salesAnalytics, isLoading: isLoadingSales, error: errorSales } = useQuery({
     queryKey: ['sales-analytics'],
     queryFn: () => getSalesAnalytics(),
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: 1000,
+    enabled: !isLoadingLedger, // Load sequentially
   });
 
   const formatSpeciesData = (bySpecies: Record<string, number>) => {
@@ -74,6 +85,9 @@ const ReportsDashboard: React.FC = () => {
 
   const isLoading = isLoadingAnimal || isLoadingHealth || isLoadingLedger || isLoadingSales;
 
+  // Show errors if any
+  const hasError = errorAnimal || errorHealth || errorLedger || errorSales;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -83,6 +97,16 @@ const ReportsDashboard: React.FC = () => {
           Exportar
         </Button>
       </div>
+
+      {hasError && (
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <p className="text-sm text-destructive">
+              Error al cargar los reportes. Por favor, intenta recargar la página.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={activeReport} onValueChange={(value) => setActiveReport(value as any)}>
         <TabsList className="grid w-full grid-cols-3">

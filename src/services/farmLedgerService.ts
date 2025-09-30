@@ -62,7 +62,7 @@ export const getLedgerSummary = async (dateRange?: { start: string; end: string 
     let totalExpenses = 0;
     entries.forEach(entry => {
       if (entry.transaction_type === 'expense') {
-        totalExpenses += entry.amount;
+        totalExpenses += Math.abs(entry.amount); // Ensure positive
       }
     });
     
