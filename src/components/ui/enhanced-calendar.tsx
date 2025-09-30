@@ -76,6 +76,7 @@ function EnhancedCalendar({
     const monthIndex = parseInt(monthStr, 10);
     const newDate = new Date(currentYear, monthIndex);
     setMonth(newDate);
+    setIsMonthYearOpen(false);
   };
 
   const handleYearChange = (yearStr: string) => {
@@ -83,6 +84,7 @@ function EnhancedCalendar({
     if (newYear >= 1900 && newYear <= 2100) {
       const newDate = new Date(newYear, currentMonth);
       setMonth(newDate);
+      setIsMonthYearOpen(false);
     }
   };
 
