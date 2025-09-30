@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_settings: {
+        Row: {
+          ai_provider: string
+          created_at: string
+          enable_animal_context: boolean | null
+          enable_breeding_context: boolean | null
+          enable_lots_context: boolean | null
+          id: string
+          language: string | null
+          system_prompt: string | null
+          updated_at: string
+          usage_limit_per_user: number | null
+        }
+        Insert: {
+          ai_provider?: string
+          created_at?: string
+          enable_animal_context?: boolean | null
+          enable_breeding_context?: boolean | null
+          enable_lots_context?: boolean | null
+          id?: string
+          language?: string | null
+          system_prompt?: string | null
+          updated_at?: string
+          usage_limit_per_user?: number | null
+        }
+        Update: {
+          ai_provider?: string
+          created_at?: string
+          enable_animal_context?: boolean | null
+          enable_breeding_context?: boolean | null
+          enable_lots_context?: boolean | null
+          id?: string
+          language?: string | null
+          system_prompt?: string | null
+          updated_at?: string
+          usage_limit_per_user?: number | null
+        }
+        Relationships: []
+      }
       animal_attachments: {
         Row: {
           animal_id: string
@@ -610,6 +649,33 @@ export type Database = {
           updated_at?: string
           user_id?: string
           veterinarian?: string | null
+        }
+        Relationships: []
+      }
+      chat_history: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          role?: string
+          user_id?: string
         }
         Relationships: []
       }

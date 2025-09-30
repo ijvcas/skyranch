@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,8 @@ import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 import { createOptimizedQueryClient } from '@/utils/queryConfig';
+import FloatingChatButton from '@/components/ai-chat/FloatingChatButton';
+import ChatDialog from '@/components/ai-chat/ChatDialog';
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
 const SoldAnimals = lazy(() => import('@/pages/SoldAnimals'));
 import AnimalDetail from '@/pages/AnimalDetail';
@@ -35,6 +37,7 @@ const queryClient = createOptimizedQueryClient();
 function AppContent() {
   useDeepLinking();
   const { user, loading } = useAuth();
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Log an "app_open" when a user has an active session (once per tab)
   React.useEffect(() => {
@@ -125,10 +128,18 @@ function AppContent() {
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />
-                </Routes>
+                 </Routes>
         </Suspense>
       </AppErrorBoundary>
               <Toaster />
+      
+      {/* AI Chat Assistant - Only show when logged in */}
+      {user && (
+        <>
+          <FloatingChatButton onClick={() => setChatOpen(true)} />
+          <ChatDialog open={chatOpen} onOpenChange={setChatOpen} />
+        </>
+      )}
     </div>
   );
 }
