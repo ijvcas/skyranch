@@ -66,7 +66,9 @@ const DashboardStats = ({ totalAnimals, speciesCounts }: DashboardStatsProps) =>
       </Card>
 
       {/* Species Cards */}
-      {Object.entries(speciesCounts).map(([species, count]) => (
+      {Object.entries(speciesCounts)
+        .filter(([_, count]) => count > 0)
+        .map(([species, count]) => (
         <Card 
           key={species} 
           className={`${getSpeciesColor(species)} shadow-lg border-opacity-20 hover:shadow-xl cursor-pointer transition-all duration-300 hover:scale-105`}

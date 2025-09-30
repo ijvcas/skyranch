@@ -30,11 +30,16 @@ export const useDashboardStats = () => {
         return counts;
       }, {} as Record<string, number>);
       
-      console.log('📊 Dashboard stats computed:', { totalAnimals, speciesCounts });
+      // Filter out species with 0 count
+      const filteredSpeciesCounts = Object.fromEntries(
+        Object.entries(speciesCounts).filter(([_, count]) => count > 0)
+      );
+      
+      console.log('📊 Dashboard stats computed:', { totalAnimals, speciesCounts: filteredSpeciesCounts });
       
       return {
         totalAnimals,
-        speciesCounts,
+        speciesCounts: filteredSpeciesCounts,
         animals
       };
     }

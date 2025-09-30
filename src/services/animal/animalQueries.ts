@@ -61,11 +61,8 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
   try {
     let query = supabase
       .from('animals')
-      .select('id,species');
-    
-    if (!includeDeceased) {
-      query = query.neq('lifecycle_status', 'deceased');
-    }
+      .select('id,species')
+      .eq('lifecycle_status', 'active'); // Only active animals
     
     const { data, error } = await query
       .order('created_at', { ascending: false });
