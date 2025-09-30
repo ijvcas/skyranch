@@ -6,15 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, DollarSign, FileText } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { DollarSign, FileText } from 'lucide-react';
 import type { CadastralParcel } from '@/services/cadastralService';
 import { ParcelStatus, PARCEL_STATUS_LABELS } from '@/utils/cadastral/types';
 import PermissionGuard from '@/components/PermissionGuard';
 import { ParcelOwnersManager } from './components/ParcelOwnersManager';
+import DatePickerField from '@/components/calendar/DatePickerField';
 
 interface ParcelAcquisitionFormProps {
   parcel: CadastralParcel;
@@ -33,13 +30,11 @@ const ParcelAcquisitionForm: React.FC<ParcelAcquisitionFormProps> = ({
     totalCost: parcel.totalCost?.toString() || '',
     costPerSquareMeter: parcel.costPerSquareMeter?.toString() || '',
     sellerName: parcel.sellerName || '',
-    acquisitionDate: parcel.acquisitionDate ? new Date(parcel.acquisitionDate) : undefined,
+    acquisitionDate: parcel.acquisitionDate || '',
     acquisitionNotes: parcel.acquisitionNotes || '',
     contractReference: parcel.contractReference || '',
     notes: parcel.notes || ''
   });
-
-  const [showCalendar, setShowCalendar] = useState(false);
 
   const calculateCostPerSquareMeter = (totalCost: string) => {
     if (!totalCost || !parcel.areaHectares) return '';
@@ -78,7 +73,7 @@ const ParcelAcquisitionForm: React.FC<ParcelAcquisitionFormProps> = ({
       totalCost: formData.totalCost ? parseFloat(formData.totalCost) : undefined,
       costPerSquareMeter: formData.costPerSquareMeter ? parseFloat(formData.costPerSquareMeter) : undefined,
       sellerName: formData.sellerName,
-      acquisitionDate: formData.acquisitionDate?.toISOString().split('T')[0],
+      acquisitionDate: formData.acquisitionDate || undefined,
       acquisitionNotes: formData.acquisitionNotes,
       contractReference: formData.contractReference,
       notes: formData.notes
@@ -188,34 +183,12 @@ const ParcelAcquisitionForm: React.FC<ParcelAcquisitionFormProps> = ({
                 />
               </div>
 
-              <div>
-                <Label htmlFor="acquisitionDate">Fecha de Adquisición</Label>
-                <Popover open={showCalendar} onOpenChange={setShowCalendar}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formData.acquisitionDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.acquisitionDate ? format(formData.acquisitionDate, "PPP") : "Seleccionar fecha"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={formData.acquisitionDate}
-                      onSelect={(date) => {
-                        setFormData(prev => ({ ...prev, acquisitionDate: date }));
-                        setShowCalendar(false);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <DatePickerField
+                value={formData.acquisitionDate}
+                onChange={(date) => setFormData(prev => ({ ...prev, acquisitionDate: date }))}
+                label="Fecha de Adquisición"
+                placeholder="Seleccionar fecha"
+              />
 
               <div className="md:col-span-2">
                 <Label htmlFor="contractReference">Referencia de Contrato/Escritura</Label>
