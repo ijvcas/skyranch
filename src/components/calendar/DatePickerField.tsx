@@ -35,7 +35,7 @@ const DatePickerField = ({ value, onChange, label, placeholder = "Seleccionar fe
       <Label htmlFor={label.toLowerCase().replace(/\s+/g, '-')}>
         {label} {required && '*'}
       </Label>
-      <Popover>
+      <Popover modal={true}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -48,7 +48,12 @@ const DatePickerField = ({ value, onChange, label, placeholder = "Seleccionar fe
             {selectedDate ? format(selectedDate, 'PPP', { locale: es }) : placeholder}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+        <PopoverContent 
+          className="w-auto p-0 bg-background border shadow-lg" 
+          align="start"
+          sideOffset={5}
+          style={{ zIndex: 99999 }}
+        >
           <EnhancedCalendar
             mode="single"
             selected={selectedDate}
