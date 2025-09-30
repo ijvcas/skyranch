@@ -22,13 +22,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAIChatDialog } from '@/contexts/AIChatContext';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import NotificationBell from './NotificationBell';
 import PWAInstallButton from './PWAInstallButton';
+import aiIcon from '@/assets/ai-icon.png';
 
 const HeaderWithDropdown = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { setChatOpen } = useAIChatDialog();
   const { hasAccess: canAccessSettings } = usePermissionCheck('system_settings');
 
   const navItems = [
@@ -102,8 +105,21 @@ const HeaderWithDropdown = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Right side - PWA install button and notification bell */}
+          {/* Right side - AI Assistant, PWA install button and notification bell */}
           <div className="flex items-center space-x-3 h-full">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setChatOpen(true)}
+              className="h-10 w-10 hover:bg-green-50"
+              aria-label="Abrir asistente de IA"
+            >
+              <img 
+                src={aiIcon} 
+                alt="AI Assistant" 
+                className="h-6 w-6"
+              />
+            </Button>
             <div className="flex items-center h-full">
               <PWAInstallButton />
             </div>

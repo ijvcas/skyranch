@@ -1,7 +1,8 @@
-import React, { Suspense, lazy, useState } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AIChatProvider, useAIChatDialog } from '@/contexts/AIChatContext';
 import { Toaster } from '@/components/ui/toaster';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useDeepLinking } from '@/hooks/useDeepLinking';
@@ -12,7 +13,6 @@ import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 import { createOptimizedQueryClient } from '@/utils/queryConfig';
-import FloatingChatButton from '@/components/ai-chat/FloatingChatButton';
 import ChatDialog from '@/components/ai-chat/ChatDialog';
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
 const SoldAnimals = lazy(() => import('@/pages/SoldAnimals'));
@@ -37,7 +37,7 @@ const queryClient = createOptimizedQueryClient();
 function AppContent() {
   useDeepLinking();
   const { user, loading } = useAuth();
-  const [chatOpen, setChatOpen] = useState(false);
+  const { chatOpen, setChatOpen } = useAIChatDialog();
 
   // Log an "app_open" when a user has an active session (once per tab)
   React.useEffect(() => {
@@ -133,13 +133,8 @@ function AppContent() {
       </AppErrorBoundary>
               <Toaster />
       
-      {/* AI Chat Assistant - Only show when logged in */}
-      {user && (
-        <>
-          <FloatingChatButton onClick={() => setChatOpen(true)} />
-          <ChatDialog open={chatOpen} onOpenChange={setChatOpen} />
-        </>
-      )}
+      {/* AI Chat Dialog - Only show when logged in */}
+      {user && <ChatDialog open={chatOpen} onOpenChange={setChatOpen} />}
     </div>
   );
 }
@@ -148,9 +143,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <AIChatProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AIChatProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
