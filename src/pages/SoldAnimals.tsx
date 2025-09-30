@@ -238,40 +238,30 @@ const SoldAnimals: React.FC = () => {
                   <Card key={sale.id}>
                     <CardContent className="p-4">
                       {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <DollarSign className="w-5 h-5 text-primary" />
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-lg font-bold">{sale.animals?.name || 'Animal'}</h3>
-                              {sale.animals?.species && (
-                                <span className="text-sm text-muted-foreground">
-                                  {sale.animals.breed ? `${sale.animals.breed} - ` : ''}{sale.animals.species.toUpperCase()}
-                                </span>
-                              )}
-                            </div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <DollarSign className="w-4 h-4 text-primary flex-shrink-0" />
+                          <h3 className="text-base font-bold truncate">{sale.animals?.name || 'Animal'}</h3>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {getPaymentStatusBadge(sale.payment_status)}
+                            {pendingAmount > 0 && (
+                              <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs px-2 py-0">
+                                Saldo: {formatCostPerSqm(pendingAmount)}
+                              </Badge>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {getPaymentStatusBadge(sale.payment_status)}
-                          {pendingAmount > 0 && (
-                            <Badge variant="outline" className="text-orange-600 border-orange-600">
-                              Saldo: {formatCostPerSqm(pendingAmount)}
-                            </Badge>
-                          )}
-                          <Button variant="outline" size="sm" className="gap-2">
-                            <Edit className="w-4 h-4" />
-                            Editar
-                          </Button>
-                        </div>
+                        <Button variant="outline" size="icon" className="flex-shrink-0 h-8 w-8">
+                          <Edit className="w-4 h-4" />
+                        </Button>
                       </div>
 
                       {/* Details Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                      <div className="grid grid-cols-1 gap-3 text-center">
                         {/* Sale Date */}
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Fecha de Venta</p>
-                          <p className="font-semibold">
+                          <p className="text-xs text-muted-foreground mb-0.5">Fecha de Venta</p>
+                          <p className="font-semibold text-sm">
                             {new Date(sale.sale_date).toLocaleDateString('es-ES', {
                               day: '2-digit',
                               month: '2-digit',
@@ -282,29 +272,26 @@ const SoldAnimals: React.FC = () => {
 
                         {/* Buyer */}
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Comprador</p>
-                          <p className="font-semibold">{sale.buyer_name}</p>
+                          <p className="text-xs text-muted-foreground mb-0.5">Comprador</p>
+                          <p className="font-semibold text-sm">{sale.buyer_name}</p>
                           {sale.buyer_contact && (
-                            <p className="text-sm text-muted-foreground flex items-center gap-1">
-                              <CreditCard className="w-3 h-3" />
-                              {sale.buyer_contact}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{sale.buyer_contact}</p>
                           )}
                         </div>
 
                         {/* Price */}
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Precio</p>
-                          <p className="font-semibold text-green-600">{formatCostPerSqm(sale.total_amount)}</p>
-                          <p className="text-sm text-muted-foreground">Pagado: {formatCostPerSqm(sale.amount_paid)}</p>
+                          <p className="text-xs text-muted-foreground mb-0.5">Precio</p>
+                          <p className="font-semibold text-green-600 text-sm">{formatCostPerSqm(sale.total_amount)}</p>
+                          <p className="text-xs text-muted-foreground">Pagado: {formatCostPerSqm(sale.amount_paid)}</p>
                         </div>
 
                         {/* Payment Method */}
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Método</p>
-                          <p className="font-semibold">{getPaymentMethodLabel(sale.payment_method)}</p>
+                          <p className="text-xs text-muted-foreground mb-0.5">Método</p>
+                          <p className="font-semibold text-sm">{getPaymentMethodLabel(sale.payment_method)}</p>
                           {sale.updated_at && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               Pagado: {new Date(sale.updated_at).toLocaleDateString('es-ES', {
                                 day: '2-digit',
                                 month: '2-digit',
@@ -315,14 +302,6 @@ const SoldAnimals: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Footer Button */}
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={() => navigate(`/animals/${sale.animal_id}`)}
-                      >
-                        Ver Detalles del Animal
-                      </Button>
                     </CardContent>
                   </Card>
                 );
