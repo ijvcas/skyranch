@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Users, Plus, AlertTriangle } from 'lucide-react';
-import { ParcelOwner, getParcelOwners, createParcelOwner, updateParcelOwner, deleteParcelOwner, validateOwnershipPercentage } from '@/services/parcelOwnersService';
+import { ParcelOwner, getParcelOwners, createParcelOwner, updateParcelOwner, deleteParcelOwner } from '@/services/parcelOwnersService';
 import { OwnerContactCard } from './OwnerContactCard';
 import { useToast } from '@/hooks/use-toast';
 import PermissionGuard from '@/components/PermissionGuard';
@@ -79,30 +79,18 @@ export const ParcelOwnersManager: React.FC<ParcelOwnersManagerProps> = ({
     try {
       const percentage = parseFloat(formData.ownership_percentage);
       
+      // Basic client-side validation for input range
       if (percentage <= 0 || percentage > 100) {
         toast({
           title: "Error",
           description: "El porcentaje debe estar entre 1 y 100",
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
 
-      const isValid = await validateOwnershipPercentage(
-        parcelId, 
-        editingOwner?.id, 
-        percentage
-      );
-
-      if (!isValid) {
-        toast({
-          title: "Error",
-          description: "El porcentaje total de propiedad no puede exceder el 100%",
-          variant: "destructive",
-        });
-        return;
-      }
-
+      // Database trigger will validate total ownership percentage
       const ownerData = {
         parcel_id: parcelId,
         owner_name: formData.owner_name,
@@ -134,13 +122,24 @@ export const ParcelOwnersManager: React.FC<ParcelOwnersManagerProps> = ({
       setEditingOwner(null);
       setShowForm(false);
       loadOwners();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving owner:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo guardar el propietario",
-        variant: "destructive",
-      });
+      
+      // Check if it's a database validation error about ownership percentage
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('ownership percentage') || errorMessage.includes('100')) {
+        toast({
+          title: "Error de validación",
+          description: "El porcentaje total de propiedad no puede exceder el 100%",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "No se pudo guardar el propietario",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

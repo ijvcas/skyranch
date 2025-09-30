@@ -90,20 +90,6 @@ export const findSimilarOwners = async (ownerName: string): Promise<ParcelOwner[
   return data || [];
 };
 
-export const validateOwnershipPercentage = async (parcelId: string, ownerId?: string, percentage?: number): Promise<boolean> => {
-  const { data, error } = await supabase
-    .from('parcel_owners')
-    .select('ownership_percentage')
-    .eq('parcel_id', parcelId)
-    .neq('id', ownerId || '');
-
-  if (error) {
-    console.error('Error validating ownership percentage:', error);
-    return false;
-  }
-
-  const currentTotal = data?.reduce((sum, owner) => sum + owner.ownership_percentage, 0) || 0;
-  const newTotal = currentTotal + (percentage || 0);
-  
-  return newTotal <= 100;
-};
+// Removed: Client-side validation is now handled by database trigger
+// The database has a proper trigger that validates ownership percentages
+// This prevents conflicts between client and server validation logic
