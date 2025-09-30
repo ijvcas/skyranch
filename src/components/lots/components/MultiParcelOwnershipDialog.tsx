@@ -65,7 +65,7 @@ const MultiParcelOwnershipDialog: React.FC<MultiParcelOwnershipDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh]">
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
@@ -82,7 +82,7 @@ const MultiParcelOwnershipDialog: React.FC<MultiParcelOwnershipDialogProps> = ({
             <span className="ml-3 text-muted-foreground">Analizando propietarios...</span>
           </div>
         ) : analysis ? (
-          <ScrollArea className="h-[600px] pr-4">
+          <ScrollArea className="flex-1 max-h-[calc(90vh-200px)] pr-4">
             <div className="space-y-6">
               {/* Summary Statistics */}
               <OwnershipSummaryStats analysis={analysis} />
