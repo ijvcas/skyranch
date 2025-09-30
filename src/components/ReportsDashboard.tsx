@@ -30,9 +30,8 @@ const ReportsDashboard: React.FC = () => {
     queryFn: generateHealthReport,
     staleTime: 3 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
-    retry: 2,
+    retry: 1,
     retryDelay: 1000,
-    enabled: !isLoadingAnimal, // Load sequentially to avoid overload
   });
 
   const { data: ledgerSummary, isLoading: isLoadingLedger, error: errorLedger } = useQuery({
@@ -40,9 +39,8 @@ const ReportsDashboard: React.FC = () => {
     queryFn: () => getLedgerSummary(),
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
-    retry: 2,
+    retry: 1,
     retryDelay: 1000,
-    enabled: !isLoadingHealth, // Load sequentially
   });
 
   const { data: salesAnalytics, isLoading: isLoadingSales, error: errorSales } = useQuery({
@@ -50,9 +48,8 @@ const ReportsDashboard: React.FC = () => {
     queryFn: () => getSalesAnalytics(),
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
-    retry: 2,
+    retry: 1,
     retryDelay: 1000,
-    enabled: !isLoadingLedger, // Load sequentially
   });
 
   const formatSpeciesData = (bySpecies: Record<string, number>) => {

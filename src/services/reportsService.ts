@@ -34,68 +34,88 @@ export interface HealthReportData {
 }
 
 export const generateAnimalSummaryReport = async (): Promise<AnimalSummaryData> => {
-  // Optimized: Only fetch needed fields
-  const { data, error } = await supabase
-    .from('animals')
-    .select('id, species, health_status, birth_date')
-    .eq('lifecycle_status', 'active');
-  
-  if (error) throw error;
-  const animals = data || [];
-  
-  const bySpecies: Record<string, number> = {};
-  const byHealthStatus: Record<string, number> = {};
-  let totalAge = 0;
-  let animalsWithAge = 0;
-  
-  const currentDate = new Date();
-  const thirtyDaysAgo = new Date(currentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
-  let recentBirths = 0;
-
-  animals.forEach(animal => {
-    // Count by species
-    bySpecies[animal.species] = (bySpecies[animal.species] || 0) + 1;
+  try {
+    // Optimized: Only fetch needed fields
+    const { data, error } = await supabase
+      .from('animals')
+      .select('id, species, health_status, birth_date')
+      .eq('lifecycle_status', 'active');
     
-    // Count by health status
-    byHealthStatus[animal.health_status] = (byHealthStatus[animal.health_status] || 0) + 1;
-    
-    // Calculate average age
-    if (animal.birth_date) {
-      const birthDate = new Date(animal.birth_date);
-      const age = currentDate.getFullYear() - birthDate.getFullYear();
-      totalAge += age;
-      animalsWithAge++;
-      
-      // Count recent births
-      if (birthDate >= thirtyDaysAgo) {
-        recentBirths++;
-      }
+    if (error) {
+      console.error('Error fetching animals for report:', error);
+      throw error;
     }
-  });
+    
+    const animals = data || [];
+    
+    const bySpecies: Record<string, number> = {};
+    const byHealthStatus: Record<string, number> = {};
+    let totalAge = 0;
+    let animalsWithAge = 0;
+    
+    const currentDate = new Date();
+    const thirtyDaysAgo = new Date(currentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+    let recentBirths = 0;
 
-  return {
-    totalAnimals: animals.length,
-    bySpecies,
-    byHealthStatus,
-    averageAge: animalsWithAge > 0 ? Math.round(totalAge / animalsWithAge) : 0,
-    recentBirths
-  };
+    animals.forEach(animal => {
+      // Count by species
+      bySpecies[animal.species] = (bySpecies[animal.species] || 0) + 1;
+      
+      // Count by health status (snake_case from DB)
+      const healthStatus = animal.health_status || 'healthy';
+      byHealthStatus[healthStatus] = (byHealthStatus[healthStatus] || 0) + 1;
+      
+      // Calculate average age (snake_case from DB)
+      if (animal.birth_date) {
+        const birthDate = new Date(animal.birth_date);
+        const age = currentDate.getFullYear() - birthDate.getFullYear();
+        totalAge += age;
+        animalsWithAge++;
+        
+        // Count recent births
+        if (birthDate >= thirtyDaysAgo) {
+          recentBirths++;
+        }
+      }
+    });
+
+    return {
+      totalAnimals: animals.length,
+      bySpecies,
+      byHealthStatus,
+      averageAge: animalsWithAge > 0 ? Math.round(totalAge / animalsWithAge) : 0,
+      recentBirths
+    };
+  } catch (error) {
+    console.error('Error generating animal summary report:', error);
+    return {
+      totalAnimals: 0,
+      bySpecies: {},
+      byHealthStatus: {},
+      averageAge: 0,
+      recentBirths: 0
+    };
+  }
 };
 
 export const generateHealthReport = async (): Promise<HealthReportData> => {
-  // Optimized: Direct query for active animals' IDs only
-  const { data: animals, error: animalsError } = await supabase
-    .from('animals')
-    .select('id')
-    .eq('lifecycle_status', 'active');
-  
-  if (animalsError) throw animalsError;
-  
-  // Optimized: Fetch all health records in a single query
-  const animalIds = (animals || []).map(animal => animal.id);
-  const allHealthRecords = animalIds.length > 0 
-    ? await getHealthRecordsForAnimals(animalIds)
-    : [];
+  try {
+    // Optimized: Direct query for active animals' IDs only
+    const { data: animals, error: animalsError } = await supabase
+      .from('animals')
+      .select('id')
+      .eq('lifecycle_status', 'active');
+    
+    if (animalsError) {
+      console.error('Error fetching animals for health report:', animalsError);
+      throw animalsError;
+    }
+    
+    // Optimized: Fetch all health records in a single query
+    const animalIds = (animals || []).map(animal => animal.id);
+    const allHealthRecords = animalIds.length > 0 
+      ? await getHealthRecordsForAnimals(animalIds)
+      : [];
 
   const byType: Record<string, number> = {};
   let totalCost = 0;
@@ -125,16 +145,29 @@ export const generateHealthReport = async (): Promise<HealthReportData> => {
     }
   });
 
-  return {
-    totalRecords: allHealthRecords.length,
-    byType,
-    upcomingVaccinations,
-    costsSummary: {
-      total: totalCost,
-      average: allHealthRecords.length > 0 ? totalCost / allHealthRecords.length : 0,
-      byMonth: costsByMonth
-    }
-  };
+    return {
+      totalRecords: allHealthRecords.length,
+      byType,
+      upcomingVaccinations,
+      costsSummary: {
+        total: totalCost,
+        average: allHealthRecords.length > 0 ? totalCost / allHealthRecords.length : 0,
+        byMonth: costsByMonth
+      }
+    };
+  } catch (error) {
+    console.error('Error generating health report:', error);
+    return {
+      totalRecords: 0,
+      byType: {},
+      upcomingVaccinations: 0,
+      costsSummary: {
+        total: 0,
+        average: 0,
+        byMonth: {}
+      }
+    };
+  }
 };
 
 export const saveReport = async (report: Omit<Report, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
