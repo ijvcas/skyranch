@@ -49,7 +49,7 @@ const DatePickerField = ({ value, onChange, label, placeholder = "Seleccionar fe
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-auto p-0 bg-background border shadow-lg !z-[100]" 
+          className="w-auto p-0 bg-background border shadow-lg !z-[10000]" 
           align="start"
           sideOffset={5}
         >

@@ -207,7 +207,7 @@ function EnhancedCalendar({
             <ChevronDown className="h-3 w-3" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-4" align="center">
+        <PopoverContent className="w-80 p-4 !z-[10000] bg-white border shadow-xl" align="center">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Seleccionar fecha</h4>
