@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, X } from 'lucide-react';
+import { Send, Loader2, Trash2 } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
 
@@ -44,23 +44,15 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onOpenChange }) => {
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
             <DialogTitle>Asistente de IA - Skyranch</DialogTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearHistory}
-                disabled={messages.length === 0}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearHistory}
+              disabled={messages.length === 0}
+              title="Borrar historial"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
 
