@@ -23,8 +23,9 @@ const AnimalListStats = ({ animals, selectedFilter, onFilterChange }: AnimalList
 
   if (animals.length === 0) return null;
 
-  // Separate active and deceased animals for proper counting
-  const activeAnimals = animals.filter(a => a.lifecycleStatus !== 'deceased');
+  // Separate active, sold, and deceased animals for proper counting
+  const activeAnimals = animals.filter(a => a.lifecycleStatus !== 'deceased' && a.lifecycleStatus !== 'sold');
+  const soldAnimals = animals.filter(a => a.lifecycleStatus === 'sold');
   const deceasedAnimals = animals.filter(a => a.lifecycleStatus === 'deceased');
 
   // Helper function to determine if an animal is pregnant using breeding records
@@ -64,7 +65,7 @@ const AnimalListStats = ({ animals, selectedFilter, onFilterChange }: AnimalList
     },
     {
       key: 'sold' as FilterType,
-      count: activeAnimals.filter(a => a.lifecycleStatus === 'sold').length,
+      count: soldAnimals.length,
       label: 'Vendidos',
       colorClass: 'text-purple-600'
     },
@@ -84,7 +85,13 @@ const AnimalListStats = ({ animals, selectedFilter, onFilterChange }: AnimalList
           className={`shadow-lg cursor-pointer transition-all hover:shadow-xl ${
             selectedFilter === stat.key ? 'ring-2 ring-primary' : ''
           }`}
-          onClick={() => onFilterChange(stat.key)}
+          onClick={() => {
+            if (stat.key === 'sold') {
+              window.location.href = '/animals/sold';
+            } else {
+              onFilterChange(stat.key);
+            }
+          }}
         >
           <CardContent className="p-4 text-center">
             <div className={`text-2xl font-bold ${stat.colorClass}`}>{stat.count}</div>

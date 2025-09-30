@@ -89,17 +89,17 @@ export const useOptimizedAnimalFiltering = (animals: Animal[], selectedFilter: F
       // Filter type (from stats cards)
       switch (selectedFilter) {
         case 'healthy':
-          return animal.healthStatus === 'healthy' && !isAnimalPregnant(animal.id);
+          return animal.healthStatus === 'healthy' && !isAnimalPregnant(animal.id) && animal.lifecycleStatus !== 'sold';
         case 'pregnant':
-          return isAnimalPregnant(animal.id);
+          return isAnimalPregnant(animal.id) && animal.lifecycleStatus !== 'sold';
         case 'sick':
-          return (animal.healthStatus === 'sick' || animal.healthStatus === 'pregnant-sick') && !isAnimalPregnant(animal.id);
+          return (animal.healthStatus === 'sick' || animal.healthStatus === 'pregnant-sick') && !isAnimalPregnant(animal.id) && animal.lifecycleStatus !== 'sold';
         case 'sold':
           return animal.lifecycleStatus === 'sold';
         case 'deceased':
           return animal.lifecycleStatus === 'deceased';
         default:
-          return animal.lifecycleStatus !== 'deceased';
+          return animal.lifecycleStatus !== 'deceased' && animal.lifecycleStatus !== 'sold';
       }
     });
 

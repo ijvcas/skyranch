@@ -320,11 +320,11 @@ const recordSaleInLedger = async (saleId: string, amount: number, buyerName: str
     await supabase
       .from('farm_ledger')
       .insert({
-        transaction_type: 'sale',
+        transaction_type: 'income',
         reference_id: saleId,
         reference_type: 'animal_sale',
         amount: amount,
-        description: `Animal sale to ${buyerName}`,
+        description: `Venta de animal a ${buyerName}`,
         transaction_date: saleDate,
         user_id: user.id,
         metadata: { buyer_name: buyerName, type: 'animal_sale' }
@@ -343,11 +343,11 @@ const recordPaymentInLedger = async (saleId: string, amount: number, paymentDate
     await supabase
       .from('farm_ledger')
       .insert({
-        transaction_type: 'payment',
+        transaction_type: 'income',
         reference_id: saleId,
-        reference_type: 'animal_sale',
+        reference_type: 'animal_sale_payment',
         amount: amount,
-        description: `Payment received for animal sale`,
+        description: `Pago recibido por venta de animal`,
         transaction_date: paymentDate,
         user_id: user.id,
         metadata: { type: 'sale_payment' }

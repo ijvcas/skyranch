@@ -12,6 +12,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
+const SoldAnimals = lazy(() => import('@/pages/SoldAnimals'));
 import AnimalDetail from '@/pages/AnimalDetail';
 import AnimalEdit from '@/pages/AnimalEdit';
 import AnimalForm from '@/pages/AnimalForm';
@@ -71,6 +72,11 @@ function AppContent() {
                   <Route path="/animals" element={
                     <ProtectedRoute>
                       <AnimalList />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/animals/sold" element={
+                    <ProtectedRoute>
+                      <SoldAnimals />
                     </ProtectedRoute>
                   } />
                   <Route path="/animals/:id" element={
