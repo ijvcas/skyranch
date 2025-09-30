@@ -120,48 +120,48 @@ const SoldAnimals: React.FC = () => {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <DollarSign className="w-5 h-5 text-green-600 mt-1" />
+                <DollarSign className="w-5 h-5 text-green-600 mt-0.5" />
                 <div>
                   <p className="text-sm text-muted-foreground">Total Vendido</p>
-                  <p className="text-2xl font-bold">{formatCostPerSqm(stats.totalSold)}</p>
+                  <p className="text-xl font-bold">{formatCostPerSqm(stats.totalSold)}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <User className="w-5 h-5 text-blue-600 mt-1" />
+                <User className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div>
                   <p className="text-sm text-muted-foreground">Animales Vendidos</p>
-                  <p className="text-2xl font-bold">{stats.totalAnimals}</p>
+                  <p className="text-xl font-bold">{stats.totalAnimals}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <Calendar className="w-5 h-5 text-orange-600 mt-1" />
+                <Calendar className="w-5 h-5 text-orange-600 mt-0.5" />
                 <div>
                   <p className="text-sm text-muted-foreground">Pagos Pendientes</p>
-                  <p className="text-2xl font-bold">{stats.pendingPayments}</p>
+                  <p className="text-xl font-bold">{stats.pendingPayments}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <DollarSign className="w-5 h-5 text-orange-600 mt-1" />
+                <DollarSign className="w-5 h-5 text-orange-600 mt-0.5" />
                 <div>
                   <p className="text-sm text-muted-foreground">Saldo Pendiente</p>
-                  <p className="text-2xl font-bold text-orange-600">{formatCostPerSqm(stats.totalPending)}</p>
+                  <p className="text-xl font-bold text-orange-600">{formatCostPerSqm(stats.totalPending)}</p>
                 </div>
               </div>
             </CardContent>
@@ -170,8 +170,8 @@ const SoldAnimals: React.FC = () => {
 
         {/* Filters */}
         <Card>
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4">Filtros y Búsqueda</h2>
+          <CardContent className="p-4">
+            <h2 className="text-lg font-bold mb-4">Filtros y Búsqueda</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -217,7 +217,7 @@ const SoldAnimals: React.FC = () => {
 
         {/* Sales History */}
         <div>
-          <h2 className="text-2xl font-bold mb-4">Historial de Ventas ({filteredSales.length})</h2>
+          <h2 className="text-xl font-bold mb-4">Historial de Ventas ({filteredSales.length})</h2>
           
           {filteredSales.length === 0 ? (
             <Card>
@@ -236,14 +236,14 @@ const SoldAnimals: React.FC = () => {
                 
                 return (
                   <Card key={sale.id}>
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                       {/* Header */}
-                      <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <DollarSign className="w-6 h-6 text-primary" />
+                          <DollarSign className="w-5 h-5 text-primary" />
                           <div>
                             <div className="flex items-center gap-2">
-                              <h3 className="text-xl font-bold">{sale.animals?.name || 'Animal'}</h3>
+                              <h3 className="text-lg font-bold">{sale.animals?.name || 'Animal'}</h3>
                               {sale.animals?.species && (
                                 <span className="text-sm text-muted-foreground">
                                   {sale.animals.breed ? `${sale.animals.breed} - ` : ''}{sale.animals.species.toUpperCase()}
@@ -267,7 +267,7 @@ const SoldAnimals: React.FC = () => {
                       </div>
 
                       {/* Details Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         {/* Sale Date */}
                         <div>
                           <p className="text-sm text-muted-foreground mb-1">Fecha de Venta</p>
