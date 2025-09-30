@@ -7,40 +7,35 @@ export const useDashboardStats = () => {
     queryKey: ['dashboard', 'stats', 'lean'],
     queryFn: async () => {
       console.log('🔄 Fetching dashboard stats...');
-      const animals = await getAnimalsLean(false); // Only active animals for stats
-      console.log('✅ Dashboard stats fetched:', animals.length, 'animals');
-      return animals;
-    },
-    staleTime: 2 * 60_000, // 2 minutes for faster updates
-    gcTime: 5 * 60_000, // 5 minutes
-    refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      console.log('🔄 Dashboard stats retry attempt:', failureCount, error);
-      // Don't retry on auth errors
-      if (error?.message?.includes('auth') || error?.message?.includes('JWT')) {
-        return false;
+      try {
+        const animals = await getAnimalsLean(false);
+        console.log('✅ Dashboard stats fetched:', animals?.length || 0, 'animals');
+        return animals || [];
+      } catch (error) {
+        console.error('❌ Dashboard stats error:', error);
+        // Return empty array on error to prevent infinite loading
+        return [];
       }
-      return failureCount < 2;
     },
+    staleTime: 2 * 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    retry: 1, // Only retry once
     select: (animals) => {
-      // Process data in the query selector for better performance
-      const totalAnimals = animals.length;
-      const speciesCounts = animals.reduce((counts, animal) => {
-        counts[animal.species] = (counts[animal.species] || 0) + 1;
+      const totalAnimals = animals?.length || 0;
+      const speciesCounts = (animals || []).reduce((counts, animal) => {
+        if (animal?.species) {
+          counts[animal.species] = (counts[animal.species] || 0) + 1;
+        }
         return counts;
       }, {} as Record<string, number>);
       
-      // Filter out species with 0 count
-      const filteredSpeciesCounts = Object.fromEntries(
-        Object.entries(speciesCounts).filter(([_, count]) => count > 0)
-      );
-      
-      console.log('📊 Dashboard stats computed:', { totalAnimals, speciesCounts: filteredSpeciesCounts });
+      console.log('📊 Dashboard stats computed:', { totalAnimals, speciesCounts });
       
       return {
         totalAnimals,
-        speciesCounts: filteredSpeciesCounts,
-        animals
+        speciesCounts,
+        animals: animals || []
       };
     }
   });
