@@ -147,3 +147,37 @@ export const deleteHealthRecord = async (id: string): Promise<boolean> => {
 
   return true;
 };
+
+// Bulk query for health records across multiple animals (optimized for reports)
+export const getHealthRecordsForAnimals = async (animalIds: string[]): Promise<HealthRecord[]> => {
+  if (animalIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from('health_records')
+    .select('*')
+    .in('animal_id', animalIds)
+    .order('date_administered', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching bulk health records:', error);
+    throw error;
+  }
+
+  return (data || []).map(record => ({
+    id: record.id,
+    animalId: record.animal_id,
+    userId: record.user_id,
+    recordType: record.record_type as HealthRecord['recordType'],
+    title: record.title,
+    description: record.description || undefined,
+    veterinarian: record.veterinarian || undefined,
+    medication: record.medication || undefined,
+    dosage: record.dosage || undefined,
+    cost: record.cost || undefined,
+    dateAdministered: record.date_administered,
+    nextDueDate: record.next_due_date || undefined,
+    notes: record.notes || undefined,
+    createdAt: record.created_at,
+    updatedAt: record.updated_at
+  }));
+};

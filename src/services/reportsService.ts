@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { getAllAnimals } from './animalService';
-import { getHealthRecords } from './healthRecordService';
+import { getHealthRecordsForAnimals } from './healthRecordService';
 
 export interface Report {
   id: string;
@@ -79,17 +79,12 @@ export const generateAnimalSummaryReport = async (): Promise<AnimalSummaryData> 
 export const generateHealthReport = async (): Promise<HealthReportData> => {
   const allAnimals = await getAllAnimals();
   const animals = allAnimals.filter(animal => animal.lifecycleStatus === 'active');
-  const allHealthRecords = [];
   
-  // Get health records for all animals
-  for (const animal of animals) {
-    try {
-      const records = await getHealthRecords(animal.id);
-      allHealthRecords.push(...records);
-    } catch (error) {
-      console.error(`Error fetching health records for animal ${animal.id}:`, error);
-    }
-  }
+  // Optimized: Fetch all health records in a single query
+  const animalIds = animals.map(animal => animal.id);
+  const allHealthRecords = animalIds.length > 0 
+    ? await getHealthRecordsForAnimals(animalIds)
+    : [];
 
   const byType: Record<string, number> = {};
   let totalCost = 0;

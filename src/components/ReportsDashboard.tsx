@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { FileText, TrendingUp, Activity, DollarSign, Heart, BarChart3, Download } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { generateAnimalSummaryReport, generateHealthReport } from '@/services/reportsService';
@@ -17,22 +18,30 @@ const ReportsDashboard: React.FC = () => {
 
   const { data: animalSummary, isLoading: isLoadingAnimal } = useQuery({
     queryKey: ['animal-summary-report'],
-    queryFn: generateAnimalSummaryReport
+    queryFn: generateAnimalSummaryReport,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: healthReport, isLoading: isLoadingHealth } = useQuery({
     queryKey: ['health-report'],
-    queryFn: generateHealthReport
+    queryFn: generateHealthReport,
+    staleTime: 3 * 60 * 1000, // 3 minutes
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: ledgerSummary, isLoading: isLoadingLedger } = useQuery({
     queryKey: ['ledger-summary'],
     queryFn: () => getLedgerSummary(),
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: salesAnalytics, isLoading: isLoadingSales } = useQuery({
     queryKey: ['sales-analytics'],
     queryFn: () => getSalesAnalytics(),
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const formatSpeciesData = (bySpecies: Record<string, number>) => {
@@ -63,13 +72,7 @@ const ReportsDashboard: React.FC = () => {
     }));
   };
 
-  if (isLoadingAnimal || isLoadingHealth || isLoadingLedger || isLoadingSales) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const isLoading = isLoadingAnimal || isLoadingHealth || isLoadingLedger || isLoadingSales;
 
   return (
     <div className="space-y-6">
@@ -89,7 +92,18 @@ const ReportsDashboard: React.FC = () => {
         </TabsList>
 
         <TabsContent value="animal" className="space-y-6">
-          {animalSummary && (
+          {isLoadingAnimal ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader><Skeleton className="h-4 w-24" /></CardHeader>
+                    <CardContent><Skeleton className="h-8 w-16" /></CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : animalSummary && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card>
@@ -184,7 +198,18 @@ const ReportsDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="health" className="space-y-6">
-          {healthReport && (
+          {isLoadingHealth ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader><Skeleton className="h-4 w-24" /></CardHeader>
+                    <CardContent><Skeleton className="h-8 w-16" /></CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : healthReport && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card>
@@ -269,7 +294,15 @@ const ReportsDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="sales" className="space-y-6">
-          {ledgerSummary && <FarmLedger summary={ledgerSummary} />}
+          {isLoadingLedger ? (
+            <Card>
+              <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ) : ledgerSummary && <FarmLedger summary={ledgerSummary} />}
           
           {salesAnalytics && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">

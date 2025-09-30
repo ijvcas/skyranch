@@ -2,7 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { TrendingUp, DollarSign, Calendar, CreditCard, PiggyBank, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { TrendingUp, DollarSign, Calendar, CreditCard, PiggyBank, AlertCircle, Info } from 'lucide-react';
 import { formatCostPerSqm } from '@/utils/financialFormatters';
 
 interface FarmLedgerProps {
@@ -40,6 +41,17 @@ const FarmLedger: React.FC<FarmLedgerProps> = ({ summary }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* No Sales Notice */}
+          {summary.totalRevenue === 0 && summary.totalExpenses > 0 && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription className="text-sm">
+                No hay ventas registradas. Los gastos mostrados (€{summary.totalExpenses.toFixed(2)}) 
+                incluyen costos veterinarios y otros gastos operativos.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-1">
@@ -50,7 +62,9 @@ const FarmLedger: React.FC<FarmLedgerProps> = ({ summary }) => {
               <p className="text-lg font-bold text-green-600 dark:text-green-400">
                 {formatCurrency(summary.totalRevenue)}
               </p>
-              <p className="text-xs text-muted-foreground">Cobrado</p>
+              <p className="text-xs text-muted-foreground">
+                {summary.totalRevenue === 0 ? 'Sin ventas' : 'Cobrado'}
+              </p>
             </div>
 
             <div className="space-y-1">
@@ -61,7 +75,9 @@ const FarmLedger: React.FC<FarmLedgerProps> = ({ summary }) => {
               <p className="text-lg font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(summary.totalExpenses)}
               </p>
-              <p className="text-xs text-muted-foreground">Totales</p>
+              <p className="text-xs text-muted-foreground">
+                {summary.totalExpenses > 0 ? 'Veterinario + Otros' : 'Sin gastos'}
+              </p>
             </div>
 
             <div className="space-y-1">
@@ -72,7 +88,9 @@ const FarmLedger: React.FC<FarmLedgerProps> = ({ summary }) => {
               <p className={`text-lg font-bold ${getIncomeColor(summary.netIncome)}`}>
                 {formatCurrency(summary.netIncome)}
               </p>
-              <p className="text-xs text-muted-foreground">Neto</p>
+              <p className="text-xs text-muted-foreground">
+                {summary.totalRevenue === 0 && summary.netIncome < 0 ? 'Solo gastos' : 'Neto'}
+              </p>
             </div>
 
             <div className="space-y-1">
