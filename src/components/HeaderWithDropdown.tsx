@@ -111,7 +111,7 @@ const HeaderWithDropdown = () => {
             <Button
               variant="ghost"
               onClick={() => setChatOpen(true)}
-              className="h-14 w-14 p-3 hover:bg-green-50 rounded-lg transition-all text-green-700 hover:text-green-900"
+              className="h-16 w-16 p-3 hover:bg-green-50 rounded-lg transition-all text-green-700 hover:text-green-900"
               aria-label="Abrir asistente de IA"
             >
               <Bot className="h-full w-full" strokeWidth={2} />
