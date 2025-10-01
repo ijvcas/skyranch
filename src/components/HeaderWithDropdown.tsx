@@ -11,7 +11,8 @@ import {
   Bell,
   MapPin,
   ChevronDown,
-  LogOut
+  LogOut,
+  Bot
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -26,7 +27,7 @@ import { useAIChatDialog } from '@/contexts/AIChatContext';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import NotificationBell from './NotificationBell';
 import PWAInstallButton from './PWAInstallButton';
-import aiIcon from '@/assets/ai-icon.png';
+
 
 const HeaderWithDropdown = () => {
   const navigate = useNavigate();
@@ -110,14 +111,10 @@ const HeaderWithDropdown = () => {
             <Button
               variant="ghost"
               onClick={() => setChatOpen(true)}
-              className="h-14 w-14 p-2 hover:bg-green-50 rounded-lg transition-all"
+              className="h-14 w-14 p-3 hover:bg-green-50 rounded-lg transition-all text-green-700 hover:text-green-900"
               aria-label="Abrir asistente de IA"
             >
-              <img 
-                src={aiIcon} 
-                alt="AI Assistant" 
-                className="h-full w-full object-contain opacity-80 hover:opacity-100 transition-opacity"
-              />
+              <Bot className="h-full w-full" strokeWidth={2} />
             </Button>
             <div className="flex items-center h-full">
               <PWAInstallButton />
