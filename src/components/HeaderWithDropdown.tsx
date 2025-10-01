@@ -107,14 +107,14 @@ const HeaderWithDropdown = () => {
           </DropdownMenu>
 
           {/* Right side - AI Assistant, PWA install button and notification bell */}
-          <div className="flex items-center space-x-3 h-full">
+          <div className="flex items-center space-x-2 sm:space-x-3 h-full">
             <Button
               variant="ghost"
               onClick={() => setChatOpen(true)}
-              className="h-16 w-16 p-3 hover:bg-green-50 rounded-lg transition-all text-green-700 hover:text-green-900"
+              className="h-16 w-16 p-2 hover:bg-green-50 rounded-lg transition-all text-green-700 hover:text-green-900"
               aria-label="Abrir asistente de IA"
             >
-              <Bot className="h-full w-full" strokeWidth={2} />
+              <Bot className="w-10 h-10" strokeWidth={2} />
             </Button>
             <div className="flex items-center h-full">
               <PWAInstallButton />
