@@ -26,7 +26,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAIChatDialog } from '@/contexts/AIChatContext';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import NotificationBell from './NotificationBell';
-import PWAInstallButton from './PWAInstallButton';
 
 
 const HeaderWithDropdown = () => {
@@ -116,9 +115,6 @@ const HeaderWithDropdown = () => {
             >
               <Bot className="w-10 h-10" strokeWidth={2} />
             </Button>
-            <div className="flex items-center h-full">
-              <PWAInstallButton />
-            </div>
             <div className="flex items-center h-full">
               <NotificationBell />
             </div>
