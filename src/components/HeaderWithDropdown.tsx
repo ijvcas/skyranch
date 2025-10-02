@@ -106,7 +106,7 @@ const HeaderWithDropdown = () => {
           </DropdownMenu>
 
           {/* Right side - AI Assistant and notification bell */}
-          <div className="flex items-center space-x-1 h-full">
+          <div className="flex items-center space-x-1 h-full pr-3">
             <Button
               variant="ghost"
               onClick={() => setChatOpen(true)}
