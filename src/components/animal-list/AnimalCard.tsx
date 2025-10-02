@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skull, DollarSign } from 'lucide-react';
@@ -15,7 +15,8 @@ interface AnimalCardProps {
   onDelete: (animalId: string, animalName: string) => void;
 }
 
-const AnimalCard = ({ animal, onDelete }: AnimalCardProps) => {
+// OPTIMIZED: Memoize to prevent unnecessary re-renders
+const AnimalCard = memo(({ animal, onDelete }: AnimalCardProps) => {
   const {
     isEditMode,
     currentTransform,
@@ -28,7 +29,17 @@ const AnimalCard = ({ animal, onDelete }: AnimalCardProps) => {
     handleCancelEdit
   } = useImageTransform(animal);
 
-  const isDeceased = animal.lifecycleStatus === 'deceased';
+  // OPTIMIZED: Memoize computed values
+  const isDeceased = useMemo(() => animal.lifecycleStatus === 'deceased', [animal.lifecycleStatus]);
+  const isSold = useMemo(() => animal.lifecycleStatus === 'sold', [animal.lifecycleStatus]);
+  const statusColor = useMemo(() => 
+    getStatusColor(isDeceased ? 'deceased' : animal.healthStatus),
+    [isDeceased, animal.healthStatus]
+  );
+  const statusText = useMemo(() => 
+    getStatusText(isDeceased ? 'deceased' : animal.healthStatus),
+    [isDeceased, animal.healthStatus]
+  );
   
   return (
     <Card className={`shadow hover:shadow-lg transition-shadow ${isDeceased ? 'bg-gray-50 border-gray-300 opacity-90' : ''}`}>
@@ -47,8 +58,8 @@ const AnimalCard = ({ animal, onDelete }: AnimalCardProps) => {
               <p className={`text-sm ${isDeceased ? 'text-gray-500' : 'text-gray-600'}`}>#{animal.tag}</p>
             </div>
           </div>
-          <Badge className={`${getStatusColor(isDeceased ? 'deceased' : animal.healthStatus)}`}>
-            {getStatusText(isDeceased ? 'deceased' : animal.healthStatus)}
+          <Badge className={statusColor}>
+            {statusText}
           </Badge>
         </div>
       </CardHeader>
@@ -67,7 +78,7 @@ const AnimalCard = ({ animal, onDelete }: AnimalCardProps) => {
         />
         
         {/* Sold animal indicator */}
-        {animal.lifecycleStatus === 'sold' && (
+        {isSold && (
           <div className="absolute top-2 right-2">
             <DollarSign className="w-6 h-6 text-purple-600" />
           </div>
@@ -83,6 +94,17 @@ const AnimalCard = ({ animal, onDelete }: AnimalCardProps) => {
       </CardContent>
     </Card>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo - only re-render if animal data actually changed
+  return (
+    prevProps.animal.id === nextProps.animal.id &&
+    prevProps.animal.name === nextProps.animal.name &&
+    prevProps.animal.lifecycleStatus === nextProps.animal.lifecycleStatus &&
+    prevProps.animal.healthStatus === nextProps.animal.healthStatus &&
+    prevProps.animal.image === nextProps.animal.image
+  );
+});
+
+AnimalCard.displayName = 'AnimalCard';
 
 export default AnimalCard;

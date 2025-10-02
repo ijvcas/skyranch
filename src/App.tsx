@@ -15,19 +15,23 @@ import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 import { createOptimizedQueryClient } from '@/utils/queryConfig';
 // AI Chat using drawer component with OpenAI integration
 import ChatDrawer from '@/components/ai-chat/ChatDrawer';
+
+// OPTIMIZED: Lazy load heavy pages for better initial bundle size
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
 const SoldAnimals = lazy(() => import('@/pages/SoldAnimals'));
-import AnimalDetail from '@/pages/AnimalDetail';
-import AnimalEdit from '@/pages/AnimalEdit';
-import AnimalForm from '@/pages/AnimalForm';
-import Breeding from '@/pages/Breeding';
-import Calendar from '@/pages/Calendar';
-import GmailCallback from '@/pages/GmailCallback';
-import Reports from '@/pages/Reports';
+const AnimalDetail = lazy(() => import('@/pages/AnimalDetail'));
+const AnimalEdit = lazy(() => import('@/pages/AnimalEdit'));
+const AnimalForm = lazy(() => import('@/pages/AnimalForm'));
+const Breeding = lazy(() => import('@/pages/Breeding'));
+const Calendar = lazy(() => import('@/pages/Calendar'));
+const Reports = lazy(() => import('@/pages/Reports'));
 const Lots = lazy(() => import('@/pages/Lots'));
-import Notifications from '@/pages/Notifications';
-import Settings from '@/pages/Settings';
-import HealthRecords from '@/pages/HealthRecords';
+const HealthRecords = lazy(() => import('@/pages/HealthRecords'));
+const Notifications = lazy(() => import('@/pages/Notifications'));
+const Settings = lazy(() => import('@/pages/Settings'));
+
+// Keep lightweight pages eager-loaded
+import GmailCallback from '@/pages/GmailCallback';
 import NotFound from '@/pages/NotFound';
 import './App.css';
 import AppErrorBoundary from '@/components/common/AppErrorBoundary';

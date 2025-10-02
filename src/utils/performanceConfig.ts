@@ -1,11 +1,14 @@
 // Performance configuration constants
 export const PERFORMANCE_CONFIG = {
-  // Query cache times (in milliseconds)
+  // Query cache times (in milliseconds) - STANDARDIZED
   CACHE_TIMES: {
-    DASHBOARD_STATS: 2 * 60_000, // 2 minutes - frequent updates for dashboard
+    ANIMAL_NAMES: 10 * 60_000, // 10 minutes - rarely changes
+    DASHBOARD_STATS: 3 * 60_000, // 3 minutes - match animal list
     ANIMAL_LIST: 3 * 60_000, // 3 minutes - balance between freshness and performance  
     ANIMAL_LEAN: 5 * 60_000, // 5 minutes - longer cache for lean queries
     BREEDING_RECORDS: 5 * 60_000, // 5 minutes - pregnancy data doesn't change often
+    HEALTH_RECORDS: 3 * 60_000, // 3 minutes - match animal list
+    CALENDAR_EVENTS: 5 * 60_000, // 5 minutes - events don't change often
   },
   
   // Garbage collection times
@@ -34,6 +37,13 @@ export const PERFORMANCE_CONFIG = {
     ENABLE_PERFORMANCE_MARKS: process.env.NODE_ENV === 'development',
     LOG_SLOW_QUERIES: true,
     SLOW_QUERY_THRESHOLD: 1000, // 1 second
+  },
+  
+  // Mobile detection and optimization
+  MOBILE: {
+    BREAKPOINT: 768, // px
+    REDUCED_BATCH_SIZE: 20, // Load fewer items on mobile
+    REDUCE_IMAGE_QUALITY: true,
   }
 };
 
@@ -86,5 +96,17 @@ export const performanceUtils = {
         setTimeout(() => inThrottle = false, limit);
       }
     };
+  },
+  
+  // Detect if device is mobile
+  isMobile: (): boolean => {
+    return window.innerWidth < PERFORMANCE_CONFIG.MOBILE.BREAKPOINT;
+  },
+  
+  // Get optimal batch size based on device
+  getOptimalBatchSize: (): number => {
+    return performanceUtils.isMobile() 
+      ? PERFORMANCE_CONFIG.MOBILE.REDUCED_BATCH_SIZE 
+      : PERFORMANCE_CONFIG.PAGINATION.DEFAULT_PAGE_SIZE;
   }
 };

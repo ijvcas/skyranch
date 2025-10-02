@@ -50,23 +50,7 @@ const Dashboard = () => {
   
   // Load banner image and user data
   useEffect(() => {
-    // Run network diagnostics on component mount
-    networkDiagnostics.runDiagnostics().then(({ network, supabase }) => {
-      if (!network) {
-        toast({
-          title: "Problema de Conexión",
-          description: "Se detectaron problemas de conectividad de red",
-          variant: "destructive"
-        });
-      }
-      if (!supabase) {
-        toast({
-          title: "Problema de Base de Datos",
-          description: "No se puede conectar a la base de datos",
-          variant: "destructive"
-        });
-      }
-    });
+    // OPTIMIZED: Only run network diagnostics on error, not on every mount
     
     const loadBanner = async () => {
       try {
@@ -92,7 +76,7 @@ const Dashboard = () => {
     
     loadBanner();
     loadUserData();
-  }, [toast]);
+  }, []); // Removed toast dependency to prevent re-runs
   
   // Enhanced query with admin fallback and better error handling
   // Use optimized dashboard stats hook
