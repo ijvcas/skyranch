@@ -208,27 +208,27 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
       },
     ];
 
-    // Call Lovable AI (default)
-    console.log('🔑 Checking for LOVABLE_API_KEY...');
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    // Call OpenAI
+    console.log('🔑 Checking for OPENAI_API_KEY...');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     
-    if (!LOVABLE_API_KEY) {
-      console.error('❌ LOVABLE_API_KEY not found in environment');
+    if (!OPENAI_API_KEY) {
+      console.error('❌ OPENAI_API_KEY not found in environment');
       return new Response(
-        JSON.stringify({ error: 'AI service not configured. Please contact support.' }),
+        JSON.stringify({ error: 'OpenAI API key not configured. Please contact support.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    console.log('✅ API key found, calling Lovable AI...');
+    console.log('✅ API key found, calling OpenAI...');
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gpt-4o-mini',
         messages,
         temperature: 0.7,
         max_tokens: 1000,
@@ -237,13 +237,13 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('❌ AI API error:', aiResponse.status, errorText);
+      console.error('❌ OpenAI API error:', aiResponse.status, errorText);
       
-      let errorMessage = 'Error del servicio de IA';
+      let errorMessage = 'Error del servicio de OpenAI';
       if (aiResponse.status === 429) {
-        errorMessage = 'Límite de solicitudes excedido. Por favor, intenta más tarde.';
+        errorMessage = 'Límite de solicitudes de OpenAI excedido. Por favor, intenta más tarde.';
       } else if (aiResponse.status === 402) {
-        errorMessage = 'Se requiere pago. Por favor, agrega créditos a tu workspace de Lovable AI.';
+        errorMessage = 'Se requiere pago en OpenAI para continuar.';
       }
       
       return new Response(

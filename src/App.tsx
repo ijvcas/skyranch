@@ -13,7 +13,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 import { createOptimizedQueryClient } from '@/utils/queryConfig';
-import ChatDialog from '@/components/ai-chat/ChatDialog';
+import ChatDrawer from '@/components/ai-chat/ChatDrawer';
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
 const SoldAnimals = lazy(() => import('@/pages/SoldAnimals'));
 import AnimalDetail from '@/pages/AnimalDetail';
@@ -133,8 +133,8 @@ function AppContent() {
       </AppErrorBoundary>
               <Toaster />
       
-      {/* AI Chat Dialog - Only show when logged in */}
-      {user && <ChatDialog open={chatOpen} onOpenChange={setChatOpen} />}
+      {/* AI Chat Drawer - Only show when logged in */}
+      {user && <ChatDrawer open={chatOpen} onOpenChange={setChatOpen} />}
     </div>
   );
 }
