@@ -105,8 +105,8 @@ const HeaderWithDropdown = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Right side - AI Assistant, PWA install button and notification bell */}
-          <div className="flex items-center space-x-2 sm:space-x-3 h-full">
+          {/* Right side - AI Assistant and notification bell */}
+          <div className="flex items-center space-x-1 h-full">
             <Button
               variant="ghost"
               onClick={() => setChatOpen(true)}
@@ -115,7 +115,7 @@ const HeaderWithDropdown = () => {
             >
               <Bot className="w-10 h-10" strokeWidth={2} />
             </Button>
-            <div className="flex items-center h-full mr-2">
+            <div className="flex items-center h-full">
               <NotificationBell />
             </div>
           </div>
