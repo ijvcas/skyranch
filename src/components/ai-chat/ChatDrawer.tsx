@@ -29,6 +29,18 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     }
   }, [messages]);
 
+  // Scroll to bottom when drawer opens
+  useEffect(() => {
+    if (open && scrollRef.current) {
+      // Small delay to ensure DOM is rendered
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [open]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
