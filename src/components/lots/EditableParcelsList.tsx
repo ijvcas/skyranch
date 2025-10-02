@@ -5,6 +5,7 @@ import type { CadastralParcel } from '@/services/cadastralService';
 import { ParcelStatus } from '@/utils/cadastral/types';
 import { ParcelCard } from './components/ParcelCard';
 import { ParcelDetailDialog } from './components/ParcelDetailDialog';
+import { useAuthPermissions } from '@/hooks/useAuthPermissions';
 
 interface EditableParcelProps {
   parcels: CadastralParcel[];
@@ -17,6 +18,9 @@ const EditableParcelsList: React.FC<EditableParcelProps> = ({
   onParcelUpdate,
   onParcelClick
 }) => {
+  const { hasPermission } = useAuthPermissions();
+  const hasEditPermission = hasPermission('cadastral_edit');
+  
   const [editingParcel, setEditingParcel] = useState<string | null>(null);
   const [detailEditingParcel, setDetailEditingParcel] = useState<CadastralParcel | null>(null);
   const [editValues, setEditValues] = useState<{
@@ -82,6 +86,7 @@ const EditableParcelsList: React.FC<EditableParcelProps> = ({
                   onSaveEdit={handleSaveEdit}
                   onCancelEdit={handleCancelEdit}
                   onDetailEdit={handleDetailEdit}
+                  hasEditPermission={hasEditPermission}
                 />
               </div>
             ))}

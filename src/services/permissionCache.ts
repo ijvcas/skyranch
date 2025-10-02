@@ -9,7 +9,7 @@ interface CacheEntry<T> {
 
 class PermissionCache {
   private cache: Map<string, CacheEntry<any>> = new Map();
-  private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
+  private readonly DEFAULT_TTL = 30 * 60 * 1000; // 30 minutes (session duration)
 
   set<T>(key: string, data: T, ttl: number = this.DEFAULT_TTL): void {
     this.cache.set(key, {
@@ -60,10 +60,10 @@ export const getCachedUserRole = (userId: string) =>
   permissionCache.get<string>(`role:${userId}`);
 
 export const setCachedUserRole = (userId: string, role: string) => 
-  permissionCache.set(`role:${userId}`, role, 5 * 60 * 1000); // 5 min TTL
+  permissionCache.set(`role:${userId}`, role, 30 * 60 * 1000); // 30 min TTL
 
 export const getCachedPermission = (userId: string, permission: string) => 
   permissionCache.get<boolean>(`permission:${userId}:${permission}`);
 
 export const setCachedPermission = (userId: string, permission: string, hasAccess: boolean) => 
-  permissionCache.set(`permission:${userId}:${permission}`, hasAccess, 5 * 60 * 1000);
+  permissionCache.set(`permission:${userId}:${permission}`, hasAccess, 30 * 60 * 1000);

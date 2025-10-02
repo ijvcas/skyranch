@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Permission } from '@/services/permissionService';
-import { usePermissionCheck } from '@/hooks/usePermissions';
+import { useAuthPermissions } from '@/hooks/useAuthPermissions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, AlertTriangle } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 interface PermissionGuardProps {
   permission: Permission;
@@ -12,35 +12,25 @@ interface PermissionGuardProps {
   showError?: boolean;
 }
 
+/**
+ * Optimized PermissionGuard - Zero database calls
+ * Reads permissions from AuthContext (loaded once at login)
+ */
 const PermissionGuard: React.FC<PermissionGuardProps> = ({
   permission,
   children,
   fallback,
   showError = true
 }) => {
-  const { hasAccess, loading, error } = usePermissionCheck(permission);
+  const { hasPermission, loading } = useAuthPermissions();
 
+  // Still loading auth state
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-        <span className="ml-2 text-sm text-gray-600">Verificando permisos...</span>
-      </div>
-    );
+    return null;
   }
 
-  if (error) {
-    return (
-      <Alert className="border-orange-200 bg-orange-50">
-        <AlertTriangle className="h-4 w-4 text-orange-600" />
-        <AlertDescription className="text-orange-800">
-          Error al verificar permisos: {error}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  if (!hasAccess) {
+  // Check permission instantly (no database call)
+  if (!hasPermission(permission)) {
     if (fallback) {
       return <>{fallback}</>;
     }

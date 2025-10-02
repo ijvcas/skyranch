@@ -3,10 +3,15 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { validatePasswordStrength } from '@/utils/passwordPolicy';
 import { logConnection, logTokenRefreshedThrottled } from '@/utils/connectionLogger';
+import { UserRole, Permission, getCurrentUserRole } from '@/services/permissionService';
+import { ROLE_PERMISSIONS } from '@/services/permissionService';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  userRole: UserRole | null;
+  permissions: Permission[];
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -30,6 +35,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
 
   useEffect(() => {
     console.log('🔄 [AUTH CONTEXT] Initializing auth...');
@@ -55,22 +62,53 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } catch (e) {
             console.warn('⚠️ [AUTH CONTEXT] Storage clear failed', e);
           }
+          setUserRole(null);
+          setPermissions([]);
         }
 
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Load role and permissions once on sign in
+        if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+          setTimeout(async () => {
+            try {
+              const role = await getCurrentUserRole(session.user);
+              setUserRole(role);
+              const perms = role ? ROLE_PERMISSIONS[role] : [];
+              setPermissions(perms);
+              console.log('✅ [AUTH CONTEXT] Loaded role and permissions:', role, perms.length);
+            } catch (error) {
+              console.error('❌ [AUTH CONTEXT] Failed to load role:', error);
+            }
+          }, 0);
+        }
+        
         setLoading(false);
       }
     );
 
     supabase.auth.getSession()
-      .then(({ data: { session }, error }) => {
+      .then(async ({ data: { session }, error }) => {
         console.log('📋 [AUTH CONTEXT] Initial session check:', session?.user?.email || 'No session');
         if (error) {
           console.error('❌ [AUTH CONTEXT] Error getting initial session:', error);
         }
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Load role and permissions for existing session
+        if (session?.user) {
+          try {
+            const role = await getCurrentUserRole(session.user);
+            setUserRole(role);
+            const perms = role ? ROLE_PERMISSIONS[role] : [];
+            setPermissions(perms);
+            console.log('✅ [AUTH CONTEXT] Loaded initial role and permissions:', role, perms.length);
+          } catch (error) {
+            console.error('❌ [AUTH CONTEXT] Failed to load initial role:', error);
+          }
+        }
       })
       .catch((error) => {
         console.error('❌ [AUTH CONTEXT] Exception getting initial session:', error);
@@ -157,6 +195,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Clear permission cache on sign out
     const { permissionCache } = await import('@/services/permissionCache');
     permissionCache.clearAuthCache();
+    
+    // Clear role and permissions
+    setUserRole(null);
+    setPermissions([]);
     
     // Log before signing out so RLS still allows insert
     await logConnection('signed_out');
@@ -305,6 +347,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     loading,
+    userRole,
+    permissions,
     signUp,
     signIn,
     signOut,

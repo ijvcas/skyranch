@@ -9,7 +9,6 @@ import { ParcelStatus, PARCEL_STATUS_LABELS, PARCEL_STATUS_COLORS } from '@/util
 import { ParcelEditForm } from './ParcelEditForm';
 import { getParcelNumber, hasFinancialInfo, isIncompletePropiedad } from '../utils/parcelUtils';
 import { useTimezone } from '@/hooks/useTimezone';
-import PermissionGuard from '@/components/PermissionGuard';
 import { getParcelOwners, ParcelOwner } from '@/services/parcelOwnersService';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -27,6 +26,7 @@ interface ParcelCardProps {
   onSaveEdit: (parcelId: string) => void;
   onCancelEdit: () => void;
   onDetailEdit: (parcel: CadastralParcel) => void;
+  hasEditPermission: boolean;
 }
 
 export const ParcelCard: React.FC<ParcelCardProps> = ({
@@ -38,7 +38,8 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
   onStartEdit,
   onSaveEdit,
   onCancelEdit,
-  onDetailEdit
+  onDetailEdit,
+  hasEditPermission
 }) => {
   const { formatCurrency } = useTimezone();
   const parcelNumber = getParcelNumber(parcel);
@@ -101,7 +102,7 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
             )}
           </div>
           <div className="flex items-center space-x-1">
-            <PermissionGuard permission="cadastral_edit" showError={false}>
+            {hasEditPermission && (
               <Button
                 size="sm"
                 variant="ghost"
@@ -113,9 +114,9 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
               >
                 <Settings className="w-3 h-3" />
               </Button>
-            </PermissionGuard>
+            )}
             {isEditing ? (
-              <PermissionGuard permission="cadastral_edit" showError={false}>
+              hasEditPermission && (
                 <>
                   <Button
                     size="sm"
@@ -140,9 +141,9 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
                     <X className="w-3 h-3" />
                   </Button>
                 </>
-              </PermissionGuard>
+              )
             ) : (
-              <PermissionGuard permission="cadastral_edit" showError={false}>
+              hasEditPermission && (
                 <Button
                   size="sm"
                   variant="ghost"
@@ -154,7 +155,7 @@ export const ParcelCard: React.FC<ParcelCardProps> = ({
                 >
                   <Edit2 className="w-3 h-3" />
                 </Button>
-              </PermissionGuard>
+              )
             )}
           </div>
         </div>
