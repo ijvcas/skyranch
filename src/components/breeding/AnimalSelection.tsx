@@ -10,6 +10,7 @@ interface AnimalSelectionProps {
   animals: Animal[];
   onMotherChange: (value: string) => void;
   onFatherChange: (value: string) => void;
+  selectedSpecies?: string;
 }
 
 const AnimalSelection: React.FC<AnimalSelectionProps> = ({
@@ -17,15 +18,20 @@ const AnimalSelection: React.FC<AnimalSelectionProps> = ({
   fatherId,
   animals,
   onMotherChange,
-  onFatherChange
+  onFatherChange,
+  selectedSpecies
 }) => {
-  // Improved gender filtering - check for multiple possible gender values
-  const femaleAnimals = animals.filter(animal => {
+  // Filter by species first, then by gender
+  const speciesFilteredAnimals = selectedSpecies 
+    ? animals.filter(animal => animal.species === selectedSpecies)
+    : animals;
+
+  const femaleAnimals = speciesFilteredAnimals.filter(animal => {
     const gender = animal.gender?.toLowerCase().trim();
     return gender === 'female' || gender === 'hembra' || gender === 'f';
   });
 
-  const maleAnimals = animals.filter(animal => {
+  const maleAnimals = speciesFilteredAnimals.filter(animal => {
     const gender = animal.gender?.toLowerCase().trim();
     return gender === 'male' || gender === 'macho' || gender === 'm';
   });
@@ -65,9 +71,9 @@ const AnimalSelection: React.FC<AnimalSelectionProps> = ({
                 <SelectItem 
                   key={animal.id} 
                   value={animal.id} 
-                  className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100 px-3 py-2"
+                  className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100 px-3 py-2 pl-8"
                 >
-                  {animal.name} (#{animal.id.slice(-4)}) - {animal.species}
+                  {animal.name}
                 </SelectItem>
               ))
             )}
@@ -99,9 +105,9 @@ const AnimalSelection: React.FC<AnimalSelectionProps> = ({
                 <SelectItem 
                   key={animal.id} 
                   value={animal.id} 
-                  className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100 px-3 py-2"
+                  className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100 px-3 py-2 pl-8"
                 >
-                  {animal.name} (#{animal.id.slice(-4)}) - {animal.species}
+                  {animal.name}
                 </SelectItem>
               ))
             )}

@@ -4,12 +4,15 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { createBreedingRecord } from '@/services/breedingService';
 import { getAllAnimals } from '@/services/animalService';
+import { calculateExpectedDueDate } from '@/services/gestationService';
 
 export interface BreedingFormData {
+  species: string;
   motherId: string;
   fatherId: string;
   breedingDate: string;
   breedingMethod: 'natural' | 'artificial_insemination' | 'embryo_transfer';
+  expectedDueDate: string;
   actualBirthDate: string;
   pregnancyConfirmed: boolean;
   pregnancyConfirmationDate: string;
@@ -28,10 +31,12 @@ export const useBreedingForm = (onSuccess: () => void) => {
   const submissionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [formData, setFormData] = useState<BreedingFormData>({
+    species: '',
     motherId: '',
     fatherId: '',
     breedingDate: '',
     breedingMethod: 'natural' as const,
+    expectedDueDate: '',
     actualBirthDate: '',
     pregnancyConfirmed: false,
     pregnancyConfirmationDate: '',
@@ -94,15 +99,43 @@ export const useBreedingForm = (onSuccess: () => void) => {
   }, [formData.motherId, animals]);
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      
+      // If species changed, reset mother and father selections
+      if (field === 'species') {
+        newData.motherId = '';
+        newData.fatherId = '';
+        
+        // Auto-calculate expected due date if breeding date exists
+        if (newData.breedingDate && value) {
+          const calculatedDate = calculateExpectedDueDate(newData.breedingDate, value);
+          if (calculatedDate) {
+            newData.expectedDueDate = calculatedDate;
+          }
+        }
+      }
+      
+      // If breeding date changed and species exists, auto-calculate expected due date
+      if (field === 'breedingDate' && prev.species && value) {
+        const calculatedDate = calculateExpectedDueDate(value, prev.species);
+        if (calculatedDate) {
+          newData.expectedDueDate = calculatedDate;
+        }
+      }
+      
+      return newData;
+    });
   };
 
   const resetForm = () => {
     setFormData({
+      species: '',
       motherId: '',
       fatherId: '',
       breedingDate: '',
       breedingMethod: 'natural' as const,
+      expectedDueDate: '',
       actualBirthDate: '',
       pregnancyConfirmed: false,
       pregnancyConfirmationDate: '',
@@ -150,6 +183,7 @@ export const useBreedingForm = (onSuccess: () => void) => {
       fatherId: formData.fatherId,
       breedingDate: formData.breedingDate,
       breedingMethod: formData.breedingMethod,
+      expectedDueDate: formData.expectedDueDate || undefined,
       actualBirthDate: formData.actualBirthDate || undefined,
       pregnancyConfirmed: formData.pregnancyConfirmed,
       pregnancyConfirmationDate: formData.pregnancyConfirmationDate || undefined,

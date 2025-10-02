@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { updateBreedingRecord, BreedingRecord } from '@/services/breedingService';
 import { getAllAnimals } from '@/services/animalService';
-import { calculateExpectedDueDate, getSpeciesDisplayName } from '@/services/gestationService';
+import { calculateExpectedDueDate } from '@/services/gestationService';
 import BreedingBasicInfo from '@/components/breeding/BreedingBasicInfo';
 import BreedingPregnancyInfo from '@/components/breeding/BreedingPregnancyInfo';
 import BreedingAdditionalInfo from '@/components/breeding/BreedingAdditionalInfo';
@@ -21,6 +21,7 @@ const BreedingEditForm: React.FC<BreedingEditFormProps> = ({ record, onSuccess }
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
+    species: '',
     motherId: record.motherId,
     fatherId: record.fatherId,
     breedingDate: record.breedingDate,
@@ -64,12 +65,13 @@ const BreedingEditForm: React.FC<BreedingEditFormProps> = ({ record, onSuccess }
     }
   });
 
-  // Update mother species when mother is selected
+  // Update mother species and form species when mother is selected
   useEffect(() => {
     if (formData.motherId) {
       const selectedMother = animals.find(animal => animal.id === formData.motherId);
       if (selectedMother?.species) {
         setMotherSpecies(selectedMother.species);
+        setFormData(prev => ({ ...prev, species: selectedMother.species }));
       }
     } else {
       setMotherSpecies('');
@@ -109,7 +111,33 @@ const BreedingEditForm: React.FC<BreedingEditFormProps> = ({ record, onSuccess }
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      
+      // If species changed, reset mother and father selections
+      if (field === 'species') {
+        newData.motherId = '';
+        newData.fatherId = '';
+        
+        // Auto-calculate expected due date if breeding date exists
+        if (newData.breedingDate && value) {
+          const calculatedDate = calculateExpectedDueDate(newData.breedingDate, value);
+          if (calculatedDate) {
+            newData.expectedDueDate = calculatedDate;
+          }
+        }
+      }
+      
+      // If breeding date changed and species exists, auto-calculate expected due date
+      if (field === 'breedingDate' && prev.species && value) {
+        const calculatedDate = calculateExpectedDueDate(value, prev.species);
+        if (calculatedDate) {
+          newData.expectedDueDate = calculatedDate;
+        }
+      }
+      
+      return newData;
+    });
   };
 
   const handleRecalculateDate = () => {
@@ -121,7 +149,7 @@ const BreedingEditForm: React.FC<BreedingEditFormProps> = ({ record, onSuccess }
           setFormData(prev => ({ ...prev, expectedDueDate: calculatedDate }));
           toast({
             title: "Fecha Recalculada",
-            description: `Fecha esperada de parto actualizada basada en ${getSpeciesDisplayName(selectedMother.species)}`,
+            description: `Fecha esperada de parto actualizada basada en ${selectedMother.species}`,
           });
         }
       }
