@@ -9,7 +9,6 @@ import { calculateExpectedDueDate } from '@/services/gestationService';
 import BreedingBasicInfo from '@/components/breeding/BreedingBasicInfo';
 import BreedingPregnancyInfo from '@/components/breeding/BreedingPregnancyInfo';
 import BreedingAdditionalInfo from '@/components/breeding/BreedingAdditionalInfo';
-import BreedingEditDateSection from '@/components/breeding/BreedingEditDateSection';
 
 interface BreedingEditFormProps {
   record: BreedingRecord;
@@ -153,21 +152,6 @@ const BreedingEditForm: React.FC<BreedingEditFormProps> = ({ record, onSuccess }
     });
   };
 
-  const handleRecalculateDate = () => {
-    if (formData.motherId && formData.breedingDate) {
-      const selectedMother = animals.find(animal => animal.id === formData.motherId);
-      if (selectedMother?.species) {
-        const calculatedDate = calculateExpectedDueDate(formData.breedingDate, selectedMother.species);
-        if (calculatedDate) {
-          setFormData(prev => ({ ...prev, expectedDueDate: calculatedDate }));
-          toast({
-            title: "Fecha Recalculada",
-            description: `Fecha esperada de parto actualizada basada en ${selectedMother.species}`,
-          });
-        }
-      }
-    }
-  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -175,13 +159,6 @@ const BreedingEditForm: React.FC<BreedingEditFormProps> = ({ record, onSuccess }
         formData={formData}
         animals={animals}
         onInputChange={handleInputChange}
-      />
-
-      <BreedingEditDateSection
-        formData={formData}
-        animals={animals}
-        onInputChange={handleInputChange}
-        onRecalculateDate={handleRecalculateDate}
       />
 
       <BreedingPregnancyInfo
