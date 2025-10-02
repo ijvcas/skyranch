@@ -123,6 +123,34 @@ export const getAnimalNamesMap = async (includeDeceased = false): Promise<Record
   }
 };
 
+// OPTIMIZED: Fetch minimal animal data (id, name, species, gender) for breeding/forms
+export const getAnimalsForForms = async (includeDeceased = false): Promise<Array<{id: string, name: string, species: string, gender: string | null}>> => {
+  const queryKey = `getAnimalsForForms-${includeDeceased ? 'all' : 'active'}`;
+  queryPerformanceMonitor.markQueryStart(queryKey);
+  
+  try {
+    const query = supabase
+      .from('animals')
+      .select('id, name, species, gender');
+    
+    if (!includeDeceased) {
+      query.neq('lifecycle_status', 'deceased');
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Database error: ${error.message}`);
+    }
+
+    queryPerformanceMonitor.markQueryEnd(queryKey);
+    return data || [];
+  } catch (error) {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
+    throw error;
+  }
+};
+
 // OPTIMIZED: Fetch animals by specific IDs (for breeding page)
 export const getAnimalsByIds = async (animalIds: string[]): Promise<Record<string, string>> => {
   const queryKey = 'getAnimalsByIds';

@@ -6,10 +6,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronDown, X } from 'lucide-react';
-import { Animal } from '@/stores/animalStore';
+
+type MinimalAnimal = {
+  id: string;
+  name: string;
+  tag?: string;
+  species?: string;
+};
 
 interface AnimalMultiSelectProps {
-  animals: Animal[];
+  animals: MinimalAnimal[];
   selectedAnimalIds: string[];
   onChange: (selectedIds: string[]) => void;
   label?: string;
@@ -25,7 +31,7 @@ const AnimalMultiSelect = ({
 
   // Group animals by species
   const animalsBySpecies = useMemo(() => {
-    const grouped: Record<string, Animal[]> = {};
+    const grouped: Record<string, MinimalAnimal[]> = {};
     animals.forEach(animal => {
       const species = animal.species || 'Sin especie';
       if (!grouped[species]) {
@@ -95,8 +101,8 @@ const AnimalMultiSelect = ({
         <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/50">
           {selectedAnimals.map(animal => (
             <Badge key={animal.id} variant="secondary" className="flex items-center gap-1">
-              {animal.name} (#{animal.tag})
-              <X 
+              {animal.name}{animal.tag ? ` (#${animal.tag})` : ''}
+              <X
                 className="h-3 w-3 cursor-pointer hover:text-destructive" 
                 onClick={() => removeAnimal(animal.id)}
               />
@@ -178,7 +184,7 @@ const AnimalMultiSelect = ({
                           htmlFor={animal.id}
                           className="text-sm cursor-pointer flex-1"
                         >
-                          {animal.name} (#{animal.tag})
+                          {animal.name}{animal.tag ? ` (#${animal.tag})` : ''}
                         </Label>
                       </div>
                     ))}

@@ -1,10 +1,17 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Animal } from '@/stores/animalStore';
 import AnimalSelection from './AnimalSelection';
 import BreedingDetailsSelector from './BreedingDetailsSelector';
 import SpeciesSelector from './SpeciesSelector';
+
+// Use minimal animal type for better performance
+type MinimalAnimal = {
+  id: string;
+  name: string;
+  species: string;
+  gender: string | null;
+};
 
 interface BreedingBasicInfoProps {
   formData: {
@@ -15,7 +22,7 @@ interface BreedingBasicInfoProps {
     expectedDueDate: string;
     species?: string;
   };
-  animals: Animal[];
+  animals: MinimalAnimal[];
   onInputChange: (field: string, value: any) => void;
 }
 

@@ -2,12 +2,18 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Animal } from '@/stores/animalStore';
+
+type MinimalAnimal = {
+  id: string;
+  name: string;
+  species: string;
+  gender: string | null;
+};
 
 interface AnimalSelectionProps {
   motherId: string;
   fatherId: string;
-  animals: Animal[];
+  animals: MinimalAnimal[];
   onMotherChange: (value: string) => void;
   onFatherChange: (value: string) => void;
   selectedSpecies?: string;
