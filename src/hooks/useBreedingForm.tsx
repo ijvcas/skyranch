@@ -124,6 +124,19 @@ export const useBreedingForm = (onSuccess: () => void) => {
         }
       }
       
+      // Automatic status management
+      if (field === 'pregnancyConfirmed') {
+        if (value === true) {
+          newData.status = 'confirmed_pregnant';
+        } else if (value === false && !newData.actualBirthDate) {
+          newData.status = 'planned';
+        }
+      }
+      
+      if (field === 'actualBirthDate' && value) {
+        newData.status = 'birth_completed';
+      }
+      
       return newData;
     });
   };

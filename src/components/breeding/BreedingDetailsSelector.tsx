@@ -2,25 +2,31 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Calendar } from 'lucide-react';
 import DatePickerField from '@/components/calendar/DatePickerField';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface BreedingDetailsSelectorProps {
   breedingDate: string;
   breedingMethod: 'natural' | 'artificial_insemination' | 'embryo_transfer';
-  status: 'planned' | 'failed' | 'birth_completed' | 'completed' | 'confirmed_pregnant' | 'not_pregnant';
+  expectedDueDate: string;
   onDateChange: (field: string, value: string) => void;
   onMethodChange: (value: 'natural' | 'artificial_insemination' | 'embryo_transfer') => void;
-  onStatusChange: (value: 'planned' | 'failed' | 'birth_completed' | 'completed' | 'confirmed_pregnant' | 'not_pregnant') => void;
 }
 
 const BreedingDetailsSelector: React.FC<BreedingDetailsSelectorProps> = ({
   breedingDate,
   breedingMethod,
-  status,
+  expectedDueDate,
   onDateChange,
-  onMethodChange,
-  onStatusChange
+  onMethodChange
 }) => {
+  const formattedDueDate = expectedDueDate 
+    ? format(new Date(expectedDueDate), 'dd/MM/yyyy', { locale: es })
+    : '';
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div className="space-y-2">
@@ -46,19 +52,18 @@ const BreedingDetailsSelector: React.FC<BreedingDetailsSelectorProps> = ({
         </Select>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="status">Estado</Label>
-        <Select value={status} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full bg-white border border-gray-300 hover:border-gray-400 focus:border-blue-500">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="z-[60] bg-white border border-gray-200 shadow-lg">
-            <SelectItem value="planned" className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100">Planificado</SelectItem>
-            <SelectItem value="confirmed_pregnant" className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100">Embarazo Confirmado</SelectItem>
-            <SelectItem value="not_pregnant" className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100">No Embarazada</SelectItem>
-            <SelectItem value="birth_completed" className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100">Parto Completado</SelectItem>
-            <SelectItem value="failed" className="cursor-pointer hover:bg-gray-100 focus:bg-gray-100">Fallido</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label htmlFor="expectedDueDate" className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-muted-foreground" />
+          Fecha Esperada de Parto
+        </Label>
+        <Input
+          id="expectedDueDate"
+          type="text"
+          value={formattedDueDate}
+          readOnly
+          className="bg-muted/50 cursor-not-allowed"
+          placeholder="Auto-calculada"
+        />
       </div>
     </div>
   );

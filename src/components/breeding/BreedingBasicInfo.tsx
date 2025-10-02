@@ -12,7 +12,7 @@ interface BreedingBasicInfoProps {
     fatherId: string;
     breedingDate: string;
     breedingMethod: 'natural' | 'artificial_insemination' | 'embryo_transfer';
-    status: 'planned' | 'failed' | 'birth_completed' | 'completed' | 'confirmed_pregnant' | 'not_pregnant';
+    expectedDueDate: string;
     species?: string;
   };
   animals: Animal[];
@@ -52,10 +52,9 @@ const BreedingBasicInfo: React.FC<BreedingBasicInfoProps> = ({
         <BreedingDetailsSelector
           breedingDate={formData.breedingDate}
           breedingMethod={formData.breedingMethod}
-          status={formData.status}
+          expectedDueDate={formData.expectedDueDate}
           onDateChange={handleDateChange}
           onMethodChange={(value) => onInputChange('breedingMethod', value)}
-          onStatusChange={(value) => onInputChange('status', value)}
         />
       </CardContent>
     </Card>
