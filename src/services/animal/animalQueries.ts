@@ -89,7 +89,41 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
   }
 };
 
-// NEW: Optimized fetch for breeding page - only fetch animals by IDs
+// OPTIMIZED: Fetch only animal IDs and names for dropdowns/selections
+export const getAnimalNamesMap = async (includeDeceased = false): Promise<Record<string, string>> => {
+  const queryKey = `getAnimalNamesMap-${includeDeceased ? 'all' : 'active'}`;
+  queryPerformanceMonitor.markQueryStart(queryKey);
+  
+  try {
+    const query = supabase
+      .from('animals')
+      .select('id, name');
+    
+    if (!includeDeceased) {
+      query.neq('lifecycle_status', 'deceased');
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Database error: ${error.message}`);
+    }
+
+    // Create a map of id -> name
+    const nameMap: Record<string, string> = {};
+    (data || []).forEach(animal => {
+      nameMap[animal.id] = animal.name;
+    });
+
+    queryPerformanceMonitor.markQueryEnd(queryKey);
+    return nameMap;
+  } catch (error) {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
+    throw error;
+  }
+};
+
+// OPTIMIZED: Fetch animals by specific IDs (for breeding page)
 export const getAnimalsByIds = async (animalIds: string[]): Promise<Record<string, string>> => {
   const queryKey = 'getAnimalsByIds';
   queryPerformanceMonitor.markQueryStart(queryKey);
@@ -104,7 +138,7 @@ export const getAnimalsByIds = async (animalIds: string[]): Promise<Record<strin
 
     const { data, error } = await supabase
       .from('animals')
-      .select('id,name')
+      .select('id, name')
       .in('id', uniqueIds);
 
     if (error) {
@@ -117,12 +151,71 @@ export const getAnimalsByIds = async (animalIds: string[]): Promise<Record<strin
       nameMap[animal.id] = animal.name;
     });
 
+    queryPerformanceMonitor.markQueryEnd(queryKey);
     return nameMap;
   } catch (error) {
     queryPerformanceMonitor.markQueryEnd(queryKey);
     throw error;
-  } finally {
+  }
+};
+
+// OPTIMIZED: Fetch all health records with animal names in a single query
+export const getAllHealthRecordsWithAnimals = async () => {
+  const queryKey = 'getAllHealthRecordsWithAnimals';
+  queryPerformanceMonitor.markQueryStart(queryKey);
+  
+  try {
+    const { data, error } = await supabase
+      .from('health_records')
+      .select(`
+        id,
+        animal_id,
+        record_type,
+        title,
+        description,
+        veterinarian,
+        medication,
+        dosage,
+        cost,
+        date_administered,
+        next_due_date,
+        notes,
+        created_at,
+        updated_at,
+        animals!inner (
+          id,
+          name,
+          lifecycle_status
+        )
+      `)
+      .eq('animals.lifecycle_status', 'active')
+      .order('date_administered', { ascending: false });
+
+    if (error) {
+      throw new Error(`Database error: ${error.message}`);
+    }
+
     queryPerformanceMonitor.markQueryEnd(queryKey);
+    return (data || []).map(record => ({
+      id: record.id,
+      animalId: record.animal_id,
+      animalName: record.animals.name,
+      recordType: record.record_type,
+      title: record.title,
+      description: record.description,
+      veterinarian: record.veterinarian,
+      medication: record.medication,
+      dosage: record.dosage,
+      cost: record.cost,
+      dateAdministered: record.date_administered,
+      nextDueDate: record.next_due_date,
+      notes: record.notes,
+      createdAt: record.created_at,
+      updatedAt: record.updated_at
+    }));
+  } catch (error) {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
+    throw error;
   }
 };
 

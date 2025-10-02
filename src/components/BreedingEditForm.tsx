@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { updateBreedingRecord, BreedingRecord } from '@/services/breedingService';
-import { getAllAnimals } from '@/services/animalService';
+import { getAnimalNamesMap } from '@/services/animal/animalQueries';
 import { calculateExpectedDueDate } from '@/services/gestationService';
 import BreedingBasicInfo from '@/components/breeding/BreedingBasicInfo';
 import BreedingPregnancyInfo from '@/components/breeding/BreedingPregnancyInfo';
@@ -39,10 +39,14 @@ const BreedingEditForm: React.FC<BreedingEditFormProps> = ({ record, onSuccess }
 
   const [motherSpecies, setMotherSpecies] = useState<string>('');
 
-  const { data: animals = [] } = useQuery({
-    queryKey: ['animals'],
-    queryFn: () => getAllAnimals(false)
+  // OPTIMIZED: Only fetch animal names
+  const { data: animalNames = {} } = useQuery({
+    queryKey: ['animals', 'names-map'],
+    queryFn: () => getAnimalNamesMap(false),
+    staleTime: 10 * 60_000,
   });
+
+  const animals = Object.entries(animalNames).map(([id, name]) => ({ id, name }));
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string, data: any }) => updateBreedingRecord(id, data),

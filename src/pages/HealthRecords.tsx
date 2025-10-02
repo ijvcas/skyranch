@@ -5,38 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Activity, Calendar, DollarSign, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { getHealthRecords } from '@/services/healthRecordService';
-import { getAllAnimals } from '@/services/animalService';
+import { getAllHealthRecordsWithAnimals } from '@/services/animal/animalQueries';
 import HealthRecordForm from '@/components/HealthRecordForm';
 import HealthRecordsListImproved from '@/components/HealthRecordsListImproved';
 
 const HealthRecords: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
 
-  const { data: animals = [] } = useQuery({
-    queryKey: ['animals'],
-    queryFn: () => getAllAnimals(false)
-  });
-
-  // Get health records for all animals
-  const healthRecordsQueries = useQuery({
+  // OPTIMIZED: Single query with JOIN instead of N+1 queries
+  const { data: allHealthRecords = [], isLoading } = useQuery({
     queryKey: ['all-health-records'],
-    queryFn: async () => {
-      const allRecords = [];
-      for (const animal of animals) {
-        try {
-          const records = await getHealthRecords(animal.id);
-          allRecords.push(...records);
-        } catch (error) {
-          console.error(`Error fetching health records for animal ${animal.id}:`, error);
-        }
-      }
-      return allRecords.sort((a, b) => new Date(b.dateAdministered).getTime() - new Date(a.dateAdministered).getTime());
-    },
-    enabled: animals.length > 0
+    queryFn: getAllHealthRecordsWithAnimals,
+    staleTime: 3 * 60_000, // 3 minutes
+    gcTime: 10 * 60_000, // 10 minutes
+    refetchOnWindowFocus: false,
   });
-
-  const allHealthRecords = healthRecordsQueries.data || [];
 
   const handleFormSuccess = () => {
     setShowForm(false);
@@ -60,7 +43,7 @@ const HealthRecords: React.FC = () => {
     return recordDate >= thirtyDaysAgo;
   }).length;
 
-  if (healthRecordsQueries.isLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

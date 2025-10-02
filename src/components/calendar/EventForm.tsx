@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarEvent } from '@/services/calendarService';
-import { getAllAnimals } from '@/services/animalService';
+import { getAnimalNamesMap } from '@/services/animal/animalQueries';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import UserSelector from '@/components/notifications/UserSelector';
@@ -45,10 +45,15 @@ const EventForm = ({
     notes: ''
   });
 
-  const { data: animals = [] } = useQuery({
-    queryKey: ['animals'],
-    queryFn: () => getAllAnimals(false)
+  // OPTIMIZED: Only fetch animal names
+  const { data: animalNames = {} } = useQuery({
+    queryKey: ['animals', 'names-map'],
+    queryFn: () => getAnimalNamesMap(false),
+    staleTime: 10 * 60_000,
   });
+
+  // Convert to array format for AnimalMultiSelect
+  const animals = Object.entries(animalNames).map(([id, name]) => ({ id, name }));
 
   // Set today's date when component mounts or selectedDate changes
   useEffect(() => {

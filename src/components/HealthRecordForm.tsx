@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { addHealthRecord, updateHealthRecord } from '@/services/healthRecordService';
-import { getAllAnimals } from '@/services/animalService';
+import { getAnimalNamesMap } from '@/services/animal/animalQueries';
 import { useToast } from '@/hooks/use-toast';
 import { useHealthRecordNotifications } from '@/hooks/useHealthRecordNotifications';
 import BasicInfoSection from '@/components/health-records/BasicInfoSection';
@@ -57,10 +57,14 @@ const HealthRecordForm: React.FC<HealthRecordFormProps> = ({
     notes: record?.notes || ''
   });
 
-  const { data: animals = [] } = useQuery({
-    queryKey: ['animals'],
-    queryFn: () => getAllAnimals(false)
+  // OPTIMIZED: Only fetch animal names
+  const { data: animalNames = {} } = useQuery({
+    queryKey: ['animals', 'names-map'],
+    queryFn: () => getAnimalNamesMap(false),
+    staleTime: 10 * 60_000,
   });
+
+  const animals = Object.entries(animalNames).map(([id, name]) => ({ id, name }));
 
   const createMutation = useMutation({
     mutationFn: addHealthRecord,

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EnhancedCalendar } from '@/components/ui/enhanced-calendar';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { getAllAnimals } from '@/services/animalService';
+import { getAnimalNamesMap } from '@/services/animal/animalQueries';
 import EventList from '@/components/calendar/EventList';
 import UpcomingEvents from '@/components/calendar/UpcomingEvents';
 import { CalendarEvent } from '@/services/calendarService';
@@ -24,10 +24,16 @@ const CalendarContent = ({
   onEditEvent,
   onEventClick
 }: CalendarContentProps) => {
-  const { data: animals = [] } = useQuery({
-    queryKey: ['animals'],
-    queryFn: () => getAllAnimals(false)
+  // OPTIMIZED: Only fetch animal names for display
+  const { data: animalNames = {} } = useQuery({
+    queryKey: ['animals', 'names-map'],
+    queryFn: () => getAnimalNamesMap(false),
+    staleTime: 10 * 60_000, // 10 minutes - rarely changes
+    gcTime: 15 * 60_000,
   });
+
+  // Convert names map to array format for UpcomingEvents component
+  const animals = Object.entries(animalNames).map(([id, name]) => ({ id, name }));
 
   return (
     <>

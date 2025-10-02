@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getAllAnimals } from '@/services/animalService';
+import { getAnimalNamesMap } from '@/services/animal/animalQueries';
 import EventEditDialog from '@/components/calendar/EventEditDialog';
 import EventDetailDialog from '@/components/calendar/EventDetailDialog';
 import { CalendarEvent } from '@/services/calendarService';
@@ -33,10 +33,14 @@ const CalendarDialogs = ({
   onDeleteEvent,
   onEditEvent
 }: CalendarDialogsProps) => {
-  const { data: animals = [] } = useQuery({
-    queryKey: ['animals'],
-    queryFn: () => getAllAnimals(false)
+  // OPTIMIZED: Only fetch animal names
+  const { data: animalNames = {} } = useQuery({
+    queryKey: ['animals', 'names-map'],
+    queryFn: () => getAnimalNamesMap(false),
+    staleTime: 10 * 60_000,
   });
+
+  const animals = Object.entries(animalNames).map(([id, name]) => ({ id, name }));
 
   return (
     <>
