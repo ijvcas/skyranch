@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Heart, Calendar, TrendingUp, Bell } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBreedingRecords, deleteBreedingRecord, BreedingRecord } from '@/services/breedingService';
-import { getAllAnimals } from '@/services/animalService';
+import { getAnimalsByIds } from '@/services/animal/animalQueries';
 import { useToast } from '@/hooks/use-toast';
 import { useBreedingNotifications } from '@/hooks/useBreedingNotifications';
 import BreedingForm from '@/components/BreedingForm';
@@ -29,9 +29,21 @@ const Breeding: React.FC = () => {
     queryFn: getBreedingRecords
   });
 
-  const { data: animals = [] } = useQuery({
-    queryKey: ['animals'],
-    queryFn: () => getAllAnimals(false)
+  // Extract all unique animal IDs from breeding records
+  const animalIds = React.useMemo(() => {
+    const ids = new Set<string>();
+    breedingRecords.forEach(record => {
+      if (record.motherId) ids.add(record.motherId);
+      if (record.fatherId) ids.add(record.fatherId);
+    });
+    return Array.from(ids);
+  }, [breedingRecords]);
+
+  // Fetch only the animals that appear in breeding records
+  const { data: animalNames = {} } = useQuery({
+    queryKey: ['breeding-animal-names', animalIds],
+    queryFn: () => getAnimalsByIds(animalIds),
+    enabled: animalIds.length > 0
   });
 
   const deleteMutation = useMutation({
@@ -54,11 +66,6 @@ const Breeding: React.FC = () => {
     }
   });
 
-  // Create a map of animal IDs to names for display
-  const animalNames = animals.reduce((acc, animal) => {
-    acc[animal.id] = animal.name;
-    return acc;
-  }, {} as Record<string, string>);
 
   const handleFormSuccess = () => {
     setShowForm(false);

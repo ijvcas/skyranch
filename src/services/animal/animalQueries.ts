@@ -89,6 +89,43 @@ export const getAnimalsLean = async (includeDeceased = false): Promise<Array<Pic
   }
 };
 
+// NEW: Optimized fetch for breeding page - only fetch animals by IDs
+export const getAnimalsByIds = async (animalIds: string[]): Promise<Record<string, string>> => {
+  const queryKey = 'getAnimalsByIds';
+  queryPerformanceMonitor.markQueryStart(queryKey);
+  
+  try {
+    if (animalIds.length === 0) {
+      return {};
+    }
+
+    // Remove duplicates
+    const uniqueIds = [...new Set(animalIds)];
+
+    const { data, error } = await supabase
+      .from('animals')
+      .select('id,name')
+      .in('id', uniqueIds);
+
+    if (error) {
+      throw new Error(`Database error: ${error.message}`);
+    }
+
+    // Create a map of id -> name
+    const nameMap: Record<string, string> = {};
+    (data || []).forEach(animal => {
+      nameMap[animal.id] = animal.name;
+    });
+
+    return nameMap;
+  } catch (error) {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
+    throw error;
+  } finally {
+    queryPerformanceMonitor.markQueryEnd(queryKey);
+  }
+};
+
 // Ultra-lean fetch for Animals list - only essential display columns for fast loading
 export const getAnimalsPageUltraLean = async (limit = 50, offset = 0, includeDeceased = false): Promise<Animal[]> => {
   const startTime = performance.now();
