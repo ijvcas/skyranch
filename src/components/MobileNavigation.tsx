@@ -69,13 +69,13 @@ const MobileNavigation = () => {
           </div>
 
           {/* Right side buttons */}
-          <div className="flex items-center space-x-2 flex-shrink-0 h-full">
+          <div className="flex items-center gap-1 flex-shrink-0 h-full">
             <div className="flex items-center h-full">
               <NotificationBell />
             </div>
             <NavLink
               to="/animals/new"
-              className="flex items-center px-2.5 py-1.5 bg-green-600 text-white rounded-md text-sm font-medium h-8 mobile-tap-target"
+              className="flex items-center px-2 py-1.5 bg-green-600 text-white rounded-md text-sm font-medium h-8 mobile-tap-target"
             >
               <PlusCircle className="w-4 h-4" />
             </NavLink>
