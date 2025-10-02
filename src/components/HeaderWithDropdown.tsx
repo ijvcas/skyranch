@@ -115,7 +115,7 @@ const HeaderWithDropdown = () => {
             >
               <Bot className="w-10 h-10" strokeWidth={2} />
             </Button>
-            <div className="flex items-center h-full">
+            <div className="flex items-center h-full mr-4">
               <NotificationBell />
             </div>
           </div>
