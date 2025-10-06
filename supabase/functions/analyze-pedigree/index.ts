@@ -43,19 +43,11 @@ serve(async (req) => {
     let extractedData;
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-    if (fileType === 'application/pdf') {
-      // For PDFs, we'd ideally use document parsing, but for now use vision API with first page
-      const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-      
-      extractedData = await extractWithVisionAPI(base64, fileType, LOVABLE_API_KEY);
-    } else {
-      // For images (JPEG/PNG), use vision API directly
-      const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-      
-      extractedData = await extractWithVisionAPI(base64, fileType, LOVABLE_API_KEY);
-    }
+    // Convert file to base64 in chunks to avoid stack overflow
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = arrayBufferToBase64(arrayBuffer);
+    
+    extractedData = await extractWithVisionAPI(base64, fileType, LOVABLE_API_KEY);
 
     // Upload file to storage
     const fileName = `${user.id}/${Date.now()}-${file.name}`;
@@ -90,6 +82,20 @@ serve(async (req) => {
     });
   }
 });
+
+// Helper function to convert ArrayBuffer to base64 in chunks (prevents stack overflow)
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 8192;
+  
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.slice(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  
+  return btoa(binary);
+}
 
 async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKey: string) {
   const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

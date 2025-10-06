@@ -166,7 +166,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                         : 'bg-muted border border-border'
                     )}
                   >
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed select-text">
                       {message.message}
                     </p>
                     <p className={cn(
