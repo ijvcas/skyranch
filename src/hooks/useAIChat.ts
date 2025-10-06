@@ -88,7 +88,9 @@ export const useAIChat = () => {
 
       if (aiError) {
         console.error('Edge function error:', aiError);
-        throw new Error(aiError.message || 'Error al llamar al servicio de IA');
+        // Try to get the actual error message from the response
+        const errorMessage = aiResponse?.error || aiError.message || 'Error al llamar al servicio de IA';
+        throw new Error(errorMessage);
       }
 
       if (aiResponse?.error) {

@@ -88,6 +88,18 @@ serve(async (req) => {
       if (!pedigreeResponse.ok) {
         const errorText = await pedigreeResponse.text();
         console.error('❌ Pedigree analysis error:', errorText);
+        
+        // Try to parse error details
+        try {
+          const errorData = JSON.parse(errorText);
+          if (pedigreeResponse.status === 429) {
+            return new Response(
+              JSON.stringify({ error: errorData.error || 'Límite de solicitudes de OpenAI excedido. Por favor, intenta más tarde.' }),
+              { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        } catch {}
+        
         throw new Error('Failed to analyze pedigree document');
       }
 

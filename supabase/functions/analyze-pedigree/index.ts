@@ -80,6 +80,18 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error('Error in analyze-pedigree:', error);
+    
+    // Check for OpenAI rate limit errors
+    if (error.message?.includes('429') || error.message?.includes('rate limit')) {
+      return new Response(JSON.stringify({ 
+        error: 'Límite de solicitudes de OpenAI excedido. Por favor, intenta más tarde o agrega un método de pago en tu cuenta de OpenAI.',
+        details: error.message
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     return new Response(JSON.stringify({ 
       error: error.message || 'Error analyzing pedigree' 
     }), {
