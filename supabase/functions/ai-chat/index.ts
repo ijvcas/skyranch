@@ -149,11 +149,13 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
     }
 
     if (enableAnimalContext) {
+      // Fetch detailed animal information including full pedigree data
       const { data: animals } = await supabase
         .from('animals')
-        .select('species, count')
+        .select('id, name, tag, species, breed, gender, birth_date, father_id, mother_id, paternal_grandfather_id, paternal_grandmother_id, maternal_grandfather_id, maternal_grandmother_id')
         .eq('user_id', user.id)
-        .eq('lifecycle_status', 'active');
+        .eq('lifecycle_status', 'active')
+        .limit(100);
       
       if (animals) {
         contextData.animals = {
@@ -162,6 +164,7 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
             acc[a.species] = (acc[a.species] || 0) + 1;
             return acc;
           }, {}),
+          detailedList: animals, // Include full animal details with pedigree info
         };
       }
     }
