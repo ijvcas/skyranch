@@ -263,32 +263,37 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
 
     // Special handling for pedigree analysis
     if (pedigreeData) {
-      enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE PEDIGRÍ SOLICITADO:
+      enhancedSystemPrompt += `\n\n🧬 DOCUMENTO DE PEDIGRÍ YA PROCESADO:
 
-El usuario ha subido un documento de pedigrí que ha sido procesado. Los datos extraídos son:
+IMPORTANTE: Ya he analizado la imagen/documento que subió el usuario usando tecnología de visión artificial. Los datos extraídos son:
+
 ${JSON.stringify(pedigreeData, null, 2)}
 
-IMPORTANTE: Debes seguir estos pasos:
+NUNCA digas que "no puedes ver imágenes" o "no tienes capacidad de ver fotos" - el documento ya fue procesado exitosamente.
 
-1. Primero, confirma que extrajiste el pedigrí correctamente mostrando:
-   - Nombre del animal: ${pedigreeData.animalName || 'No detectado'}
-   - Raza: ${pedigreeData.breed || 'No detectada'}
-   - Fecha de nacimiento: ${pedigreeData.birthDate || 'No detectada'}
-   - Padre: ${pedigreeData.father?.name || 'No detectado'}
-   - Madre: ${pedigreeData.mother?.name || 'No detectada'}
+INSTRUCCIONES:
 
-2. LUEGO pregúntale al usuario: "¿Quieres que guarde este animal externo en tu base de datos del rancho para futuras referencias?"
-   - Si dice SÍ o palabras similares (sí, por favor, adelante, hazlo), responde: "✅ Perfecto, he guardado el animal en la base de datos para futuras consultas."
-   - Si dice NO o rechaza, continúa con el análisis sin mencionar guardar
+1. Confirma que analicé el pedigrí correctamente mostrando:
+   - Nombre del animal: **${pedigreeData.animalName || 'No detectado'}**
+   - Raza: **${pedigreeData.breed || 'No detectada'}**
+   - Fecha de nacimiento: **${pedigreeData.birthDate || 'No detectada'}**
+   - Padre: **${pedigreeData.father?.name || 'No detectado'}**
+   - Madre: **${pedigreeData.mother?.name || 'No detectada'}**
+   ${pedigreeData.paternalGrandfather ? `- Abuelo paterno: **${pedigreeData.paternalGrandfather}**` : ''}
+   ${pedigreeData.paternalGrandmother ? `- Abuela paterna: **${pedigreeData.paternalGrandmother}**` : ''}
+   ${pedigreeData.maternalGrandfather ? `- Abuelo materno: **${pedigreeData.maternalGrandfather}**` : ''}
+   ${pedigreeData.maternalGrandmother ? `- Abuela materna: **${pedigreeData.maternalGrandmother}**` : ''}
 
-3. Si el usuario menciona un animal específico de su rancho, analiza:
-   - Compatibilidad genética entre ambos animales
-   - Antepasados comunes (si los hay)
+2. Pregunta al usuario: "¿Quieres que guarde este animal externo en tu base de datos del rancho para futuras referencias?"
+
+3. Si menciona un animal de su rancho, proporciona análisis de:
+   - Compatibilidad genética
+   - Antepasados comunes
    - Coeficiente de endogamia estimado
-   - Recomendaciones para el apareamiento
+   - Recomendaciones de apareamiento
 
-ANIMALES DISPONIBLES EN EL RANCHO:
-${contextData.farmAnimals ? JSON.stringify(contextData.farmAnimals, null, 2) : 'No hay animales activos en el rancho'}`;
+ANIMALES EN EL RANCHO:
+${contextData.farmAnimals ? JSON.stringify(contextData.farmAnimals, null, 2) : 'Sin animales activos'}`;
     }
 
     if (Object.keys(contextData).length > 0 && !pedigreeData) {
