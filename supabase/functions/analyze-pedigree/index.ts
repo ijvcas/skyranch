@@ -83,15 +83,14 @@ serve(async (req) => {
   }
 });
 
-// Helper function to convert ArrayBuffer to base64 in chunks (prevents stack overflow)
+// Helper function to convert ArrayBuffer to base64 (prevents stack overflow)
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = '';
-  const chunkSize = 8192;
   
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.slice(i, i + chunkSize);
-    binary += String.fromCharCode(...chunk);
+  // Iterate byte by byte to avoid stack overflow from spread operator
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
   }
   
   return btoa(binary);
