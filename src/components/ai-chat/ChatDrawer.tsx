@@ -8,9 +8,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, X } from 'lucide-react';
+import { Send, Loader2, Trash2, X, Paperclip, FileImage } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChatDrawerProps {
   open: boolean;
@@ -19,8 +20,11 @@ interface ChatDrawerProps {
 
 const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const [input, setInput] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
+  const { toast } = useToast();
 
   // Scroll to bottom function
   const scrollToBottom = () => {
@@ -46,13 +50,55 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     }
   }, [open]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    const maxSize = 20 * 1024 * 1024; // 20MB
+
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: 'Tipo de archivo no válido',
+        description: 'Solo se permiten archivos PDF, JPEG o PNG',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (file.size > maxSize) {
+      toast({
+        title: 'Archivo muy grande',
+        description: 'El tamaño máximo es 20MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
+    const fileToSend = selectedFile;
+    
     setInput('');
-    await sendMessage(userMessage);
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    
+    await sendMessage(userMessage, fileToSend || undefined);
   };
 
   const handleClearHistory = () => {
@@ -147,7 +193,39 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
           </ScrollArea>
 
           <form onSubmit={handleSubmit} className="border-t p-4 flex-shrink-0 bg-background">
+            {selectedFile && (
+              <div className="mb-2 flex items-center gap-2 p-2 bg-muted rounded-md">
+                <FileImage className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveFile}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
             <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading}
+                title="Subir pedigrí (PDF, JPEG, PNG)"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

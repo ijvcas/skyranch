@@ -30,7 +30,7 @@ export const useAIChat = () => {
     },
   });
 
-  const sendMessage = async (message: string) => {
+  const sendMessage = async (message: string, file?: File) => {
     try {
       setIsLoading(true);
 
@@ -57,9 +57,31 @@ export const useAIChat = () => {
 
       // Call AI edge function
       console.log('🚀 Calling AI chat function...');
-      const { data: aiResponse, error: aiError } = await supabase.functions.invoke('ai-chat', {
-        body: { message },
-      });
+      
+      let aiResponse, aiError;
+      
+      if (file) {
+        // If file is provided, use multipart/form-data
+        const formData = new FormData();
+        formData.append('message', message);
+        formData.append('file', file);
+        formData.append('fileType', file.type);
+
+        const response = await supabase.functions.invoke('ai-chat', {
+          body: formData,
+        });
+        
+        aiResponse = response.data;
+        aiError = response.error;
+      } else {
+        // Regular JSON request
+        const response = await supabase.functions.invoke('ai-chat', {
+          body: { message },
+        });
+        
+        aiResponse = response.data;
+        aiError = response.error;
+      }
 
       console.log('AI Response:', aiResponse);
       console.log('AI Error:', aiError);

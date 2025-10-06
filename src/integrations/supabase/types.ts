@@ -1317,6 +1317,56 @@ export type Database = {
           },
         ]
       }
+      pedigree_analyses: {
+        Row: {
+          analysis_result: Json | null
+          compatibility_score: number | null
+          created_at: string
+          document_url: string | null
+          external_animal_name: string
+          external_pedigree_data: Json
+          farm_animal_id: string | null
+          id: string
+          inbreeding_coefficient: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis_result?: Json | null
+          compatibility_score?: number | null
+          created_at?: string
+          document_url?: string | null
+          external_animal_name: string
+          external_pedigree_data: Json
+          farm_animal_id?: string | null
+          id?: string
+          inbreeding_coefficient?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis_result?: Json | null
+          compatibility_score?: number | null
+          created_at?: string
+          document_url?: string | null
+          external_animal_name?: string
+          external_pedigree_data?: Json
+          farm_animal_id?: string | null
+          id?: string
+          inbreeding_coefficient?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedigree_analyses_farm_animal_id_fkey"
+            columns: ["farm_animal_id"]
+            isOneToOne: false
+            referencedRelation: "animals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null

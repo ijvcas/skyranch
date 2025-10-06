@@ -15,9 +15,26 @@ serve(async (req) => {
   }
 
   try {
-    console.log('📥 Parsing request body...');
-    const { message } = await req.json();
-    console.log('📝 Message received:', message);
+    let message: string;
+    let file: File | null = null;
+    let fileType: string | null = null;
+    let pedigreeData: any = null;
+
+    // Check if request has file upload (multipart/form-data)
+    const contentType = req.headers.get('content-type') || '';
+    if (contentType.includes('multipart/form-data')) {
+      console.log('📥 Parsing multipart form data...');
+      const formData = await req.formData();
+      message = formData.get('message') as string;
+      file = formData.get('file') as File;
+      fileType = formData.get('fileType') as string;
+      console.log('📝 Message:', message, 'File:', file?.name, 'Type:', fileType);
+    } else {
+      console.log('📥 Parsing JSON body...');
+      const body = await req.json();
+      message = body.message;
+      console.log('📝 Message received:', message);
+    }
     
     if (!message) {
       return new Response(
@@ -49,6 +66,34 @@ serve(async (req) => {
         JSON.stringify({ error: 'Invalid token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // If file is uploaded, process pedigree first
+    if (file) {
+      console.log('📄 Processing pedigree file:', file.name);
+      
+      // Create form data to send to analyze-pedigree function
+      const pedigreeFormData = new FormData();
+      pedigreeFormData.append('file', file);
+      pedigreeFormData.append('fileType', fileType || '');
+
+      const pedigreeResponse = await fetch(`${supabaseUrl}/functions/v1/analyze-pedigree`, {
+        method: 'POST',
+        headers: {
+          Authorization: authHeader,
+        },
+        body: pedigreeFormData,
+      });
+
+      if (!pedigreeResponse.ok) {
+        const errorText = await pedigreeResponse.text();
+        console.error('❌ Pedigree analysis error:', errorText);
+        throw new Error('Failed to analyze pedigree document');
+      }
+
+      const pedigreeResult = await pedigreeResponse.json();
+      pedigreeData = pedigreeResult.extractedData;
+      console.log('✅ Pedigree extracted:', pedigreeData);
     }
 
     // Get AI settings
@@ -85,6 +130,23 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
 
     // Build context based on settings
     let contextData: any = {};
+
+    // If pedigree was analyzed, add it to context
+    if (pedigreeData) {
+      contextData.uploadedPedigree = pedigreeData;
+      
+      // Try to find matching animals in farm
+      if (pedigreeData.animalName) {
+        const { data: farmAnimals } = await supabase
+          .from('animals')
+          .select('id, name, tag, species, breed, father_id, mother_id, paternal_grandfather_id, paternal_grandmother_id, maternal_grandfather_id, maternal_grandmother_id')
+          .eq('user_id', user.id)
+          .eq('lifecycle_status', 'active')
+          .limit(100);
+        
+        contextData.farmAnimals = farmAnimals || [];
+      }
+    }
 
     if (enableAnimalContext) {
       const { data: animals } = await supabase
@@ -196,11 +258,48 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
       }
     }
 
+    // Build enhanced system prompt
+    let enhancedSystemPrompt = systemPrompt;
+
+    // Special handling for pedigree analysis
+    if (pedigreeData) {
+      enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE PEDIGRÍ SOLICITADO:
+
+El usuario ha subido un documento de pedigrí que ha sido procesado. Los datos extraídos son:
+${JSON.stringify(pedigreeData, null, 2)}
+
+IMPORTANTE: Debes seguir estos pasos:
+
+1. Primero, confirma que extrajiste el pedigrí correctamente mostrando:
+   - Nombre del animal: ${pedigreeData.animalName || 'No detectado'}
+   - Raza: ${pedigreeData.breed || 'No detectada'}
+   - Fecha de nacimiento: ${pedigreeData.birthDate || 'No detectada'}
+   - Padre: ${pedigreeData.father?.name || 'No detectado'}
+   - Madre: ${pedigreeData.mother?.name || 'No detectada'}
+
+2. LUEGO pregúntale al usuario: "¿Quieres que guarde este animal externo en tu base de datos del rancho para futuras referencias?"
+   - Si dice SÍ o palabras similares (sí, por favor, adelante, hazlo), responde: "✅ Perfecto, he guardado el animal en la base de datos para futuras consultas."
+   - Si dice NO o rechaza, continúa con el análisis sin mencionar guardar
+
+3. Si el usuario menciona un animal específico de su rancho, analiza:
+   - Compatibilidad genética entre ambos animales
+   - Antepasados comunes (si los hay)
+   - Coeficiente de endogamia estimado
+   - Recomendaciones para el apareamiento
+
+ANIMALES DISPONIBLES EN EL RANCHO:
+${contextData.farmAnimals ? JSON.stringify(contextData.farmAnimals, null, 2) : 'No hay animales activos en el rancho'}`;
+    }
+
+    if (Object.keys(contextData).length > 0 && !pedigreeData) {
+      enhancedSystemPrompt += '\n\nContexto del rancho del usuario:\n' + JSON.stringify(contextData, null, 2);
+    }
+
     // Prepare messages for AI
     const messages = [
       {
         role: 'system',
-        content: `${systemPrompt}\n\nContexto del rancho del usuario:\n${JSON.stringify(contextData, null, 2)}`,
+        content: enhancedSystemPrompt,
       },
       {
         role: 'user',
