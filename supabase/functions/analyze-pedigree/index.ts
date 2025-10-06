@@ -40,20 +40,20 @@ serve(async (req) => {
 
     console.log('Processing file:', file.name, 'Type:', fileType);
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     
-    if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY not found in environment');
-      throw new Error('AI service not configured. Please contact support.');
+    if (!OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY not found in environment');
+      throw new Error('OpenAI API key not configured. Please add it in your Supabase secrets.');
     }
 
-    console.log('LOVABLE_API_KEY is set:', !!LOVABLE_API_KEY);
+    console.log('Processing file with OpenAI vision API');
 
-    // Convert file to base64 to avoid stack overflow
+    // Convert file to base64
     const arrayBuffer = await file.arrayBuffer();
     const base64 = arrayBufferToBase64(arrayBuffer);
     
-    const extractedData = await extractWithVisionAPI(base64, fileType, LOVABLE_API_KEY);
+    const extractedData = await extractWithVisionAPI(base64, fileType, OPENAI_API_KEY);
 
     // Upload file to storage
     const fileName = `${user.id}/${Date.now()}-${file.name}`;
@@ -102,21 +102,17 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKey: string | undefined) {
-  if (!apiKey) {
-    throw new Error('API key is required');
-  }
-
-  console.log('Calling Lovable AI API with model: google/gemini-2.5-flash');
+async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKey: string) {
+  console.log('Calling OpenAI vision API with model: gpt-4o-mini');
   
-  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'user',
@@ -151,14 +147,15 @@ async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKe
           ]
         }
       ],
+      max_tokens: 1000,
       temperature: 0.1,
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Vision API error:', errorText);
-    throw new Error(`Vision API error: ${response.status}`);
+    console.error('OpenAI API error:', errorText);
+    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
