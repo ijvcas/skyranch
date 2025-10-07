@@ -370,14 +370,18 @@ ${contextData.farmAnimals ? JSON.stringify(contextData.farmAnimals, null, 2) : '
       
       let errorMessage = 'Error del servicio de OpenAI';
       if (aiResponse.status === 429) {
-        errorMessage = 'Límite de solicitudes de OpenAI excedido. Por favor, intenta más tarde.';
+        errorMessage = 'Límite de solicitudes de OpenAI excedido. Por favor, intenta de nuevo más tarde o verifica tu configuración de OpenAI.';
       } else if (aiResponse.status === 402) {
-        errorMessage = 'Se requiere pago en OpenAI para continuar.';
+        errorMessage = 'Se requiere pago en OpenAI para continuar. Por favor verifica tu cuenta de OpenAI.';
       }
       
       return new Response(
-        JSON.stringify({ error: errorMessage, details: errorText }),
-        { status: aiResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: errorMessage,
+          response: errorMessage,
+          details: errorText 
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
