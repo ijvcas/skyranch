@@ -114,7 +114,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKey: string) {
-  console.log('Calling OpenAI vision API with model: gpt-4o-mini');
+  console.log('Calling OpenAI API with model: gpt-4o (supports PDFs)');
   
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -123,7 +123,7 @@ async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKe
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'user',
@@ -159,7 +159,6 @@ async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKe
         }
       ],
       max_tokens: 1000,
-      temperature: 0.1,
     }),
   });
 

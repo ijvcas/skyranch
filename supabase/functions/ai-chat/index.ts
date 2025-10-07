@@ -278,6 +278,23 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
     // Build enhanced system prompt
     let enhancedSystemPrompt = systemPrompt;
 
+    // ALWAYS inform AI about Skyranch database access if animals are available
+    if (contextData.farmAnimals && contextData.farmAnimals.length > 0) {
+      enhancedSystemPrompt += `\n\n🐴 **BASE DE DATOS SKYRANCH - ACCESO COMPLETO:**
+
+Tienes acceso a la información de ${contextData.farmAnimals.length} animales activos en la base de datos de Skyranch:
+
+${contextData.farmAnimals.map((a: any) => 
+  `- **${a.name}** (Tag: ${a.tag}) - ${a.species} ${a.breed || 'sin raza'}
+  Género: ${a.gender || 'no especificado'} | Nacimiento: ${a.birth_date || 'no registrado'}
+  Padre ID: ${a.father_id || 'desconocido'} | Madre ID: ${a.mother_id || 'desconocida'}
+  Abuelos paternos: ${a.paternal_grandfather_id || 'N/A'}, ${a.paternal_grandmother_id || 'N/A'}
+  Abuelos maternos: ${a.maternal_grandfather_id || 'N/A'}, ${a.maternal_grandmother_id || 'N/A'}`
+).join('\n\n')}
+
+**IMPORTANTE:** Esta información de la base de datos de Skyranch está disponible para análisis de consanguinidad, cruces genéticos, y cualquier consulta sobre los animales del rancho.`;
+    }
+
     // Special handling for pedigree analysis
     if (pedigreeData) {
       enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE PEDIGRÍ COMPLETADO - DATOS EXTRAÍDOS:
@@ -295,16 +312,11 @@ ${pedigreeData.paternalGrandmother ? `- **Abuela paterna:** ${pedigreeData.pater
 ${pedigreeData.maternalGrandfather ? `- **Abuelo materno:** ${pedigreeData.maternalGrandfather}` : ''}
 ${pedigreeData.maternalGrandmother ? `- **Abuela materna:** ${pedigreeData.maternalGrandmother}` : ''}
 
-🐴 **ANIMALES EN SKYRANCH (base de datos):**
-${contextData.farmAnimals && contextData.farmAnimals.length > 0 ? contextData.farmAnimals.map((a: any) => 
-  `- ${a.name} (${a.tag}) - ${a.breed || 'Sin raza'} | Padre: ${a.father_id || 'Desconocido'} | Madre: ${a.mother_id || 'Desconocida'}`
-).join('\n') : 'No hay animales activos en Skyranch'}
-
 **TU TAREA:**
 
 1. **Confirma la extracción:** Resume los datos del pedigrí externo mostrados arriba en formato claro y legible
 
-2. **Busca coincidencias:** Compara el pedigrí externo con los animales de Skyranch. Busca:
+2. **Busca coincidencias:** Compara el pedigrí externo con los animales de Skyranch listados arriba. Busca:
    - Nombres idénticos o similares en padres/madres/abuelos
    - Posibles antepasados comunes
    - Patrones genéticos compartidos
@@ -324,8 +336,18 @@ ${contextData.farmAnimals && contextData.farmAnimals.length > 0 ? contextData.fa
 **NUNCA** digas "no puedo ver imágenes" - el documento YA fue procesado exitosamente.`;
     }
 
+    // Add full context as JSON for reference
+    console.log('📊 Context data being sent:', {
+      hasPedigreeData: !!pedigreeData,
+      farmAnimalsCount: contextData.farmAnimals?.length || 0,
+      hasAnimalsContext: !!contextData.animals,
+      hasBreedingContext: !!contextData.breeding,
+      hasLotsContext: !!contextData.lots,
+      hasWeatherContext: !!contextData.weather
+    });
+
     if (Object.keys(contextData).length > 0) {
-      enhancedSystemPrompt += '\n\nContexto del rancho del usuario:\n' + JSON.stringify(contextData, null, 2);
+      enhancedSystemPrompt += '\n\n[Datos completos del contexto en JSON para referencia técnica]:\n' + JSON.stringify(contextData, null, 2);
     }
 
     // Prepare messages for AI
