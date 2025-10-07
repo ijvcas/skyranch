@@ -297,43 +297,25 @@ ${contextData.farmAnimals.map((a: any) =>
 
     // Special handling for pedigree analysis
     if (pedigreeData) {
-      enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE PEDIGRÍ COMPLETADO - DATOS EXTRAÍDOS:
+      enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE PEDIGRÍ:
 
-**IMPORTANTE:** Ya procesé el documento de pedigrí subido usando visión artificial GPT-4o. Los datos extraídos son:
+El pedigrí de ${pedigreeData.animalName || 'este animal'} (${pedigreeData.breed || 'raza no especificada'}) ha sido procesado.
 
-📋 **INFORMACIÓN DEL ANIMAL EXTERNO:**
-- **Nombre:** ${pedigreeData.animalName || 'No detectado'}
-- **Raza:** ${pedigreeData.breed || 'No detectada'}
-- **Fecha de nacimiento:** ${pedigreeData.birthDate || 'No detectada'}
-- **Padre:** ${pedigreeData.father?.name || 'No detectado'}
-- **Madre:** ${pedigreeData.mother?.name || 'No detectada'}
-${pedigreeData.paternalGrandfather ? `- **Abuelo paterno:** ${pedigreeData.paternalGrandfather}` : ''}
-${pedigreeData.paternalGrandmother ? `- **Abuela paterna:** ${pedigreeData.paternalGrandmother}` : ''}
-${pedigreeData.maternalGrandfather ? `- **Abuelo materno:** ${pedigreeData.maternalGrandfather}` : ''}
-${pedigreeData.maternalGrandmother ? `- **Abuela materna:** ${pedigreeData.maternalGrandmother}` : ''}
+**DATOS EXTRAÍDOS:**
+Animal: ${pedigreeData.animalName} | Nacimiento: ${pedigreeData.birthDate}
+Padre: ${pedigreeData.father?.name} | Madre: ${pedigreeData.mother?.name}
+Abuelos paternos: ${pedigreeData.paternalGrandfather}, ${pedigreeData.paternalGrandmother}
+Abuelos maternos: ${pedigreeData.maternalGrandfather}, ${pedigreeData.maternalGrandmother}
 
 **TU TAREA:**
+1. Resume los datos del pedigrí claramente
+2. Compara con los ${contextData.farmAnimals?.length || 0} animales de Skyranch
+3. Busca coincidencias en nombres de padres/abuelos
+4. Si hay antepasados comunes, calcula el coeficiente de consanguinidad estimado
+5. Da recomendación clara: ¿comprar o no comprar? Explica por qué
+6. Pregunta: "¿Quieres que guarde ${pedigreeData.animalName} en Skyranch?"
 
-1. **Confirma la extracción:** Resume los datos del pedigrí externo mostrados arriba en formato claro y legible
-
-2. **Busca coincidencias:** Compara el pedigrí externo con los animales de Skyranch listados arriba. Busca:
-   - Nombres idénticos o similares en padres/madres/abuelos
-   - Posibles antepasados comunes
-   - Patrones genéticos compartidos
-
-3. **Análisis de consanguinidad:** 
-   - Si encuentras antepasados comunes, calcula el coeficiente de endogamia estimado
-   - Evalúa si hay riesgo genético (consanguinidad > 10% es preocupante)
-   - Identifica qué líneas genéticas se duplican
-
-4. **Recomendación de compra:**
-   ${pedigreeData.animalName ? `- **Si el análisis muestra un bajo índice de consanguinidad y buena diversidad genética**, recomienda la compra de ${pedigreeData.animalName}` : ''}
-   - **Si se observa un alto índice de consanguinidad o problemas genéticos**, recomienda considerar otras opciones
-   - Explica claramente los riesgos o beneficios genéticos de esta cruza
-
-5. **Pregunta final:** "¿Quieres que guarde este animal externo (${pedigreeData.animalName || 'este pedigrí'}) en tu base de datos de Skyranch para futuras referencias y análisis?"
-
-**NUNCA** digas "no puedo ver imágenes" - el documento YA fue procesado exitosamente.`;
+Sé conciso y directo.`;
     }
 
     // Add full context as JSON for reference
@@ -375,57 +357,78 @@ ${pedigreeData.maternalGrandmother ? `- **Abuela materna:** ${pedigreeData.mater
     }
     console.log('✅ API key found, calling OpenAI...');
 
-    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages,
-        max_tokens: 2000,
-        temperature: 0.7,
-      }),
-    });
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('❌ OpenAI API error:', aiResponse.status, errorText);
-      
-      let errorMessage = 'Error del servicio de OpenAI';
-      if (aiResponse.status === 429) {
-        errorMessage = 'Límite de solicitudes de OpenAI excedido. Por favor, intenta de nuevo más tarde o verifica tu configuración de OpenAI.';
-      } else if (aiResponse.status === 402) {
-        errorMessage = 'Se requiere pago en OpenAI para continuar. Por favor verifica tu cuenta de OpenAI.';
-      }
-      
-      return new Response(
-        JSON.stringify({ 
-          error: errorMessage,
-          response: errorMessage,
-          details: errorText 
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('✅ AI response received');
-    const aiData = await aiResponse.json();
-    const responseText = aiData.choices?.[0]?.message?.content || 'No response from AI';
-    console.log('📤 Sending response back to client');
-
-    return new Response(
-      JSON.stringify({
-        response: responseText,
-        metadata: {
-          model: aiData.model,
-          provider: aiProvider,
-          contextIncluded: Object.keys(contextData),
+    try {
+      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
         },
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages,
+          max_tokens: 1500, // Reduced for faster response
+          temperature: 0.7,
+        }),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!aiResponse.ok) {
+        const errorText = await aiResponse.text();
+        console.error('❌ OpenAI API error:', aiResponse.status, errorText);
+        
+        let errorMessage = 'Error del servicio de OpenAI';
+        if (aiResponse.status === 429) {
+          errorMessage = 'Límite de solicitudes de OpenAI excedido. Por favor, intenta de nuevo más tarde o verifica tu configuración de OpenAI.';
+        } else if (aiResponse.status === 402) {
+          errorMessage = 'Se requiere pago en OpenAI para continuar. Por favor verifica tu cuenta de OpenAI.';
+        }
+        
+        return new Response(
+          JSON.stringify({ 
+            error: errorMessage,
+            response: errorMessage,
+            details: errorText 
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('✅ AI response received');
+      const aiData = await aiResponse.json();
+      const responseText = aiData.choices?.[0]?.message?.content || 'No response from AI';
+      console.log('📤 Sending response back to client');
+
+      return new Response(
+        JSON.stringify({
+          response: responseText,
+          metadata: {
+            model: aiData.model,
+            provider: aiProvider,
+            contextIncluded: Object.keys(contextData),
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (timeoutError: any) {
+      if (timeoutError.name === 'AbortError') {
+        console.error('⏱️ Request timeout after 25 seconds');
+        return new Response(
+          JSON.stringify({ 
+            error: 'La solicitud tardó demasiado tiempo. Por favor, intenta de nuevo con una consulta más simple.',
+            response: 'Tiempo de espera agotado. Por favor, intenta de nuevo.'
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw timeoutError; // Re-throw other errors
+    }
 
   } catch (error: any) {
     console.error('❌ Error in ai-chat function:', error);
