@@ -156,18 +156,6 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
     // If pedigree was analyzed, add it to context
     if (pedigreeData) {
       contextData.uploadedPedigree = pedigreeData;
-      
-      // Try to find matching animals in farm
-      if (pedigreeData.animalName) {
-        const { data: farmAnimals } = await supabase
-          .from('animals')
-          .select('id, name, tag, species, breed, father_id, mother_id, paternal_grandfather_id, paternal_grandmother_id, maternal_grandfather_id, maternal_grandmother_id')
-          .eq('user_id', user.id)
-          .eq('lifecycle_status', 'active')
-          .limit(100);
-        
-        contextData.farmAnimals = farmAnimals || [];
-      }
     }
 
     if (enableAnimalContext) {
@@ -180,6 +168,10 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
         .limit(100);
       
       if (animals) {
+        // Always populate farmAnimals for pedigree analysis
+        contextData.farmAnimals = animals;
+        
+        // Also keep the legacy structure for backward compatibility
         contextData.animals = {
           total: animals.length,
           bySpecies: animals.reduce((acc: any, a: any) => {
