@@ -288,37 +288,48 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
 
     // Special handling for pedigree analysis
     if (pedigreeData) {
-      enhancedSystemPrompt += `\n\n🧬 DOCUMENTO DE PEDIGRÍ YA PROCESADO:
+      enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE PEDIGRÍ COMPLETADO - DATOS EXTRAÍDOS:
 
-IMPORTANTE: Ya he analizado la imagen/documento que subió el usuario usando tecnología de visión artificial. Los datos extraídos son:
+**IMPORTANTE:** Ya procesé el documento de pedigrí subido usando visión artificial GPT-4o. Los datos extraídos son:
 
-${JSON.stringify(pedigreeData, null, 2)}
+📋 **INFORMACIÓN DEL ANIMAL EXTERNO:**
+- **Nombre:** ${pedigreeData.animalName || 'No detectado'}
+- **Raza:** ${pedigreeData.breed || 'No detectada'}
+- **Fecha de nacimiento:** ${pedigreeData.birthDate || 'No detectada'}
+- **Padre:** ${pedigreeData.father?.name || 'No detectado'}
+- **Madre:** ${pedigreeData.mother?.name || 'No detectada'}
+${pedigreeData.paternalGrandfather ? `- **Abuelo paterno:** ${pedigreeData.paternalGrandfather}` : ''}
+${pedigreeData.paternalGrandmother ? `- **Abuela paterna:** ${pedigreeData.paternalGrandmother}` : ''}
+${pedigreeData.maternalGrandfather ? `- **Abuelo materno:** ${pedigreeData.maternalGrandfather}` : ''}
+${pedigreeData.maternalGrandmother ? `- **Abuela materna:** ${pedigreeData.maternalGrandmother}` : ''}
 
-NUNCA digas que "no puedes ver imágenes" o "no tienes capacidad de ver fotos" - el documento ya fue procesado exitosamente.
+🐴 **ANIMALES EN SKYRANCH (base de datos):**
+${contextData.farmAnimals && contextData.farmAnimals.length > 0 ? contextData.farmAnimals.map((a: any) => 
+  `- ${a.name} (${a.tag}) - ${a.breed || 'Sin raza'} | Padre: ${a.father_id || 'Desconocido'} | Madre: ${a.mother_id || 'Desconocida'}`
+).join('\n') : 'No hay animales activos en Skyranch'}
 
-INSTRUCCIONES:
+**TU TAREA:**
 
-1. Confirma que analicé el pedigrí correctamente mostrando:
-   - Nombre del animal: **${pedigreeData.animalName || 'No detectado'}**
-   - Raza: **${pedigreeData.breed || 'No detectada'}**
-   - Fecha de nacimiento: **${pedigreeData.birthDate || 'No detectada'}**
-   - Padre: **${pedigreeData.father?.name || 'No detectado'}**
-   - Madre: **${pedigreeData.mother?.name || 'No detectada'}**
-   ${pedigreeData.paternalGrandfather ? `- Abuelo paterno: **${pedigreeData.paternalGrandfather}**` : ''}
-   ${pedigreeData.paternalGrandmother ? `- Abuela paterna: **${pedigreeData.paternalGrandmother}**` : ''}
-   ${pedigreeData.maternalGrandfather ? `- Abuelo materno: **${pedigreeData.maternalGrandfather}**` : ''}
-   ${pedigreeData.maternalGrandmother ? `- Abuela materna: **${pedigreeData.maternalGrandmother}**` : ''}
+1. **Confirma la extracción:** Resume los datos del pedigrí externo mostrados arriba en formato claro y legible
 
-2. Pregunta al usuario: "¿Quieres que guarde este animal externo en tu base de datos del rancho para futuras referencias?"
+2. **Busca coincidencias:** Compara el pedigrí externo con los animales de Skyranch. Busca:
+   - Nombres idénticos o similares en padres/madres/abuelos
+   - Posibles antepasados comunes
+   - Patrones genéticos compartidos
 
-3. Si menciona un animal de su rancho, proporciona análisis de:
-   - Compatibilidad genética
-   - Antepasados comunes
-   - Coeficiente de endogamia estimado
-   - Recomendaciones de apareamiento
+3. **Análisis de consanguinidad:** 
+   - Si encuentras antepasados comunes, calcula el coeficiente de endogamia estimado
+   - Evalúa si hay riesgo genético (consanguinidad > 10% es preocupante)
+   - Identifica qué líneas genéticas se duplican
 
-ANIMALES EN EL RANCHO:
-${contextData.farmAnimals ? JSON.stringify(contextData.farmAnimals, null, 2) : 'Sin animales activos'}`;
+4. **Recomendación de compra:**
+   ${pedigreeData.animalName ? `- **Si el análisis muestra un bajo índice de consanguinidad y buena diversidad genética**, recomienda la compra de ${pedigreeData.animalName}` : ''}
+   - **Si se observa un alto índice de consanguinidad o problemas genéticos**, recomienda considerar otras opciones
+   - Explica claramente los riesgos o beneficios genéticos de esta cruza
+
+5. **Pregunta final:** "¿Quieres que guarde este animal externo (${pedigreeData.animalName || 'este pedigrí'}) en tu base de datos de Skyranch para futuras referencias y análisis?"
+
+**NUNCA** digas "no puedo ver imágenes" - el documento YA fue procesado exitosamente.`;
     }
 
     if (Object.keys(contextData).length > 0) {

@@ -6,7 +6,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, Trash2, X, Paperclip, FileImage } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
@@ -226,12 +226,19 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
-              <Input
+              <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Escribe tu pregunta..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e as any);
+                  }
+                }}
+                placeholder="Escribe tu pregunta... (Shift+Enter para nueva línea)"
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 min-h-[60px] max-h-[200px] resize-y"
+                rows={2}
               />
               <Button 
                 type="submit" 
