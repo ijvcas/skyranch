@@ -321,7 +321,7 @@ ANIMALES EN EL RANCHO:
 ${contextData.farmAnimals ? JSON.stringify(contextData.farmAnimals, null, 2) : 'Sin animales activos'}`;
     }
 
-    if (Object.keys(contextData).length > 0 && !pedigreeData) {
+    if (Object.keys(contextData).length > 0) {
       enhancedSystemPrompt += '\n\nContexto del rancho del usuario:\n' + JSON.stringify(contextData, null, 2);
     }
 
