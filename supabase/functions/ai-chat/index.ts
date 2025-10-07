@@ -382,9 +382,10 @@ ${pedigreeData.maternalGrandmother ? `- **Abuela materna:** ${pedigreeData.mater
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o',
         messages,
-        max_completion_tokens: 4000,
+        max_tokens: 2000,
+        temperature: 0.7,
       }),
     });
 
