@@ -8,10 +8,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, X, Paperclip, FileImage } from 'lucide-react';
+import { Send, Loader2, Trash2, X, Paperclip, FileImage, Save } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ChatDrawerProps {
   open: boolean;
@@ -24,6 +25,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   // Scroll to bottom function
@@ -107,6 +109,50 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     }
   };
 
+  const handleSaveToDatabase = async () => {
+    setIsSaving(true);
+    try {
+      // Find the last assistant message with pedigree data
+      const lastAssistantMessage = [...messages].reverse().find(
+        m => m.role === 'assistant' && m.metadata?.pedigreeData
+      );
+
+      if (!lastAssistantMessage?.metadata?.pedigreeData) {
+        toast({
+          title: 'No hay datos de pedigree',
+          description: 'No se encontraron datos de pedigree para guardar',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('save-external-pedigree', {
+        body: {
+          pedigreeData: lastAssistantMessage.metadata.pedigreeData,
+          documentUrl: lastAssistantMessage.metadata.documentUrl || null,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast({
+        title: 'Animal guardado',
+        description: `${data.animal.name} ha sido añadido a la base de datos`,
+      });
+    } catch (error: any) {
+      console.error('Error saving to database:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo guardar el animal',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent className="h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none">
@@ -117,6 +163,15 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                 Asistente de IA - Skyranch
               </DrawerTitle>
               <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSaveToDatabase}
+                  disabled={isSaving || isLoading}
+                  title="Guardar animal a la base de datos"
+                >
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
