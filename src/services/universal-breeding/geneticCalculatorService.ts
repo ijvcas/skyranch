@@ -8,18 +8,18 @@ export class GeneticCalculatorService {
     const pedigreeFields = [
       animal.fatherId,
       animal.motherId,
-      animal.paternalGrandfatherId,
-      animal.paternalGrandmotherId,
-      animal.maternalGrandfatherId,
-      animal.maternalGrandmotherId,
-      animal.paternalGreatGrandfatherPaternalId,
-      animal.paternalGreatGrandmotherPaternalId,
-      animal.paternalGreatGrandfatherMaternalId,
-      animal.paternalGreatGrandmotherMaternalId,
-      animal.maternalGreatGrandfatherPaternalId,
-      animal.maternalGreatGrandmotherPaternalId,
-      animal.maternalGreatGrandfatherMaternalId,
-      animal.maternalGreatGrandmotherMaternalId
+      animal.paternal_grandfather_id,
+      animal.paternal_grandmother_id,
+      animal.maternal_grandfather_id,
+      animal.maternal_grandmother_id,
+      animal.paternal_great_grandfather_paternal_id,
+      animal.paternal_great_grandmother_paternal_id,
+      animal.paternal_great_grandfather_maternal_id,
+      animal.paternal_great_grandmother_maternal_id,
+      animal.maternal_great_grandfather_paternal_id,
+      animal.maternal_great_grandmother_paternal_id,
+      animal.maternal_great_grandfather_maternal_id,
+      animal.maternal_great_grandmother_maternal_id
     ];
 
     pedigreeFields.forEach(field => {

@@ -90,10 +90,10 @@ export class FamilyRelationshipService {
 
       // Check for grandparent-grandchild relationships
       const animal1Grandparents = [
-        resolveParentId(animal1.paternalGrandfatherId || (animal1 as any).paternal_grandfather_id),
-        resolveParentId(animal1.paternalGrandmotherId || (animal1 as any).paternal_grandmother_id),
-        resolveParentId(animal1.maternalGrandfatherId || (animal1 as any).maternal_grandfather_id),
-        resolveParentId(animal1.maternalGrandmotherId || (animal1 as any).maternal_grandmother_id)
+        resolveParentId(animal1.paternal_grandfather_id),
+        resolveParentId(animal1.paternal_grandmother_id),
+        resolveParentId(animal1.maternal_grandfather_id),
+        resolveParentId(animal1.maternal_grandmother_id)
       ].filter(Boolean);
 
       if (animal1Grandparents.includes(animal2.id)) {
@@ -105,10 +105,10 @@ export class FamilyRelationshipService {
       }
 
       const animal2Grandparents = [
-        resolveParentId(animal2.paternalGrandfatherId || (animal2 as any).paternal_grandfather_id),
-        resolveParentId(animal2.paternalGrandmotherId || (animal2 as any).paternal_grandmother_id),
-        resolveParentId(animal2.maternalGrandfatherId || (animal2 as any).maternal_grandfather_id),
-        resolveParentId(animal2.maternalGrandmotherId || (animal2 as any).maternal_grandmother_id)
+        resolveParentId(animal2.paternal_grandfather_id),
+        resolveParentId(animal2.paternal_grandmother_id),
+        resolveParentId(animal2.maternal_grandfather_id),
+        resolveParentId(animal2.maternal_grandmother_id)
       ].filter(Boolean);
 
       if (animal2Grandparents.includes(animal1.id)) {

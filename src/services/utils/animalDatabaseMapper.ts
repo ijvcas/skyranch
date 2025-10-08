@@ -62,18 +62,17 @@ export const fromDatabase = (dbAnimal: any): Animal => {
     causeOfDeath: dbAnimal.cause_of_death || '',
     fatherId: dbAnimal.father_id || '',
     motherId: dbAnimal.mother_id || '',
-    paternalGrandfatherId: dbAnimal.paternal_grandfather_id || '',
-    paternalGrandmotherId: dbAnimal.paternal_grandmother_id || '',
-    maternalGrandfatherId: dbAnimal.maternal_grandfather_id || '',
-    maternalGrandmotherId: dbAnimal.maternal_grandmother_id || '',
-    paternalGreatGrandfatherPaternalId: dbAnimal.paternal_great_grandfather_paternal_id || '',
-    paternalGreatGrandmotherPaternalId: dbAnimal.paternal_great_grandmother_paternal_id || '',
-    paternalGreatGrandfatherMaternalId: dbAnimal.paternal_great_grandfather_maternal_id || '',
-    paternalGreatGrandmotherMaternalId: dbAnimal.paternal_great_grandmother_maternal_id || '',
-    maternalGreatGrandfatherPaternalId: dbAnimal.maternal_great_grandfather_paternal_id || '',
-    maternalGreatGrandmotherPaternalId: dbAnimal.maternal_great_grandmother_paternal_id || '',
-    maternalGreatGrandfatherMaternalId: dbAnimal.maternal_great_grandfather_maternal_id || '',
-    maternalGreatGrandmotherMaternalId: dbAnimal.maternal_great_grandmother_maternal_id || ''
+    paternal_grandfather_id: dbAnimal.paternal_grandfather_id || '',
+    paternal_grandmother_id: dbAnimal.paternal_grandmother_id || '',
+    maternal_grandfather_id: dbAnimal.maternal_grandfather_id || '',
+    maternal_grandmother_id: dbAnimal.maternal_grandmother_id || '',
+    paternal_great_grandfather_paternal_id: dbAnimal.paternal_great_grandfather_paternal_id || '',
+    paternal_great_grandmother_paternal_id: dbAnimal.paternal_great_grandmother_paternal_id || '',
+    paternal_great_grandfather_maternal_id: dbAnimal.paternal_great_grandfather_maternal_id || '',
+    paternal_great_grandmother_maternal_id: dbAnimal.paternal_great_grandmother_maternal_id || '',
+    maternal_great_grandfather_paternal_id: dbAnimal.maternal_great_grandfather_paternal_id || '',
+    maternal_great_grandmother_paternal_id: dbAnimal.maternal_great_grandmother_paternal_id || '',
+    maternal_great_grandmother_maternal_id: dbAnimal.maternal_great_grandmother_maternal_id || ''
   };
 };
 
