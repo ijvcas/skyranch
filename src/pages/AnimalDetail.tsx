@@ -7,7 +7,7 @@ import { ArrowLeft, Edit, Trash2, Activity } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getAnimal } from '@/services/animalService';
 import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
-import AnimalPedigreeChart from '@/components/AnimalPedigreeChart';
+import HorizontalPedigreeTree from '@/components/HorizontalPedigreeTree';
 import AnimalBasicInfo from '@/components/animal-detail/AnimalBasicInfo';
 import AnimalSidebar from '@/components/animal-detail/AnimalSidebar';
 import AnimalHealthRecords from '@/components/animal-detail/AnimalHealthRecords';
@@ -123,7 +123,7 @@ const AnimalDetail = () => {
               </TabsContent>
 
               <TabsContent value="pedigree">
-                <AnimalPedigreeChart animal={animal} />
+                <HorizontalPedigreeTree animal={animal} />
               </TabsContent>
 
               <TabsContent value="history">
