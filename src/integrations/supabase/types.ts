@@ -213,6 +213,54 @@ export type Database = {
           current_lot_id: string | null
           date_of_death: string | null
           father_id: string | null
+          gen4_maternal_ggfgf_m: string | null
+          gen4_maternal_ggfgm_m: string | null
+          gen4_maternal_ggggf_m: string | null
+          gen4_maternal_ggggm_m: string | null
+          gen4_maternal_gggmf_m: string | null
+          gen4_maternal_gggmm_m: string | null
+          gen4_maternal_ggmgf_m: string | null
+          gen4_maternal_ggmgm_m: string | null
+          gen4_paternal_ggfgf_p: string | null
+          gen4_paternal_ggfgm_p: string | null
+          gen4_paternal_ggggf_p: string | null
+          gen4_paternal_ggggm_p: string | null
+          gen4_paternal_gggmf_p: string | null
+          gen4_paternal_gggmm_p: string | null
+          gen4_paternal_ggmgf_p: string | null
+          gen4_paternal_ggmgm_p: string | null
+          gen5_maternal_1: string | null
+          gen5_maternal_10: string | null
+          gen5_maternal_11: string | null
+          gen5_maternal_12: string | null
+          gen5_maternal_13: string | null
+          gen5_maternal_14: string | null
+          gen5_maternal_15: string | null
+          gen5_maternal_16: string | null
+          gen5_maternal_2: string | null
+          gen5_maternal_3: string | null
+          gen5_maternal_4: string | null
+          gen5_maternal_5: string | null
+          gen5_maternal_6: string | null
+          gen5_maternal_7: string | null
+          gen5_maternal_8: string | null
+          gen5_maternal_9: string | null
+          gen5_paternal_1: string | null
+          gen5_paternal_10: string | null
+          gen5_paternal_11: string | null
+          gen5_paternal_12: string | null
+          gen5_paternal_13: string | null
+          gen5_paternal_14: string | null
+          gen5_paternal_15: string | null
+          gen5_paternal_16: string | null
+          gen5_paternal_2: string | null
+          gen5_paternal_3: string | null
+          gen5_paternal_4: string | null
+          gen5_paternal_5: string | null
+          gen5_paternal_6: string | null
+          gen5_paternal_7: string | null
+          gen5_paternal_8: string | null
+          gen5_paternal_9: string | null
           gender: string | null
           health_status: string | null
           id: string
@@ -249,6 +297,54 @@ export type Database = {
           current_lot_id?: string | null
           date_of_death?: string | null
           father_id?: string | null
+          gen4_maternal_ggfgf_m?: string | null
+          gen4_maternal_ggfgm_m?: string | null
+          gen4_maternal_ggggf_m?: string | null
+          gen4_maternal_ggggm_m?: string | null
+          gen4_maternal_gggmf_m?: string | null
+          gen4_maternal_gggmm_m?: string | null
+          gen4_maternal_ggmgf_m?: string | null
+          gen4_maternal_ggmgm_m?: string | null
+          gen4_paternal_ggfgf_p?: string | null
+          gen4_paternal_ggfgm_p?: string | null
+          gen4_paternal_ggggf_p?: string | null
+          gen4_paternal_ggggm_p?: string | null
+          gen4_paternal_gggmf_p?: string | null
+          gen4_paternal_gggmm_p?: string | null
+          gen4_paternal_ggmgf_p?: string | null
+          gen4_paternal_ggmgm_p?: string | null
+          gen5_maternal_1?: string | null
+          gen5_maternal_10?: string | null
+          gen5_maternal_11?: string | null
+          gen5_maternal_12?: string | null
+          gen5_maternal_13?: string | null
+          gen5_maternal_14?: string | null
+          gen5_maternal_15?: string | null
+          gen5_maternal_16?: string | null
+          gen5_maternal_2?: string | null
+          gen5_maternal_3?: string | null
+          gen5_maternal_4?: string | null
+          gen5_maternal_5?: string | null
+          gen5_maternal_6?: string | null
+          gen5_maternal_7?: string | null
+          gen5_maternal_8?: string | null
+          gen5_maternal_9?: string | null
+          gen5_paternal_1?: string | null
+          gen5_paternal_10?: string | null
+          gen5_paternal_11?: string | null
+          gen5_paternal_12?: string | null
+          gen5_paternal_13?: string | null
+          gen5_paternal_14?: string | null
+          gen5_paternal_15?: string | null
+          gen5_paternal_16?: string | null
+          gen5_paternal_2?: string | null
+          gen5_paternal_3?: string | null
+          gen5_paternal_4?: string | null
+          gen5_paternal_5?: string | null
+          gen5_paternal_6?: string | null
+          gen5_paternal_7?: string | null
+          gen5_paternal_8?: string | null
+          gen5_paternal_9?: string | null
           gender?: string | null
           health_status?: string | null
           id?: string
@@ -285,6 +381,54 @@ export type Database = {
           current_lot_id?: string | null
           date_of_death?: string | null
           father_id?: string | null
+          gen4_maternal_ggfgf_m?: string | null
+          gen4_maternal_ggfgm_m?: string | null
+          gen4_maternal_ggggf_m?: string | null
+          gen4_maternal_ggggm_m?: string | null
+          gen4_maternal_gggmf_m?: string | null
+          gen4_maternal_gggmm_m?: string | null
+          gen4_maternal_ggmgf_m?: string | null
+          gen4_maternal_ggmgm_m?: string | null
+          gen4_paternal_ggfgf_p?: string | null
+          gen4_paternal_ggfgm_p?: string | null
+          gen4_paternal_ggggf_p?: string | null
+          gen4_paternal_ggggm_p?: string | null
+          gen4_paternal_gggmf_p?: string | null
+          gen4_paternal_gggmm_p?: string | null
+          gen4_paternal_ggmgf_p?: string | null
+          gen4_paternal_ggmgm_p?: string | null
+          gen5_maternal_1?: string | null
+          gen5_maternal_10?: string | null
+          gen5_maternal_11?: string | null
+          gen5_maternal_12?: string | null
+          gen5_maternal_13?: string | null
+          gen5_maternal_14?: string | null
+          gen5_maternal_15?: string | null
+          gen5_maternal_16?: string | null
+          gen5_maternal_2?: string | null
+          gen5_maternal_3?: string | null
+          gen5_maternal_4?: string | null
+          gen5_maternal_5?: string | null
+          gen5_maternal_6?: string | null
+          gen5_maternal_7?: string | null
+          gen5_maternal_8?: string | null
+          gen5_maternal_9?: string | null
+          gen5_paternal_1?: string | null
+          gen5_paternal_10?: string | null
+          gen5_paternal_11?: string | null
+          gen5_paternal_12?: string | null
+          gen5_paternal_13?: string | null
+          gen5_paternal_14?: string | null
+          gen5_paternal_15?: string | null
+          gen5_paternal_16?: string | null
+          gen5_paternal_2?: string | null
+          gen5_paternal_3?: string | null
+          gen5_paternal_4?: string | null
+          gen5_paternal_5?: string | null
+          gen5_paternal_6?: string | null
+          gen5_paternal_7?: string | null
+          gen5_paternal_8?: string | null
+          gen5_paternal_9?: string | null
           gender?: string | null
           health_status?: string | null
           id?: string

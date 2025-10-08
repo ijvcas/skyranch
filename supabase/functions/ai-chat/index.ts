@@ -381,6 +381,8 @@ He actualizado el pedigrí de **${result.animal.name}** en Skyranch:
 - ${stats.parents} padres
 - ${stats.grandparents} abuelos
 - ${stats.greatGrandparents} bisabuelos
+- ${stats.gen4 || 0} generación 4
+- ${stats.gen5 || 0} generación 5
 
 **TU TAREA:**
 1. Confirma al usuario que el pedigrí de ${result.animal.name} ha sido actualizado
@@ -485,32 +487,32 @@ Sé conciso y directo.`;
       },
     ];
 
-    // Call Lovable AI Gateway (faster and free)
-    console.log('🔑 Checking for LOVABLE_API_KEY...');
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    // Call OpenAI
+    console.log('🔑 Checking for OPENAI_API_KEY...');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     
-    if (!LOVABLE_API_KEY) {
-      console.error('❌ LOVABLE_API_KEY not found in environment');
+    if (!OPENAI_API_KEY) {
+      console.error('❌ OPENAI_API_KEY not found in environment');
       return new Response(
-        JSON.stringify({ error: 'Lovable AI key not configured. Please contact support.' }),
+        JSON.stringify({ error: 'OpenAI API key not configured. Please contact support.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    console.log('✅ API key found, calling Lovable AI Gateway...');
+    console.log('✅ API key found, calling OpenAI...');
 
     // Add timeout to prevent hanging (55s = Supabase max)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 55000); // 55 second timeout
 
     try {
-      const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.5-flash', // Fast and free
+          model: 'gpt-4o',
           messages,
           max_tokens: 1500,
           temperature: 0.7,
@@ -522,13 +524,13 @@ Sé conciso y directo.`;
 
       if (!aiResponse.ok) {
         const errorText = await aiResponse.text();
-        console.error('❌ Lovable AI API error:', aiResponse.status, errorText);
+        console.error('❌ OpenAI API error:', aiResponse.status, errorText);
         
-        let errorMessage = 'Error del servicio de IA';
+        let errorMessage = 'Error del servicio de OpenAI';
         if (aiResponse.status === 429) {
-          errorMessage = 'Límite de solicitudes excedido. Por favor, intenta de nuevo en unos momentos.';
+          errorMessage = 'Límite de solicitudes de OpenAI excedido. Por favor, intenta de nuevo más tarde.';
         } else if (aiResponse.status === 402) {
-          errorMessage = 'Se requiere añadir créditos a tu cuenta de Lovable. Visita Settings → Workspace → Usage.';
+          errorMessage = 'Se requiere pago en OpenAI para continuar. Por favor verifica tu cuenta de OpenAI.';
         }
         
         return new Response(
