@@ -99,18 +99,18 @@ export const useAnimalEditForm = (animal: Animal | null) => {
           ] = await Promise.all([
             loadDisplayName(animal.motherId),
             loadDisplayName(animal.fatherId),
-            loadDisplayName(animal.maternalGrandmotherId),
-            loadDisplayName(animal.maternalGrandfatherId),
-            loadDisplayName(animal.paternalGrandmotherId),
-            loadDisplayName(animal.paternalGrandfatherId),
-            loadDisplayName(animal.maternalGreatGrandmotherMaternalId),
-            loadDisplayName(animal.maternalGreatGrandfatherMaternalId),
-            loadDisplayName(animal.maternalGreatGrandmotherPaternalId),
-            loadDisplayName(animal.maternalGreatGrandfatherPaternalId),
-            loadDisplayName(animal.paternalGreatGrandmotherMaternalId),
-            loadDisplayName(animal.paternalGreatGrandfatherMaternalId),
-            loadDisplayName(animal.paternalGreatGrandmotherPaternalId),
-            loadDisplayName(animal.paternalGreatGrandfatherPaternalId)
+            loadDisplayName(animal.maternal_grandmother_id),
+            loadDisplayName(animal.maternal_grandfather_id),
+            loadDisplayName(animal.paternal_grandmother_id),
+            loadDisplayName(animal.paternal_grandfather_id),
+            loadDisplayName(animal.maternal_great_grandmother_maternal_id),
+            loadDisplayName(animal.maternal_great_grandfather_maternal_id),
+            loadDisplayName(animal.maternal_great_grandmother_paternal_id),
+            loadDisplayName(animal.maternal_great_grandfather_paternal_id),
+            loadDisplayName(animal.paternal_great_grandmother_maternal_id),
+            loadDisplayName(animal.paternal_great_grandfather_maternal_id),
+            loadDisplayName(animal.paternal_great_grandmother_paternal_id),
+            loadDisplayName(animal.paternal_great_grandfather_paternal_id)
           ]);
 
           const newFormData = {

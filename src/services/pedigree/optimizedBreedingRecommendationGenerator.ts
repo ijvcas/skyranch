@@ -254,13 +254,13 @@ export class OptimizedBreedingRecommendationGenerator {
 
     // Check grandparent relationships for deeper analysis
     const maleGrandparents = [
-      male.maternalGrandmotherId, male.maternalGrandfatherId,
-      male.paternalGrandmotherId, male.paternalGrandfatherId
+      male.maternal_grandmother_id, male.maternal_grandfather_id,
+      male.paternal_grandmother_id, male.paternal_grandfather_id
     ].filter(Boolean);
 
     const femaleGrandparents = [
-      female.maternalGrandmotherId, female.maternalGrandfatherId,
-      female.paternalGrandmotherId, female.paternalGrandfatherId
+      female.maternal_grandmother_id, female.maternal_grandfather_id,
+      female.paternal_grandmother_id, female.paternal_grandfather_id
     ].filter(Boolean);
 
     const commonGrandparents = maleGrandparents.filter(gp => femaleGrandparents.includes(gp!));

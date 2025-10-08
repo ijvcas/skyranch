@@ -81,10 +81,10 @@ const DataImportExport: React.FC<DataImportExportProps> = ({ onImportComplete })
           healthStatus: animalData.healthStatus,
           notes: animalData.notes,
           image: animalData.image || null,
-          maternalGrandmotherId: animalData.maternalGrandmotherId || '',
-          maternalGrandfatherId: animalData.maternalGrandfatherId || '',
-          paternalGrandmotherId: animalData.paternalGrandmotherId || '',
-          paternalGrandfatherId: animalData.paternalGrandfatherId || '',
+          maternal_grandmother_id: animalData.maternal_grandmother_id || '',
+          maternal_grandfather_id: animalData.maternal_grandfather_id || '',
+          paternal_grandmother_id: animalData.paternal_grandmother_id || '',
+          paternal_grandfather_id: animalData.paternal_grandfather_id || '',
         });
       }
 

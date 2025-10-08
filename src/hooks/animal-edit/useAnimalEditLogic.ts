@@ -33,18 +33,18 @@ export const useAnimalEditLogic = () => {
     // Pedigree data
     motherId: '',
     fatherId: '',
-    maternalGrandmotherId: '',
-    maternalGrandfatherId: '',
-    paternalGrandmotherId: '',
-    paternalGrandfatherId: '',
-    maternalGreatGrandmotherMaternalId: '',
-    maternalGreatGrandfatherMaternalId: '',
-    maternalGreatGrandmotherPaternalId: '',
-    maternalGreatGrandfatherPaternalId: '',
-    paternalGreatGrandmotherMaternalId: '',
-    paternalGreatGrandfatherMaternalId: '',
-    paternalGreatGrandmotherPaternalId: '',
-    paternalGreatGrandfatherPaternalId: ''
+    maternal_grandmother_id: '',
+    maternal_grandfather_id: '',
+    paternal_grandmother_id: '',
+    paternal_grandfather_id: '',
+    maternal_great_grandmother_maternal_id: '',
+    maternal_great_grandfather_maternal_id: '',
+    maternal_great_grandmother_paternal_id: '',
+    maternal_great_grandfather_paternal_id: '',
+    paternal_great_grandmother_maternal_id: '',
+    paternal_great_grandfather_maternal_id: '',
+    paternal_great_grandmother_paternal_id: '',
+    paternal_great_grandfather_paternal_id: ''
   });
 
   const { getNameOnly, getDisplayName, animalNamesMap } = useAnimalNames();
@@ -94,18 +94,18 @@ export const useAnimalEditLogic = () => {
         causeOfDeath: animal.causeOfDeath || '',
         motherId: animal.motherId || '',
         fatherId: animal.fatherId || '',
-        maternalGrandmotherId: animal.maternalGrandmotherId || '',
-        maternalGrandfatherId: animal.maternalGrandfatherId || '',
-        paternalGrandmotherId: animal.paternalGrandmotherId || '',
-        paternalGrandfatherId: animal.paternalGrandfatherId || '',
-        maternalGreatGrandmotherMaternalId: animal.maternalGreatGrandmotherMaternalId || '',
-        maternalGreatGrandfatherMaternalId: animal.maternalGreatGrandfatherMaternalId || '',
-        maternalGreatGrandmotherPaternalId: animal.maternalGreatGrandmotherPaternalId || '',
-        maternalGreatGrandfatherPaternalId: animal.maternalGreatGrandfatherPaternalId || '',
-        paternalGreatGrandmotherMaternalId: animal.paternalGreatGrandmotherMaternalId || '',
-        paternalGreatGrandfatherMaternalId: animal.paternalGreatGrandfatherMaternalId || '',
-        paternalGreatGrandmotherPaternalId: animal.paternalGreatGrandmotherPaternalId || '',
-        paternalGreatGrandfatherPaternalId: animal.paternalGreatGrandfatherPaternalId || ''
+        maternal_grandmother_id: animal.maternal_grandmother_id || '',
+        maternal_grandfather_id: animal.maternal_grandfather_id || '',
+        paternal_grandmother_id: animal.paternal_grandmother_id || '',
+        paternal_grandfather_id: animal.paternal_grandfather_id || '',
+        maternal_great_grandmother_maternal_id: animal.maternal_great_grandmother_maternal_id || '',
+        maternal_great_grandfather_maternal_id: animal.maternal_great_grandfather_maternal_id || '',
+        maternal_great_grandmother_paternal_id: animal.maternal_great_grandmother_paternal_id || '',
+        maternal_great_grandfather_paternal_id: animal.maternal_great_grandfather_paternal_id || '',
+        paternal_great_grandmother_maternal_id: animal.paternal_great_grandmother_maternal_id || '',
+        paternal_great_grandfather_maternal_id: animal.paternal_great_grandfather_maternal_id || '',
+        paternal_great_grandmother_paternal_id: animal.paternal_great_grandmother_paternal_id || '',
+        paternal_great_grandfather_paternal_id: animal.paternal_great_grandfather_paternal_id || ''
       };
       
       console.log('🔄 Initial formData set with lifecycleStatus:', newFormData.lifecycleStatus);

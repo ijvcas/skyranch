@@ -7,18 +7,18 @@ export const addAnimal = async (animal: Omit<Animal, 'id'>): Promise<boolean> =>
   console.log('🔄 Adding animal with parent data:', {
     motherId: animal.motherId,
     fatherId: animal.fatherId,
-    maternalGrandmotherId: animal.maternalGrandmotherId,
-    maternalGrandfatherId: animal.maternalGrandfatherId,
-    paternalGrandmotherId: animal.paternalGrandmotherId,
-    paternalGrandfatherId: animal.paternalGrandfatherId,
-    maternalGreatGrandmotherMaternalId: animal.maternalGreatGrandmotherMaternalId,
-    maternalGreatGrandfatherMaternalId: animal.maternalGreatGrandfatherMaternalId,
-    maternalGreatGrandmotherPaternalId: animal.maternalGreatGrandmotherPaternalId,
-    maternalGreatGrandfatherPaternalId: animal.maternalGreatGrandfatherPaternalId,
-    paternalGreatGrandmotherMaternalId: animal.paternalGreatGrandmotherMaternalId,
-    paternalGreatGrandfatherMaternalId: animal.paternalGreatGrandfatherMaternalId,
-    paternalGreatGrandmotherPaternalId: animal.paternalGreatGrandmotherPaternalId,
-    paternalGreatGrandfatherPaternalId: animal.paternalGreatGrandfatherPaternalId
+    maternal_grandmother_id: animal.maternal_grandmother_id,
+    maternal_grandfather_id: animal.maternal_grandfather_id,
+    paternal_grandmother_id: animal.paternal_grandmother_id,
+    paternal_grandfather_id: animal.paternal_grandfather_id,
+    maternal_great_grandmother_maternal_id: animal.maternal_great_grandmother_maternal_id,
+    maternal_great_grandfather_maternal_id: animal.maternal_great_grandfather_maternal_id,
+    maternal_great_grandmother_paternal_id: animal.maternal_great_grandmother_paternal_id,
+    maternal_great_grandfather_paternal_id: animal.maternal_great_grandfather_paternal_id,
+    paternal_great_grandmother_maternal_id: animal.paternal_great_grandmother_maternal_id,
+    paternal_great_grandfather_maternal_id: animal.paternal_great_grandfather_maternal_id,
+    paternal_great_grandmother_paternal_id: animal.paternal_great_grandmother_paternal_id,
+    paternal_great_grandfather_paternal_id: animal.paternal_great_grandfather_paternal_id
   });
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -47,18 +47,18 @@ export const addAnimal = async (animal: Omit<Animal, 'id'>): Promise<boolean> =>
   ] = await Promise.all([
     processParentId(animal.motherId),
     processParentId(animal.fatherId),
-    processParentId(animal.maternalGrandmotherId),
-    processParentId(animal.maternalGrandfatherId),
-    processParentId(animal.paternalGrandmotherId),
-    processParentId(animal.paternalGrandfatherId),
-    processParentId(animal.maternalGreatGrandmotherMaternalId),
-    processParentId(animal.maternalGreatGrandfatherMaternalId),
-    processParentId(animal.maternalGreatGrandmotherPaternalId),
-    processParentId(animal.maternalGreatGrandfatherPaternalId),
-    processParentId(animal.paternalGreatGrandmotherMaternalId),
-    processParentId(animal.paternalGreatGrandfatherMaternalId),
-    processParentId(animal.paternalGreatGrandmotherPaternalId),
-    processParentId(animal.paternalGreatGrandfatherPaternalId)
+    processParentId(animal.maternal_grandmother_id),
+    processParentId(animal.maternal_grandfather_id),
+    processParentId(animal.paternal_grandmother_id),
+    processParentId(animal.paternal_grandfather_id),
+    processParentId(animal.maternal_great_grandmother_maternal_id),
+    processParentId(animal.maternal_great_grandfather_maternal_id),
+    processParentId(animal.maternal_great_grandmother_paternal_id),
+    processParentId(animal.maternal_great_grandfather_paternal_id),
+    processParentId(animal.paternal_great_grandmother_maternal_id),
+    processParentId(animal.paternal_great_grandfather_maternal_id),
+    processParentId(animal.paternal_great_grandmother_paternal_id),
+    processParentId(animal.paternal_great_grandfather_paternal_id)
   ]);
 
   console.log('🔄 Processed all ancestor IDs:', {
@@ -115,51 +115,51 @@ export const updateAnimal = async (id: string, animal: Omit<Animal, 'id'>): Prom
   console.log('🔄 Updating animal with parent data:', {
     motherId: animal.motherId,
     fatherId: animal.fatherId,
-    maternalGrandmotherId: animal.maternalGrandmotherId,
-    maternalGrandfatherId: animal.maternalGrandfatherId,
-    paternalGrandmotherId: animal.paternalGrandmotherId,
-    paternalGrandfatherId: animal.paternalGrandfatherId,
-    maternalGreatGrandmotherMaternalId: animal.maternalGreatGrandmotherMaternalId,
-    maternalGreatGrandfatherMaternalId: animal.maternalGreatGrandfatherMaternalId,
-    maternalGreatGrandmotherPaternalId: animal.maternalGreatGrandmotherPaternalId,
-    maternalGreatGrandfatherPaternalId: animal.maternalGreatGrandfatherPaternalId,
-    paternalGreatGrandmotherMaternalId: animal.paternalGreatGrandmotherMaternalId,
-    paternalGreatGrandfatherMaternalId: animal.paternalGreatGrandfatherMaternalId,
-    paternalGreatGrandmotherPaternalId: animal.paternalGreatGrandmotherPaternalId,
-    paternalGreatGrandfatherPaternalId: animal.paternalGreatGrandfatherPaternalId
+    maternal_grandmother_id: animal.maternal_grandmother_id,
+    maternal_grandfather_id: animal.maternal_grandfather_id,
+    paternal_grandmother_id: animal.paternal_grandmother_id,
+    paternal_grandfather_id: animal.paternal_grandfather_id,
+    maternal_great_grandmother_maternal_id: animal.maternal_great_grandmother_maternal_id,
+    maternal_great_grandfather_maternal_id: animal.maternal_great_grandfather_maternal_id,
+    maternal_great_grandmother_paternal_id: animal.maternal_great_grandmother_paternal_id,
+    maternal_great_grandfather_paternal_id: animal.maternal_great_grandfather_paternal_id,
+    paternal_great_grandmother_maternal_id: animal.paternal_great_grandmother_maternal_id,
+    paternal_great_grandfather_maternal_id: animal.paternal_great_grandfather_maternal_id,
+    paternal_great_grandmother_paternal_id: animal.paternal_great_grandmother_paternal_id,
+    paternal_great_grandfather_paternal_id: animal.paternal_great_grandfather_paternal_id
   });
 
   // Process all parent and ancestor IDs concurrently for better performance
   const [
     motherId, 
     fatherId, 
-    maternalGrandmotherId, 
-    maternalGrandfatherId, 
-    paternalGrandmotherId, 
-    paternalGrandfatherId,
-    maternalGreatGrandmotherMaternalId,
-    maternalGreatGrandfatherMaternalId,
-    maternalGreatGrandmotherPaternalId,
-    maternalGreatGrandfatherPaternalId,
-    paternalGreatGrandmotherMaternalId,
-    paternalGreatGrandfatherMaternalId,
-    paternalGreatGrandmotherPaternalId,
-    paternalGreatGrandfatherPaternalId
+    maternal_grandmother_id, 
+    maternal_grandfather_id, 
+    paternal_grandmother_id, 
+    paternal_grandfather_id,
+    maternal_great_grandmother_maternal_id,
+    maternal_great_grandfather_maternal_id,
+    maternal_great_grandmother_paternal_id,
+    maternal_great_grandfather_paternal_id,
+    paternal_great_grandmother_maternal_id,
+    paternal_great_grandfather_maternal_id,
+    paternal_great_grandmother_paternal_id,
+    paternal_great_grandfather_paternal_id
   ] = await Promise.all([
     processParentId(animal.motherId),
     processParentId(animal.fatherId),
-    processParentId(animal.maternalGrandmotherId),
-    processParentId(animal.maternalGrandfatherId),
-    processParentId(animal.paternalGrandmotherId),
-    processParentId(animal.paternalGrandfatherId),
-    processParentId(animal.maternalGreatGrandmotherMaternalId),
-    processParentId(animal.maternalGreatGrandfatherMaternalId),
-    processParentId(animal.maternalGreatGrandmotherPaternalId),
-    processParentId(animal.maternalGreatGrandfatherPaternalId),
-    processParentId(animal.paternalGreatGrandmotherMaternalId),
-    processParentId(animal.paternalGreatGrandfatherMaternalId),
-    processParentId(animal.paternalGreatGrandmotherPaternalId),
-    processParentId(animal.paternalGreatGrandfatherPaternalId)
+    processParentId(animal.maternal_grandmother_id),
+    processParentId(animal.maternal_grandfather_id),
+    processParentId(animal.paternal_grandmother_id),
+    processParentId(animal.paternal_grandfather_id),
+    processParentId(animal.maternal_great_grandmother_maternal_id),
+    processParentId(animal.maternal_great_grandfather_maternal_id),
+    processParentId(animal.maternal_great_grandmother_paternal_id),
+    processParentId(animal.maternal_great_grandfather_paternal_id),
+    processParentId(animal.paternal_great_grandmother_maternal_id),
+    processParentId(animal.paternal_great_grandfather_maternal_id),
+    processParentId(animal.paternal_great_grandmother_paternal_id),
+    processParentId(animal.paternal_great_grandfather_paternal_id)
   ]);
 
   console.log('🔄 Processed all ancestor IDs for update:', {
