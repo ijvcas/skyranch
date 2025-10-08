@@ -33,12 +33,18 @@ export const useAIChat = () => {
   const sendMessage = async (message: string, file?: File) => {
     try {
       setIsLoading(true);
+      console.log('📤 Sending message:', message.substring(0, 50) + '...');
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
+      if (!user) {
+        console.error('❌ No authenticated user');
+        throw new Error('No authenticated user');
+      }
+      console.log('✅ User authenticated:', user.id);
 
       // Save user message to history
+      console.log('💾 Saving user message to chat_history...');
       const { data: userMessage, error: saveError } = await supabase
         .from('chat_history')
         .insert([{
@@ -50,7 +56,16 @@ export const useAIChat = () => {
         .select()
         .single();
 
-      if (saveError) throw saveError;
+      if (saveError) {
+        console.error('❌ Error saving user message:', saveError);
+        toast({
+          title: 'Error guardando mensaje',
+          description: saveError.message,
+          variant: 'destructive',
+        });
+        throw saveError;
+      }
+      console.log('✅ User message saved:', userMessage.id);
 
       // Invalidate to show user message immediately
       queryClient.invalidateQueries({ queryKey: ['chat-history'] });
@@ -94,10 +109,12 @@ export const useAIChat = () => {
       }
 
       if (aiResponse?.error) {
+        console.error('❌ AI returned error:', aiResponse.error);
         throw new Error(aiResponse.error);
       }
 
       // Save assistant response to history
+      console.log('💾 Saving assistant response to chat_history...');
       const { error: assistantError } = await supabase
         .from('chat_history')
         .insert([{
@@ -107,10 +124,24 @@ export const useAIChat = () => {
           metadata: aiResponse.metadata || {},
         }]);
 
-      if (assistantError) throw assistantError;
+      if (assistantError) {
+        console.error('❌ Error saving assistant message:', assistantError);
+        toast({
+          title: 'Error guardando respuesta',
+          description: assistantError.message,
+          variant: 'destructive',
+        });
+        throw assistantError;
+      }
+      console.log('✅ Assistant response saved');
 
       // Refresh chat history
       queryClient.invalidateQueries({ queryKey: ['chat-history'] });
+      
+      toast({
+        title: 'Mensaje enviado',
+        description: 'La respuesta de IA ha sido guardada',
+      });
 
     } catch (error: any) {
       console.error('Error sending message:', error);

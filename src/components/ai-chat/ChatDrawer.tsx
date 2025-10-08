@@ -120,32 +120,57 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
       if (!lastAssistantMessage?.metadata?.pedigreeData) {
         toast({
           title: 'No hay datos de pedigree',
-          description: 'No se encontraron datos de pedigree para guardar',
+          description: 'No se encontraron datos de pedigree en el chat',
           variant: 'destructive',
         });
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('save-external-pedigree', {
-        body: {
-          pedigreeData: lastAssistantMessage.metadata.pedigreeData,
-          documentUrl: lastAssistantMessage.metadata.documentUrl || null,
-        },
-      });
+      const pedigreeData = lastAssistantMessage.metadata.pedigreeData;
+      
+      // Check if animal already exists
+      const { data: existingAnimals } = await supabase
+        .from('animals')
+        .select('id, name')
+        .ilike('name', pedigreeData.animalName)
+        .limit(1);
+      
+      if (existingAnimals && existingAnimals.length > 0) {
+        // Update existing animal
+        const { data, error } = await supabase.functions.invoke('update-animal-pedigree', {
+          body: {
+            animalId: existingAnimals[0].id,
+            pedigreeData: pedigreeData,
+          },
+        });
 
-      if (error) {
-        throw new Error(error.message);
+        if (error) throw new Error(error.message);
+
+        toast({
+          title: 'Pedigrí actualizado',
+          description: data.message,
+        });
+      } else {
+        // Create new animal
+        const { data, error } = await supabase.functions.invoke('save-external-pedigree', {
+          body: {
+            pedigreeData: pedigreeData,
+            documentUrl: lastAssistantMessage.metadata.documentUrl || null,
+          },
+        });
+
+        if (error) throw new Error(error.message);
+
+        toast({
+          title: 'Animal guardado',
+          description: `${data.animal.name} ha sido añadido a la base de datos`,
+        });
       }
-
-      toast({
-        title: 'Animal guardado',
-        description: `${data.animal.name} ha sido añadido a la base de datos`,
-      });
     } catch (error: any) {
       console.error('Error saving to database:', error);
       toast({
         title: 'Error',
-        description: error.message || 'No se pudo guardar el animal',
+        description: error.message || 'No se pudo procesar el pedigrí',
         variant: 'destructive',
       });
     } finally {

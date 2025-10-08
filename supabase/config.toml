@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.save-external-pedigree]
 verify_jwt = true
+
+[functions.update-animal-pedigree]
+verify_jwt = true

@@ -116,6 +116,48 @@ serve(async (req) => {
       const pedigreeResult = await pedigreeResponse.json();
       pedigreeData = pedigreeResult.extractedData;
       console.log('✅ Pedigree extracted:', pedigreeData);
+      
+      // AUTO-UPDATE: Check if animal exists in database by name
+      if (pedigreeData?.animalName) {
+        console.log('🔍 Checking if animal exists:', pedigreeData.animalName);
+        
+        const { data: existingAnimal } = await supabase
+          .from('animals')
+          .select('id, name')
+          .eq('user_id', user.id)
+          .ilike('name', pedigreeData.animalName)
+          .maybeSingle();
+        
+        if (existingAnimal) {
+          console.log('✅ Found existing animal, auto-updating pedigree:', existingAnimal.name);
+          
+          // Call update-animal-pedigree function
+          const updateResponse = await fetch(`${supabaseUrl}/functions/v1/update-animal-pedigree`, {
+            method: 'POST',
+            headers: {
+              Authorization: authHeader,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              animalId: existingAnimal.id,
+              pedigreeData: pedigreeData
+            }),
+          });
+          
+          if (updateResponse.ok) {
+            const updateResult = await updateResponse.json();
+            console.log('✅ Pedigree auto-updated:', updateResult);
+            
+            // Add metadata to return to frontend
+            pedigreeData._autoUpdated = true;
+            pedigreeData._updateResult = updateResult;
+          } else {
+            console.warn('⚠️ Could not auto-update pedigree');
+          }
+        } else {
+          console.log('ℹ️ Animal not found in database, treating as external');
+        }
+      }
     }
 
     // Get AI settings
@@ -328,8 +370,26 @@ ${contextData.farmAnimals.map((a: any) =>
 **IMPORTANTE:** Esta información de la base de datos de Skyranch está disponible para análisis de consanguinidad, cruces genéticos, y cualquier consulta sobre los animales del rancho.`;
     }
 
-    // Special handling for pedigree analysis with deterministic inbreeding results
-    if (pedigreeData && contextData.inbreedingAnalysis) {
+    // Special handling for auto-updated pedigree
+    if (pedigreeData?._autoUpdated && pedigreeData?._updateResult) {
+      const result = pedigreeData._updateResult;
+      const stats = result.pedigreeStats;
+      
+      enhancedSystemPrompt += `\n\n✅ PEDIGRÍ ACTUALIZADO AUTOMÁTICAMENTE:
+
+He actualizado el pedigrí de **${result.animal.name}** en Skyranch:
+- ${stats.parents} padres
+- ${stats.grandparents} abuelos
+- ${stats.greatGrandparents} bisabuelos
+
+**TU TAREA:**
+1. Confirma al usuario que el pedigrí de ${result.animal.name} ha sido actualizado
+2. Resume brevemente los ancestros principales que se agregaron
+3. Menciona que puede ver el árbol genealógico completo en la página del animal
+4. Sé breve y conversacional
+
+**NO** hagas análisis de consanguinidad ni sugerencias de compra. Solo confirma la actualización del pedigrí.`;
+    } else if (pedigreeData && contextData.inbreedingAnalysis) {
       const analysis = contextData.inbreedingAnalysis;
       
       enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE CONSANGUINIDAD COMPLETADO:
