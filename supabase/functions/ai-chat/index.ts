@@ -131,28 +131,44 @@ serve(async (req) => {
         if (existingAnimal) {
           console.log('✅ Found existing animal, auto-updating pedigree:', existingAnimal.name);
           
-          // Call update-animal-pedigree function
-          const updateResponse = await fetch(`${supabaseUrl}/functions/v1/update-animal-pedigree`, {
-            method: 'POST',
-            headers: {
-              Authorization: authHeader,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              animalId: existingAnimal.id,
-              pedigreeData: pedigreeData
-            }),
-          });
-          
-          if (updateResponse.ok) {
-            const updateResult = await updateResponse.json();
-            console.log('✅ Pedigree auto-updated:', updateResult);
+          try {
+            // Call update-animal-pedigree function
+            const updateResponse = await fetch(`${supabaseUrl}/functions/v1/update-animal-pedigree`, {
+              method: 'POST',
+              headers: {
+                Authorization: authHeader,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                animalId: existingAnimal.id,
+                pedigreeData: pedigreeData
+              }),
+            });
             
-            // Add metadata to return to frontend
-            pedigreeData._autoUpdated = true;
-            pedigreeData._updateResult = updateResult;
-          } else {
-            console.warn('⚠️ Could not auto-update pedigree');
+            const updateResult = await updateResponse.json();
+            
+            if (updateResponse.ok && updateResult.success) {
+              console.log('✅ Pedigree auto-updated successfully:', updateResult.message);
+              
+              // Add metadata to return to frontend
+              pedigreeData._autoUpdated = true;
+              pedigreeData._updateResult = updateResult;
+            } else {
+              // Update failed - log detailed error
+              console.error('❌ Pedigree update failed:', {
+                status: updateResponse.status,
+                error: updateResult.error,
+                details: updateResult.details
+              });
+              
+              // Mark as failed and include error info
+              pedigreeData._autoUpdated = false;
+              pedigreeData._updateError = updateResult.error || 'Error al actualizar el pedigrí en la base de datos';
+            }
+          } catch (updateError: any) {
+            console.error('❌ Exception calling update-animal-pedigree:', updateError);
+            pedigreeData._autoUpdated = false;
+            pedigreeData._updateError = `Error de conexión al actualizar pedigrí: ${updateError.message}`;
           }
         } else {
           console.log('ℹ️ Animal not found in database, treating as external');
@@ -391,6 +407,20 @@ He actualizado el pedigrí de **${result.animal.name}** en Skyranch:
 4. Sé breve y conversacional
 
 **NO** hagas análisis de consanguinidad ni sugerencias de compra. Solo confirma la actualización del pedigrí.`;
+    } else if (pedigreeData?._autoUpdated === false && pedigreeData?._updateError) {
+      // Update failed - inform AI to notify user
+      enhancedSystemPrompt += `\n\n⚠️ ERROR AL ACTUALIZAR PEDIGRÍ:
+
+La extracción del pedigrí fue exitosa, pero hubo un error al guardar los datos en la base de datos:
+**Error:** ${pedigreeData._updateError}
+
+**TU TAREA:**
+1. Informa al usuario que se extrajo el pedigrí de ${pedigreeData.animalName} correctamente
+2. Explica que hubo un problema técnico al guardar los datos automáticamente
+3. Sugiere que el usuario intente de nuevo o contacte al administrador
+4. Sé amable y tranquilizador
+
+**NO** proceder con análisis de consanguinidad hasta que el pedigrí esté guardado.`;
     } else if (pedigreeData && contextData.inbreedingAnalysis) {
       const analysis = contextData.inbreedingAnalysis;
       
