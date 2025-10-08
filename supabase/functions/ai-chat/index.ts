@@ -156,6 +156,39 @@ Siempre que menciones el clima, incluye recomendaciones prácticas y accionables
     // If pedigree was analyzed, add it to context
     if (pedigreeData) {
       contextData.uploadedPedigree = pedigreeData;
+      
+      // Call analyze-inbreeding function for deterministic calculation
+      console.log('🧬 Calling analyze-inbreeding function...');
+      try {
+        const inbreedingResponse = await fetch(
+          `${supabaseUrl}/functions/v1/analyze-inbreeding`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: authHeader,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              pedigreeData: pedigreeData,
+              userId: user.id
+            })
+          }
+        );
+
+        if (inbreedingResponse.ok) {
+          const inbreedingAnalysis = await inbreedingResponse.json();
+          contextData.inbreedingAnalysis = inbreedingAnalysis;
+          console.log('✅ Inbreeding analysis completed:', {
+            compatible: inbreedingAnalysis.compatiblePairings?.length || 0,
+            cautious: inbreedingAnalysis.cautiousPairings?.length || 0,
+            avoid: inbreedingAnalysis.avoidPairings?.length || 0
+          });
+        } else {
+          console.warn('⚠️ Inbreeding analysis failed, continuing without it');
+        }
+      } catch (inbreedingError: any) {
+        console.warn('⚠️ Could not perform inbreeding analysis:', inbreedingError.message);
+      }
     }
 
     if (enableAnimalContext) {
@@ -295,8 +328,58 @@ ${contextData.farmAnimals.map((a: any) =>
 **IMPORTANTE:** Esta información de la base de datos de Skyranch está disponible para análisis de consanguinidad, cruces genéticos, y cualquier consulta sobre los animales del rancho.`;
     }
 
-    // Special handling for pedigree analysis
-    if (pedigreeData) {
+    // Special handling for pedigree analysis with deterministic inbreeding results
+    if (pedigreeData && contextData.inbreedingAnalysis) {
+      const analysis = contextData.inbreedingAnalysis;
+      
+      enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE CONSANGUINIDAD COMPLETADO:
+
+Se ha analizado el pedigrí de **${pedigreeData.animalName}** contra ${analysis.totalAnimalsAnalyzed} animales de Skyranch usando el coeficiente de Wright.
+
+**RESULTADOS DETERMINÍSTICOS:**
+`;
+
+      if (analysis.compatiblePairings && analysis.compatiblePairings.length > 0) {
+        enhancedSystemPrompt += `\n✅ **EMPAREJAMIENTOS COMPATIBLES** (< 3% consanguinidad):
+${analysis.compatiblePairings.slice(0, 5).map((p: any) => 
+  `- **${p.animalName}** (${p.animalTag}): ${p.inbreedingPercentage.toFixed(2)}% consanguinidad
+   ${p.commonAncestors.length > 0 ? `Ancestros comunes: ${p.commonAncestors.map((a: any) => a.name).join(', ')}` : 'Sin ancestros comunes detectados'}
+   ${p.recommendation}`
+).join('\n\n')}
+${analysis.compatiblePairings.length > 5 ? `\n... y ${analysis.compatiblePairings.length - 5} más` : ''}
+`;
+      }
+
+      if (analysis.cautiousPairings && analysis.cautiousPairings.length > 0) {
+        enhancedSystemPrompt += `\n⚠️ **EMPAREJAMIENTOS PRECAUTORIOS** (3-8% consanguinidad):
+${analysis.cautiousPairings.map((p: any) => 
+  `- **${p.animalName}** (${p.animalTag}): ${p.inbreedingPercentage.toFixed(2)}%
+   Ancestros comunes: ${p.commonAncestors.map((a: any) => a.name).join(', ')}
+   ${p.recommendation}`
+).join('\n\n')}
+`;
+      }
+
+      if (analysis.avoidPairings && analysis.avoidPairings.length > 0) {
+        enhancedSystemPrompt += `\n🚫 **EMPAREJAMIENTOS A EVITAR** (> 8% consanguinidad):
+${analysis.avoidPairings.map((p: any) => 
+  `- **${p.animalName}** (${p.animalTag}): ${p.inbreedingPercentage.toFixed(2)}%
+   Ancestros comunes: ${p.commonAncestors.map((a: any) => a.name).join(', ')}
+   ${p.recommendation}`
+).join('\n\n')}
+`;
+      }
+
+      enhancedSystemPrompt += `\n**TU TAREA:**
+1. Presenta estos resultados en español conversacional y claro
+2. Explica qué significa cada nivel de consanguinidad para la salud de las crías
+3. Da una recomendación clara: ¿COMPRAR o NO COMPRAR ${pedigreeData.animalName}?
+4. Justifica tu recomendación basándote en los datos de consanguinidad
+5. Pregunta: "¿Quieres que guarde ${pedigreeData.animalName} en la base de datos de Skyranch?"
+
+**IMPORTANTE:** Estos son cálculos determinísticos usando el coeficiente de Wright. NO inventes porcentajes ni análisis. USA SOLO los datos proporcionados arriba.`;
+    } else if (pedigreeData) {
+      // Fallback if inbreeding analysis failed
       enhancedSystemPrompt += `\n\n🧬 ANÁLISIS DE PEDIGRÍ:
 
 El pedigrí de ${pedigreeData.animalName || 'este animal'} (${pedigreeData.breed || 'raza no especificada'}) ha sido procesado.
@@ -309,11 +392,9 @@ Abuelos maternos: ${pedigreeData.maternalGrandfather}, ${pedigreeData.maternalGr
 
 **TU TAREA:**
 1. Resume los datos del pedigrí claramente
-2. Compara con los ${contextData.farmAnimals?.length || 0} animales de Skyranch
-3. Busca coincidencias en nombres de padres/abuelos
-4. Si hay antepasados comunes, calcula el coeficiente de consanguinidad estimado
-5. Da recomendación clara: ¿comprar o no comprar? Explica por qué
-6. Pregunta: "¿Quieres que guarde ${pedigreeData.animalName} en Skyranch?"
+2. Menciona que el análisis de consanguinidad automático no está disponible temporalmente
+3. Recomienda revisión manual comparando con los animales de Skyranch
+4. Pregunta: "¿Quieres que guarde ${pedigreeData.animalName} en Skyranch para análisis futuro?"
 
 Sé conciso y directo.`;
     }

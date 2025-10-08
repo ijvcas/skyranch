@@ -35,3 +35,9 @@ verify_jwt = true
 
 [functions.analyze-pedigree]
 verify_jwt = true
+
+[functions.analyze-inbreeding]
+verify_jwt = true
+
+[functions.save-external-pedigree]
+verify_jwt = true

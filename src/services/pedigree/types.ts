@@ -37,3 +37,64 @@ export interface BreedingRecommendation {
   recommendations: string[];
   reasoning: string[];
 }
+
+// Extended types for 5-generation pedigree analysis
+export interface ExtendedPedigreeData {
+  animalName: string;
+  gender?: string;
+  breed?: string;
+  species?: string;
+  birthDate?: string;
+  registrationNumber?: string;
+  father?: { name: string; details?: any };
+  mother?: { name: string; details?: any };
+  paternalGrandfather?: string;
+  paternalGrandmother?: string;
+  maternalGrandfather?: string;
+  maternalGrandmother?: string;
+  paternalGreatGrandparents?: string[];
+  maternalGreatGrandparents?: string[];
+  generation4?: {
+    paternalLine: string[];
+    maternalLine: string[];
+  };
+  generation5?: {
+    paternalLine: string[];
+    maternalLine: string[];
+  };
+}
+
+export interface CommonAncestor {
+  name: string;
+  generationLevel: number;
+  relationshipPath: string;
+}
+
+export interface PairingRecommendation {
+  animalId: string;
+  animalName: string;
+  animalTag: string;
+  animalBreed: string;
+  animalGender: string;
+  inbreedingCoefficient: number;
+  inbreedingPercentage: number;
+  riskLevel: 'low' | 'moderate' | 'high';
+  commonAncestors: CommonAncestor[];
+  recommendation: string;
+  detailedPath: string;
+  purchaseAdvice: 'recommended' | 'consider_carefully' | 'not_recommended';
+}
+
+export interface KinshipAnalysis {
+  externalAnimal: {
+    name: string;
+    breed: string;
+    gender: string;
+    birthDate: string;
+  };
+  compatiblePairings: PairingRecommendation[];
+  cautiousPairings: PairingRecommendation[];
+  avoidPairings: PairingRecommendation[];
+  totalAnimalsAnalyzed: number;
+  analysisDate: string;
+}

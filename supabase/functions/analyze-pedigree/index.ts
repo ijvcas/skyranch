@@ -130,24 +130,50 @@ async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKe
           content: [
             {
               type: 'text',
-              text: `Analyze this pedigree document and extract ALL available information in a structured JSON format. 
-              
-              Extract:
-              - animalName: The name of the main animal in the pedigree
-              - gender: male or female (if visible)
-              - breed: The breed of the animal
-              - birthDate: Date of birth if available (format: YYYY-MM-DD)
-              - registrationNumber: Any registration or identification numbers
-              - father: Object with name and any available details
-              - mother: Object with name and any available details
-              - paternalGrandfather: Name if available
-              - paternalGrandmother: Name if available
-              - maternalGrandfather: Name if available
-              - maternalGrandmother: Name if available
-              - paternalGreatGrandparents: Array of names if available (4 animals)
-              - maternalGreatGrandparents: Array of names if available (4 animals)
-              
-              Return ONLY valid JSON. If information is not available, use null.`
+              text: `Analyze this pedigree document and extract ALL available information up to 5 GENERATIONS.
+
+Extract in this exact JSON structure:
+{
+  "animalName": "Name of the main animal",
+  "gender": "male" or "female",
+  "breed": "Breed name",
+  "species": "equino", "ovino", "caninos", etc.
+  "birthDate": "YYYY-MM-DD or YYYY",
+  "registrationNumber": "Any registration/UELN numbers",
+  
+  "father": {"name": "...", "details": {}},
+  "mother": {"name": "...", "details": {}},
+  
+  "paternalGrandfather": "Name",
+  "paternalGrandmother": "Name",
+  "maternalGrandfather": "Name",
+  "maternalGrandmother": "Name",
+  
+  "paternalGreatGrandparents": [
+    "paternal grandfather's father",
+    "paternal grandfather's mother",
+    "paternal grandmother's father",
+    "paternal grandmother's mother"
+  ],
+  "maternalGreatGrandparents": [
+    "maternal grandfather's father",
+    "maternal grandfather's mother",
+    "maternal grandmother's father",
+    "maternal grandmother's mother"
+  ],
+  
+  "generation4": {
+    "paternalLine": ["8 names from paternal side"],
+    "maternalLine": ["8 names from maternal side"]
+  },
+  
+  "generation5": {
+    "paternalLine": ["16 names from paternal side"],
+    "maternalLine": ["16 names from maternal side"]
+  }
+}
+
+Extract ALL names visible in the pedigree document. Use null for missing information. Return ONLY valid JSON.`
             },
             {
               type: 'image_url',
