@@ -28,19 +28,24 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
       if (!animal.pedigree_pdf_url) return;
 
       try {
-        const { data, error } = await supabase.storage
-          .from('pedigree-documents')
-          .createSignedUrl(animal.pedigree_pdf_url, 3600);
+      const { data, error } = await supabase.storage
+        .from('pedigree-documents')
+        .createSignedUrl(animal.pedigree_pdf_url, 3600);
 
-        if (error) {
-          console.error('Error creating signed URL:', error);
-          setPdfLoadError(true);
-          return;
-        }
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        setPdfLoadError(true);
+        return;
+      }
 
-        if (data?.signedUrl) {
-          setPdfUrl(data.signedUrl);
-        }
+      if (data?.signedUrl) {
+        // Convert relative path to absolute URL
+        const baseUrl = 'https://ahwhtxygyzoadsmdrwwg.supabase.co/storage/v1';
+        const absoluteUrl = data.signedUrl.startsWith('http') 
+          ? data.signedUrl 
+          : `${baseUrl}${data.signedUrl}`;
+        setPdfUrl(absoluteUrl);
+      }
       } catch (error) {
         console.error('Error loading PDF:', error);
         setPdfLoadError(true);
@@ -105,7 +110,11 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
       if (urlError) throw urlError;
       if (!signedUrlData?.signedUrl) throw new Error('No se pudo generar la URL del PDF');
 
-      const signedUrl = signedUrlData.signedUrl;
+      // Convert relative path to absolute URL
+      const baseUrl = 'https://ahwhtxygyzoadsmdrwwg.supabase.co/storage/v1';
+      const signedUrl = signedUrlData.signedUrl.startsWith('http') 
+        ? signedUrlData.signedUrl 
+        : `${baseUrl}${signedUrlData.signedUrl}`;
 
       // Update animal record with the file path (not the signed URL)
       const { error: updateError } = await supabase
