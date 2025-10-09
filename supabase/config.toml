@@ -42,9 +42,6 @@ verify_jwt = true
 [functions.save-external-pedigree]
 verify_jwt = true
 
-[functions.update-animal-pedigree]
-verify_jwt = true
-
 [functions.test-pedigree-extraction]
 verify_jwt = true
 

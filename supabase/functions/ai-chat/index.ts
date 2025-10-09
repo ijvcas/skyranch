@@ -142,14 +142,51 @@ serve(async (req) => {
       pedigreeData = pedigreeResult.extractedData;
       console.log('✅ Pedigree extracted:', pedigreeData);
       
-      // Check if animal exists in database (with wildcard for partial match)
-      console.log(`[${new Date().toISOString()}] 🔍 Checking if animal exists: ${pedigreeData.animalName}`);
-      const { data: existingAnimal } = await supabase
+      // Smart animal lookup with multiple strategies
+      console.log(`🔍 Looking for animal: "${pedigreeData.animalName}"`);
+
+      // Try 1: Name wildcard match
+      let { data: existingAnimal } = await supabase
         .from('animals')
-        .select('id, name')
+        .select('id, name, tag')
         .eq('user_id', user.id)
         .ilike('name', `%${pedigreeData.animalName}%`)
         .maybeSingle();
+
+      // Try 2: Tag/registration number match
+      if (!existingAnimal && pedigreeData.registrationNumber) {
+        const { data: tagMatch } = await supabase
+          .from('animals')
+          .select('id, name, tag')
+          .eq('user_id', user.id)
+          .ilike('tag', `%${pedigreeData.registrationNumber}%`)
+          .maybeSingle();
+        if (tagMatch) {
+          console.log(`✅ Matched by tag: ${tagMatch.tag}`);
+          existingAnimal = tagMatch;
+        }
+      }
+
+      // Try 3: Parenthetical name extraction (LUNA (NIOUININON) → NIOUININON)
+      if (!existingAnimal) {
+        const { data: allAnimals } = await supabase
+          .from('animals')
+          .select('id, name, tag')
+          .eq('user_id', user.id);
+        
+        for (const animal of allAnimals || []) {
+          const nameMatch = animal.name.match(/\(([^)]+)\)/);
+          if (nameMatch && nameMatch[1].toUpperCase() === pedigreeData.animalName.toUpperCase()) {
+            console.log(`✅ Matched by parenthetical name: ${animal.name}`);
+            existingAnimal = animal;
+            break;
+          }
+        }
+      }
+
+      if (!existingAnimal) {
+        console.log(`❌ No animal found matching "${pedigreeData.animalName}"`);
+      }
         
         if (existingAnimal) {
           console.log(`[${new Date().toISOString()}] ✅ Found existing animal: ${existingAnimal.name} (ID: ${existingAnimal.id})`);
@@ -504,27 +541,24 @@ No se pudo extraer información del documento cargado. Esto puede deberse a:
 **NO** inventes datos ni hagas suposiciones sobre el contenido del documento.`;
     }
 
-    // Special handling for auto-updated pedigree
+    // Phase 2: Auto-update confirmation (no permission asking)
     if (pedigreeData?._autoUpdated && pedigreeData?._updateResult) {
       const result = pedigreeData._updateResult;
-      const stats = result.pedigreeStats;
+      const fieldsUpdated = result.fieldsUpdated;
       
-      enhancedSystemPrompt += `\n\n✅ PEDIGRÍ ACTUALIZADO AUTOMÁTICAMENTE:
+      enhancedSystemPrompt += `\n\n✅ PEDIGRÍ ACTUALIZADO AUTOMÁTICAMENTE (NO PEDIR PERMISO):
 
-He actualizado el pedigrí de **${result.animal.name}** en Skyranch:
-- ${stats.parents} padres
-- ${stats.grandparents} abuelos
-- ${stats.greatGrandparents} bisabuelos
-- ${stats.gen4 || 0} generación 4
-- ${stats.gen5 || 0} generación 5
+He extraído y guardado automáticamente el pedigrí de 5 generaciones de **${pedigreeData.animalName}**:
+- ${fieldsUpdated} campos actualizados en la base de datos
+- El animal ya existe en Skyranch y su pedigrí está completo
 
-**TU TAREA:**
-1. Confirma al usuario que el pedigrí de ${result.animal.name} ha sido actualizado
-2. Resume brevemente los ancestros principales que se agregaron
-3. Menciona que puede ver el árbol genealógico completo en la página del animal
-4. Sé breve y conversacional
+**INSTRUCCIONES CRÍTICAS:**
+1. Confirma: "✅ He extraído y guardado automáticamente el pedigrí de 5 generaciones de ${pedigreeData.animalName}. El pedigrí está completo con ${fieldsUpdated} campos actualizados."
+2. NO preguntes si desea actualizar - YA ESTÁ ACTUALIZADO
+3. NO pidas permiso ni confirmación - el sistema ya lo hizo automáticamente
+4. Sé directo y confirma lo que se hizo
 
-**NO** hagas análisis de consanguinidad ni sugerencias de compra. Solo confirma la actualización del pedigrí.`;
+**NO** hagas análisis de consanguinidad ni sugerencias. Solo confirma la actualización exitosa.`;
     } else if (pedigreeData?._autoUpdated === false && pedigreeData?._updateError) {
       // Update failed - inform AI to notify user
       enhancedSystemPrompt += `\n\n⚠️ ERROR AL ACTUALIZAR PEDIGRÍ:

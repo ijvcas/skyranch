@@ -5,14 +5,17 @@ import PedigreeGrandparents from '@/components/pedigree/PedigreeGrandparents';
 import PedigreeParents from '@/components/pedigree/PedigreeParents';
 import PedigreeGeneration4 from '@/components/pedigree/PedigreeGeneration4';
 import PedigreeGeneration5 from '@/components/pedigree/PedigreeGeneration5';
+import { PedigreeUploadSection } from './PedigreeUploadSection';
 
 interface PedigreeFormProps {
   formData: any;
   onInputChange: (field: string, value: string) => void;
   disabled?: boolean;
+  animalId?: string;
+  animalName?: string;
 }
 
-const PedigreeForm = ({ formData, onInputChange, disabled = false }: PedigreeFormProps) => {
+const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, animalName }: PedigreeFormProps) => {
 
   return (
     <Card className="shadow-lg">
@@ -20,6 +23,13 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false }: PedigreeFor
         <CardTitle className="text-xl text-gray-900">Información de Pedigrí (5 Generaciones)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
+        {animalId && animalName && (
+          <PedigreeUploadSection 
+            animalId={animalId}
+            animalName={animalName}
+            onUploadSuccess={() => window.location.reload()}
+          />
+        )}
         <PedigreeGeneration5 
           formData={formData} 
           onInputChange={onInputChange} 

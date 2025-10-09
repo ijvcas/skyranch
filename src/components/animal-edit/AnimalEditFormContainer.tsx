@@ -53,7 +53,9 @@ const AnimalEditFormContainer: React.FC<AnimalEditFormContainerProps> = ({
           
           <PedigreeForm 
             formData={formData} 
-            onInputChange={onInputChange} 
+            onInputChange={onInputChange}
+            animalId={animal.id}
+            animalName={animal.name}
           />
           
           <PhotoUploadForm 
