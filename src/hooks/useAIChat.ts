@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface ChatMessage {
   id: string;
@@ -61,11 +61,7 @@ export const useAIChat = () => {
 
       if (saveError) {
         console.error('❌ Error saving user message:', saveError);
-        toast({
-          title: 'Error guardando mensaje',
-          description: saveError.message,
-          variant: 'destructive',
-        });
+        toast.error(`Error guardando mensaje: ${saveError.message}`);
         throw saveError;
       }
       console.log('✅ User message saved:', userMessage.id);
@@ -141,11 +137,7 @@ export const useAIChat = () => {
 
       if (assistantError) {
         console.error('❌ Error saving assistant message:', assistantError);
-        toast({
-          title: 'Error guardando respuesta',
-          description: assistantError.message,
-          variant: 'destructive',
-        });
+        toast.error(`Error guardando respuesta: ${assistantError.message}`);
         throw assistantError;
       }
       console.log('✅ Assistant response saved');
@@ -153,29 +145,18 @@ export const useAIChat = () => {
       // Refresh chat history
       queryClient.invalidateQueries({ queryKey: ['chat-history'] });
       
-      toast({
-        title: 'Mensaje enviado',
-        description: 'La respuesta de IA ha sido guardada',
-      });
+      toast.success('Mensaje enviado - La respuesta de IA ha sido guardada');
 
     } catch (error: any) {
       // Handle timeout specifically
       if (error.name === 'AbortError') {
         console.error('❌ Request timeout');
-        toast({
-          title: 'Tiempo de espera agotado',
-          description: 'La solicitud tardó demasiado. Por favor, intenta de nuevo.',
-          variant: 'destructive',
-        });
+        toast.error('Tiempo de espera agotado - La solicitud tardó demasiado. Por favor, intenta de nuevo.');
         return;
       }
 
       console.error('Error sending message:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo enviar el mensaje',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'No se pudo enviar el mensaje');
     } finally {
       // Clean up timeout
       if (timeoutId) {
@@ -196,17 +177,10 @@ export const useAIChat = () => {
 
       queryClient.invalidateQueries({ queryKey: ['chat-history'] });
       
-      toast({
-        title: 'Historial borrado',
-        description: 'Se ha eliminado el historial de chat',
-      });
+      toast.success('Historial borrado - Se ha eliminado el historial de chat');
     } catch (error: any) {
       console.error('Error clearing history:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo borrar el historial',
-        variant: 'destructive',
-      });
+      toast.error('No se pudo borrar el historial');
     }
   };
 
