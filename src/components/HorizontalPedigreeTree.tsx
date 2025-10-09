@@ -11,13 +11,20 @@ interface HorizontalPedigreeTreeProps {
   animal: Animal;
 }
 
-// Clean up UELN artifacts from names
+// Clean up UELN artifacts from names but keep registration numbers
 const cleanName = (name: string | undefined | null): string => {
   if (!name) return '—';
-  return name
-    .replace(/Nº\s*UELN\s*\d+[A-Z]*/gi, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  
+  // Remove UELN prefix
+  let cleaned = name.replace(/UELN\s*\d+[A-Z]/g, '').trim();
+  
+  // If the name contains a comma followed by a year (e.g., "OBERON BDP, 1980"), keep everything
+  // This preserves registration numbers with years
+  
+  // If empty after cleaning, return dash
+  if (!cleaned) return '—';
+  
+  return cleaned;
 };
 
 // Get pedigree completeness stats
@@ -220,8 +227,30 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
               <AncestorBox name={animal.maternal_great_grandmother_maternal_id} label="Bisabuela MM" gender="female" generation={3} />
             </div>
 
-            {/* Generation 4-5 placeholder */}
-            {stats.gen4 + stats.gen5 === 0 && (
+            {/* Generation 4 - Great-Great-Grandparents */}
+            {stats.gen4 > 0 ? (
+              <div className="flex flex-col gap-1 justify-center">
+                <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 4</div>
+                {/* Paternal side */}
+                <AncestorBox name={animal.gen4_paternal_ggggf_p} label="GGGGF P" gender="male" generation={4} />
+                <AncestorBox name={animal.gen4_paternal_ggggm_p} label="GGGGM P" gender="female" generation={4} />
+                <AncestorBox name={animal.gen4_paternal_gggmf_p} label="GGGMF P" gender="male" generation={4} />
+                <AncestorBox name={animal.gen4_paternal_gggmm_p} label="GGGMM P" gender="female" generation={4} />
+                <AncestorBox name={animal.gen4_paternal_ggfgf_p} label="GGFGF P" gender="male" generation={4} />
+                <AncestorBox name={animal.gen4_paternal_ggfgm_p} label="GGFGM P" gender="female" generation={4} />
+                <AncestorBox name={animal.gen4_paternal_ggmgf_p} label="GGMGF P" gender="male" generation={4} />
+                <AncestorBox name={animal.gen4_paternal_ggmgm_p} label="GGMGM P" gender="female" generation={4} />
+                {/* Maternal side */}
+                <AncestorBox name={animal.gen4_maternal_ggggf_m} label="GGGGF M" gender="male" generation={4} />
+                <AncestorBox name={animal.gen4_maternal_ggggm_m} label="GGGGM M" gender="female" generation={4} />
+                <AncestorBox name={animal.gen4_maternal_gggmf_m} label="GGGMF M" gender="male" generation={4} />
+                <AncestorBox name={animal.gen4_maternal_gggmm_m} label="GGGMM M" gender="female" generation={4} />
+                <AncestorBox name={animal.gen4_maternal_ggfgf_m} label="GGFGF M" gender="male" generation={4} />
+                <AncestorBox name={animal.gen4_maternal_ggfgm_m} label="GGFGM M" gender="female" generation={4} />
+                <AncestorBox name={animal.gen4_maternal_ggmgf_m} label="GGMGF M" gender="male" generation={4} />
+                <AncestorBox name={animal.gen4_maternal_ggmgm_m} label="GGMGM M" gender="female" generation={4} />
+              </div>
+            ) : (
               <>
                 <label htmlFor="pedigree-upload-view" className="cursor-pointer">
                   <div className="flex items-center justify-center px-8 py-4 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
@@ -249,6 +278,45 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
                   disabled={uploading}
                 />
               </>
+            )}
+
+            {/* Generation 5 */}
+            {stats.gen5 > 0 && (
+              <div className="flex flex-col gap-0.5 justify-center">
+                <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 5</div>
+                <AncestorBox name={animal.gen5_paternal_1} label="G5-P1" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_2} label="G5-P2" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_3} label="G5-P3" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_4} label="G5-P4" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_5} label="G5-P5" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_6} label="G5-P6" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_7} label="G5-P7" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_8} label="G5-P8" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_9} label="G5-P9" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_10} label="G5-P10" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_11} label="G5-P11" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_12} label="G5-P12" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_13} label="G5-P13" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_14} label="G5-P14" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_15} label="G5-P15" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_paternal_16} label="G5-P16" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_1} label="G5-M1" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_2} label="G5-M2" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_3} label="G5-M3" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_4} label="G5-M4" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_5} label="G5-M5" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_6} label="G5-M6" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_7} label="G5-M7" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_8} label="G5-M8" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_9} label="G5-M9" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_10} label="G5-M10" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_11} label="G5-M11" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_12} label="G5-M12" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_13} label="G5-M13" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_14} label="G5-M14" gender="female" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_15} label="G5-M15" gender="male" generation={5} />
+                <AncestorBox name={animal.gen5_maternal_16} label="G5-M16" gender="female" generation={5} />
+              </div>
             )}
           </div>
         </div>
