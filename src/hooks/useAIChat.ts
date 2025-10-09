@@ -30,7 +30,7 @@ export const useAIChat = () => {
     },
   });
 
-  const sendMessage = async (message: string, file?: File) => {
+  const sendMessage = async (message: string, file?: File, animalId?: string) => {
     const abortController = new AbortController();
     let timeoutId: NodeJS.Timeout | null = null;
 
@@ -85,6 +85,9 @@ export const useAIChat = () => {
         const formData = new FormData();
         formData.append('message', message);
         formData.append('file', file);
+        if (animalId) {
+          formData.append('animalId', animalId);
+        }
 
         const { data: { session } } = await supabase.auth.getSession();
         

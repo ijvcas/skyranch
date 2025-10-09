@@ -114,7 +114,8 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
     try {
       await sendMessage(
         `Aquí está el pedigrí de 5 generaciones de ${animal.name}. Extrae toda la información y actualiza automáticamente su ficha.`,
-        file
+        file,
+        animal.id
       );
       toast.success('Pedigrí procesado correctamente. Recargando página...');
       setTimeout(() => window.location.reload(), 2000);
