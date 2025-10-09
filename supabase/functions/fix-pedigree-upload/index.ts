@@ -17,7 +17,16 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    if (!openaiApiKey) {
+      console.error('❌ OPENAI_API_KEY not configured');
+      return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Get authorization header to identify user
     const authHeader = req.headers.get('Authorization');
@@ -64,32 +73,15 @@ serve(async (req) => {
 
     console.log(`📄 Processing file: ${file.name} Type: ${file.type}`);
 
-    // Call analyze-pedigree function - Convert file to base64
+    // Convert file to base64 using SAFE method
+    console.log('🔄 Converting file to base64...');
     const fileBytes = await file.arrayBuffer();
-    const fileBase64 = btoa(
-      Array.from(new Uint8Array(fileBytes))
-        .map(byte => String.fromCharCode(byte))
-        .join('')
-    );
+    const fileBase64 = arrayBufferToBase64(fileBytes);
+    console.log(`✅ Base64 conversion complete: ${fileBase64.length} chars`);
 
-    console.log('🔍 Calling analyze-pedigree function...');
-    
-    const { data: pedigreeData, error: analyzeError } = await supabase.functions.invoke('analyze-pedigree', {
-      body: {
-        file: fileBase64,
-        fileName: file.name,
-        fileType: file.type,
-      },
-    });
-
-    if (analyzeError) {
-      console.error('❌ Analyze pedigree error:', analyzeError);
-      return new Response(JSON.stringify({ error: 'Failed to analyze pedigree' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
+    // Call OpenAI directly
+    console.log('🤖 Calling OpenAI Vision API...');
+    const pedigreeData = await extractWithVisionAPI(fileBase64, file.type, openaiApiKey);
     console.log('✅ Pedigree extracted:', JSON.stringify(pedigreeData, null, 2));
 
     if (!pedigreeData || !pedigreeData.animalName) {
@@ -348,3 +340,140 @@ serve(async (req) => {
     });
   }
 });
+
+// SAFE base64 conversion - processes byte by byte to avoid crashes
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  
+  return btoa(binary);
+}
+
+// Direct OpenAI extraction
+async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKey: string) {
+  console.log('🤖 Calling OpenAI API with model: gpt-4o');
+  
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Analyze this pedigree document and extract ALL available information up to 5 GENERATIONS.
+
+Extract in this exact JSON structure:
+{
+  "animalName": "Name of the main animal",
+  "gender": "male" or "female",
+  "breed": "Breed name",
+  "species": "equino", "ovino", "caninos", etc.
+  "birthDate": "YYYY-MM-DD or YYYY",
+  "registrationNumber": "Any registration/UELN numbers",
+  
+  "father": {"name": "...", "details": {}},
+  "mother": {"name": "...", "details": {}},
+  
+  "paternalGrandfather": "Name",
+  "paternalGrandmother": "Name",
+  "maternalGrandfather": "Name",
+  "maternalGrandmother": "Name",
+  
+  "paternalGreatGrandparents": [
+    "paternal grandfather's father",
+    "paternal grandfather's mother",
+    "paternal grandmother's father",
+    "paternal grandmother's mother"
+  ],
+  "maternalGreatGrandparents": [
+    "maternal grandfather's father",
+    "maternal grandfather's mother",
+    "maternal grandmother's father",
+    "maternal grandmother's mother"
+  ],
+  
+  "generation4": {
+    "paternalLine": ["8 names from paternal side"],
+    "maternalLine": ["8 names from maternal side"]
+  },
+  
+  "generation5": {
+    "paternalLine": ["16 names from paternal side"],
+    "maternalLine": ["16 names from maternal side"]
+  }
+}
+
+Extract ALL names visible in the pedigree document. Use null for missing information. Return ONLY valid JSON.`
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimeType};base64,${base64Image}`
+              }
+            }
+          ]
+        }
+      ],
+      max_tokens: 1000,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('❌ OpenAI API error:', errorText);
+    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content;
+  
+  if (!content) {
+    throw new Error('No content in AI response');
+  }
+
+  console.log('📝 Raw AI response length:', content.length);
+
+  // Extract JSON from response
+  let jsonStr = content.trim();
+  if (jsonStr.startsWith('```json')) {
+    jsonStr = jsonStr.slice(7);
+  }
+  if (jsonStr.startsWith('```')) {
+    jsonStr = jsonStr.slice(3);
+  }
+  if (jsonStr.endsWith('```')) {
+    jsonStr = jsonStr.slice(0, -3);
+  }
+  
+  console.log('🔍 Attempting to parse JSON...');
+  
+  try {
+    return JSON.parse(jsonStr.trim());
+  } catch (parseError) {
+    console.error('❌ JSON parse error:', parseError);
+    console.error('🔧 Attempting to clean JSON...');
+    
+    let cleaned = jsonStr.trim()
+      .replace(/,(\s*[}\]])/g, '$1')
+      .replace(/^[^{]*({)/, '$1');
+    
+    try {
+      return JSON.parse(cleaned);
+    } catch (secondError) {
+      console.error('❌ Failed to parse even after cleaning:', secondError);
+      throw new Error(`Unable to parse pedigree data: ${secondError.message}`);
+    }
+  }
+}
