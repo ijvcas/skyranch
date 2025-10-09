@@ -19,22 +19,20 @@ export const PedigreeUploadSection = ({ animalId, animalName, onUploadSuccess }:
 
     setUploading(true);
     try {
-      console.log('📤 [PedigreeUploadSection] Starting upload for animal:', animalName, 'ID:', animalId);
+      console.log('📤 Starting upload for:', animalName, 'ID:', animalId);
       
-      // Use the dedicated fix-pedigree-upload function
       const formData = new FormData();
-      formData.append('message', `Pedigrí de 5 generaciones de ${animalName}`);
       formData.append('file', file);
-      formData.append('animalId', animalId); // Pass animal ID for direct lookup
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('No hay sesión activa');
       }
 
-      console.log('🔄 [PedigreeUploadSection] Calling fix-pedigree-upload...');
+      // Call edge function for extraction
+      console.log('🔄 Calling fix-pedigree-upload...');
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fix-pedigree-upload`,
+        `https://ahwhtxygyzoadsmdrwwg.supabase.co/functions/v1/fix-pedigree-upload`,
         {
           method: 'POST',
           headers: {
@@ -47,15 +45,78 @@ export const PedigreeUploadSection = ({ animalId, animalName, onUploadSuccess }:
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('❌ [PedigreeUploadSection] Upload error:', result);
+        console.error('❌ Upload error:', result);
         throw new Error(result.error || 'Error al procesar el pedigrí');
       }
 
-      console.log('✅ [PedigreeUploadSection] Upload success:', result);
-      toast.success(`Pedigrí actualizado: Gen4: ${result.updated.gen4}, Gen5: ${result.updated.gen5}`);
+      console.log('✅ Extraction success:', result);
+
+      // Build database update object
+      const updateData: any = {};
+      const pedigreeData = result.pedigreeData;
+
+      // Map Gen4 Paternal (8 ancestors)
+      if (pedigreeData?.generation4?.paternalLine) {
+        const patLine = pedigreeData.generation4.paternalLine;
+        updateData.gen4_paternal_ggggf_p = patLine[0] || null;
+        updateData.gen4_paternal_ggggm_p = patLine[1] || null;
+        updateData.gen4_paternal_gggmf_p = patLine[2] || null;
+        updateData.gen4_paternal_gggmm_p = patLine[3] || null;
+        updateData.gen4_paternal_ggfgf_p = patLine[4] || null;
+        updateData.gen4_paternal_ggfgm_p = patLine[5] || null;
+        updateData.gen4_paternal_ggmgf_p = patLine[6] || null;
+        updateData.gen4_paternal_ggmgm_p = patLine[7] || null;
+      }
+
+      // Map Gen4 Maternal (8 ancestors)
+      if (pedigreeData?.generation4?.maternalLine) {
+        const matLine = pedigreeData.generation4.maternalLine;
+        updateData.gen4_maternal_ggggf_m = matLine[0] || null;
+        updateData.gen4_maternal_ggggm_m = matLine[1] || null;
+        updateData.gen4_maternal_gggmf_m = matLine[2] || null;
+        updateData.gen4_maternal_gggmm_m = matLine[3] || null;
+        updateData.gen4_maternal_ggfgf_m = matLine[4] || null;
+        updateData.gen4_maternal_ggfgm_m = matLine[5] || null;
+        updateData.gen4_maternal_ggmgf_m = matLine[6] || null;
+        updateData.gen4_maternal_ggmgm_m = matLine[7] || null;
+      }
+
+      // Map Gen5 Paternal (16 ancestors)
+      if (pedigreeData?.generation5?.paternalLine) {
+        const patLine = pedigreeData.generation5.paternalLine;
+        for (let i = 0; i < 16 && i < patLine.length; i++) {
+          updateData[`gen5_paternal_${i + 1}`] = patLine[i] || null;
+        }
+      }
+
+      // Map Gen5 Maternal (16 ancestors)
+      if (pedigreeData?.generation5?.maternalLine) {
+        const matLine = pedigreeData.generation5.maternalLine;
+        for (let i = 0; i < 16 && i < matLine.length; i++) {
+          updateData[`gen5_maternal_${i + 1}`] = matLine[i] || null;
+        }
+      }
+
+      // Update database
+      console.log('💾 Updating database with', Object.keys(updateData).length, 'fields');
+      const { error: updateError } = await supabase
+        .from('animals')
+        .update(updateData)
+        .eq('id', animalId);
+
+      if (updateError) {
+        console.error('❌ Database update failed:', updateError);
+        throw new Error('Error al guardar el pedigrí');
+      }
+
+      const gen4Count = Object.keys(updateData).filter(k => k.startsWith('gen4_')).length;
+      const gen5Count = Object.keys(updateData).filter(k => k.startsWith('gen5_')).length;
+
+      console.log('✅ Database updated: Gen4:', gen4Count, 'Gen5:', gen5Count);
+      toast.success(`Pedigrí actualizado: Gen4: ${gen4Count}, Gen5: ${gen5Count}`);
       onUploadSuccess?.();
     } catch (error) {
-      console.error('❌ [PedigreeUploadSection] Pedigree upload error:', error);
+      console.error('❌ Pedigree upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Error al procesar el pedigrí');
     } finally {
       setUploading(false);
