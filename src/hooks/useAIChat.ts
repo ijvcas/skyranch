@@ -81,17 +81,33 @@ export const useAIChat = () => {
       let aiResponse, aiError;
       
       if (file) {
-        // Use fix-pedigree-upload for file uploads with detailed logging
+        // Use fix-pedigree-upload for file uploads via direct fetch
         const formData = new FormData();
         formData.append('message', message);
         formData.append('file', file);
 
-        const response = await supabase.functions.invoke('fix-pedigree-upload', {
-          body: formData,
-        });
+        const { data: { session } } = await supabase.auth.getSession();
         
-        aiResponse = response.data;
-        aiError = response.error;
+        const response = await fetch(
+          `https://ahwhtxygyzoadsmdrwwg.supabase.co/functions/v1/fix-pedigree-upload`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+            },
+            body: formData,
+          }
+        );
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Edge function error:', errorText);
+          aiError = new Error(`Edge function failed: ${response.status}`);
+          aiResponse = null;
+        } else {
+          aiResponse = await response.json();
+          aiError = null;
+        }
       } else {
         // Regular JSON request
         const response = await supabase.functions.invoke('ai-chat', {
