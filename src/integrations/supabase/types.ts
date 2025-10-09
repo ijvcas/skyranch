@@ -281,6 +281,7 @@ export type Database = {
           paternal_great_grandfather_paternal_id: string | null
           paternal_great_grandmother_maternal_id: string | null
           paternal_great_grandmother_paternal_id: string | null
+          pedigree_pdf_url: string | null
           sale_id: string | null
           species: string
           tag: string
@@ -365,6 +366,7 @@ export type Database = {
           paternal_great_grandfather_paternal_id?: string | null
           paternal_great_grandmother_maternal_id?: string | null
           paternal_great_grandmother_paternal_id?: string | null
+          pedigree_pdf_url?: string | null
           sale_id?: string | null
           species: string
           tag: string
@@ -449,6 +451,7 @@ export type Database = {
           paternal_great_grandfather_paternal_id?: string | null
           paternal_great_grandmother_maternal_id?: string | null
           paternal_great_grandmother_paternal_id?: string | null
+          pedigree_pdf_url?: string | null
           sale_id?: string | null
           species?: string
           tag?: string
