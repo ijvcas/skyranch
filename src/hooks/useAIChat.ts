@@ -31,6 +31,9 @@ export const useAIChat = () => {
   });
 
   const sendMessage = async (message: string, file?: File) => {
+    const abortController = new AbortController();
+    let timeoutId: NodeJS.Timeout | null = null;
+
     try {
       setIsLoading(true);
       console.log('📤 Sending message:', message.substring(0, 50) + '...');
@@ -67,10 +70,16 @@ export const useAIChat = () => {
       }
       console.log('✅ User message saved:', userMessage.id);
 
-      // Invalidate to show user message immediately
+      // ✅ PHASE 2: Optimistic UI - Show user message immediately
       queryClient.invalidateQueries({ queryKey: ['chat-history'] });
 
-      // Call AI edge function
+      // Set 60-second timeout for AI response
+      timeoutId = setTimeout(() => {
+        console.warn('⏱️ Request timeout after 60 seconds');
+        abortController.abort();
+      }, 60000);
+
+      // Call AI edge function with timeout
       console.log('🚀 Calling AI chat function...');
       
       let aiResponse, aiError;
@@ -96,6 +105,12 @@ export const useAIChat = () => {
         
         aiResponse = response.data;
         aiError = response.error;
+      }
+
+      // Clear timeout on successful response
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
       }
 
       console.log('AI Response:', aiResponse);
@@ -144,6 +159,17 @@ export const useAIChat = () => {
       });
 
     } catch (error: any) {
+      // Handle timeout specifically
+      if (error.name === 'AbortError') {
+        console.error('❌ Request timeout');
+        toast({
+          title: 'Tiempo de espera agotado',
+          description: 'La solicitud tardó demasiado. Por favor, intenta de nuevo.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       console.error('Error sending message:', error);
       toast({
         title: 'Error',
@@ -151,6 +177,10 @@ export const useAIChat = () => {
         variant: 'destructive',
       });
     } finally {
+      // Clean up timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       setIsLoading(false);
     }
   };

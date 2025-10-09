@@ -1,240 +1,232 @@
 import React from 'react';
+import { Animal } from '@/stores/animalStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { Animal } from '@/stores/animalStore';
+import { AlertCircle, CheckCircle2, Upload } from 'lucide-react';
 
 interface HorizontalPedigreeTreeProps {
   animal: Animal;
 }
 
-const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal }) => {
-  // Helper to clean names by removing "Nº UELN" artifacts
-  const cleanName = (name: string | undefined): string => {
-    if (!name) return '';
-    return name.replace(/\s*Nº\s*UELN.*$/i, '').trim();
+// Clean up UELN artifacts from names
+const cleanName = (name: string | undefined | null): string => {
+  if (!name) return '—';
+  return name
+    .replace(/Nº\s*UELN\s*\d+[A-Z]*/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// Get pedigree completeness stats
+const getPedigreeStats = (animal: Animal) => {
+  const stats = {
+    gen0: animal.name ? 1 : 0,
+    gen1: [animal.fatherId, animal.motherId].filter(Boolean).length,
+    gen2: [
+      animal.paternal_grandfather_id,
+      animal.paternal_grandmother_id,
+      animal.maternal_grandfather_id,
+      animal.maternal_grandmother_id,
+    ].filter(Boolean).length,
+    gen3: [
+      animal.paternal_great_grandfather_paternal_id,
+      animal.paternal_great_grandmother_paternal_id,
+      animal.paternal_great_grandfather_maternal_id,
+      animal.paternal_great_grandmother_maternal_id,
+      animal.maternal_great_grandfather_paternal_id,
+      animal.maternal_great_grandmother_paternal_id,
+      animal.maternal_great_grandfather_maternal_id,
+      animal.maternal_great_grandmother_maternal_id,
+    ].filter(Boolean).length,
+    gen4: 0,
+    gen5: 0,
   };
 
-  // Helper to render an ancestor box
-  const AncestorBox = ({ 
-    name, 
-    label, 
-    gender 
-  }: { 
-    name: string | undefined; 
-    label: string; 
-    gender?: 'male' | 'female' 
-  }) => {
-    const cleanedName = cleanName(name);
-    const isEmpty = !cleanedName;
-    
-    return (
-      <div 
-        className={`
-          border rounded p-2 text-xs transition-all
-          ${isEmpty 
-            ? 'bg-muted/30 border-muted text-muted-foreground' 
-            : gender === 'male' 
-              ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' 
-              : gender === 'female'
-                ? 'bg-pink-50 border-pink-200 hover:bg-pink-100'
-                : 'bg-background border-border hover:bg-muted/50'
-          }
-        `}
-        title={name || 'Desconocido'}
-      >
-        <div className="font-medium truncate">
-          {isEmpty ? '—' : cleanedName}
-        </div>
-        <div className="text-[10px] text-muted-foreground mt-0.5">
-          {label}
-        </div>
+  // Count gen4 fields (16 total)
+  const gen4Fields = [
+    'gen4PaternalGgggfP', 'gen4PaternalGgggmP', 'gen4PaternalGggmfP', 'gen4PaternalGggmmP',
+    'gen4PaternalGgfgfP', 'gen4PaternalGgfgmP', 'gen4PaternalGgmgfP', 'gen4PaternalGgmgmP',
+    'gen4MaternalGgggfM', 'gen4MaternalGgggmM', 'gen4MaternalGggmfM', 'gen4MaternalGggmmM',
+    'gen4MaternalGgfgfM', 'gen4MaternalGgfgmM', 'gen4MaternalGgmgfM', 'gen4MaternalGgmgmM',
+  ];
+  
+  gen4Fields.forEach(field => {
+    if ((animal as any)[field]) stats.gen4++;
+  });
+
+  // Count gen5 fields (32 total)
+  for (let i = 1; i <= 16; i++) {
+    if ((animal as any)[`gen5Paternal${i}`]) stats.gen5++;
+    if ((animal as any)[`gen5Maternal${i}`]) stats.gen5++;
+  }
+
+  return stats;
+};
+
+const AncestorBox: React.FC<{
+  name: string | undefined | null;
+  label: string;
+  gender?: 'male' | 'female';
+  generation: number;
+}> = ({ name, label, gender, generation }) => {
+  const cleanedName = cleanName(name);
+  const isEmpty = cleanedName === '—';
+  
+  return (
+    <div className={`
+      flex flex-col items-center justify-center p-2 rounded border text-center min-w-[120px]
+      ${isEmpty ? 'border-dashed border-muted bg-muted/20' : 'border-border bg-card'}
+      ${gender === 'male' ? 'border-l-4 border-l-blue-500' : ''}
+      ${gender === 'female' ? 'border-l-4 border-l-pink-500' : ''}
+    `}>
+      <div className="text-xs text-muted-foreground mb-1">{label}</div>
+      <div className={`font-medium text-xs ${isEmpty ? 'text-muted-foreground italic' : 'text-foreground'}`}>
+        {cleanedName}
       </div>
-    );
-  };
+    </div>
+  );
+};
 
-  // Generation 5 (32 ancestors)
-  const gen5 = [
-    // Paternal line (16)
-    { name: animal.gen5_paternal_1, label: 'P1' },
-    { name: animal.gen5_paternal_2, label: 'P2' },
-    { name: animal.gen5_paternal_3, label: 'P3' },
-    { name: animal.gen5_paternal_4, label: 'P4' },
-    { name: animal.gen5_paternal_5, label: 'P5' },
-    { name: animal.gen5_paternal_6, label: 'P6' },
-    { name: animal.gen5_paternal_7, label: 'P7' },
-    { name: animal.gen5_paternal_8, label: 'P8' },
-    { name: animal.gen5_paternal_9, label: 'P9' },
-    { name: animal.gen5_paternal_10, label: 'P10' },
-    { name: animal.gen5_paternal_11, label: 'P11' },
-    { name: animal.gen5_paternal_12, label: 'P12' },
-    { name: animal.gen5_paternal_13, label: 'P13' },
-    { name: animal.gen5_paternal_14, label: 'P14' },
-    { name: animal.gen5_paternal_15, label: 'P15' },
-    { name: animal.gen5_paternal_16, label: 'P16' },
-    // Maternal line (16)
-    { name: animal.gen5_maternal_1, label: 'M1' },
-    { name: animal.gen5_maternal_2, label: 'M2' },
-    { name: animal.gen5_maternal_3, label: 'M3' },
-    { name: animal.gen5_maternal_4, label: 'M4' },
-    { name: animal.gen5_maternal_5, label: 'M5' },
-    { name: animal.gen5_maternal_6, label: 'M6' },
-    { name: animal.gen5_maternal_7, label: 'M7' },
-    { name: animal.gen5_maternal_8, label: 'M8' },
-    { name: animal.gen5_maternal_9, label: 'M9' },
-    { name: animal.gen5_maternal_10, label: 'M10' },
-    { name: animal.gen5_maternal_11, label: 'M11' },
-    { name: animal.gen5_maternal_12, label: 'M12' },
-    { name: animal.gen5_maternal_13, label: 'M13' },
-    { name: animal.gen5_maternal_14, label: 'M14' },
-    { name: animal.gen5_maternal_15, label: 'M15' },
-    { name: animal.gen5_maternal_16, label: 'M16' },
-  ];
-
-  // Generation 4 (16 ancestors)
-  const gen4 = [
-    // Paternal line (8)
-    { name: animal.gen4_paternal_ggggf_p, label: 'GGGGF-P', gender: 'male' as const },
-    { name: animal.gen4_paternal_ggggm_p, label: 'GGGGM-P', gender: 'female' as const },
-    { name: animal.gen4_paternal_gggmf_p, label: 'GGGMF-P', gender: 'male' as const },
-    { name: animal.gen4_paternal_gggmm_p, label: 'GGGMM-P', gender: 'female' as const },
-    { name: animal.gen4_paternal_ggfgf_p, label: 'GGFGF-P', gender: 'male' as const },
-    { name: animal.gen4_paternal_ggfgm_p, label: 'GGFGM-P', gender: 'female' as const },
-    { name: animal.gen4_paternal_ggmgf_p, label: 'GGMGF-P', gender: 'male' as const },
-    { name: animal.gen4_paternal_ggmgm_p, label: 'GGMGM-P', gender: 'female' as const },
-    // Maternal line (8)
-    { name: animal.gen4_maternal_ggggf_m, label: 'GGGGF-M', gender: 'male' as const },
-    { name: animal.gen4_maternal_ggggm_m, label: 'GGGGM-M', gender: 'female' as const },
-    { name: animal.gen4_maternal_gggmf_m, label: 'GGGMF-M', gender: 'male' as const },
-    { name: animal.gen4_maternal_gggmm_m, label: 'GGGMM-M', gender: 'female' as const },
-    { name: animal.gen4_maternal_ggfgf_m, label: 'GGFGF-M', gender: 'male' as const },
-    { name: animal.gen4_maternal_ggfgm_m, label: 'GGFGM-M', gender: 'female' as const },
-    { name: animal.gen4_maternal_ggmgf_m, label: 'GGMGF-M', gender: 'male' as const },
-    { name: animal.gen4_maternal_ggmgm_m, label: 'GGMGM-M', gender: 'female' as const },
-  ];
-
-  // Generation 3 (8 great-grandparents)
-  const gen3 = [
-    { name: animal.paternal_great_grandfather_paternal_id, label: 'Bisabuelo PP', gender: 'male' as const },
-    { name: animal.paternal_great_grandmother_paternal_id, label: 'Bisabuela PP', gender: 'female' as const },
-    { name: animal.paternal_great_grandfather_maternal_id, label: 'Bisabuelo PM', gender: 'male' as const },
-    { name: animal.paternal_great_grandmother_maternal_id, label: 'Bisabuela PM', gender: 'female' as const },
-    { name: animal.maternal_great_grandfather_paternal_id, label: 'Bisabuelo MP', gender: 'male' as const },
-    { name: animal.maternal_great_grandmother_paternal_id, label: 'Bisabuela MP', gender: 'female' as const },
-    { name: animal.maternal_great_grandfather_maternal_id, label: 'Bisabuelo MM', gender: 'male' as const },
-    { name: animal.maternal_great_grandmother_maternal_id, label: 'Bisabuela MM', gender: 'female' as const },
-  ];
-
-  // Generation 2 (4 grandparents)
-  const gen2 = [
-    { name: animal.paternal_grandfather_id, label: 'Abuelo Paterno', gender: 'male' as const },
-    { name: animal.paternal_grandmother_id, label: 'Abuela Paterna', gender: 'female' as const },
-    { name: animal.maternal_grandfather_id, label: 'Abuelo Materno', gender: 'male' as const },
-    { name: animal.maternal_grandmother_id, label: 'Abuela Materna', gender: 'female' as const },
-  ];
-
-  // Generation 1 (2 parents)
-  const gen1 = [
-    { name: animal.fatherId, label: 'Padre', gender: 'male' as const },
-    { name: animal.motherId, label: 'Madre', gender: 'female' as const },
-  ];
+const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal }) => {
+  const stats = getPedigreeStats(animal);
+  const totalKnown = stats.gen0 + stats.gen1 + stats.gen2 + stats.gen3 + stats.gen4 + stats.gen5;
+  const totalPossible = 1 + 2 + 4 + 8 + 16 + 32; // 63 total ancestors
+  const completeness = Math.round((totalKnown / totalPossible) * 100);
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">Árbol Genealógico (5 Generaciones)</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl">Árbol Genealógico (5 Generaciones)</CardTitle>
+          <div className="flex items-center gap-2">
+            <Badge variant={completeness > 80 ? 'default' : completeness > 50 ? 'secondary' : 'outline'}>
+              {completeness}% completo
+            </Badge>
+            {stats.gen4 + stats.gen5 === 0 && (
+              <Badge variant="outline" className="gap-1">
+                <Upload className="w-3 h-3" />
+                Sube pedigrí para Gen 4-5
+              </Badge>
+            )}
+          </div>
+        </div>
+        
+        {/* Generation summary */}
+        <div className="flex gap-2 mt-2 text-xs">
+          <div className="flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3 text-green-600" />
+            <span>Gen 0-1: {stats.gen0 + stats.gen1}/3</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {stats.gen2 === 4 ? (
+              <CheckCircle2 className="w-3 h-3 text-green-600" />
+            ) : (
+              <AlertCircle className="w-3 h-3 text-amber-600" />
+            )}
+            <span>Gen 2: {stats.gen2}/4</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {stats.gen3 === 8 ? (
+              <CheckCircle2 className="w-3 h-3 text-green-600" />
+            ) : (
+              <AlertCircle className="w-3 h-3 text-amber-600" />
+            )}
+            <span>Gen 3: {stats.gen3}/8</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {stats.gen4 > 0 ? (
+              <CheckCircle2 className="w-3 h-3 text-green-600" />
+            ) : (
+              <AlertCircle className="w-3 h-3 text-muted-foreground" />
+            )}
+            <span>Gen 4: {stats.gen4}/16</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {stats.gen5 > 0 ? (
+              <CheckCircle2 className="w-3 h-3 text-green-600" />
+            ) : (
+              <AlertCircle className="w-3 h-3 text-muted-foreground" />
+            )}
+            <span>Gen 5: {stats.gen5}/32</span>
+          </div>
+        </div>
       </CardHeader>
+      
       <CardContent>
         <div className="overflow-x-auto pb-4">
-          <div className="inline-flex gap-2 min-w-max">
-            {/* Current Animal (Gen 0) */}
-            <div className="flex items-center justify-center min-w-[140px]">
-              <Card className="shadow-md border-2 border-primary">
-                <CardContent className="p-3">
-                  <div className="text-center">
-                    <Badge variant="default" className="mb-2 text-[10px]">Animal</Badge>
-                    <div className="font-bold text-sm">{animal.name}</div>
-                    <div className="text-xs text-muted-foreground">#{animal.tag}</div>
+          <div className="flex gap-4 min-w-max">
+            {/* Current Animal - Generation 0 */}
+            <div className="flex flex-col justify-center">
+              <div className="bg-primary text-primary-foreground p-4 rounded-lg text-center min-w-[150px] shadow-lg">
+                <div className="text-sm font-semibold mb-1">Gen 0</div>
+                <div className="font-bold text-base">{cleanName(animal.name)}</div>
+                <div className="text-xs opacity-90 mt-1">
+                  {animal.gender === 'male' ? '♂ Macho' : animal.gender === 'female' ? '♀ Hembra' : ''}
+                </div>
+              </div>
+            </div>
+
+            {/* Parents - Generation 1 */}
+            <div className="flex flex-col gap-2 justify-center">
+              <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 1 - Padres</div>
+              <AncestorBox name={animal.fatherId} label="Padre" gender="male" generation={1} />
+              <AncestorBox name={animal.motherId} label="Madre" gender="female" generation={1} />
+            </div>
+
+            {/* Grandparents - Generation 2 */}
+            <div className="flex flex-col gap-2 justify-center">
+              <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 2 - Abuelos</div>
+              <AncestorBox name={animal.paternal_grandfather_id} label="Abuelo P" gender="male" generation={2} />
+              <AncestorBox name={animal.paternal_grandmother_id} label="Abuela P" gender="female" generation={2} />
+              <AncestorBox name={animal.maternal_grandfather_id} label="Abuelo M" gender="male" generation={2} />
+              <AncestorBox name={animal.maternal_grandmother_id} label="Abuela M" gender="female" generation={2} />
+            </div>
+
+            {/* Great-Grandparents - Generation 3 */}
+            <div className="flex flex-col gap-2 justify-center">
+              <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 3 - Bisabuelos</div>
+              <AncestorBox name={animal.paternal_great_grandfather_paternal_id} label="Bisabuelo PP" gender="male" generation={3} />
+              <AncestorBox name={animal.paternal_great_grandmother_paternal_id} label="Bisabuela PP" gender="female" generation={3} />
+              <AncestorBox name={animal.paternal_great_grandfather_maternal_id} label="Bisabuelo PM" gender="male" generation={3} />
+              <AncestorBox name={animal.paternal_great_grandmother_maternal_id} label="Bisabuela PM" gender="female" generation={3} />
+              <AncestorBox name={animal.maternal_great_grandfather_paternal_id} label="Bisabuelo MP" gender="male" generation={3} />
+              <AncestorBox name={animal.maternal_great_grandmother_paternal_id} label="Bisabuela MP" gender="female" generation={3} />
+              <AncestorBox name={animal.maternal_great_grandfather_maternal_id} label="Bisabuelo MM" gender="male" generation={3} />
+              <AncestorBox name={animal.maternal_great_grandmother_maternal_id} label="Bisabuela MM" gender="female" generation={3} />
+            </div>
+
+            {/* Generation 4-5 placeholder */}
+            {stats.gen4 + stats.gen5 === 0 && (
+              <div className="flex items-center justify-center px-8 py-4 border-2 border-dashed border-muted rounded-lg bg-muted/10">
+                <div className="text-center">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Generaciones 4 y 5
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Connection Line */}
-            <div className="flex items-center">
-              <div className="w-6 h-0.5 bg-border"></div>
-            </div>
-
-            {/* Generation 1 (Parents) */}
-            <div className="flex flex-col justify-center gap-16 min-w-[120px]">
-              {gen1.map((ancestor, idx) => (
-                <AncestorBox key={idx} {...ancestor} />
-              ))}
-            </div>
-
-            {/* Connection Line */}
-            <div className="flex items-center">
-              <div className="w-6 h-0.5 bg-border"></div>
-            </div>
-
-            {/* Generation 2 (Grandparents) */}
-            <div className="flex flex-col justify-center gap-6 min-w-[120px]">
-              {gen2.map((ancestor, idx) => (
-                <AncestorBox key={idx} {...ancestor} />
-              ))}
-            </div>
-
-            {/* Connection Line */}
-            <div className="flex items-center">
-              <div className="w-6 h-0.5 bg-border"></div>
-            </div>
-
-            {/* Generation 3 (Great-Grandparents) */}
-            <div className="flex flex-col justify-center gap-2 min-w-[120px]">
-              {gen3.map((ancestor, idx) => (
-                <AncestorBox key={idx} {...ancestor} />
-              ))}
-            </div>
-
-            {/* Connection Line */}
-            <div className="flex items-center">
-              <div className="w-6 h-0.5 bg-border"></div>
-            </div>
-
-            {/* Generation 4 (Great-Great-Grandparents) */}
-            <div className="flex flex-col justify-center gap-1 min-w-[110px]">
-              {gen4.map((ancestor, idx) => (
-                <AncestorBox key={idx} {...ancestor} />
-              ))}
-            </div>
-
-            {/* Connection Line */}
-            <div className="flex items-center">
-              <div className="w-6 h-0.5 bg-border"></div>
-            </div>
-
-            {/* Generation 5 (5th Generation) */}
-            <div className="flex flex-col justify-center gap-0.5 min-w-[100px]">
-              {gen5.map((ancestor, idx) => (
-                <AncestorBox key={idx} name={ancestor.name} label={ancestor.label} />
-              ))}
-            </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Sube un documento de pedigrí para completar
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Legend */}
-        <div className="mt-6 p-3 bg-muted/50 rounded-lg">
-          <h4 className="text-sm font-medium mb-2">Leyenda:</h4>
-          <div className="text-xs text-muted-foreground space-y-1">
-            <div className="flex gap-4">
-              <span className="inline-block w-4 h-4 bg-blue-100 border border-blue-200 rounded"></span>
-              <span>Línea Paterna (Machos)</span>
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded border border-l-4 border-l-blue-500 bg-card"></div>
+              <span>Macho (♂)</span>
             </div>
-            <div className="flex gap-4">
-              <span className="inline-block w-4 h-4 bg-pink-100 border border-pink-200 rounded"></span>
-              <span>Línea Materna (Hembras)</span>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded border border-l-4 border-l-pink-500 bg-card"></div>
+              <span>Hembra (♀)</span>
             </div>
-            <div><strong>P:</strong> Paternal, <strong>M:</strong> Maternal</div>
-            <div><strong>GG:</strong> Great-Great (Tatarabuelo), <strong>GGG:</strong> 4ta Gen, <strong>GGGG:</strong> 5ta Gen</div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded border-dashed border bg-muted/20"></div>
+              <span>Sin información</span>
+            </div>
           </div>
         </div>
       </CardContent>

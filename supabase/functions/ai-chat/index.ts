@@ -117,22 +117,22 @@ serve(async (req) => {
       pedigreeData = pedigreeResult.extractedData;
       console.log('✅ Pedigree extracted:', pedigreeData);
       
-      // AUTO-UPDATE: Check if animal exists in database by name
-      if (pedigreeData?.animalName) {
-        console.log('🔍 Checking if animal exists:', pedigreeData.animalName);
-        
-        const { data: existingAnimal } = await supabase
-          .from('animals')
-          .select('id, name')
-          .eq('user_id', user.id)
-          .ilike('name', pedigreeData.animalName)
-          .maybeSingle();
+      // Check if animal exists in database (with wildcard for partial match)
+      console.log(`[${new Date().toISOString()}] 🔍 Checking if animal exists: ${pedigreeData.animalName}`);
+      const { data: existingAnimal } = await supabase
+        .from('animals')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .ilike('name', `%${pedigreeData.animalName}%`)
+        .maybeSingle();
         
         if (existingAnimal) {
-          console.log('✅ Found existing animal, auto-updating pedigree:', existingAnimal.name);
+          console.log(`[${new Date().toISOString()}] ✅ Found existing animal: ${existingAnimal.name} (ID: ${existingAnimal.id})`);
+          const updateStartTime = Date.now();
           
           try {
             // Call update-animal-pedigree function
+            console.log(`[${new Date().toISOString()}] 📞 Calling update-animal-pedigree...`);
             const updateResponse = await fetch(`${supabaseUrl}/functions/v1/update-animal-pedigree`, {
               method: 'POST',
               headers: {
@@ -146,9 +146,10 @@ serve(async (req) => {
             });
             
             const updateResult = await updateResponse.json();
+            const updateDuration = Date.now() - updateStartTime;
             
             if (updateResponse.ok && updateResult.success) {
-              console.log('✅ Pedigree auto-updated successfully:', updateResult.message);
+              console.log(`[${new Date().toISOString()}] ✅ Pedigree auto-updated in ${updateDuration}ms:`, updateResult.message);
               
               // Add metadata to return to frontend
               pedigreeData._autoUpdated = true;
@@ -171,7 +172,7 @@ serve(async (req) => {
             pedigreeData._updateError = `Error de conexión al actualizar pedigrí: ${updateError.message}`;
           }
         } else {
-          console.log('ℹ️ Animal not found in database, treating as external');
+          console.log(`[${new Date().toISOString()}] ℹ️ Animal "${pedigreeData.animalName}" not found in database, treating as external`);
         }
       }
     }

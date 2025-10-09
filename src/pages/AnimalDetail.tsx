@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Edit, Trash2, Activity } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Activity, Wrench } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getAnimal } from '@/services/animalService';
 import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
 import HorizontalPedigreeTree from '@/components/HorizontalPedigreeTree';
+import PedigreeDiagnostics from '@/components/PedigreeDiagnostics';
 import AnimalBasicInfo from '@/components/animal-detail/AnimalBasicInfo';
 import AnimalSidebar from '@/components/animal-detail/AnimalSidebar';
 import AnimalHealthRecords from '@/components/animal-detail/AnimalHealthRecords';
@@ -100,13 +101,17 @@ const AnimalDetail = () => {
           {/* Main Information */}
           <div className="lg:col-span-2 space-y-6">
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 h-auto">
+              <TabsList className="grid w-full grid-cols-1 md:grid-cols-5 h-auto">
                 <TabsTrigger value="general" className="w-full">Información General</TabsTrigger>
                 <TabsTrigger value="health" className="w-full">
                   <Activity className="w-4 h-4 mr-2" />
                   Salud
                 </TabsTrigger>
                 <TabsTrigger value="pedigree" className="w-full">Pedigrí</TabsTrigger>
+                <TabsTrigger value="diagnostics" className="w-full">
+                  <Wrench className="w-4 h-4 mr-2" />
+                  Diagnóstico
+                </TabsTrigger>
                 <TabsTrigger value="history" className="w-full">Historial</TabsTrigger>
               </TabsList>
               
@@ -124,6 +129,10 @@ const AnimalDetail = () => {
 
               <TabsContent value="pedigree">
                 <HorizontalPedigreeTree animal={animal} />
+              </TabsContent>
+
+              <TabsContent value="diagnostics">
+                <PedigreeDiagnostics animal={animal} />
               </TabsContent>
 
               <TabsContent value="history">
