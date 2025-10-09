@@ -88,16 +88,19 @@ export const useAIChat = () => {
 
         const { data: { session } } = await supabase.auth.getSession();
         
+        console.log('🔄 Uploading file to fix-pedigree-upload...');
         const response = await fetch(
-          `https://ahwhtxygyzoadsmdrwwg.supabase.co/functions/v1/fix-pedigree-upload`,
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fix-pedigree-upload`,
           {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${session?.access_token}`,
             },
             body: formData,
+            signal: abortController.signal,
           }
         );
+        console.log('📥 Upload response status:', response.status);
         
         if (!response.ok) {
           const errorText = await response.text();
