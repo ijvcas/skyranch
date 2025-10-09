@@ -68,31 +68,56 @@ serve(async (req) => {
       );
     }
 
-    // If file is uploaded, process pedigree first
+    // If file is uploaded, process pedigree first with retry logic
     if (file) {
       console.log('📄 Processing pedigree file:', file.name);
       
-      // Create form data to send to analyze-pedigree function
-      const pedigreeFormData = new FormData();
-      pedigreeFormData.append('file', file);
-      pedigreeFormData.append('fileType', fileType || '');
+      let attempts = 0;
+      const maxAttempts = 2;
+      let pedigreeResponse: Response | null = null;
+      
+      while (attempts < maxAttempts && !pedigreeData) {
+        attempts++;
+        console.log(`🔄 Pedigree extraction attempt ${attempts}/${maxAttempts}`);
+        
+        try {
+          // Create form data to send to analyze-pedigree function
+          const pedigreeFormData = new FormData();
+          pedigreeFormData.append('file', file);
+          pedigreeFormData.append('fileType', fileType || '');
 
-      const pedigreeResponse = await fetch(`${supabaseUrl}/functions/v1/analyze-pedigree`, {
-        method: 'POST',
-        headers: {
-          Authorization: authHeader,
-        },
-        body: pedigreeFormData,
-      });
+          pedigreeResponse = await fetch(`${supabaseUrl}/functions/v1/analyze-pedigree`, {
+            method: 'POST',
+            headers: {
+              Authorization: authHeader,
+            },
+            body: pedigreeFormData,
+          });
 
-      if (!pedigreeResponse.ok) {
-        const errorText = await pedigreeResponse.text();
-        console.error('❌ Pedigree analysis error:', errorText);
+          if (pedigreeResponse.ok) {
+            const result = await pedigreeResponse.json();
+            if (result.extractedData) {
+              pedigreeData = result.extractedData;
+              console.log('✅ Pedigree extracted successfully on attempt', attempts);
+              break;
+            }
+          }
+        } catch (err) {
+          console.error(`⚠️ Attempt ${attempts} failed:`, err);
+          if (attempts >= maxAttempts) {
+            throw err;
+          }
+        }
+      }
+
+      if (!pedigreeResponse || !pedigreeResponse.ok) {
+        const errorText = pedigreeResponse ? await pedigreeResponse.text() : 'No response';
+        console.error('❌ Pedigree analysis failed after all attempts:', errorText);
         
         // Try to parse error details and return proper error message
         try {
           const errorData = JSON.parse(errorText);
-          const errorMessage = errorData.error || 'Error al analizar el pedigrí';
+          const errorMessage = errorData.error || 'No se pudo extraer el pedigrí de la imagen. Por favor, intenta con una imagen más clara.';
           
           // Return 200 with error in body so client can display it
           return new Response(
@@ -459,6 +484,24 @@ ${contextData.farmAnimals.map((a: any) =>
 ).join('\n\n')}
 
 **IMPORTANTE:** Esta información de la base de datos de Skyranch está disponible para análisis de consanguinidad, cruces genéticos, y cualquier consulta sobre los animales del rancho.`;
+    }
+
+    // Phase 3: Enhanced error handling for pedigree extraction
+    if (file && !pedigreeData) {
+      enhancedSystemPrompt += `\n\n❌ ERROR EN EXTRACCIÓN DE PEDIGRÍ:
+
+No se pudo extraer información del documento cargado. Esto puede deberse a:
+- Imagen de baja calidad o poco legible
+- Formato de pedigrí no reconocido
+- Error en el servicio de análisis
+
+**TU TAREA:**
+1. Informa al usuario que hubo un problema al leer el documento de pedigrí
+2. Sugiere que intente con una imagen más clara o en mejor resolución
+3. Ofrece ayuda manual: puede escribir los datos del pedigrí y tú lo procesarás
+4. Sé amable y ofrece alternativas
+
+**NO** inventes datos ni hagas suposiciones sobre el contenido del documento.`;
     }
 
     // Special handling for auto-updated pedigree

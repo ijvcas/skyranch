@@ -38,74 +38,58 @@ serve(async (req) => {
       throw new Error('No file provided');
     }
 
-    console.log('Processing file:', file.name, 'Type:', fileType);
+    console.log('[TEST] Processing file:', file.name, 'Type:', fileType);
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     
     if (!OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY not found in environment');
-      throw new Error('OpenAI API key not configured. Please add it in your Supabase secrets.');
+      console.error('[TEST] OPENAI_API_KEY not found in environment');
+      throw new Error('OpenAI API key not configured');
     }
 
-    console.log('Processing file with OpenAI vision API');
-
-    // Convert file to base64
+    console.log('[TEST] Converting file to base64...');
     const arrayBuffer = await file.arrayBuffer();
     const base64 = arrayBufferToBase64(arrayBuffer);
     
+    console.log('[TEST] Calling OpenAI Vision API...');
     const extractedData = await extractWithVisionAPI(base64, fileType, OPENAI_API_KEY);
 
-    // Upload file to storage
-    const fileName = `${user.id}/${Date.now()}-${file.name}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('pedigree-documents')
-      .upload(fileName, file);
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      throw uploadError;
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('pedigree-documents')
-      .getPublicUrl(fileName);
+    console.log('[TEST] ✅ Extraction successful!');
+    console.log('[TEST] Extracted data:', JSON.stringify(extractedData, null, 2));
 
     return new Response(JSON.stringify({
       success: true,
+      message: 'Pedigree extraction test completed successfully',
       extractedData,
-      documentUrl: publicUrl
+      extractionStats: {
+        parents: !!(extractedData.father?.name || extractedData.mother?.name),
+        grandparents: !!(extractedData.paternalGrandfather || extractedData.paternalGrandmother || extractedData.maternalGrandfather || extractedData.maternalGrandmother),
+        greatGrandparents: !!(extractedData.paternalGreatGrandparents?.length || extractedData.maternalGreatGrandparents?.length),
+        gen4Count: (extractedData.generation4?.paternalLine?.length || 0) + (extractedData.generation4?.maternalLine?.length || 0),
+        gen5Count: (extractedData.generation5?.paternalLine?.length || 0) + (extractedData.generation5?.maternalLine?.length || 0),
+      }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error: any) {
-    console.error('Error in analyze-pedigree:', error);
-    
-    let errorMessage = 'Error al analizar el pedigrí';
-    
-    // Check for OpenAI rate limit errors
-    if (error.message?.includes('429') || error.message?.includes('rate limit')) {
-      errorMessage = 'Límite de solicitudes de OpenAI excedido. Por favor, intenta de nuevo en unas horas. Tu cuenta de OpenAI ha alcanzado el límite de uso.';
-    } else if (error.message?.includes('OpenAI API error')) {
-      errorMessage = error.message;
-    }
+    console.error('[TEST] ❌ Error:', error);
     
     return new Response(JSON.stringify({ 
-      error: errorMessage,
-      details: error.message
+      success: false,
+      error: error.message,
+      details: error.stack
     }), {
-      status: 200, // Return 200 so error message reaches client
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
 
-// Helper function to convert ArrayBuffer to base64 (prevents stack overflow)
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = '';
   
-  // Iterate byte by byte to avoid stack overflow from spread operator
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
@@ -114,7 +98,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKey: string) {
-  console.log('Calling OpenAI API with model: gpt-4o (supports PDFs)');
+  console.log('[TEST] Calling OpenAI API with model: gpt-4o');
   
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -124,7 +108,7 @@ async function extractWithVisionAPI(base64Image: string, mimeType: string, apiKe
     },
     body: JSON.stringify({
       model: 'gpt-4o',
-      response_format: { type: "json_object" }, // Force valid JSON output
+      response_format: { type: "json_object" },
       messages: [
         {
           role: 'user',
@@ -191,7 +175,7 @@ Extract ALL names visible in the pedigree document. Use null for missing informa
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('OpenAI API error:', errorText);
+    console.error('[TEST] OpenAI API error:', errorText);
     throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
   }
 
@@ -202,7 +186,10 @@ Extract ALL names visible in the pedigree document. Use null for missing informa
     throw new Error('No content in AI response');
   }
 
-  // Extract JSON from response (handle markdown code blocks)
+  console.log('[TEST] Raw AI response length:', content.length);
+  console.log('[TEST] First 300 chars:', content.substring(0, 300));
+
+  // Extract JSON from response
   let jsonStr = content.trim();
   if (jsonStr.startsWith('```json')) {
     jsonStr = jsonStr.slice(7);
@@ -214,28 +201,23 @@ Extract ALL names visible in the pedigree document. Use null for missing informa
     jsonStr = jsonStr.slice(0, -3);
   }
   
-  console.log('Attempting to parse JSON, length:', jsonStr.length);
-  console.log('First 200 chars:', jsonStr.substring(0, 200));
+  console.log('[TEST] Attempting to parse JSON...');
   
-  // Robust JSON parsing with error recovery
   try {
     return JSON.parse(jsonStr.trim());
   } catch (parseError) {
-    console.error('JSON parse error:', parseError);
-    console.error('Attempting to clean JSON...');
+    console.error('[TEST] JSON parse error:', parseError);
+    console.error('[TEST] Attempting to clean JSON...');
     
-    // Try to fix common issues
     let cleaned = jsonStr.trim()
-      // Remove trailing commas before closing brackets
       .replace(/,(\s*[}\]])/g, '$1')
-      // Remove any non-JSON text before first {
       .replace(/^[^{]*({)/, '$1');
     
     try {
       return JSON.parse(cleaned);
     } catch (secondError) {
-      console.error('Failed to parse even after cleaning:', secondError);
-      console.error('Raw content:', content.substring(0, 500));
+      console.error('[TEST] Failed to parse even after cleaning:', secondError);
+      console.error('[TEST] Raw content:', content.substring(0, 500));
       throw new Error(`Unable to parse pedigree data: ${secondError.message}`);
     }
   }
