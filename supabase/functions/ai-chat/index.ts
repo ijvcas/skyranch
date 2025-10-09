@@ -159,18 +159,18 @@ serve(async (req) => {
             
             // Gen 3 (Great-grandparents) - Paternal
             if (pedigreeData.paternalGreatGrandparents) {
-              if (pedigreeData.paternalGreatGrandparents[0]) pedigreeUpdate.paternal_ggf_p = cleanName(pedigreeData.paternalGreatGrandparents[0]);
-              if (pedigreeData.paternalGreatGrandparents[1]) pedigreeUpdate.paternal_ggm_p = cleanName(pedigreeData.paternalGreatGrandparents[1]);
-              if (pedigreeData.paternalGreatGrandparents[2]) pedigreeUpdate.paternal_gmf_p = cleanName(pedigreeData.paternalGreatGrandparents[2]);
-              if (pedigreeData.paternalGreatGrandparents[3]) pedigreeUpdate.paternal_gmm_p = cleanName(pedigreeData.paternalGreatGrandparents[3]);
+              if (pedigreeData.paternalGreatGrandparents[0]) pedigreeUpdate.paternal_great_grandfather_paternal_id = cleanName(pedigreeData.paternalGreatGrandparents[0]);
+              if (pedigreeData.paternalGreatGrandparents[1]) pedigreeUpdate.paternal_great_grandmother_paternal_id = cleanName(pedigreeData.paternalGreatGrandparents[1]);
+              if (pedigreeData.paternalGreatGrandparents[2]) pedigreeUpdate.paternal_great_grandfather_maternal_id = cleanName(pedigreeData.paternalGreatGrandparents[2]);
+              if (pedigreeData.paternalGreatGrandparents[3]) pedigreeUpdate.paternal_great_grandmother_maternal_id = cleanName(pedigreeData.paternalGreatGrandparents[3]);
             }
             
             // Gen 3 (Great-grandparents) - Maternal
             if (pedigreeData.maternalGreatGrandparents) {
-              if (pedigreeData.maternalGreatGrandparents[0]) pedigreeUpdate.maternal_ggf_m = cleanName(pedigreeData.maternalGreatGrandparents[0]);
-              if (pedigreeData.maternalGreatGrandparents[1]) pedigreeUpdate.maternal_ggm_m = cleanName(pedigreeData.maternalGreatGrandparents[1]);
-              if (pedigreeData.maternalGreatGrandparents[2]) pedigreeUpdate.maternal_gmf_m = cleanName(pedigreeData.maternalGreatGrandparents[2]);
-              if (pedigreeData.maternalGreatGrandparents[3]) pedigreeUpdate.maternal_gmm_m = cleanName(pedigreeData.maternalGreatGrandparents[3]);
+              if (pedigreeData.maternalGreatGrandparents[0]) pedigreeUpdate.maternal_great_grandfather_paternal_id = cleanName(pedigreeData.maternalGreatGrandparents[0]);
+              if (pedigreeData.maternalGreatGrandparents[1]) pedigreeUpdate.maternal_great_grandmother_paternal_id = cleanName(pedigreeData.maternalGreatGrandparents[1]);
+              if (pedigreeData.maternalGreatGrandparents[2]) pedigreeUpdate.maternal_great_grandfather_maternal_id = cleanName(pedigreeData.maternalGreatGrandparents[2]);
+              if (pedigreeData.maternalGreatGrandparents[3]) pedigreeUpdate.maternal_great_grandmother_maternal_id = cleanName(pedigreeData.maternalGreatGrandparents[3]);
             }
             
             // Gen 4 - Paternal Line (8 ancestors)
