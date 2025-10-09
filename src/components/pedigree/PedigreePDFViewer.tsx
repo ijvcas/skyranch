@@ -22,37 +22,52 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfLoadError, setPdfLoadError] = useState(false);
 
-  // Load signed URL on mount if PDF exists
+  // Load PDF as blob to avoid cross-origin issues
   React.useEffect(() => {
-    const loadSignedUrl = async () => {
+    const loadPdfAsBlob = async () => {
       if (!animal.pedigree_pdf_url) return;
 
       try {
-      const { data, error } = await supabase.storage
-        .from('pedigree-documents')
-        .createSignedUrl(animal.pedigree_pdf_url, 3600);
+        // Get signed URL
+        const { data, error } = await supabase.storage
+          .from('pedigree-documents')
+          .createSignedUrl(animal.pedigree_pdf_url, 3600);
 
-      if (error) {
-        console.error('Error creating signed URL:', error);
-        setPdfLoadError(true);
-        return;
-      }
+        if (error) {
+          console.error('Error creating signed URL:', error);
+          setPdfLoadError(true);
+          return;
+        }
 
-      if (data?.signedUrl) {
-        // Convert relative path to absolute URL
-        const baseUrl = 'https://ahwhtxygyzoadsmdrwwg.supabase.co/storage/v1';
-        const absoluteUrl = data.signedUrl.startsWith('http') 
-          ? data.signedUrl 
-          : `${baseUrl}${data.signedUrl}`;
-        setPdfUrl(absoluteUrl);
-      }
+        if (data?.signedUrl) {
+          // Convert relative path to absolute URL
+          const baseUrl = 'https://ahwhtxygyzoadsmdrwwg.supabase.co/storage/v1';
+          const absoluteUrl = data.signedUrl.startsWith('http') 
+            ? data.signedUrl 
+            : `${baseUrl}${data.signedUrl}`;
+
+          // Fetch PDF as blob to avoid cross-origin blocking
+          const response = await fetch(absoluteUrl);
+          if (!response.ok) throw new Error('Failed to fetch PDF');
+          
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          setPdfUrl(blobUrl);
+        }
       } catch (error) {
         console.error('Error loading PDF:', error);
         setPdfLoadError(true);
       }
     };
 
-    loadSignedUrl();
+    loadPdfAsBlob();
+
+    // Cleanup blob URL on unmount
+    return () => {
+      if (pdfUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
   }, [animal.pedigree_pdf_url]);
 
   const onDrop = async (acceptedFiles: File[]) => {
@@ -102,7 +117,7 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
 
       if (uploadError) throw uploadError;
 
-      // Get signed URL for private bucket (valid for 1 hour)
+      // Get signed URL for private bucket
       const { data: signedUrlData, error: urlError } = await supabase.storage
         .from('pedigree-documents')
         .createSignedUrl(filePath, 3600);
@@ -110,11 +125,17 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
       if (urlError) throw urlError;
       if (!signedUrlData?.signedUrl) throw new Error('No se pudo generar la URL del PDF');
 
-      // Convert relative path to absolute URL
+      // Convert to absolute URL and fetch as blob
       const baseUrl = 'https://ahwhtxygyzoadsmdrwwg.supabase.co/storage/v1';
-      const signedUrl = signedUrlData.signedUrl.startsWith('http') 
+      const absoluteUrl = signedUrlData.signedUrl.startsWith('http') 
         ? signedUrlData.signedUrl 
         : `${baseUrl}${signedUrlData.signedUrl}`;
+
+      const response = await fetch(absoluteUrl);
+      if (!response.ok) throw new Error('Failed to fetch PDF');
+      
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
 
       // Update animal record with the file path (not the signed URL)
       const { error: updateError } = await supabase
@@ -124,7 +145,7 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
 
       if (updateError) throw updateError;
 
-      setPdfUrl(signedUrl);
+      setPdfUrl(blobUrl);
       setPdfLoadError(false);
       toast({
         title: 'Éxito',
