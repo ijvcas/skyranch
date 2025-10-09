@@ -45,3 +45,6 @@ verify_jwt = true
 [functions.test-pedigree-extraction]
 verify_jwt = true
 
+[functions.fix-pedigree-upload]
+verify_jwt = true
+
