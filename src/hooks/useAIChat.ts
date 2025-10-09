@@ -81,13 +81,12 @@ export const useAIChat = () => {
       let aiResponse, aiError;
       
       if (file) {
-        // If file is provided, use multipart/form-data
+        // Use fix-pedigree-upload for file uploads with detailed logging
         const formData = new FormData();
         formData.append('message', message);
         formData.append('file', file);
-        formData.append('fileType', file.type);
 
-        const response = await supabase.functions.invoke('ai-chat', {
+        const response = await supabase.functions.invoke('fix-pedigree-upload', {
           body: formData,
         });
         

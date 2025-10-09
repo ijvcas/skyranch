@@ -47,10 +47,10 @@ const getPedigreeStats = (animal: Animal) => {
 
   // Count gen4 fields (16 total)
   const gen4Fields = [
-    'gen4PaternalGgggfP', 'gen4PaternalGgggmP', 'gen4PaternalGggmfP', 'gen4PaternalGggmmP',
-    'gen4PaternalGgfgfP', 'gen4PaternalGgfgmP', 'gen4PaternalGgmgfP', 'gen4PaternalGgmgmP',
-    'gen4MaternalGgggfM', 'gen4MaternalGgggmM', 'gen4MaternalGggmfM', 'gen4MaternalGggmmM',
-    'gen4MaternalGgfgfM', 'gen4MaternalGgfgmM', 'gen4MaternalGgmgfM', 'gen4MaternalGgmgmM',
+    'gen4_paternal_ggggf_p', 'gen4_paternal_ggggm_p', 'gen4_paternal_gggmf_p', 'gen4_paternal_gggmm_p',
+    'gen4_paternal_ggfgf_p', 'gen4_paternal_ggfgm_p', 'gen4_paternal_ggmgf_p', 'gen4_paternal_ggmgm_p',
+    'gen4_maternal_ggggf_m', 'gen4_maternal_ggggm_m', 'gen4_maternal_gggmf_m', 'gen4_maternal_gggmm_m',
+    'gen4_maternal_ggfgf_m', 'gen4_maternal_ggfgm_m', 'gen4_maternal_ggmgf_m', 'gen4_maternal_ggmgm_m',
   ];
   
   gen4Fields.forEach(field => {
@@ -59,8 +59,8 @@ const getPedigreeStats = (animal: Animal) => {
 
   // Count gen5 fields (32 total)
   for (let i = 1; i <= 16; i++) {
-    if ((animal as any)[`gen5Paternal${i}`]) stats.gen5++;
-    if ((animal as any)[`gen5Maternal${i}`]) stats.gen5++;
+    if ((animal as any)[`gen5_paternal_${i}`]) stats.gen5++;
+    if ((animal as any)[`gen5_maternal_${i}`]) stats.gen5++;
   }
 
   return stats;
