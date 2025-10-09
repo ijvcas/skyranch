@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Animal } from '@/stores/animalStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle2, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, CheckCircle2, Upload, Loader2 } from 'lucide-react';
+import { useAIChat } from '@/hooks/useAIChat';
+import { toast } from 'sonner';
 
 interface HorizontalPedigreeTreeProps {
   animal: Animal;
@@ -88,10 +91,32 @@ const AncestorBox: React.FC<{
 };
 
 const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal }) => {
+  const [uploading, setUploading] = useState(false);
+  const { sendMessage } = useAIChat();
+  
   const stats = getPedigreeStats(animal);
   const totalKnown = stats.gen0 + stats.gen1 + stats.gen2 + stats.gen3 + stats.gen4 + stats.gen5;
   const totalPossible = 1 + 2 + 4 + 8 + 16 + 32; // 63 total ancestors
   const completeness = Math.round((totalKnown / totalPossible) * 100);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      await sendMessage(
+        `Aquí está el pedigrí de 5 generaciones de ${animal.name}. Extrae toda la información y actualiza automáticamente su ficha.`,
+        file
+      );
+      toast.success('Pedigrí procesado correctamente. Recargando página...');
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+      toast.error('Error al procesar el pedigrí');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <Card className="w-full">
@@ -197,17 +222,33 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
 
             {/* Generation 4-5 placeholder */}
             {stats.gen4 + stats.gen5 === 0 && (
-              <div className="flex items-center justify-center px-8 py-4 border-2 border-dashed border-muted rounded-lg bg-muted/10">
-                <div className="text-center">
-                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                  <div className="text-sm font-medium text-muted-foreground">
-                    Generaciones 4 y 5
+              <>
+                <label htmlFor="pedigree-upload-view" className="cursor-pointer">
+                  <div className="flex items-center justify-center px-8 py-4 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
+                    <div className="text-center">
+                      {uploading ? (
+                        <Loader2 className="w-8 h-8 mx-auto mb-2 text-primary animate-spin" />
+                      ) : (
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-primary" />
+                      )}
+                      <div className="text-sm font-medium text-foreground">
+                        Generaciones 4 y 5
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {uploading ? 'Procesando...' : 'Sube un documento de pedigrí para completar'}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Sube un documento de pedigrí para completar
-                  </div>
-                </div>
-              </div>
+                </label>
+                <input
+                  id="pedigree-upload-view"
+                  type="file"
+                  accept="image/png,image/jpeg,application/pdf"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                  disabled={uploading}
+                />
+              </>
             )}
           </div>
         </div>
