@@ -19,7 +19,36 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState(animal.pedigree_pdf_url || null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfLoadError, setPdfLoadError] = useState(false);
+
+  // Load signed URL on mount if PDF exists
+  React.useEffect(() => {
+    const loadSignedUrl = async () => {
+      if (!animal.pedigree_pdf_url) return;
+
+      try {
+        const { data, error } = await supabase.storage
+          .from('pedigree-documents')
+          .createSignedUrl(animal.pedigree_pdf_url, 3600);
+
+        if (error) {
+          console.error('Error creating signed URL:', error);
+          setPdfLoadError(true);
+          return;
+        }
+
+        if (data?.signedUrl) {
+          setPdfUrl(data.signedUrl);
+        }
+      } catch (error) {
+        console.error('Error loading PDF:', error);
+        setPdfLoadError(true);
+      }
+    };
+
+    loadSignedUrl();
+  }, [animal.pedigree_pdf_url]);
 
   const onDrop = async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -51,9 +80,8 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
       if (!user) throw new Error('No autenticado');
 
       // Delete old PDF if exists
-      if (pdfUrl) {
-        const oldPath = pdfUrl.split('/').slice(-2).join('/');
-        await supabase.storage.from('pedigree-documents').remove([oldPath]);
+      if (animal.pedigree_pdf_url) {
+        await supabase.storage.from('pedigree-documents').remove([animal.pedigree_pdf_url]);
       }
 
       // Upload new PDF
@@ -69,22 +97,26 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
+      // Get signed URL for private bucket (valid for 1 hour)
+      const { data: signedUrlData, error: urlError } = await supabase.storage
         .from('pedigree-documents')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 3600);
 
-      const publicUrl = urlData.publicUrl;
+      if (urlError) throw urlError;
+      if (!signedUrlData?.signedUrl) throw new Error('No se pudo generar la URL del PDF');
 
-      // Update animal record
+      const signedUrl = signedUrlData.signedUrl;
+
+      // Update animal record with the file path (not the signed URL)
       const { error: updateError } = await supabase
         .from('animals')
-        .update({ pedigree_pdf_url: publicUrl })
+        .update({ pedigree_pdf_url: filePath })
         .eq('id', animal.id);
 
       if (updateError) throw updateError;
 
-      setPdfUrl(publicUrl);
+      setPdfUrl(signedUrl);
+      setPdfLoadError(false);
       toast({
         title: 'Éxito',
         description: 'Pedigrí PDF subido correctamente',
@@ -109,17 +141,14 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
   });
 
   const handleDelete = async () => {
-    if (!pdfUrl) return;
+    if (!animal.pedigree_pdf_url) return;
 
     setDeleting(true);
     try {
-      // Extract file path from URL
-      const filePath = pdfUrl.split('/').slice(-2).join('/');
-
-      // Delete from storage
+      // Delete from storage using the stored file path
       const { error: deleteError } = await supabase.storage
         .from('pedigree-documents')
-        .remove([filePath]);
+        .remove([animal.pedigree_pdf_url]);
 
       if (deleteError) throw deleteError;
 
@@ -190,13 +219,34 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
           </div>
         ) : (
           <>
-            <div className="border rounded-lg overflow-hidden bg-gray-50">
-              <iframe
-                src={`${pdfUrl}#view=FitH`}
-                className="w-full h-[600px] md:h-[700px] lg:h-[800px]"
-                title="Pedigrí PDF"
-              />
-            </div>
+            {pdfLoadError ? (
+              <div className="border-2 border-yellow-300 rounded-lg p-8 text-center bg-yellow-50">
+                <FileText className="w-16 h-16 mx-auto mb-4 text-yellow-600" />
+                <p className="text-lg font-medium text-gray-900 mb-2">
+                  No se pudo cargar el PDF
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  El documento existe pero no se puede visualizar. Puedes descargarlo o subir uno nuevo.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={handleDownload}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Descargar PDF
+                </Button>
+              </div>
+            ) : (
+              <div className="border rounded-lg overflow-hidden bg-gray-50">
+                <iframe
+                  src={`${pdfUrl}#view=FitH`}
+                  className="w-full h-[600px] md:h-[700px] lg:h-[800px]"
+                  title="Pedigrí PDF"
+                  onError={() => setPdfLoadError(true)}
+                />
+              </div>
+            )}
             <div className="flex items-center justify-between gap-4 pt-2">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <FileText className="w-4 h-4" />
