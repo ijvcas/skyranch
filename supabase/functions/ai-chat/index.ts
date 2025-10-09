@@ -131,45 +131,119 @@ serve(async (req) => {
           const updateStartTime = Date.now();
           
           try {
-            // Call update-animal-pedigree function
-            console.log(`[${new Date().toISOString()}] 📞 Calling update-animal-pedigree...`);
-            const updateResponse = await fetch(`${supabaseUrl}/functions/v1/update-animal-pedigree`, {
-              method: 'POST',
-              headers: {
-                Authorization: authHeader,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                animalId: existingAnimal.id,
-                pedigreeData: pedigreeData
-              }),
-            });
+            // Update pedigree DIRECTLY in database
+            console.log(`[${new Date().toISOString()}] 💾 Updating pedigree in database...`);
             
-            const updateResult = await updateResponse.json();
-            const updateDuration = Date.now() - updateStartTime;
+            // Helper function to clean names
+            const cleanName = (name: string | null | undefined): string | null => {
+              if (!name) return null;
+              return name
+                .replace(/Nº\s*UELN[:\s]*/gi, '')
+                .replace(/UELN[:\s]*/gi, '')
+                .replace(/\s*\([^)]*\)/g, '')
+                .trim() || null;
+            };
             
-            if (updateResponse.ok && updateResult.success) {
-              console.log(`[${new Date().toISOString()}] ✅ Pedigree auto-updated in ${updateDuration}ms:`, updateResult.message);
-              
-              // Add metadata to return to frontend
-              pedigreeData._autoUpdated = true;
-              pedigreeData._updateResult = updateResult;
-            } else {
-              // Update failed - log detailed error
-              console.error('❌ Pedigree update failed:', {
-                status: updateResponse.status,
-                error: updateResult.error,
-                details: updateResult.details
-              });
-              
-              // Mark as failed and include error info
+            // Build update object with all pedigree fields
+            const pedigreeUpdate: any = {};
+            
+            // Gen 1 (Parents)
+            if (pedigreeData.father?.name) pedigreeUpdate.father_id = cleanName(pedigreeData.father.name);
+            if (pedigreeData.mother?.name) pedigreeUpdate.mother_id = cleanName(pedigreeData.mother.name);
+            
+            // Gen 2 (Grandparents)
+            if (pedigreeData.paternalGrandfather) pedigreeUpdate.paternal_grandfather_id = cleanName(pedigreeData.paternalGrandfather);
+            if (pedigreeData.paternalGrandmother) pedigreeUpdate.paternal_grandmother_id = cleanName(pedigreeData.paternalGrandmother);
+            if (pedigreeData.maternalGrandfather) pedigreeUpdate.maternal_grandfather_id = cleanName(pedigreeData.maternalGrandfather);
+            if (pedigreeData.maternalGrandmother) pedigreeUpdate.maternal_grandmother_id = cleanName(pedigreeData.maternalGrandmother);
+            
+            // Gen 3 (Great-grandparents) - Paternal
+            if (pedigreeData.paternalGreatGrandparents) {
+              if (pedigreeData.paternalGreatGrandparents[0]) pedigreeUpdate.paternal_ggf_p = cleanName(pedigreeData.paternalGreatGrandparents[0]);
+              if (pedigreeData.paternalGreatGrandparents[1]) pedigreeUpdate.paternal_ggm_p = cleanName(pedigreeData.paternalGreatGrandparents[1]);
+              if (pedigreeData.paternalGreatGrandparents[2]) pedigreeUpdate.paternal_gmf_p = cleanName(pedigreeData.paternalGreatGrandparents[2]);
+              if (pedigreeData.paternalGreatGrandparents[3]) pedigreeUpdate.paternal_gmm_p = cleanName(pedigreeData.paternalGreatGrandparents[3]);
+            }
+            
+            // Gen 3 (Great-grandparents) - Maternal
+            if (pedigreeData.maternalGreatGrandparents) {
+              if (pedigreeData.maternalGreatGrandparents[0]) pedigreeUpdate.maternal_ggf_m = cleanName(pedigreeData.maternalGreatGrandparents[0]);
+              if (pedigreeData.maternalGreatGrandparents[1]) pedigreeUpdate.maternal_ggm_m = cleanName(pedigreeData.maternalGreatGrandparents[1]);
+              if (pedigreeData.maternalGreatGrandparents[2]) pedigreeUpdate.maternal_gmf_m = cleanName(pedigreeData.maternalGreatGrandparents[2]);
+              if (pedigreeData.maternalGreatGrandparents[3]) pedigreeUpdate.maternal_gmm_m = cleanName(pedigreeData.maternalGreatGrandparents[3]);
+            }
+            
+            // Gen 4 - Paternal Line (8 ancestors)
+            if (pedigreeData.generation4?.paternalLine) {
+              const p = pedigreeData.generation4.paternalLine;
+              if (p[0]) pedigreeUpdate.gen4_paternal_ggggf_p = cleanName(p[0]);
+              if (p[1]) pedigreeUpdate.gen4_paternal_ggggm_p = cleanName(p[1]);
+              if (p[2]) pedigreeUpdate.gen4_paternal_gggmf_p = cleanName(p[2]);
+              if (p[3]) pedigreeUpdate.gen4_paternal_gggmm_p = cleanName(p[3]);
+              if (p[4]) pedigreeUpdate.gen4_paternal_ggmgf_p = cleanName(p[4]);
+              if (p[5]) pedigreeUpdate.gen4_paternal_ggmgm_p = cleanName(p[5]);
+              if (p[6]) pedigreeUpdate.gen4_paternal_ggfgf_p = cleanName(p[6]);
+              if (p[7]) pedigreeUpdate.gen4_paternal_ggfgm_p = cleanName(p[7]);
+            }
+            
+            // Gen 4 - Maternal Line (8 ancestors)
+            if (pedigreeData.generation4?.maternalLine) {
+              const m = pedigreeData.generation4.maternalLine;
+              if (m[0]) pedigreeUpdate.gen4_maternal_ggggf_m = cleanName(m[0]);
+              if (m[1]) pedigreeUpdate.gen4_maternal_ggggm_m = cleanName(m[1]);
+              if (m[2]) pedigreeUpdate.gen4_maternal_gggmf_m = cleanName(m[2]);
+              if (m[3]) pedigreeUpdate.gen4_maternal_gggmm_m = cleanName(m[3]);
+              if (m[4]) pedigreeUpdate.gen4_maternal_ggmgf_m = cleanName(m[4]);
+              if (m[5]) pedigreeUpdate.gen4_maternal_ggmgm_m = cleanName(m[5]);
+              if (m[6]) pedigreeUpdate.gen4_maternal_ggfgf_m = cleanName(m[6]);
+              if (m[7]) pedigreeUpdate.gen4_maternal_ggfgm_m = cleanName(m[7]);
+            }
+            
+            // Gen 5 - Paternal Line (16 ancestors)
+            if (pedigreeData.generation5?.paternalLine) {
+              const p5 = pedigreeData.generation5.paternalLine;
+              for (let i = 0; i < 16 && i < p5.length; i++) {
+                if (p5[i]) pedigreeUpdate[`gen5_paternal_${i + 1}`] = cleanName(p5[i]);
+              }
+            }
+            
+            // Gen 5 - Maternal Line (16 ancestors)
+            if (pedigreeData.generation5?.maternalLine) {
+              const m5 = pedigreeData.generation5.maternalLine;
+              for (let i = 0; i < 16 && i < m5.length; i++) {
+                if (m5[i]) pedigreeUpdate[`gen5_maternal_${i + 1}`] = cleanName(m5[i]);
+              }
+            }
+            
+            // Perform the update
+            const { data: updatedAnimal, error: updateError } = await supabase
+              .from('animals')
+              .update(pedigreeUpdate)
+              .eq('id', existingAnimal.id)
+              .eq('user_id', user.id)
+              .select()
+              .single();
+            
+            if (updateError) {
+              console.error(`[${new Date().toISOString()}] ❌ Database update failed:`, updateError);
               pedigreeData._autoUpdated = false;
-              pedigreeData._updateError = updateResult.error || 'Error al actualizar el pedigrí en la base de datos';
+              pedigreeData._updateError = updateError.message;
+            } else {
+              const updateDuration = Date.now() - updateStartTime;
+              const fieldsUpdated = Object.keys(pedigreeUpdate).length;
+              console.log(`[${new Date().toISOString()}] ✅ Pedigree updated in ${updateDuration}ms: ${fieldsUpdated} fields saved`);
+              
+              pedigreeData._autoUpdated = true;
+              pedigreeData._updateResult = {
+                fieldsUpdated,
+                animalName: updatedAnimal.name,
+                duration: updateDuration
+              };
             }
           } catch (updateError: any) {
-            console.error('❌ Exception calling update-animal-pedigree:', updateError);
+            console.error(`[${new Date().toISOString()}] ❌ Exception updating pedigree:`, updateError);
             pedigreeData._autoUpdated = false;
-            pedigreeData._updateError = `Error de conexión al actualizar pedigrí: ${updateError.message}`;
+            pedigreeData._updateError = `Error: ${updateError.message}`;
           }
         } else {
           console.log(`[${new Date().toISOString()}] ℹ️ Animal "${pedigreeData.animalName}" not found in database, treating as external`);
