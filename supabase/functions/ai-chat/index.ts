@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('🤖 AI Chat function called');
+  console.log('🤖 AI Chat function called - v2');
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
