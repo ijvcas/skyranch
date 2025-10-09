@@ -45,6 +45,14 @@ serve(async (req) => {
     const formData = await req.formData();
     const message = formData.get('message') as string;
     const file = formData.get('file') as File | null;
+    const animalId = formData.get('animalId') as string | null;
+
+    console.log(`📋 Received params:`, {
+      message,
+      animalId,
+      fileName: file?.name,
+      hasFile: !!file
+    });
 
     if (!file) {
       console.error('❌ No file provided');
@@ -89,21 +97,51 @@ serve(async (req) => {
     }
 
     // Find the animal using multiple strategies
-    console.log(`🔍 Searching for animal: "${pedigreeData.animalName}"`);
+    let existingAnimal: any = null;
 
-    // Try 1: Direct name match (wildcard)
-    console.log('🔍 Try 1: Name wildcard search...');
-    let { data: existingAnimal, error: nameError } = await supabase
-      .from('animals')
-      .select('id, name, tag')
-      .eq('user_id', user.id)
-      .ilike('name', `%${pedigreeData.animalName}%`)
-      .maybeSingle();
-
-    if (nameError) {
-      console.error(`❌ Name lookup error:`, nameError);
+    // Try 0: Direct ID lookup (if animalId provided)
+    if (animalId) {
+      console.log(`🔍 Try 0: Direct ID lookup for: ${animalId}`);
+      const { data: idMatch, error: idError } = await supabase
+        .from('animals')
+        .select('id, name, tag')
+        .eq('user_id', user.id)
+        .eq('id', animalId)
+        .maybeSingle();
+      
+      if (idError) {
+        console.error(`❌ ID lookup error:`, idError);
+      }
+      
+      if (idMatch) {
+        console.log(`✅ Found by ID: "${idMatch.name}"`);
+        existingAnimal = idMatch;
+      } else {
+        console.log(`   Result: Not found by ID`);
+      }
     }
-    console.log(`   Result:`, existingAnimal ? `Found: "${existingAnimal.name}"` : 'Not found');
+
+    // Try 1: Direct name match (wildcard) - only if not found by ID
+    if (!existingAnimal && pedigreeData.animalName) {
+      console.log(`🔍 Try 1: Name wildcard search for: "${pedigreeData.animalName}"`);
+      const { data: nameMatch, error: nameError } = await supabase
+        .from('animals')
+        .select('id, name, tag')
+        .eq('user_id', user.id)
+        .ilike('name', `%${pedigreeData.animalName}%`)
+        .maybeSingle();
+
+      if (nameError) {
+        console.error(`❌ Name lookup error:`, nameError);
+      }
+      
+      if (nameMatch) {
+        console.log(`✅ Found by name: "${nameMatch.name}"`);
+        existingAnimal = nameMatch;
+      } else {
+        console.log(`   Result: Not found by name`);
+      }
+    }
 
     // Try 2: Tag/registration number match
     if (!existingAnimal && pedigreeData.registrationNumber) {
@@ -171,9 +209,23 @@ serve(async (req) => {
     // Build update object with all pedigree data
     const updateData: any = {};
 
+    // Validate generation data
+    console.log('📊 Validating extracted data structure:');
+    console.log('   Gen4 Paternal:', pedigreeData.generation4?.paternalLine?.length || 0, 'ancestors');
+    console.log('   Gen4 Maternal:', pedigreeData.generation4?.maternalLine?.length || 0, 'ancestors');
+    console.log('   Gen5 Paternal:', pedigreeData.generation5?.paternalLine?.length || 0, 'ancestors');
+    console.log('   Gen5 Maternal:', pedigreeData.generation5?.maternalLine?.length || 0, 'ancestors');
+
     // Gen 4 - Paternal line (8 ancestors)
     if (pedigreeData.generation4?.paternalLine) {
       const patLine = pedigreeData.generation4.paternalLine;
+      
+      if (!Array.isArray(patLine)) {
+        console.warn('⚠️ Gen4 paternal line is not an array:', patLine);
+      } else if (patLine.length < 8) {
+        console.warn(`⚠️ Gen4 paternal line incomplete: ${patLine.length}/8 ancestors`);
+      }
+      
       updateData.gen4_paternal_ggggf_p = patLine[0] || null;
       updateData.gen4_paternal_ggggm_p = patLine[1] || null;
       updateData.gen4_paternal_gggmf_p = patLine[2] || null;
@@ -182,12 +234,19 @@ serve(async (req) => {
       updateData.gen4_paternal_ggfgm_p = patLine[5] || null;
       updateData.gen4_paternal_ggmgf_p = patLine[6] || null;
       updateData.gen4_paternal_ggmgm_p = patLine[7] || null;
-      console.log(`   Gen4 Paternal: ${patLine.length} ancestors`);
+      console.log(`   ✓ Gen4 Paternal: Mapped ${patLine.length} ancestors`);
     }
 
     // Gen 4 - Maternal line (8 ancestors)
     if (pedigreeData.generation4?.maternalLine) {
       const matLine = pedigreeData.generation4.maternalLine;
+      
+      if (!Array.isArray(matLine)) {
+        console.warn('⚠️ Gen4 maternal line is not an array:', matLine);
+      } else if (matLine.length < 8) {
+        console.warn(`⚠️ Gen4 maternal line incomplete: ${matLine.length}/8 ancestors`);
+      }
+      
       updateData.gen4_maternal_ggggf_m = matLine[0] || null;
       updateData.gen4_maternal_ggggm_m = matLine[1] || null;
       updateData.gen4_maternal_gggmf_m = matLine[2] || null;
@@ -196,25 +255,43 @@ serve(async (req) => {
       updateData.gen4_maternal_ggfgm_m = matLine[5] || null;
       updateData.gen4_maternal_ggmgf_m = matLine[6] || null;
       updateData.gen4_maternal_ggmgm_m = matLine[7] || null;
-      console.log(`   Gen4 Maternal: ${matLine.length} ancestors`);
+      console.log(`   ✓ Gen4 Maternal: Mapped ${matLine.length} ancestors`);
     }
 
     // Gen 5 - Paternal line (16 ancestors)
     if (pedigreeData.generation5?.paternalLine) {
       const patLine = pedigreeData.generation5.paternalLine;
-      for (let i = 0; i < 16 && i < patLine.length; i++) {
-        updateData[`gen5_paternal_${i + 1}`] = patLine[i] || null;
+      
+      if (!Array.isArray(patLine)) {
+        console.warn('⚠️ Gen5 paternal line is not an array:', patLine);
+      } else {
+        if (patLine.length < 16) {
+          console.warn(`⚠️ Gen5 paternal line incomplete: ${patLine.length}/16 ancestors`);
+        }
+        
+        for (let i = 0; i < 16 && i < patLine.length; i++) {
+          updateData[`gen5_paternal_${i + 1}`] = patLine[i] || null;
+        }
+        console.log(`   ✓ Gen5 Paternal: Mapped ${patLine.length} ancestors`);
       }
-      console.log(`   Gen5 Paternal: ${patLine.length} ancestors`);
     }
 
     // Gen 5 - Maternal line (16 ancestors)
     if (pedigreeData.generation5?.maternalLine) {
       const matLine = pedigreeData.generation5.maternalLine;
-      for (let i = 0; i < 16 && i < matLine.length; i++) {
-        updateData[`gen5_maternal_${i + 1}`] = matLine[i] || null;
+      
+      if (!Array.isArray(matLine)) {
+        console.warn('⚠️ Gen5 maternal line is not an array:', matLine);
+      } else {
+        if (matLine.length < 16) {
+          console.warn(`⚠️ Gen5 maternal line incomplete: ${matLine.length}/16 ancestors`);
+        }
+        
+        for (let i = 0; i < 16 && i < matLine.length; i++) {
+          updateData[`gen5_maternal_${i + 1}`] = matLine[i] || null;
+        }
+        console.log(`   ✓ Gen5 Maternal: Mapped ${matLine.length} ancestors`);
       }
-      console.log(`   Gen5 Maternal: ${matLine.length} ancestors`);
     }
 
     console.log(`🔄 Attempting update with ${Object.keys(updateData).length} fields`);

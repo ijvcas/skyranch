@@ -19,18 +19,22 @@ export const PedigreeUploadSection = ({ animalId, animalName, onUploadSuccess }:
 
     setUploading(true);
     try {
+      console.log('📤 [PedigreeUploadSection] Starting upload for animal:', animalName, 'ID:', animalId);
+      
       // Use the dedicated fix-pedigree-upload function
       const formData = new FormData();
       formData.append('message', `Pedigrí de 5 generaciones de ${animalName}`);
       formData.append('file', file);
+      formData.append('animalId', animalId); // Pass animal ID for direct lookup
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('No hay sesión activa');
       }
 
+      console.log('🔄 [PedigreeUploadSection] Calling fix-pedigree-upload...');
       const response = await fetch(
-        `https://ahwhtxygyzoadsmdrwwg.supabase.co/functions/v1/fix-pedigree-upload`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fix-pedigree-upload`,
         {
           method: 'POST',
           headers: {
@@ -43,15 +47,15 @@ export const PedigreeUploadSection = ({ animalId, animalName, onUploadSuccess }:
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('Upload error:', result);
+        console.error('❌ [PedigreeUploadSection] Upload error:', result);
         throw new Error(result.error || 'Error al procesar el pedigrí');
       }
 
-      console.log('Upload success:', result);
+      console.log('✅ [PedigreeUploadSection] Upload success:', result);
       toast.success(`Pedigrí actualizado: Gen4: ${result.updated.gen4}, Gen5: ${result.updated.gen5}`);
       onUploadSuccess?.();
     } catch (error) {
-      console.error('Pedigree upload error:', error);
+      console.error('❌ [PedigreeUploadSection] Pedigree upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Error al procesar el pedigrí');
     } finally {
       setUploading(false);
