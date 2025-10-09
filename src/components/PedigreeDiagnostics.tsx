@@ -259,7 +259,6 @@ const PedigreeDiagnostics: React.FC<PedigreeDiagnosticsProps> = ({ animal }) => 
                   <div>• Animal ID: <code className="px-1 py-0.5 rounded bg-muted">{animal.id}</code></div>
                   <div>• Especie: {animal.species}</div>
                   <div>• Raza: {animal.breed || 'No especificada'}</div>
-                  <div>• Última actualización: {animal.updatedAt ? new Date(animal.updatedAt).toLocaleString('es-ES') : 'N/A'}</div>
                 </div>
               </div>
             </div>
