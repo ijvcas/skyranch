@@ -146,21 +146,32 @@ serve(async (req) => {
       console.log(`🔍 Looking for animal: "${pedigreeData.animalName}"`);
 
       // Try 1: Name wildcard match
-      let { data: existingAnimal } = await supabase
+      let { data: existingAnimal, error: nameError } = await supabase
         .from('animals')
         .select('id, name, tag')
         .eq('user_id', user.id)
         .ilike('name', `%${pedigreeData.animalName}%`)
         .maybeSingle();
 
+      if (nameError) {
+        console.error(`❌ Name lookup error:`, nameError);
+      }
+      console.log(`🔍 Try 1 (name wildcard) result:`, existingAnimal ? `Found: ${existingAnimal.name}` : 'Not found');
+
       // Try 2: Tag/registration number match
       if (!existingAnimal && pedigreeData.registrationNumber) {
-        const { data: tagMatch } = await supabase
+        const { data: tagMatch, error: tagError } = await supabase
           .from('animals')
           .select('id, name, tag')
           .eq('user_id', user.id)
           .ilike('tag', `%${pedigreeData.registrationNumber}%`)
           .maybeSingle();
+        
+        if (tagError) {
+          console.error(`❌ Tag lookup error:`, tagError);
+        }
+        console.log(`🔍 Try 2 (tag match) result:`, tagMatch ? `Found: ${tagMatch.name}` : 'Not found');
+        
         if (tagMatch) {
           console.log(`✅ Matched by tag: ${tagMatch.tag}`);
           existingAnimal = tagMatch;
@@ -169,13 +180,22 @@ serve(async (req) => {
 
       // Try 3: Parenthetical name extraction (LUNA (NIOUININON) → NIOUININON)
       if (!existingAnimal) {
-        const { data: allAnimals } = await supabase
+        const { data: allAnimals, error: allError } = await supabase
           .from('animals')
           .select('id, name, tag')
           .eq('user_id', user.id);
         
+        if (allError) {
+          console.error(`❌ Get all animals error:`, allError);
+        }
+        console.log(`🔍 Try 3 (parenthetical) - found ${allAnimals?.length || 0} animals to check`);
+        
         for (const animal of allAnimals || []) {
+          console.log(`  Checking: "${animal.name}" for parenthetical match with "${pedigreeData.animalName}"`);
           const nameMatch = animal.name.match(/\(([^)]+)\)/);
+          if (nameMatch) {
+            console.log(`    Extracted: "${nameMatch[1]}" vs "${pedigreeData.animalName}"`);
+          }
           if (nameMatch && nameMatch[1].toUpperCase() === pedigreeData.animalName.toUpperCase()) {
             console.log(`✅ Matched by parenthetical name: ${animal.name}`);
             existingAnimal = animal;
@@ -277,6 +297,11 @@ serve(async (req) => {
               }
             }
             
+            // Log the update data before attempting update
+            console.log(`📝 Attempting to update animal ID: ${existingAnimal.id}`);
+            console.log(`📝 Update data contains ${Object.keys(pedigreeUpdate).length} fields:`, Object.keys(pedigreeUpdate).join(', '));
+            console.log(`📝 Full update data:`, JSON.stringify(pedigreeUpdate, null, 2));
+
             // Perform the update
             const { data: updatedAnimal, error: updateError } = await supabase
               .from('animals')
@@ -288,12 +313,15 @@ serve(async (req) => {
             
             if (updateError) {
               console.error(`[${new Date().toISOString()}] ❌ Database update failed:`, updateError);
+              console.error('❌ Update error details:', JSON.stringify(updateError, null, 2));
+              console.error('❌ Failed update data:', JSON.stringify(pedigreeUpdate, null, 2));
               pedigreeData._autoUpdated = false;
               pedigreeData._updateError = updateError.message;
             } else {
               const updateDuration = Date.now() - updateStartTime;
               const fieldsUpdated = Object.keys(pedigreeUpdate).length;
               console.log(`[${new Date().toISOString()}] ✅ Pedigree updated in ${updateDuration}ms: ${fieldsUpdated} fields saved`);
+              console.log('✅ Updated animal data:', JSON.stringify(updatedAnimal, null, 2));
               
               pedigreeData._autoUpdated = true;
               pedigreeData._updateResult = {
