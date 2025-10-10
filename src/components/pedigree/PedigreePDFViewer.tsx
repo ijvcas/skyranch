@@ -269,11 +269,11 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
               </div>
             ) : (
               <div className="border rounded-lg overflow-hidden bg-gray-50">
-                <iframe
+                <embed
                   src={`${pdfUrl}#view=FitH`}
+                  type="application/pdf"
                   className="w-full h-[600px] md:h-[700px] lg:h-[800px]"
                   title="Pedigrí PDF"
-                  onError={() => setPdfLoadError(true)}
                 />
               </div>
             )}
