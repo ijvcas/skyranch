@@ -22,13 +22,12 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfLoadError, setPdfLoadError] = useState(false);
 
-  // Load PDF as blob to avoid cross-origin issues
+  // Load signed URL for PDF
   React.useEffect(() => {
-    const loadPdfAsBlob = async () => {
+    const loadSignedUrl = async () => {
       if (!animal.pedigree_pdf_url) return;
 
       try {
-        // Get signed URL
         const { data, error } = await supabase.storage
           .from('pedigree-documents')
           .createSignedUrl(animal.pedigree_pdf_url, 3600);
@@ -40,19 +39,13 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
         }
 
         if (data?.signedUrl) {
-          // Convert relative path to absolute URL
           const baseUrl = 'https://ahwhtxygyzoadsmdrwwg.supabase.co/storage/v1';
           const absoluteUrl = data.signedUrl.startsWith('http') 
             ? data.signedUrl 
             : `${baseUrl}${data.signedUrl}`;
-
-          // Fetch PDF as blob to avoid cross-origin blocking
-          const response = await fetch(absoluteUrl);
-          if (!response.ok) throw new Error('Failed to fetch PDF');
           
-          const blob = await response.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          setPdfUrl(blobUrl);
+          setPdfUrl(absoluteUrl);
+          setPdfLoadError(false);
         }
       } catch (error) {
         console.error('Error loading PDF:', error);
@@ -60,14 +53,7 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
       }
     };
 
-    loadPdfAsBlob();
-
-    // Cleanup blob URL on unmount
-    return () => {
-      if (pdfUrl?.startsWith('blob:')) {
-        URL.revokeObjectURL(pdfUrl);
-      }
-    };
+    loadSignedUrl();
   }, [animal.pedigree_pdf_url]);
 
   const onDrop = async (acceptedFiles: File[]) => {
@@ -125,17 +111,11 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
       if (urlError) throw urlError;
       if (!signedUrlData?.signedUrl) throw new Error('No se pudo generar la URL del PDF');
 
-      // Convert to absolute URL and fetch as blob
+      // Convert to absolute URL
       const baseUrl = 'https://ahwhtxygyzoadsmdrwwg.supabase.co/storage/v1';
       const absoluteUrl = signedUrlData.signedUrl.startsWith('http') 
         ? signedUrlData.signedUrl 
         : `${baseUrl}${signedUrlData.signedUrl}`;
-
-      const response = await fetch(absoluteUrl);
-      if (!response.ok) throw new Error('Failed to fetch PDF');
-      
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
 
       // Update animal record with the file path (not the signed URL)
       const { error: updateError } = await supabase
@@ -145,7 +125,7 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
 
       if (updateError) throw updateError;
 
-      setPdfUrl(blobUrl);
+      setPdfUrl(absoluteUrl);
       setPdfLoadError(false);
       toast({
         title: 'Éxito',
@@ -209,7 +189,15 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
 
   const handleDownload = () => {
     if (!pdfUrl) return;
-    window.open(pdfUrl, '_blank');
+    
+    // Create a temporary link element to trigger download
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = `pedigree-${animal.id}.pdf`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
