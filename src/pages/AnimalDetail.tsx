@@ -9,7 +9,6 @@ import { getAnimal } from '@/services/animalService';
 import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
 import HorizontalPedigreeTree from '@/components/HorizontalPedigreeTree';
 import PedigreeDiagnostics from '@/components/PedigreeDiagnostics';
-import PedigreePDFViewer from '@/components/pedigree/PedigreePDFViewer';
 import AnimalBasicInfo from '@/components/animal-detail/AnimalBasicInfo';
 import AnimalSidebar from '@/components/animal-detail/AnimalSidebar';
 import AnimalHealthRecords from '@/components/animal-detail/AnimalHealthRecords';
@@ -129,11 +128,7 @@ const AnimalDetail = () => {
               </TabsContent>
 
               <TabsContent value="pedigree">
-                {animal.species === 'equino' ? (
-                  <PedigreePDFViewer animal={animal} />
-                ) : (
-                  <HorizontalPedigreeTree animal={animal} />
-                )}
+                <HorizontalPedigreeTree animal={animal} />
               </TabsContent>
 
               <TabsContent value="diagnostics">
