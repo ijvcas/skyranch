@@ -268,13 +268,22 @@ const PedigreePDFViewer = ({ animal }: PedigreePDFViewerProps) => {
                 </Button>
               </div>
             ) : (
-              <div className="border rounded-lg overflow-hidden bg-gray-50">
-                <embed
-                  src={`${pdfUrl}#view=FitH`}
-                  type="application/pdf"
-                  className="w-full h-[600px] md:h-[700px] lg:h-[800px]"
-                  title="Pedigrí PDF"
-                />
+              <div className="border rounded-lg p-8 text-center bg-gray-50">
+                <FileText className="w-16 h-16 mx-auto mb-4 text-primary" />
+                <p className="text-lg font-medium text-gray-900 mb-2">
+                  PDF de Pedigrí Disponible
+                </p>
+                <p className="text-sm text-gray-600 mb-6">
+                  Toca el botón abajo para ver el documento en pantalla completa
+                </p>
+                <Button
+                  size="lg"
+                  onClick={handleDownload}
+                  className="gap-2"
+                >
+                  <FileText className="w-5 h-5" />
+                  Ver PDF
+                </Button>
               </div>
             )}
             <div className="flex items-center justify-between gap-4 pt-2">
