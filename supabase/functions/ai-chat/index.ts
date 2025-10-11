@@ -722,10 +722,9 @@ Sé conciso y directo.`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'gpt-5-2025-08-07',
           messages,
-          max_tokens: 1500,
-          temperature: 0.7,
+          max_completion_tokens: 1500,
         }),
         signal: controller.signal,
       });
