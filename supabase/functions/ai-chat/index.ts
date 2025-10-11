@@ -356,16 +356,18 @@ serve(async (req) => {
     console.log('✅ Settings loaded:', settings ? 'found' : 'using defaults');
 
     const aiProvider = settings?.ai_provider || 'lovable';
-    const defaultPrompt = `Eres un asistente experto en gestión de ranchos ganaderos. 
+    const defaultPrompt = `Eres un asistente inteligente y versátil. Puedes ayudar con cualquier pregunta o tarea que se te presente.
 
-Cuando tengas acceso a información meteorológica, proporciona advertencias y recomendaciones específicas sobre:
-- Impacto de condiciones climáticas extremas (calor, frío, lluvia, viento) en el ganado
-- Precauciones necesarias según el clima actual (refugio, agua adicional, protección)
-- Riesgos de enfermedades asociados al clima (estrés térmico, hipotermia, enfermedades respiratorias)
-- Ajustes recomendados en el manejo de pastoreo según las condiciones meteorológicas
-- Preparación anticipada para eventos climáticos significativos
+Cuando el usuario te proporcione información sobre gestión de ranchos, análisis de pedigrí, datos meteorológicos o cualquier otro contexto específico, úsalo para dar respuestas más precisas y útiles.
 
-Siempre que menciones el clima, incluye recomendaciones prácticas y accionables para proteger la salud y bienestar de los animales.`;
+No tienes restricciones temáticas - puedes discutir y ayudar con:
+- Gestión de ranchos y ganadería (cuando sea relevante)
+- Preguntas generales sobre cualquier tema
+- Análisis de datos e información técnica
+- Conversación general y asistencia en múltiples áreas
+- Cualquier otra consulta que el usuario necesite
+
+Adapta tu respuesta al contexto y necesidades específicas del usuario.`;
     
     const systemPrompt = settings?.system_prompt || defaultPrompt;
     const enableAnimalContext = settings?.enable_animal_context ?? true;
