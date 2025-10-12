@@ -6,6 +6,7 @@ import PedigreeGrandparents from '@/components/pedigree/PedigreeGrandparents';
 import PedigreeParents from '@/components/pedigree/PedigreeParents';
 import PedigreeGeneration4 from '@/components/pedigree/PedigreeGeneration4';
 import PedigreeGeneration5 from '@/components/pedigree/PedigreeGeneration5';
+import PedigreeTextUploadSection from './PedigreeTextUploadSection';
 
 interface PedigreeFormProps {
   formData: any;
@@ -18,11 +19,17 @@ interface PedigreeFormProps {
 const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, animalName }: PedigreeFormProps) => {
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-xl text-gray-900">Información de Pedigrí (5 Generaciones)</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      <PedigreeTextUploadSection 
+        onInputChange={onInputChange} 
+        disabled={disabled} 
+      />
+      
+      <Card className="shadow-lg mt-4">
+        <CardHeader>
+          <CardTitle className="text-xl text-gray-900">Información de Pedigrí (5 Generaciones)</CardTitle>
+        </CardHeader>
+        <CardContent>
         <Tabs defaultValue="gen1" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="gen1">Gen 1</TabsTrigger>
@@ -74,6 +81,7 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
         </Tabs>
       </CardContent>
     </Card>
+    </>
   );
 };
 
