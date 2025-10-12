@@ -687,12 +687,33 @@ Sé conciso y directo.`;
       enhancedSystemPrompt += '\n\n[Datos completos del contexto en JSON para referencia técnica]:\n' + JSON.stringify(contextData, null, 2);
     }
 
-    // Prepare messages for AI
+    // Fetch conversation history from database for context
+    console.log('📜 Fetching conversation history...');
+    const { data: chatHistory, error: historyError } = await supabase
+      .from('chat_history')
+      .select('role, message')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+      .limit(100); // Last 100 messages for context
+    
+    if (historyError) {
+      console.warn('⚠️ Error fetching chat history:', historyError);
+    }
+    
+    console.log(`✅ Loaded ${chatHistory?.length || 0} messages from conversation history`);
+
+    // Prepare messages for AI with conversation history
     const messages = [
       {
         role: 'system',
         content: enhancedSystemPrompt,
       },
+      // Include conversation history for context
+      ...(chatHistory || []).map((msg: any) => ({
+        role: msg.role === 'system' ? 'system' : msg.role,
+        content: msg.message,
+      })),
+      // Add current message
       {
         role: 'user',
         content: message,

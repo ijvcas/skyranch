@@ -23,7 +23,7 @@ export const useAIChat = () => {
         .from('chat_history')
         .select('*')
         .order('created_at', { ascending: true })
-        .limit(50);
+        .limit(200); // Increased from 50 to 200 for better conversation context
       
       if (error) throw error;
       return data as ChatMessage[];
