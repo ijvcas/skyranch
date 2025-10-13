@@ -66,6 +66,38 @@ const detectGenerationMarkers = (line: string): number | null => {
   return null;
 };
 
+// Enhanced parsing with paternal/maternal line detection
+const detectLineType = (line: string): 'paternal' | 'maternal' | 'section_marker' | 'name' => {
+  const lowerLine = line.toLowerCase().trim();
+  
+  // Detect section markers
+  if (
+    lowerLine.includes('ligne paternelle') ||
+    lowerLine.includes('paternal line') ||
+    lowerLine.includes('línea paterna') ||
+    lowerLine.includes('lado paterno') ||
+    lowerLine.includes('father\'s side') ||
+    /^===.*paternal/i.test(lowerLine) ||
+    /^paternal/i.test(lowerLine)
+  ) {
+    return 'section_marker';
+  }
+  
+  if (
+    lowerLine.includes('ligne maternelle') ||
+    lowerLine.includes('maternal line') ||
+    lowerLine.includes('línea materna') ||
+    lowerLine.includes('lado materno') ||
+    lowerLine.includes('mother\'s side') ||
+    /^===.*maternal/i.test(lowerLine) ||
+    /^maternal/i.test(lowerLine)
+  ) {
+    return 'section_marker';
+  }
+  
+  return 'name';
+};
+
 const parseStructuredFormat = (text: string): ParsedPedigree | null => {
   const lines = text.split('\n').filter(line => line.trim());
   const result: any = {
@@ -82,9 +114,15 @@ const parseStructuredFormat = (text: string): ParsedPedigree | null => {
   };
 
   let currentGen = 0;
+  let currentSide: 'paternal' | 'maternal' | 'auto' = 'auto'; // Track which side we're on
+  
   const gen3Names: string[] = [];
-  const gen4Names: string[] = [];
-  const gen5Names: string[] = [];
+  const gen4PaternalNames: string[] = [];
+  const gen4MaternalNames: string[] = [];
+  const gen5PaternalNames: string[] = [];
+  const gen5MaternalNames: string[] = [];
+
+  console.log('🔍 [Pedigree Parser] Starting parse...');
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -92,6 +130,28 @@ const parseStructuredFormat = (text: string): ParsedPedigree | null => {
 
     if (genMarker) {
       currentGen = genMarker;
+      currentSide = 'auto'; // Reset side detection when entering new generation
+      console.log(`📊 [Pedigree Parser] Entered Generation ${currentGen}`);
+      continue;
+    }
+
+    const lineType = detectLineType(line);
+    
+    // Detect section markers for paternal/maternal split
+    if (lineType === 'section_marker') {
+      const lowerLine = line.toLowerCase();
+      if (
+        lowerLine.includes('paternal') ||
+        lowerLine.includes('patern') ||
+        lowerLine.includes('father') ||
+        lowerLine.includes('padre')
+      ) {
+        currentSide = 'paternal';
+        console.log(`🔵 [Pedigree Parser] Switched to PATERNAL side in Gen ${currentGen}`);
+      } else {
+        currentSide = 'maternal';
+        console.log(`🔴 [Pedigree Parser] Switched to MATERNAL side in Gen ${currentGen}`);
+      }
       continue;
     }
 
@@ -130,24 +190,70 @@ const parseStructuredFormat = (text: string): ParsedPedigree | null => {
       const name = cleanName(line.split(':').pop() || line);
       if (name && name.length > 1) {
         gen3Names.push(name);
+        console.log(`  ✅ Gen 3: "${name}"`);
       }
     }
 
-    // Generation 4
+    // Generation 4 - with paternal/maternal detection
     if (currentGen === 4) {
       const name = cleanName(line.split(':').pop() || line);
       if (name && name.length > 1) {
-        gen4Names.push(name);
+        if (currentSide === 'paternal') {
+          gen4PaternalNames.push(name);
+          console.log(`  🔵 Gen 4 PATERNAL: "${name}"`);
+        } else if (currentSide === 'maternal') {
+          gen4MaternalNames.push(name);
+          console.log(`  🔴 Gen 4 MATERNAL: "${name}"`);
+        } else {
+          // Auto mode: first 8 go to paternal, next 8 to maternal
+          if (gen4PaternalNames.length < 8) {
+            gen4PaternalNames.push(name);
+            console.log(`  🔵 Gen 4 PATERNAL (auto): "${name}"`);
+          } else {
+            gen4MaternalNames.push(name);
+            console.log(`  🔴 Gen 4 MATERNAL (auto): "${name}"`);
+          }
+        }
       }
     }
 
-    // Generation 5
+    // Generation 5 - with paternal/maternal detection
     if (currentGen === 5) {
       const name = cleanName(line.split(':').pop() || line);
       if (name && name.length > 1) {
-        gen5Names.push(name);
+        if (currentSide === 'paternal') {
+          gen5PaternalNames.push(name);
+          console.log(`  🔵 Gen 5 PATERNAL: "${name}"`);
+        } else if (currentSide === 'maternal') {
+          gen5MaternalNames.push(name);
+          console.log(`  🔴 Gen 5 MATERNAL: "${name}"`);
+        } else {
+          // Auto mode: first 16 go to paternal, next 16 to maternal
+          if (gen5PaternalNames.length < 16) {
+            gen5PaternalNames.push(name);
+            console.log(`  🔵 Gen 5 PATERNAL (auto): "${name}"`);
+          } else {
+            gen5MaternalNames.push(name);
+            console.log(`  🔴 Gen 5 MATERNAL (auto): "${name}"`);
+          }
+        }
       }
     }
+  }
+
+  // Validation warnings
+  console.log('\n📋 [Pedigree Parser] Validation:');
+  console.log(`  Gen 3: ${gen3Names.length} names (expected: 8)`);
+  console.log(`  Gen 4 Paternal: ${gen4PaternalNames.length} names (expected: 8)`);
+  console.log(`  Gen 4 Maternal: ${gen4MaternalNames.length} names (expected: 8)`);
+  console.log(`  Gen 5 Paternal: ${gen5PaternalNames.length} names (expected: 16)`);
+  console.log(`  Gen 5 Maternal: ${gen5MaternalNames.length} names (expected: 16)`);
+  
+  if (gen4PaternalNames.length + gen4MaternalNames.length !== 16) {
+    console.warn(`⚠️ [Pedigree Parser] Gen 4 total: ${gen4PaternalNames.length + gen4MaternalNames.length} (expected: 16)`);
+  }
+  if (gen5PaternalNames.length + gen5MaternalNames.length !== 32) {
+    console.warn(`⚠️ [Pedigree Parser] Gen 5 total: ${gen5PaternalNames.length + gen5MaternalNames.length} (expected: 32)`);
   }
 
   // Assign generation 3 (8 names)
@@ -156,9 +262,9 @@ const parseStructuredFormat = (text: string): ParsedPedigree | null => {
     result.generation3.push('');
   }
 
-  // Assign generation 4 (16 names split into paternal/maternal)
-  result.generation4.paternalLine = gen4Names.slice(0, 8);
-  result.generation4.maternalLine = gen4Names.slice(8, 16);
+  // Assign generation 4 - use the split arrays
+  result.generation4.paternalLine = gen4PaternalNames.slice(0, 8);
+  result.generation4.maternalLine = gen4MaternalNames.slice(0, 8);
   while (result.generation4.paternalLine.length < 8) {
     result.generation4.paternalLine.push('');
   }
@@ -166,15 +272,17 @@ const parseStructuredFormat = (text: string): ParsedPedigree | null => {
     result.generation4.maternalLine.push('');
   }
 
-  // Assign generation 5 (32 names split into paternal/maternal)
-  result.generation5.paternalLine = gen5Names.slice(0, 16);
-  result.generation5.maternalLine = gen5Names.slice(16, 32);
+  // Assign generation 5 - use the split arrays
+  result.generation5.paternalLine = gen5PaternalNames.slice(0, 16);
+  result.generation5.maternalLine = gen5MaternalNames.slice(0, 16);
   while (result.generation5.paternalLine.length < 16) {
     result.generation5.paternalLine.push('');
   }
   while (result.generation5.maternalLine.length < 16) {
     result.generation5.maternalLine.push('');
   }
+
+  console.log('✅ [Pedigree Parser] Parsing complete\n');
 
   return result as ParsedPedigree;
 };
