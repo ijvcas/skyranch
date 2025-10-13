@@ -114,7 +114,7 @@ const parseStructuredFormat = (text: string): ParsedPedigree | null => {
   };
 
   let currentGen = 0;
-  let currentSide: 'paternal' | 'maternal' | 'auto' = 'auto'; // Track which side we're on
+  let currentSide: 'paternal' | 'maternal' | 'auto' = 'auto';
   
   const gen3Names: string[] = [];
   const gen4PaternalNames: string[] = [];
@@ -122,24 +122,28 @@ const parseStructuredFormat = (text: string): ParsedPedigree | null => {
   const gen5PaternalNames: string[] = [];
   const gen5MaternalNames: string[] = [];
 
-  console.log('🔍 [Pedigree Parser] Starting parse...');
+  console.log('🔍 [Pedigree Parser] Starting parse...', { totalLines: lines.length });
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const genMarker = detectGenerationMarkers(line);
+    const trimmedLine = line.trim();
+    
+    // Skip empty lines
+    if (!trimmedLine) continue;
+
+    const genMarker = detectGenerationMarkers(trimmedLine);
 
     if (genMarker) {
       currentGen = genMarker;
-      currentSide = 'auto'; // Reset side detection when entering new generation
+      currentSide = 'auto';
       console.log(`📊 [Pedigree Parser] Entered Generation ${currentGen}`);
       continue;
     }
 
-    const lineType = detectLineType(line);
+    const lineType = detectLineType(trimmedLine);
     
-    // Detect section markers for paternal/maternal split
     if (lineType === 'section_marker') {
-      const lowerLine = line.toLowerCase();
+      const lowerLine = trimmedLine.toLowerCase();
       if (
         lowerLine.includes('paternal') ||
         lowerLine.includes('patern') ||
@@ -155,86 +159,102 @@ const parseStructuredFormat = (text: string): ParsedPedigree | null => {
       continue;
     }
 
-    const lowerLine = line.toLowerCase();
+    const lowerLine = trimmedLine.toLowerCase();
 
     // Generation 1
     if (currentGen === 1) {
       if (lowerLine.includes('padre') || lowerLine.includes('father') || lowerLine.includes('sire')) {
-        const name = cleanName(line.split(':')[1] || line.replace(/padre|father|sire/gi, ''));
-        if (name) result.generation1.father = name;
+        const name = cleanName(trimmedLine.split(':')[1] || trimmedLine.replace(/padre|father|sire/gi, ''));
+        if (name) {
+          result.generation1.father = name;
+          console.log(`  ✅ Gen 1 Father: "${name}"`);
+        }
       } else if (lowerLine.includes('madre') || lowerLine.includes('mother') || lowerLine.includes('dam')) {
-        const name = cleanName(line.split(':')[1] || line.replace(/madre|mother|dam/gi, ''));
-        if (name) result.generation1.mother = name;
+        const name = cleanName(trimmedLine.split(':')[1] || trimmedLine.replace(/madre|mother|dam/gi, ''));
+        if (name) {
+          result.generation1.mother = name;
+          console.log(`  ✅ Gen 1 Mother: "${name}"`);
+        }
       }
     }
 
     // Generation 2
     if (currentGen === 2) {
       if (lowerLine.includes('abuelo paterno') || lowerLine.includes('paternal grandfather')) {
-        const name = cleanName(line.split(':')[1] || '');
-        if (name) result.generation2.paternalGrandfather = name;
+        const name = cleanName(trimmedLine.split(':')[1] || '');
+        if (name) {
+          result.generation2.paternalGrandfather = name;
+          console.log(`  ✅ Gen 2 Paternal Grandfather: "${name}"`);
+        }
       } else if (lowerLine.includes('abuela paterna') || lowerLine.includes('paternal grandmother')) {
-        const name = cleanName(line.split(':')[1] || '');
-        if (name) result.generation2.paternalGrandmother = name;
+        const name = cleanName(trimmedLine.split(':')[1] || '');
+        if (name) {
+          result.generation2.paternalGrandmother = name;
+          console.log(`  ✅ Gen 2 Paternal Grandmother: "${name}"`);
+        }
       } else if (lowerLine.includes('abuelo materno') || lowerLine.includes('maternal grandfather')) {
-        const name = cleanName(line.split(':')[1] || '');
-        if (name) result.generation2.maternalGrandfather = name;
+        const name = cleanName(trimmedLine.split(':')[1] || '');
+        if (name) {
+          result.generation2.maternalGrandfather = name;
+          console.log(`  ✅ Gen 2 Maternal Grandfather: "${name}"`);
+        }
       } else if (lowerLine.includes('abuela materna') || lowerLine.includes('maternal grandmother')) {
-        const name = cleanName(line.split(':')[1] || '');
-        if (name) result.generation2.maternalGrandmother = name;
+        const name = cleanName(trimmedLine.split(':')[1] || '');
+        if (name) {
+          result.generation2.maternalGrandmother = name;
+          console.log(`  ✅ Gen 2 Maternal Grandmother: "${name}"`);
+        }
       }
     }
 
     // Generation 3
     if (currentGen === 3) {
-      const name = cleanName(line.split(':').pop() || line);
-      if (name && name.length > 1) {
+      const name = cleanName(trimmedLine.split(':').pop() || trimmedLine);
+      if (name && name.length > 1 && !lowerLine.match(/^(gen|generación|generation)/i)) {
         gen3Names.push(name);
-        console.log(`  ✅ Gen 3: "${name}"`);
+        console.log(`  ✅ Gen 3 [${gen3Names.length}]: "${name}"`);
       }
     }
 
-    // Generation 4 - with paternal/maternal detection
+    // Generation 4
     if (currentGen === 4) {
-      const name = cleanName(line.split(':').pop() || line);
-      if (name && name.length > 1) {
+      const name = cleanName(trimmedLine.split(':').pop() || trimmedLine);
+      if (name && name.length > 1 && !lowerLine.match(/^(gen|generación|generation)/i)) {
         if (currentSide === 'paternal') {
           gen4PaternalNames.push(name);
-          console.log(`  🔵 Gen 4 PATERNAL: "${name}"`);
+          console.log(`  🔵 Gen 4 PATERNAL [${gen4PaternalNames.length}]: "${name}"`);
         } else if (currentSide === 'maternal') {
           gen4MaternalNames.push(name);
-          console.log(`  🔴 Gen 4 MATERNAL: "${name}"`);
+          console.log(`  🔴 Gen 4 MATERNAL [${gen4MaternalNames.length}]: "${name}"`);
         } else {
-          // Auto mode: first 8 go to paternal, next 8 to maternal
           if (gen4PaternalNames.length < 8) {
             gen4PaternalNames.push(name);
-            console.log(`  🔵 Gen 4 PATERNAL (auto): "${name}"`);
+            console.log(`  🔵 Gen 4 PATERNAL (auto) [${gen4PaternalNames.length}]: "${name}"`);
           } else {
             gen4MaternalNames.push(name);
-            console.log(`  🔴 Gen 4 MATERNAL (auto): "${name}"`);
+            console.log(`  🔴 Gen 4 MATERNAL (auto) [${gen4MaternalNames.length}]: "${name}"`);
           }
         }
       }
     }
 
-    // Generation 5 - with paternal/maternal detection
+    // Generation 5
     if (currentGen === 5) {
-      const name = cleanName(line.split(':').pop() || line);
-      if (name && name.length > 1) {
+      const name = cleanName(trimmedLine.split(':').pop() || trimmedLine);
+      if (name && name.length > 1 && !lowerLine.match(/^(gen|generación|generation)/i)) {
         if (currentSide === 'paternal') {
           gen5PaternalNames.push(name);
-          console.log(`  🔵 Gen 5 PATERNAL: "${name}"`);
+          console.log(`  🔵 Gen 5 PATERNAL [${gen5PaternalNames.length}]: "${name}"`);
         } else if (currentSide === 'maternal') {
           gen5MaternalNames.push(name);
-          console.log(`  🔴 Gen 5 MATERNAL: "${name}"`);
+          console.log(`  🔴 Gen 5 MATERNAL [${gen5MaternalNames.length}]: "${name}"`);
         } else {
-          // Auto mode: first 16 go to paternal, next 16 to maternal
           if (gen5PaternalNames.length < 16) {
             gen5PaternalNames.push(name);
-            console.log(`  🔵 Gen 5 PATERNAL (auto): "${name}"`);
+            console.log(`  🔵 Gen 5 PATERNAL (auto) [${gen5PaternalNames.length}]: "${name}"`);
           } else {
             gen5MaternalNames.push(name);
-            console.log(`  🔴 Gen 5 MATERNAL (auto): "${name}"`);
+            console.log(`  🔴 Gen 5 MATERNAL (auto) [${gen5MaternalNames.length}]: "${name}"`);
           }
         }
       }

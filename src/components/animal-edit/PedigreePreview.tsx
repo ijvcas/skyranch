@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, GitBranch } from 'lucide-react';
 import type { ParsedPedigree } from '@/services/pedigree/textParser';
 
 interface PedigreePreviewProps {
@@ -38,64 +38,93 @@ const PedigreePreview: React.FC<PedigreePreviewProps> = ({ parsed, onApply, onCa
   };
 
   return (
-    <Card className="mt-4">
-      <CardHeader>
+    <Card className="mt-4 border-2 border-primary/20">
+      <CardHeader className="bg-primary/5">
         <CardTitle className="text-lg flex items-center justify-between">
-          <span>Vista Previa de Pedigrí</span>
-          <span className="text-sm font-normal text-muted-foreground">
+          <span className="flex items-center gap-2">
+            <GitBranch className="w-5 h-5" />
+            Vista Previa de Pedigrí
+          </span>
+          <span className="text-sm font-normal text-muted-foreground bg-background px-3 py-1 rounded-full border">
             {totalFields} campos detectados
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="space-y-4">
           {/* Generation 1 */}
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 relative pl-6">
+            <div className="absolute left-0 top-3 w-4 h-px bg-border"></div>
             {getStatusIcon(gen1Count, 2)}
-            <div className="flex-1">
-              <h4 className="font-semibold text-sm">Generación 1 - Padres ({gen1Count}/2)</h4>
-              <div className="mt-2 space-y-1 text-sm">
+            <div className="flex-1 border-l-2 border-primary/30 pl-4">
+              <h4 className="font-semibold text-sm mb-3">Generación 1 - Padres ({gen1Count}/2)</h4>
+              <div className="space-y-2 text-sm">
                 {parsed.generation1.father && (
-                  <div><span className="text-muted-foreground">Padre:</span> {parsed.generation1.father}</div>
+                  <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/20 p-2 rounded">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="text-muted-foreground font-medium">Padre:</span> 
+                    <span className="font-semibold">{parsed.generation1.father}</span>
+                  </div>
                 )}
                 {parsed.generation1.mother && (
-                  <div><span className="text-muted-foreground">Madre:</span> {parsed.generation1.mother}</div>
+                  <div className="flex items-center gap-2 bg-pink-50 dark:bg-pink-950/20 p-2 rounded">
+                    <div className="w-2 h-2 rounded-full bg-pink-500"></div>
+                    <span className="text-muted-foreground font-medium">Madre:</span> 
+                    <span className="font-semibold">{parsed.generation1.mother}</span>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
           {/* Generation 2 */}
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 relative pl-6">
+            <div className="absolute left-0 top-3 w-4 h-px bg-border"></div>
             {getStatusIcon(gen2Count, 4)}
-            <div className="flex-1">
-              <h4 className="font-semibold text-sm">Generación 2 - Abuelos ({gen2Count}/4)</h4>
-              <div className="mt-2 space-y-1 text-sm">
+            <div className="flex-1 border-l-2 border-primary/30 pl-4">
+              <h4 className="font-semibold text-sm mb-3">Generación 2 - Abuelos ({gen2Count}/4)</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
                 {parsed.generation2.paternalGrandfather && (
-                  <div><span className="text-muted-foreground">Abuelo Paterno:</span> {parsed.generation2.paternalGrandfather}</div>
+                  <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/20 p-2 rounded">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                    <span className="text-xs">{parsed.generation2.paternalGrandfather}</span>
+                  </div>
                 )}
                 {parsed.generation2.paternalGrandmother && (
-                  <div><span className="text-muted-foreground">Abuela Paterna:</span> {parsed.generation2.paternalGrandmother}</div>
+                  <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/20 p-2 rounded">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                    <span className="text-xs">{parsed.generation2.paternalGrandmother}</span>
+                  </div>
                 )}
                 {parsed.generation2.maternalGrandfather && (
-                  <div><span className="text-muted-foreground">Abuelo Materno:</span> {parsed.generation2.maternalGrandfather}</div>
+                  <div className="flex items-center gap-2 bg-pink-50 dark:bg-pink-950/20 p-2 rounded">
+                    <div className="w-1.5 h-1.5 rounded-full bg-pink-500"></div>
+                    <span className="text-xs">{parsed.generation2.maternalGrandfather}</span>
+                  </div>
                 )}
                 {parsed.generation2.maternalGrandmother && (
-                  <div><span className="text-muted-foreground">Abuela Materna:</span> {parsed.generation2.maternalGrandmother}</div>
+                  <div className="flex items-center gap-2 bg-pink-50 dark:bg-pink-950/20 p-2 rounded">
+                    <div className="w-1.5 h-1.5 rounded-full bg-pink-400"></div>
+                    <span className="text-xs">{parsed.generation2.maternalGrandmother}</span>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
           {/* Generation 3 */}
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 relative pl-6">
+            <div className="absolute left-0 top-3 w-4 h-px bg-border"></div>
             {getStatusIcon(gen3Count, 8)}
-            <div className="flex-1">
-              <h4 className="font-semibold text-sm">Generación 3 - Bisabuelos ({gen3Count}/8)</h4>
+            <div className="flex-1 border-l-2 border-primary/30 pl-4">
+              <h4 className="font-semibold text-sm mb-3">Generación 3 - Bisabuelos ({gen3Count}/8)</h4>
               {gen3Count > 0 && (
-                <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-4 gap-1.5 text-xs">
                   {parsed.generation3.filter(n => n && n.trim().length > 0).map((name, idx) => (
-                    <div key={idx} className="text-muted-foreground">• {name}</div>
+                    <div key={idx} className={`flex items-center gap-1 p-1.5 rounded ${idx < 4 ? 'bg-blue-50 dark:bg-blue-950/10' : 'bg-pink-50 dark:bg-pink-950/10'}`}>
+                      <div className={`w-1 h-1 rounded-full ${idx < 4 ? 'bg-blue-400' : 'bg-pink-400'}`}></div>
+                      <span className="truncate">{name}</span>
+                    </div>
                   ))}
                 </div>
               )}
@@ -103,25 +132,32 @@ const PedigreePreview: React.FC<PedigreePreviewProps> = ({ parsed, onApply, onCa
           </div>
 
           {/* Generation 4 */}
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 relative pl-6">
+            <div className="absolute left-0 top-3 w-4 h-px bg-border"></div>
             {getStatusIcon(gen4Count, 16)}
-            <div className="flex-1">
-              <h4 className="font-semibold text-sm">Generación 4 - Tatarabuelos ({gen4Count}/16)</h4>
+            <div className="flex-1 border-l-2 border-primary/30 pl-4">
+              <h4 className="font-semibold text-sm mb-3">Generación 4 - Tatarabuelos ({gen4Count}/16)</h4>
               {gen4Count > 0 && (
-                <div className="mt-2 space-y-2">
+                <div className="space-y-3">
                   <div>
-                    <div className="text-xs font-medium text-muted-foreground mb-1">Línea Paterna:</div>
-                    <div className="grid grid-cols-2 gap-1 text-sm">
+                    <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      Línea Paterna ({parsed.generation4.paternalLine.filter(n => n && n.trim().length > 0).length}/8)
+                    </div>
+                    <div className="grid grid-cols-4 gap-1 text-xs">
                       {parsed.generation4.paternalLine.filter(n => n && n.trim().length > 0).map((name, idx) => (
-                        <div key={idx} className="text-muted-foreground">• {name}</div>
+                        <div key={idx} className="bg-blue-50 dark:bg-blue-950/10 p-1 rounded truncate">{name}</div>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-muted-foreground mb-1">Línea Materna:</div>
-                    <div className="grid grid-cols-2 gap-1 text-sm">
+                    <div className="text-xs font-semibold text-pink-600 dark:text-pink-400 mb-2 flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-pink-500"></div>
+                      Línea Materna ({parsed.generation4.maternalLine.filter(n => n && n.trim().length > 0).length}/8)
+                    </div>
+                    <div className="grid grid-cols-4 gap-1 text-xs">
                       {parsed.generation4.maternalLine.filter(n => n && n.trim().length > 0).map((name, idx) => (
-                        <div key={idx} className="text-muted-foreground">• {name}</div>
+                        <div key={idx} className="bg-pink-50 dark:bg-pink-950/10 p-1 rounded truncate">{name}</div>
                       ))}
                     </div>
                   </div>
@@ -131,25 +167,32 @@ const PedigreePreview: React.FC<PedigreePreviewProps> = ({ parsed, onApply, onCa
           </div>
 
           {/* Generation 5 */}
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start space-x-3 relative pl-6">
+            <div className="absolute left-0 top-3 w-4 h-px bg-border"></div>
             {getStatusIcon(gen5Count, 32)}
-            <div className="flex-1">
-              <h4 className="font-semibold text-sm">Generación 5 ({gen5Count}/32)</h4>
+            <div className="flex-1 border-l-2 border-primary/30 pl-4">
+              <h4 className="font-semibold text-sm mb-3">Generación 5 ({gen5Count}/32)</h4>
               {gen5Count > 0 && (
-                <div className="mt-2 space-y-2">
+                <div className="space-y-3">
                   <div>
-                    <div className="text-xs font-medium text-muted-foreground mb-1">Línea Paterna:</div>
-                    <div className="grid grid-cols-3 gap-1 text-sm">
+                    <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      Línea Paterna ({parsed.generation5.paternalLine.filter(n => n && n.trim().length > 0).length}/16)
+                    </div>
+                    <div className="grid grid-cols-8 gap-0.5 text-[10px]">
                       {parsed.generation5.paternalLine.filter(n => n && n.trim().length > 0).map((name, idx) => (
-                        <div key={idx} className="text-muted-foreground text-xs">• {name}</div>
+                        <div key={idx} className="bg-blue-50 dark:bg-blue-950/10 p-0.5 rounded truncate" title={name}>{name}</div>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-muted-foreground mb-1">Línea Materna:</div>
-                    <div className="grid grid-cols-3 gap-1 text-sm">
+                    <div className="text-xs font-semibold text-pink-600 dark:text-pink-400 mb-2 flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-pink-500"></div>
+                      Línea Materna ({parsed.generation5.maternalLine.filter(n => n && n.trim().length > 0).length}/16)
+                    </div>
+                    <div className="grid grid-cols-8 gap-0.5 text-[10px]">
                       {parsed.generation5.maternalLine.filter(n => n && n.trim().length > 0).map((name, idx) => (
-                        <div key={idx} className="text-muted-foreground text-xs">• {name}</div>
+                        <div key={idx} className="bg-pink-50 dark:bg-pink-950/10 p-0.5 rounded truncate" title={name}>{name}</div>
                       ))}
                     </div>
                   </div>
