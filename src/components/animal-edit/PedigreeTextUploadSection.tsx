@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { FileText, X } from 'lucide-react';
-import { parsePedigreeText, mapPedigreeToFields } from '@/services/pedigree/textParser';
+import { FileText, X, Upload } from 'lucide-react';
+import { parseASCIITreePedigree, mapPedigreeToFields } from '@/services/pedigree/asciiTreeParser';
 import PedigreePreview from './PedigreePreview';
 import { useToast } from '@/hooks/use-toast';
+import { parse_document } from '@/utils/documentParser';
 
 interface PedigreeTextUploadSectionProps {
   onInputChange: (field: string, value: string) => void;
@@ -19,24 +20,50 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
   const [showUpload, setShowUpload] = useState(false);
   const [pastedText, setPastedText] = useState('');
   const [parsedData, setParsedData] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessing(true);
+    
+    try {
+      const text = await parse_document(file);
+      setPastedText(text);
+      
+      toast({
+        title: 'Archivo Cargado',
+        description: 'Ahora haz clic en "Analizar Árbol" para procesar el pedigrí.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error al Cargar',
+        description: 'No se pudo procesar el archivo. Intenta pegar el texto manualmente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleParse = () => {
     if (!pastedText.trim()) {
       toast({
         title: 'Error',
-        description: 'Por favor, pega el texto del pedigrí primero.',
+        description: 'Por favor, pega el texto del pedigrí o sube un archivo primero.',
         variant: 'destructive',
       });
       return;
     }
 
-    const parsed = parsePedigreeText(pastedText);
+    const parsed = parseASCIITreePedigree(pastedText);
     
     if (!parsed) {
       toast({
         title: 'Error al Analizar',
-        description: 'No se pudo analizar el texto. Verifica el formato.',
+        description: 'No se pudo analizar el árbol genealógico. Verifica el formato.',
         variant: 'destructive',
       });
       return;
@@ -85,10 +112,10 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
             disabled={disabled}
           >
             <FileText className="w-4 h-4 mr-2" />
-            Pegar Texto de Pedigrí
+            Cargar Pedigrí Completo (5 Generaciones)
           </Button>
           <p className="text-xs text-muted-foreground text-center mt-2">
-            Copia y pega el pedigrí desde cualquier documento
+            Sube PDF/TXT o pega el árbol genealógico completo
           </p>
         </CardContent>
       </Card>
@@ -99,7 +126,7 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="text-xl text-gray-900 flex items-center justify-between">
-          <span>Pegar Texto de Pedigrí</span>
+          <span>Cargar Árbol Genealógico Completo</span>
           <Button
             variant="ghost"
             size="sm"
@@ -115,36 +142,66 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label htmlFor="pdf-upload" className="cursor-pointer">
+                <div className="border-2 border-dashed border-muted rounded-lg p-4 hover:border-primary transition-colors text-center">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm font-medium">Subir PDF o TXT</p>
+                  <p className="text-xs text-muted-foreground">Haz clic para seleccionar</p>
+                </div>
+              </label>
+              <input
+                id="pdf-upload"
+                type="file"
+                accept=".pdf,.txt"
+                onChange={handleFileUpload}
+                disabled={disabled || isProcessing}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">O pega el texto</span>
+            </div>
+          </div>
+
           <div>
             <label className="text-sm font-medium mb-2 block">
-              Pega el texto del pedigrí aquí
+              Árbol genealógico en formato texto
             </label>
             <Textarea
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
-              placeholder={`Ejemplo de formato:
+              placeholder={`Pega aquí el árbol genealógico completo (5 generaciones).
+Formato ASCII con líneas y sangrías, por ejemplo:
 
-Generación 1:
-Padre: Nombre del Toro
-Madre: Nombre de la Vaca
-
-Generación 2:
-Abuelo Paterno: Nombre
-Abuela Paterna: Nombre
-Abuelo Materno: Nombre
-Abuela Materna: Nombre
-
-Generación 3:
-[Lista de bisabuelos...]
-
-...y así sucesivamente hasta Generación 5`}
-              rows={12}
-              className="font-mono text-sm"
-              disabled={disabled}
+                    BISABUELO PATERNO
+              ABUELO PATERNO
+                    BISABUELA PATERNA
+        PADRE
+                    BISABUELO MATERNO  
+              ABUELA PATERNA
+                    BISABUELA MATERNA
+  ANIMAL
+                    BISABUELO PATERNO
+              ABUELO MATERNO
+                    BISABUELA PATERNA
+        MADRE
+                    BISABUELO MATERNO
+              ABUELA MATERNA
+                    BISABUELA MATERNA`}
+              rows={16}
+              className="font-mono text-xs"
+              disabled={disabled || isProcessing}
             />
             <p className="text-xs text-muted-foreground mt-2">
-              Formatos soportados: texto estructurado con generaciones numeradas, listas, o texto con
-              etiquetas (Padre, Madre, Abuelo, etc.)
+              El parser detectará automáticamente la estructura del árbol basándose en sangrías y líneas
             </p>
           </div>
 
@@ -152,10 +209,10 @@ Generación 3:
             <Button
               type="button"
               onClick={handleParse}
-              disabled={disabled || !pastedText.trim()}
+              disabled={disabled || !pastedText.trim() || isProcessing}
               className="w-full"
             >
-              Analizar Texto
+              {isProcessing ? 'Procesando...' : 'Analizar Árbol'}
             </Button>
           )}
 

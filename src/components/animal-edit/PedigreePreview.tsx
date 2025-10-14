@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, XCircle, AlertCircle, GitBranch } from 'lucide-react';
-import type { ParsedPedigree } from '@/services/pedigree/textParser';
+import type { ParsedPedigree } from '@/services/pedigree/asciiTreeParser';
 
 interface PedigreePreviewProps {
   parsed: ParsedPedigree;

@@ -1,0 +1,67 @@
+
+                                             OBERON BDP, 1980
+                                         ┌── ACTEUR BDP, 1988
+                                         │   └── PRALINE BDP, 1981
+                                     ┌── NOIRPAN DE VILLIERS  UELN: 25000101446286L  BDP, 2001
+                                     │       ┌── VENUS BDP, 1987
+                                     │   └── DEMOISELLE BDP, 1991
+                                     │       └── QUIRIELLE BDP, 1982
+                                 ┌── RHEBUS DE LA BOUTONNE  UELN: 25000105415232C  BDP, 2005
+                                 │       ┌── CADICHON BDP, 1990
+                                 │   └── GALON D'OR BDP, 1994
+                                 │       └── BISCOTTE BDP, 1989
+                             ┌── CUPIDON DU VERN  UELN: 25000112516642D  BDP, 2012
+                             │       ┌── MIKADO BDP, 1978
+                             │   └── FANY DU BOURG BDP, 1993
+                             │       └── TYCHIE DU BOURG BDP, 1985
+LASCAUX DU VERN  (Baudet du Poitou, Mâle, Noir Pangaré, 2021)
+UELN: 25000121451444M
+                             │       ┌── INDIGO BDP, 1974
+                             │   ┌── OCCITAN PIEROUTINE BDP, 1980
+                             │   │   └── FIDÈLE BDP, 1971
+                             ├── ÉCLAIR  UELN: 250001000YV0062  BDP, 1992
+                             │       ┌── PRINCE BDP, 1981
+                             │   └── URANIE BDP, 1986
+                             │       └── ODILE BDP, 1980
+                             ├── ONDINE DU REBBERG  UELN: 25000102411281R  BDP, 2002
+                             │       ┌── INDIGO BDP, 1974
+                             │   ┌── OCCITAN PIEROUTINE BDP, 1980
+                             │   │   └── FIDÈLE BDP, 1971
+                             │   └── FANETTE  UELN: 250001000FV0128  BDP, 1993
+                             │       ┌── PRINCE BDP, 1981
+                             │       └── URANIE BDP, 1986
+                             │           └── ODILE BDP, 1980
+                             │
+                             │
+                             │           ┌── TORRENT BDP, 1985 (ou OBERON BDP, 1980)
+                             │       ┌── BAMBY BDP, 1989
+                             │       │   └── LINOTTE BDP, 1977
+                             │   ┌── FRINGANT  UELN: 250001000FS0434  BDP, 1993
+                             │   │       ┌── OBERON BDP, 1980
+                             │   │   └── VOLEUSE BDP, 1987
+                             │   │       └── PRALINE BDP, 1981
+                             ├── PAPYRUS DE L'ÉTOILE  UELN: 25000103522746C  BDP, 2003
+                             │       ┌── DIVISEUR BDP, 1969
+                             │   ┌── UNIVERS DU BOURG BDP, 1986
+                             │   │   └── PASTILLE DU BOURG BDP, 1981
+                             │   └── JAPADPRIX DE L'ÉTOILE  UELN: 250001000JS0265  BDP, 1997
+                             │       ┌── JASMIN BDP, 1975
+                             │       └── SASMINA BDP, 1984
+                             │           └── AMANDE BDP, 1966
+                             │
+                             │
+                             │           ┌── POLO BDP, 1959
+                             │       ┌── ESPOIR BDP, 1970
+                             │       │   └── VENUS BDP, (s.d.)
+                             │   ┌── REGAIN  UELN: 250001000YV0034  BDP, 1983
+                             │   │       ┌── SANS GÈNE BDP, 1960
+                             │   │   └── MISTINGUETTE BDP, 1976
+                             │   │       └── ÉTINCELLE BDP, 1970
+                             ├── GIROFLÉE  UELN: 250001000GD0636  BDP, 1994
+                             │       ┌── ESPOIR BDP, 1970
+                             │   ┌── SATURNIN BDP, 1984
+                             │   │   └── ODILE BDP, 1980
+                             │   └── BRYONE  UELN: 250001000WD6334  BDP, 1989
+                             │       ┌── GAULOIS BDP, 1972
+                             │       └── QUENELLE BDP, 1982
+                             │           └── LISON BDP, 1977
