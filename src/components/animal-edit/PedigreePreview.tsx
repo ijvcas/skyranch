@@ -23,7 +23,7 @@ const PedigreePreview: React.FC<PedigreePreviewProps> = ({ parsed, onApply, onCa
 
   const gen1Count = countPopulatedFields(parsed.generation1);
   const gen2Count = countPopulatedFields(parsed.generation2);
-  const gen3Count = parsed.generation3.filter(n => n && n.trim().length > 0).length;
+  const gen3Count = countPopulatedFields(parsed.generation3);
   const gen4Count = parsed.generation4.paternalLine.filter(n => n && n.trim().length > 0).length +
                     parsed.generation4.maternalLine.filter(n => n && n.trim().length > 0).length;
   const gen5Count = parsed.generation5.paternalLine.filter(n => n && n.trim().length > 0).length +
@@ -118,16 +118,20 @@ const PedigreePreview: React.FC<PedigreePreviewProps> = ({ parsed, onApply, onCa
             {getStatusIcon(gen3Count, 8)}
             <div className="flex-1 border-l-2 border-primary/30 pl-4">
               <h4 className="font-semibold text-sm mb-3">Generación 3 - Bisabuelos ({gen3Count}/8)</h4>
-              {gen3Count > 0 && (
-                <div className="grid grid-cols-4 gap-1.5 text-xs">
-                  {parsed.generation3.filter(n => n && n.trim().length > 0).map((name, idx) => (
-                    <div key={idx} className={`flex items-center gap-1 p-1.5 rounded ${idx < 4 ? 'bg-blue-50 dark:bg-blue-950/10' : 'bg-pink-50 dark:bg-pink-950/10'}`}>
-                      <div className={`w-1 h-1 rounded-full ${idx < 4 ? 'bg-blue-400' : 'bg-pink-400'}`}></div>
-                      <span className="truncate">{name}</span>
-                    </div>
-                  ))}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="space-y-1">
+                  {parsed.generation3.paternalGreatGrandfatherFather && <div className="bg-blue-50 dark:bg-blue-950/10 p-1 rounded truncate">{parsed.generation3.paternalGreatGrandfatherFather}</div>}
+                  {parsed.generation3.paternalGreatGrandmotherFather && <div className="bg-blue-50 dark:bg-blue-950/10 p-1 rounded truncate">{parsed.generation3.paternalGreatGrandmotherFather}</div>}
+                  {parsed.generation3.paternalGreatGrandfatherMother && <div className="bg-blue-50 dark:bg-blue-950/10 p-1 rounded truncate">{parsed.generation3.paternalGreatGrandfatherMother}</div>}
+                  {parsed.generation3.paternalGreatGrandmotherMother && <div className="bg-blue-50 dark:bg-blue-950/10 p-1 rounded truncate">{parsed.generation3.paternalGreatGrandmotherMother}</div>}
                 </div>
-              )}
+                <div className="space-y-1">
+                  {parsed.generation3.maternalGreatGrandfatherFather && <div className="bg-pink-50 dark:bg-pink-950/10 p-1 rounded truncate">{parsed.generation3.maternalGreatGrandfatherFather}</div>}
+                  {parsed.generation3.maternalGreatGrandmotherFather && <div className="bg-pink-50 dark:bg-pink-950/10 p-1 rounded truncate">{parsed.generation3.maternalGreatGrandmotherFather}</div>}
+                  {parsed.generation3.maternalGreatGrandfatherMother && <div className="bg-pink-50 dark:bg-pink-950/10 p-1 rounded truncate">{parsed.generation3.maternalGreatGrandfatherMother}</div>}
+                  {parsed.generation3.maternalGreatGrandmotherMother && <div className="bg-pink-50 dark:bg-pink-950/10 p-1 rounded truncate">{parsed.generation3.maternalGreatGrandmotherMother}</div>}
+                </div>
+              </div>
             </div>
           </div>
 
