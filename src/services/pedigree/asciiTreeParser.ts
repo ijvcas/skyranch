@@ -90,7 +90,10 @@ const detectFormat = (text: string): 'table' | 'tree' => {
 };
 
 const getIndentLevel = (line: string): number => {
-  const match = line.match(/^(\s*)/);
+  // Remove box-drawing characters to find where the actual name starts
+  // Box chars: ┌│└├─┤┬┴┼╭╮╯╰ and also spaces between them
+  const withoutBoxChars = line.replace(/[┌│└├─┤┬┴┼╭╮╯╰]/g, '');
+  const match = withoutBoxChars.match(/^(\s*)/);
   return match ? match[1].length : 0;
 };
 
