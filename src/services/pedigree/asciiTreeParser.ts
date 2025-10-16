@@ -45,8 +45,15 @@ const cleanAncestorName = (text: string): string => {
   // Remove box-drawing characters
   let cleaned = text.replace(/[┌│└├─┤┬┴┼╭╮╯╰]/g, '').trim();
   
-  // Remove UELN identifier and everything after it
-  cleaned = cleaned.replace(/UELN:\s*\S+.*$/g, '').trim();
+  // Handle UELN on same line or separate line
+  if (text.includes('UELN:')) {
+    // Split by newline if UELN is on separate line
+    const parts = text.split('\n');
+    cleaned = parts[0].trim(); // Take only the name part
+  }
+  
+  // Remove UELN if inline: "NAME  UELN: 123" → "NAME"
+  cleaned = cleaned.replace(/\s*UELN:\s*\S+/g, '').trim();
   
   // Remove breed codes and years: "NAME BDP, YEAR" → "NAME"
   cleaned = cleaned.replace(/\s+BDP,?\s*\d{4}?/g, '').trim();
@@ -56,6 +63,12 @@ const cleanAncestorName = (text: string): string => {
   
   // Remove just BDP at end
   cleaned = cleaned.replace(/\s+BDP$/g, '').trim();
+  
+  // Remove alternate format with "ou" (alternative names)
+  cleaned = cleaned.replace(/\s*\(ou\s+[^)]+\)/gi, '').trim();
+  
+  // Remove any remaining parenthetical year info
+  cleaned = cleaned.replace(/\s*\(s\.d\.\)/gi, '').trim();
   
   return cleaned.replace(/\s+/g, ' ').trim();
 };
@@ -81,9 +94,12 @@ const getIndentLevel = (line: string): number => {
   return match ? match[1].length : 0;
 };
 
-const isSubjectLine = (line: string): boolean => {
+const isSubjectLine = (line: string, nextLine?: string): boolean => {
   // Subject line contains breed info in parentheses
-  return /\([^)]*(?:Baudet|Cheval|Âne|Poney|Horse|Mâle|Male|Hembra|Female)[^)]*\)/i.test(line);
+  const hasBreedInfo = /\([^)]*(?:Baudet|Cheval|Âne|Poney|Horse|Mâle|Male|Hembra|Female)[^)]*\)/i.test(line);
+  // Or next line has UELN (multi-line subject)
+  const nextHasUELN = nextLine && /^UELN:/i.test(nextLine.trim());
+  return hasBreedInfo || nextHasUELN;
 };
 
 /**
@@ -99,9 +115,13 @@ const parseTablePedigree = (text: string): ParsedPedigree | null => {
     // Find subject line (contains breed info like "Baudet Du Poitou, Male")
     let subjectIdx = -1;
     for (let i = 0; i < lines.length; i++) {
-      if (isSubjectLine(lines[i])) {
+      if (isSubjectLine(lines[i], lines[i + 1])) {
         subjectIdx = i;
         console.log('🎯 Subject at line:', i + 1);
+        // If UELN is on next line, skip it in the row count
+        if (lines[i + 1]?.trim().startsWith('UELN:')) {
+          console.log('   (UELN on next line, will skip)');
+        }
         break;
       }
     }
@@ -241,9 +261,14 @@ const parseTreePedigree = (text: string): ParsedPedigree | null => {
     // Find subject line
     let subjectIdx = -1;
     for (let i = 0; i < lines.length; i++) {
-      if (isSubjectLine(lines[i])) {
+      if (isSubjectLine(lines[i], lines[i + 1])) {
         subjectIdx = i;
         console.log('🎯 Subject at line:', i + 1, ':', lines[i].substring(0, 50));
+        // If UELN is on next line, skip it when splitting paternal/maternal
+        if (lines[i + 1]?.trim().startsWith('UELN:')) {
+          subjectIdx = i + 1; // Move past the UELN line
+          console.log('   (Skipping UELN line at', i + 2, ')');
+        }
         break;
       }
     }
@@ -263,8 +288,13 @@ const parseTreePedigree = (text: string): ParsedPedigree | null => {
     const extractNodes = (lineArray: string[]): TreeNode[] => {
       const nodes: TreeNode[] = [];
       lineArray.forEach((line, idx) => {
+        // Skip empty lines and lines that are ONLY "UELN:" (separate line)
+        if (line.trim().startsWith('UELN:')) {
+          return; // Skip UELN-only lines
+        }
+        
         const cleaned = cleanAncestorName(line);
-        if (cleaned && cleaned.length > 2 && !line.includes('UELN:')) {
+        if (cleaned && cleaned.length > 2) {
           nodes.push({
             name: cleaned,
             lineIndex: idx,

@@ -227,7 +227,7 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
             </div>
 
             {/* Generation 4 - Great-Great-Grandparents */}
-            {stats.gen4 > 0 ? (
+            {stats.gen4 > 0 && (
               <div className="flex flex-col gap-1 justify-center">
                 <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 4</div>
                 {/* Paternal side */}
@@ -249,34 +249,6 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
                 <AncestorBox name={animal.gen4_maternal_ggmgf_m} label="GGMGF M" gender="male" generation={4} getDisplayName={getDisplayName} />
                 <AncestorBox name={animal.gen4_maternal_ggmgm_m} label="GGMGM M" gender="female" generation={4} getDisplayName={getDisplayName} />
               </div>
-            ) : (
-              <>
-                <label htmlFor="pedigree-upload-view" className="cursor-pointer">
-                  <div className="flex items-center justify-center px-8 py-4 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
-                    <div className="text-center">
-                      {uploading ? (
-                        <Loader2 className="w-8 h-8 mx-auto mb-2 text-primary animate-spin" />
-                      ) : (
-                        <Upload className="w-8 h-8 mx-auto mb-2 text-primary" />
-                      )}
-                      <div className="text-sm font-medium text-foreground">
-                        Generaciones 4 y 5
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {uploading ? 'Procesando...' : 'Sube un documento de pedigrí para completar'}
-                      </div>
-                    </div>
-                  </div>
-                </label>
-                <input
-                  id="pedigree-upload-view"
-                  type="file"
-                  accept="image/png,image/jpeg,application/pdf"
-                  className="hidden"
-                  onChange={handleFileSelect}
-                  disabled={uploading}
-                />
-              </>
             )}
 
             {/* Generation 5 */}

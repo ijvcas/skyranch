@@ -34,11 +34,10 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
       
       if (text === '__PDF_FILE__') {
         toast({
-          title: 'PDF detectado',
-          description: 'Los PDFs se extraen automáticamente. Copiando contenido...',
+          title: 'PDF Detectado',
+          description: 'Por favor, abre el PDF en tu visor y copia/pega el contenido del árbol genealógico en el área de texto a continuación.',
+          variant: 'default',
         });
-        // For PDFs, we need to use the document parser tool from the backend
-        // For now, show message to copy/paste
         setIsProcessing(false);
         return;
       }
