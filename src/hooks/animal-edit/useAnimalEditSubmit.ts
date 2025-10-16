@@ -35,23 +35,23 @@ export const useAnimalEditSubmit = (id: string, formData: any, navigate: any) =>
     
     console.log('🔄 Form data being submitted:', formData);
     
-    // Ensure we're sending all parent data correctly including great-grandparents
+    // Ensure we're sending all pedigree data correctly (all 5 generations)
     const submitData = {
       ...formData,
       motherId: formData.motherId || '',
       fatherId: formData.fatherId || '',
-      maternalGrandmotherId: formData.maternalGrandmotherId || '',
-      maternalGrandfatherId: formData.maternalGrandfatherId || '',
-      paternalGrandmotherId: formData.paternalGrandmotherId || '',
-      paternalGrandfatherId: formData.paternalGrandfatherId || '',
-      maternalGreatGrandmotherMaternalId: formData.maternalGreatGrandmotherMaternalId || '',
-      maternalGreatGrandfatherMaternalId: formData.maternalGreatGrandfatherMaternalId || '',
-      maternalGreatGrandmotherPaternalId: formData.maternalGreatGrandmotherPaternalId || '',
-      maternalGreatGrandfatherPaternalId: formData.maternalGreatGrandfatherPaternalId || '',
-      paternalGreatGrandmotherMaternalId: formData.paternalGreatGrandmotherMaternalId || '',
-      paternalGreatGrandfatherMaternalId: formData.paternalGreatGrandfatherMaternalId || '',
-      paternalGreatGrandmotherPaternalId: formData.paternalGreatGrandmotherPaternalId || '',
-      paternalGreatGrandfatherPaternalId: formData.paternalGreatGrandfatherPaternalId || ''
+      maternal_grandmother_id: formData.maternal_grandmother_id || '',
+      maternal_grandfather_id: formData.maternal_grandfather_id || '',
+      paternal_grandmother_id: formData.paternal_grandmother_id || '',
+      paternal_grandfather_id: formData.paternal_grandfather_id || '',
+      maternal_great_grandmother_maternal_id: formData.maternal_great_grandmother_maternal_id || '',
+      maternal_great_grandfather_maternal_id: formData.maternal_great_grandfather_maternal_id || '',
+      maternal_great_grandmother_paternal_id: formData.maternal_great_grandmother_paternal_id || '',
+      maternal_great_grandfather_paternal_id: formData.maternal_great_grandfather_paternal_id || '',
+      paternal_great_grandmother_maternal_id: formData.paternal_great_grandmother_maternal_id || '',
+      paternal_great_grandfather_maternal_id: formData.paternal_great_grandfather_maternal_id || '',
+      paternal_great_grandmother_paternal_id: formData.paternal_great_grandmother_paternal_id || '',
+      paternal_great_grandfather_paternal_id: formData.paternal_great_grandfather_paternal_id || ''
     };
     
     console.log('🔄 Final submit data:', submitData);

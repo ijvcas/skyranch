@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Eraser } from 'lucide-react';
-import PedigreeGreatGrandparents from '@/components/pedigree/PedigreeGreatGrandparents';
-import PedigreeGrandparents from '@/components/pedigree/PedigreeGrandparents';
-import PedigreeParents from '@/components/pedigree/PedigreeParents';
-import PedigreeGeneration4 from '@/components/pedigree/PedigreeGeneration4';
-import PedigreeGeneration5 from '@/components/pedigree/PedigreeGeneration5';
-
+import HorizontalPedigreeInputTree from '@/components/pedigree/HorizontalPedigreeInputTree';
 import { useToast } from '@/hooks/use-toast';
 
 interface PedigreeFormProps {
@@ -24,9 +18,9 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
   const { toast } = useToast();
 
   const handleClearPedigree = () => {
-    // Clear all pedigree fields
+    // Clear all pedigree fields (62 fields total)
     const pedigreeFields = [
-      'father_id', 'mother_id',
+      'fatherId', 'motherId',
       'paternal_grandfather_id', 'paternal_grandmother_id',
       'maternal_grandfather_id', 'maternal_grandmother_id',
       'paternal_great_grandfather_paternal_id', 'paternal_great_grandmother_paternal_id',
@@ -79,56 +73,13 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
           </div>
         </CardHeader>
         <CardContent>
-        <Tabs defaultValue="gen1" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="gen1">Gen 1</TabsTrigger>
-            <TabsTrigger value="gen2">Gen 2</TabsTrigger>
-            <TabsTrigger value="gen3">Gen 3</TabsTrigger>
-            <TabsTrigger value="gen4">Gen 4</TabsTrigger>
-            <TabsTrigger value="gen5">Gen 5</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="gen1" className="mt-6">
-            <PedigreeParents 
-              formData={formData} 
-              onInputChange={onInputChange} 
-              disabled={disabled} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="gen2" className="mt-6">
-            <PedigreeGrandparents 
-              formData={formData} 
-              onInputChange={onInputChange} 
-              disabled={disabled} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="gen3" className="mt-6">
-            <PedigreeGreatGrandparents 
-              formData={formData} 
-              onInputChange={onInputChange} 
-              disabled={disabled} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="gen4" className="mt-6">
-            <PedigreeGeneration4 
-              formData={formData} 
-              onInputChange={onInputChange} 
-              disabled={disabled} 
-            />
-          </TabsContent>
-          
-          <TabsContent value="gen5" className="mt-6">
-            <PedigreeGeneration5 
-              formData={formData} 
-              onInputChange={onInputChange} 
-              disabled={disabled} 
-            />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
+          <HorizontalPedigreeInputTree
+            formData={formData}
+            onInputChange={onInputChange}
+            disabled={disabled}
+            animalName={animalName}
+          />
+        </CardContent>
     </Card>
   );
 };
