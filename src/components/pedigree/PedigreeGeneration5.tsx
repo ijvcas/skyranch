@@ -9,26 +9,37 @@ interface PedigreeGeneration5Props {
 }
 
 const PedigreeGeneration5 = ({ formData, onInputChange, disabled = false }: PedigreeGeneration5Props) => {
-  const paternalFields = Array.from({ length: 16 }, (_, i) => i + 1);
-  const maternalFields = Array.from({ length: 16 }, (_, i) => i + 1);
+  const genderSymbol = (num: number) => num % 2 === 1 ? '♂' : '♀';
+  
+  const paternalFields = Array.from({ length: 16 }, (_, i) => ({
+    id: `gen5Paternal${i + 1}`,
+    label: `G5-P${i + 1} (${genderSymbol(i + 1)})`,
+    placeholder: `Ancestro Paterno ${i + 1}`
+  }));
+
+  const maternalFields = Array.from({ length: 16 }, (_, i) => ({
+    id: `gen5Maternal${i + 1}`,
+    label: `G5-M${i + 1} (${genderSymbol(i + 1)})`,
+    placeholder: `Ancestro Materno ${i + 1}`
+  }));
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">5ta Generación (Choznos)</h3>
+      <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">5ta Generación (Tatarabuelos)</h3>
       
       {/* Paternal Line */}
       <div className="space-y-4">
-        <h4 className="font-medium text-gray-700">Línea Paterna (Lado del Padre)</h4>
+        <h4 className="font-medium text-gray-700">Línea Paterna (Lado del Padre) - 16 ancestros</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {paternalFields.map((num) => (
-            <div key={`gen5_paternal_${num}`} className="space-y-2">
-              <Label htmlFor={`gen5_paternal_${num}`}>Chozno Paterno {num}</Label>
+          {paternalFields.map((field) => (
+            <div key={field.id} className="space-y-2">
+              <Label htmlFor={field.id}>{field.label}</Label>
               <Input
-                id={`gen5_paternal_${num}`}
-                value={formData[`gen5Paternal${num}`] || ''}
-                onChange={(e) => onInputChange(`gen5Paternal${num}`, e.target.value)}
+                id={field.id}
+                value={formData[field.id] || ''}
+                onChange={(e) => onInputChange(field.id, e.target.value)}
                 disabled={disabled}
-                placeholder={`Ancestro ${num}`}
+                placeholder={field.placeholder}
               />
             </div>
           ))}
@@ -37,17 +48,17 @@ const PedigreeGeneration5 = ({ formData, onInputChange, disabled = false }: Pedi
 
       {/* Maternal Line */}
       <div className="space-y-4">
-        <h4 className="font-medium text-gray-700">Línea Materna (Lado de la Madre)</h4>
+        <h4 className="font-medium text-gray-700">Línea Materna (Lado de la Madre) - 16 ancestros</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {maternalFields.map((num) => (
-            <div key={`gen5_maternal_${num}`} className="space-y-2">
-              <Label htmlFor={`gen5_maternal_${num}`}>Chozno Materno {num}</Label>
+          {maternalFields.map((field) => (
+            <div key={field.id} className="space-y-2">
+              <Label htmlFor={field.id}>{field.label}</Label>
               <Input
-                id={`gen5_maternal_${num}`}
-                value={formData[`gen5Maternal${num}`] || ''}
-                onChange={(e) => onInputChange(`gen5Maternal${num}`, e.target.value)}
+                id={field.id}
+                value={formData[field.id] || ''}
+                onChange={(e) => onInputChange(field.id, e.target.value)}
                 disabled={disabled}
-                placeholder={`Ancestro ${num}`}
+                placeholder={field.placeholder}
               />
             </div>
           ))}

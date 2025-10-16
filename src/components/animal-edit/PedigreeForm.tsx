@@ -9,7 +9,7 @@ import PedigreeGrandparents from '@/components/pedigree/PedigreeGrandparents';
 import PedigreeParents from '@/components/pedigree/PedigreeParents';
 import PedigreeGeneration4 from '@/components/pedigree/PedigreeGeneration4';
 import PedigreeGeneration5 from '@/components/pedigree/PedigreeGeneration5';
-import PedigreeTextUploadSection from './PedigreeTextUploadSection';
+
 import { useToast } from '@/hooks/use-toast';
 
 interface PedigreeFormProps {
@@ -33,12 +33,12 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
       'paternal_great_grandfather_maternal_id', 'paternal_great_grandmother_maternal_id',
       'maternal_great_grandfather_paternal_id', 'maternal_great_grandmother_paternal_id',
       'maternal_great_grandfather_maternal_id', 'maternal_great_grandmother_maternal_id',
-      'gen4_paternal_ggggf_p', 'gen4_paternal_ggggm_p', 'gen4_paternal_gggmf_p', 'gen4_paternal_gggmm_p',
-      'gen4_paternal_ggfgf_p', 'gen4_paternal_ggfgm_p', 'gen4_paternal_ggmgf_p', 'gen4_paternal_ggmgm_p',
-      'gen4_maternal_ggggf_m', 'gen4_maternal_ggggm_m', 'gen4_maternal_gggmf_m', 'gen4_maternal_gggmm_m',
-      'gen4_maternal_ggfgf_m', 'gen4_maternal_ggfgm_m', 'gen4_maternal_ggmgf_m', 'gen4_maternal_ggmgm_m',
-      ...Array.from({ length: 16 }, (_, i) => `gen5_paternal_${i + 1}`),
-      ...Array.from({ length: 16 }, (_, i) => `gen5_maternal_${i + 1}`)
+      'gen4PaternalGgggfP', 'gen4PaternalGgggmP', 'gen4PaternalGggmfP', 'gen4PaternalGggmmP',
+      'gen4PaternalGgfgfP', 'gen4PaternalGgfgmP', 'gen4PaternalGgmgfP', 'gen4PaternalGgmgmP',
+      'gen4MaternalGgggfM', 'gen4MaternalGgggmM', 'gen4MaternalGggmfM', 'gen4MaternalGggmmM',
+      'gen4MaternalGgfgfM', 'gen4MaternalGgfgmM', 'gen4MaternalGgmgfM', 'gen4MaternalGgmgmM',
+      ...Array.from({ length: 16 }, (_, i) => `gen5Paternal${i + 1}`),
+      ...Array.from({ length: 16 }, (_, i) => `gen5Maternal${i + 1}`)
     ];
 
     pedigreeFields.forEach(field => onInputChange(field, ''));
@@ -50,13 +50,7 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
   };
 
   return (
-    <>
-      <PedigreeTextUploadSection 
-        onInputChange={onInputChange} 
-        disabled={disabled} 
-      />
-      
-      <Card className="shadow-lg mt-4">
+    <Card className="shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl text-gray-900">Información de Pedigrí (5 Generaciones)</CardTitle>
@@ -136,7 +130,6 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
         </Tabs>
       </CardContent>
     </Card>
-    </>
   );
 };
 
