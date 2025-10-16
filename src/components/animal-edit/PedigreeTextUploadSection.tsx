@@ -31,12 +31,19 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
     
     try {
       const text = await parse_document(file);
-      setPastedText(text);
       
-      toast({
-        title: 'Archivo Cargado',
-        description: 'Ahora haz clic en "Analizar Árbol" para procesar el pedigrí.',
-      });
+      if (text === '__PDF_FILE__') {
+        toast({
+          title: 'PDF detectado',
+          description: 'Por favor, copia y pega el texto del PDF en lugar de subirlo directamente.',
+          variant: 'destructive',
+        });
+        setIsProcessing(false);
+        return;
+      }
+      
+      setPastedText(text);
+      handleParse(text);
     } catch (error) {
       toast({
         title: 'Error al Cargar',
@@ -48,8 +55,10 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
     }
   };
 
-  const handleParse = () => {
-    if (!pastedText.trim()) {
+  const handleParse = (textToParse?: string) => {
+    const text = textToParse || pastedText;
+    
+    if (!text.trim()) {
       toast({
         title: 'Error',
         description: 'Por favor, pega el texto del pedigrí o sube un archivo primero.',
@@ -58,12 +67,12 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
       return;
     }
 
-    const parsed = parseASCIITreePedigree(pastedText);
+    const parsed = parseASCIITreePedigree(text);
     
     if (!parsed) {
       toast({
         title: 'Error al Analizar',
-        description: 'No se pudo analizar el árbol genealógico. Verifica el formato.',
+        description: 'No se pudo analizar el árbol genealógico. Asegúrate de que el texto incluya el animal sujeto con info de raza entre paréntesis.',
         variant: 'destructive',
       });
       return;
@@ -179,23 +188,23 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
               placeholder={`Pega aquí el árbol genealógico completo (5 generaciones).
-Formato ASCII con líneas y sangrías, por ejemplo:
 
-                    BISABUELO PATERNO
-              ABUELO PATERNO
-                    BISABUELA PATERNA
-        PADRE
-                    BISABUELO MATERNO  
-              ABUELA PATERNA
-                    BISABUELA MATERNA
-  ANIMAL
-                    BISABUELO PATERNO
-              ABUELO MATERNO
-                    BISABUELA PATERNA
-        MADRE
-                    BISABUELO MATERNO
-              ABUELA MATERNA
-                    BISABUELA MATERNA`}
+Formato requerido:
+- El árbol debe contener el ANIMAL SUJETO en alguna línea con información de raza entre paréntesis
+  Ejemplo: "LASCAUX DU VERN  (Baudet du Poitou, Mâle, 2021)"
+- Los ancestros paternos deben estar ARRIBA del animal sujeto
+- Los ancestros maternos deben estar ABAJO del animal sujeto
+- El árbol usa sangrías/indentación para mostrar generaciones (más sangría = más cerca del sujeto)
+
+Ejemplo de estructura visual:
+                    BISABUELO (Gen 5)
+                ┌── ABUELO PATERNO (Gen 3)
+            ┌── PADRE (Gen 1)
+            │   └── ABUELA PATERNA
+SUJETO (Baudet, Mâle, 2021)
+            │   ┌── ABUELO MATERNO  
+            └── MADRE (Gen 1)
+                └── ABUELA MATERNA`}
               rows={16}
               className="font-mono text-xs"
               disabled={disabled || isProcessing}
@@ -208,7 +217,7 @@ Formato ASCII con líneas y sangrías, por ejemplo:
           {!parsedData && (
             <Button
               type="button"
-              onClick={handleParse}
+              onClick={() => handleParse()}
               disabled={disabled || !pastedText.trim() || isProcessing}
               className="w-full"
             >
