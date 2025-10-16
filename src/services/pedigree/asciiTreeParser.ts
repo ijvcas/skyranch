@@ -262,20 +262,30 @@ export const mapPedigreeToFields = (parsed: ParsedPedigree): Record<string, stri
   if (parsed.generation2.maternalGrandfather) fields['maternal_grandfather_id'] = parsed.generation2.maternalGrandfather;
   if (parsed.generation2.maternalGrandmother) fields['maternal_grandmother_id'] = parsed.generation2.maternalGrandmother;
   
-  if (parsed.generation3.paternalGreatGrandfatherFather) fields['paternal_great_grandfather_father_id'] = parsed.generation3.paternalGreatGrandfatherFather;
-  if (parsed.generation3.paternalGreatGrandmotherFather) fields['paternal_great_grandmother_father_id'] = parsed.generation3.paternalGreatGrandmotherFather;
-  if (parsed.generation3.paternalGreatGrandfatherMother) fields['paternal_great_grandfather_mother_id'] = parsed.generation3.paternalGreatGrandfatherMother;
-  if (parsed.generation3.paternalGreatGrandmotherMother) fields['paternal_great_grandmother_mother_id'] = parsed.generation3.paternalGreatGrandmotherMother;
-  if (parsed.generation3.maternalGreatGrandfatherFather) fields['maternal_great_grandfather_father_id'] = parsed.generation3.maternalGreatGrandfatherFather;
-  if (parsed.generation3.maternalGreatGrandmotherFather) fields['maternal_great_grandmother_father_id'] = parsed.generation3.maternalGreatGrandmotherFather;
-  if (parsed.generation3.maternalGreatGrandfatherMother) fields['maternal_great_grandfather_mother_id'] = parsed.generation3.maternalGreatGrandfatherMother;
-  if (parsed.generation3.maternalGreatGrandmotherMother) fields['maternal_great_grandmother_mother_id'] = parsed.generation3.maternalGreatGrandmotherMother;
+  if (parsed.generation3.paternalGreatGrandfatherFather) fields['paternal_great_grandfather_paternal_id'] = parsed.generation3.paternalGreatGrandfatherFather;
+  if (parsed.generation3.paternalGreatGrandmotherFather) fields['paternal_great_grandmother_paternal_id'] = parsed.generation3.paternalGreatGrandmotherFather;
+  if (parsed.generation3.paternalGreatGrandfatherMother) fields['paternal_great_grandfather_maternal_id'] = parsed.generation3.paternalGreatGrandfatherMother;
+  if (parsed.generation3.paternalGreatGrandmotherMother) fields['paternal_great_grandmother_maternal_id'] = parsed.generation3.paternalGreatGrandmotherMother;
+  if (parsed.generation3.maternalGreatGrandfatherFather) fields['maternal_great_grandfather_paternal_id'] = parsed.generation3.maternalGreatGrandfatherFather;
+  if (parsed.generation3.maternalGreatGrandmotherFather) fields['maternal_great_grandmother_paternal_id'] = parsed.generation3.maternalGreatGrandmotherFather;
+  if (parsed.generation3.maternalGreatGrandfatherMother) fields['maternal_great_grandfather_maternal_id'] = parsed.generation3.maternalGreatGrandfatherMother;
+  if (parsed.generation3.maternalGreatGrandmotherMother) fields['maternal_great_grandmother_maternal_id'] = parsed.generation3.maternalGreatGrandmotherMother;
   
+  // Gen 4 mapping - use proper field names matching database schema
+  const gen4Fields = [
+    'ggggf_p', 'ggggm_p', 'gggmf_p', 'gggmm_p',
+    'ggfgf_p', 'ggfgm_p', 'ggmgf_p', 'ggmgm_p'
+  ];
   parsed.generation4.paternalLine.forEach((name, idx) => { 
-    if (name) fields[`gen4_paternal_${idx + 1}`] = name; 
+    if (name && gen4Fields[idx]) fields[`gen4_paternal_${gen4Fields[idx]}`] = name; 
   });
+  
+  const gen4MaternalFields = [
+    'ggggf_m', 'ggggm_m', 'gggmf_m', 'gggmm_m',
+    'ggfgf_m', 'ggfgm_m', 'ggmgf_m', 'ggmgm_m'
+  ];
   parsed.generation4.maternalLine.forEach((name, idx) => { 
-    if (name) fields[`gen4_maternal_${idx + 1}`] = name; 
+    if (name && gen4MaternalFields[idx]) fields[`gen4_maternal_${gen4MaternalFields[idx]}`] = name; 
   });
   parsed.generation5.paternalLine.forEach((name, idx) => { 
     if (name) fields[`gen5_paternal_${idx + 1}`] = name; 

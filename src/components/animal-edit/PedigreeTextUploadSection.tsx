@@ -72,7 +72,7 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
     if (!parsed) {
       toast({
         title: 'Error al Analizar',
-        description: 'No se pudo analizar el árbol genealógico. Asegúrate de que el texto incluya el animal sujeto con info de raza entre paréntesis.',
+        description: 'No se pudo analizar el árbol. Verifica que el texto incluya el animal sujeto con información de raza entre paréntesis, ej: "NOMBRE (Baudet, Mâle, 2021)"',
         variant: 'destructive',
       });
       return;
@@ -214,11 +214,11 @@ SUJETO (Baudet, Mâle, 2021)
             </p>
           </div>
 
-          {!parsedData && (
+          {pastedText.trim() && !parsedData && (
             <Button
               type="button"
               onClick={() => handleParse()}
-              disabled={disabled || !pastedText.trim() || isProcessing}
+              disabled={disabled || isProcessing}
               className="w-full"
             >
               {isProcessing ? 'Procesando...' : 'Analizar Árbol'}

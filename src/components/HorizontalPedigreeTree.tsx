@@ -138,12 +138,6 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
             <Badge variant={completeness > 80 ? 'default' : completeness > 50 ? 'secondary' : 'outline'}>
               {completeness}% completo
             </Badge>
-            {stats.gen4 + stats.gen5 === 0 && (
-              <Badge variant="outline" className="gap-1">
-                <Upload className="w-3 h-3" />
-                Sube pedigrí para Gen 4-5
-              </Badge>
-            )}
           </div>
         </div>
         
@@ -195,7 +189,8 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
             <div className="flex flex-col justify-center">
               <div className="bg-primary text-primary-foreground p-4 rounded-lg text-center min-w-[150px] shadow-lg">
                 <div className="text-sm font-semibold mb-1">Gen 0</div>
-                <div className="font-bold text-base">{animal.name} (#{animal.tag})</div>
+                <div className="font-bold text-base">{animal.name}</div>
+                <div className="text-xs opacity-75 mt-1">#{animal.tag}</div>
                 <div className="text-xs opacity-90 mt-1">
                   {animal.gender === 'male' ? '♂ Macho' : animal.gender === 'female' ? '♀ Hembra' : ''}
                 </div>
