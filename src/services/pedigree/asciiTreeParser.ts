@@ -1,7 +1,7 @@
 /**
- * ASCII Tree Pedigree Parser - Indent-Level Based
- * Analyzes tree structure where subject is in middle, paternal above, maternal below
- * Higher indent = closer to subject (newer generation)
+ * Pedigree Parser - Supports both Table Format (PDF) and ASCII Tree
+ * Table Format: Horizontal rows with | separators, 5 columns (Gen5|Gen4|Gen3|Gen2|Gen1)
+ * ASCII Tree: Indented tree structure with subject in middle
  */
 
 export interface ParsedPedigree {
@@ -41,21 +41,39 @@ interface TreeNode {
   indentLevel: number;
 }
 
-const cleanAncestorName = (line: string): string => {
+const cleanAncestorName = (text: string): string => {
   // Remove box-drawing characters
-  let cleaned = line.replace(/[┌│└├─┤┬┴┼╭╮╯╰]/g, '').trim();
+  let cleaned = text.replace(/[┌│└├─┤┬┴┼╭╮╯╰]/g, '').trim();
   
-  // Remove UELN identifier
-  cleaned = cleaned.replace(/UELN:\s*\S+/g, '').trim();
+  // Remove UELN identifier and everything after it
+  cleaned = cleaned.replace(/UELN:\s*\S+.*$/g, '').trim();
   
-  // Extract just the name and year if present
-  // Format is typically: "NAME BDP, YEAR" or "NAME, YEAR"
-  const match = cleaned.match(/^([^,]+?)(?:\s+BDP)?(?:,\s*\d{4})?/);
-  if (match) {
-    cleaned = match[1].trim();
-  }
+  // Remove breed codes and years: "NAME BDP, YEAR" → "NAME"
+  cleaned = cleaned.replace(/\s+BDP,?\s*\d{4}?/g, '').trim();
+  
+  // Remove just year: "NAME, YEAR" → "NAME"
+  cleaned = cleaned.replace(/,\s*\d{4}$/g, '').trim();
+  
+  // Remove just BDP at end
+  cleaned = cleaned.replace(/\s+BDP$/g, '').trim();
   
   return cleaned.replace(/\s+/g, ' ').trim();
+};
+
+const detectFormat = (text: string): 'table' | 'tree' => {
+  const lines = text.split('\n').filter(l => l.trim());
+  
+  // Count lines with multiple | separators (table format indicator)
+  const pipeLines = lines.filter(l => (l.match(/\|/g) || []).length >= 3).length;
+  
+  // If more than 50% of lines have pipes, it's a table
+  if (pipeLines > lines.length * 0.3) {
+    console.log('🔍 Detected: TABLE format');
+    return 'table';
+  }
+  
+  console.log('🔍 Detected: TREE format');
+  return 'tree';
 };
 
 const getIndentLevel = (line: string): number => {
@@ -69,10 +87,153 @@ const isSubjectLine = (line: string): boolean => {
 };
 
 /**
+ * Parse TABLE format pedigree (from PDF)
+ * Each row has 5 columns: Gen5 | Gen4 | Gen3 | Gen2 | Gen1
+ * Subject row contains breed info, 8 rows above = paternal, 8 rows below = maternal
+ */
+const parseTablePedigree = (text: string): ParsedPedigree | null => {
+  try {
+    const lines = text.split('\n').filter(l => l.trim());
+    console.log('📊 TABLE Parser - Total lines:', lines.length);
+    
+    // Find subject line (contains breed info like "Baudet Du Poitou, Male")
+    let subjectIdx = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (isSubjectLine(lines[i])) {
+        subjectIdx = i;
+        console.log('🎯 Subject at line:', i + 1);
+        break;
+      }
+    }
+    
+    if (subjectIdx === -1) {
+      console.error('❌ No subject line found');
+      return null;
+    }
+    
+    // Get 8 rows above (paternal) and 8 rows below (maternal)
+    const paternalRows = lines.slice(Math.max(0, subjectIdx - 8), subjectIdx);
+    const maternalRows = lines.slice(subjectIdx + 1, subjectIdx + 9);
+    
+    console.log('📊 Rows - Paternal:', paternalRows.length, 'Maternal:', maternalRows.length);
+    
+    const result: ParsedPedigree = {
+      generation1: { father: '', mother: '' },
+      generation2: {
+        paternalGrandfather: '',
+        paternalGrandmother: '',
+        maternalGrandfather: '',
+        maternalGrandmother: ''
+      },
+      generation3: {
+        paternalGreatGrandfatherFather: '',
+        paternalGreatGrandmotherFather: '',
+        paternalGreatGrandfatherMother: '',
+        paternalGreatGrandmotherMother: '',
+        maternalGreatGrandfatherFather: '',
+        maternalGreatGrandmotherFather: '',
+        maternalGreatGrandfatherMother: '',
+        maternalGreatGrandmotherMother: ''
+      },
+      generation4: { paternalLine: [], maternalLine: [] },
+      generation5: { paternalLine: [], maternalLine: [] }
+    };
+    
+    // Parse each paternal row: Gen5 | Gen4 | Gen3 | Gen2 | Gen1
+    paternalRows.forEach((row, idx) => {
+      const cells = row.split('|').map(c => cleanAncestorName(c)).filter(c => c.length > 1);
+      console.log(`  P-Row ${idx}:`, cells.length, 'cells');
+      
+      if (cells.length >= 5) {
+        const gen5 = cells[0];
+        const gen4 = cells[1];
+        const gen3 = cells[2];
+        const gen2 = cells[3];
+        const gen1 = cells[4];
+        
+        // Gen 1: Only first row has father
+        if (idx === 0 && gen1) result.generation1.father = gen1;
+        
+        // Gen 2: First 2 rows
+        if (idx === 0 && gen2) result.generation2.paternalGrandfather = gen2;
+        if (idx === 1 && gen2) result.generation2.paternalGrandmother = gen2;
+        
+        // Gen 3: First 4 rows
+        if (idx === 0 && gen3) result.generation3.paternalGreatGrandfatherFather = gen3;
+        if (idx === 1 && gen3) result.generation3.paternalGreatGrandmotherFather = gen3;
+        if (idx === 2 && gen3) result.generation3.paternalGreatGrandfatherMother = gen3;
+        if (idx === 3 && gen3) result.generation3.paternalGreatGrandmotherMother = gen3;
+        
+        // Gen 4: All 8 rows
+        if (gen4) result.generation4.paternalLine.push(gen4);
+        
+        // Gen 5: All 8 rows
+        if (gen5) result.generation5.paternalLine.push(gen5);
+      }
+    });
+    
+    // Parse each maternal row
+    maternalRows.forEach((row, idx) => {
+      const cells = row.split('|').map(c => cleanAncestorName(c)).filter(c => c.length > 1);
+      console.log(`  M-Row ${idx}:`, cells.length, 'cells');
+      
+      if (cells.length >= 5) {
+        const gen5 = cells[0];
+        const gen4 = cells[1];
+        const gen3 = cells[2];
+        const gen2 = cells[3];
+        const gen1 = cells[4];
+        
+        // Gen 1: Only first row has mother
+        if (idx === 0 && gen1) result.generation1.mother = gen1;
+        
+        // Gen 2: First 2 rows
+        if (idx === 0 && gen2) result.generation2.maternalGrandfather = gen2;
+        if (idx === 1 && gen2) result.generation2.maternalGrandmother = gen2;
+        
+        // Gen 3: First 4 rows
+        if (idx === 0 && gen3) result.generation3.maternalGreatGrandfatherFather = gen3;
+        if (idx === 1 && gen3) result.generation3.maternalGreatGrandmotherFather = gen3;
+        if (idx === 2 && gen3) result.generation3.maternalGreatGrandfatherMother = gen3;
+        if (idx === 3 && gen3) result.generation3.maternalGreatGrandmotherMother = gen3;
+        
+        // Gen 4: All 8 rows
+        if (gen4) result.generation4.maternalLine.push(gen4);
+        
+        // Gen 5: All 8 rows
+        if (gen5) result.generation5.maternalLine.push(gen5);
+      }
+    });
+    
+    const totalFound = 
+      (result.generation1.father ? 1 : 0) + 
+      (result.generation1.mother ? 1 : 0) + 
+      Object.values(result.generation2).filter(Boolean).length +
+      Object.values(result.generation3).filter(Boolean).length +
+      result.generation4.paternalLine.length +
+      result.generation4.maternalLine.length +
+      result.generation5.paternalLine.length +
+      result.generation5.maternalLine.length;
+    
+    console.log('✅ TABLE Parse complete - Total ancestors:', totalFound);
+    console.log('   Gen 1:', result.generation1.father ? '✓' : '✗', result.generation1.mother ? '✓' : '✗');
+    console.log('   Gen 2:', Object.values(result.generation2).filter(Boolean).length, '/ 4');
+    console.log('   Gen 3:', Object.values(result.generation3).filter(Boolean).length, '/ 8');
+    console.log('   Gen 4:', result.generation4.paternalLine.length, '+', result.generation4.maternalLine.length, '/ 16');
+    console.log('   Gen 5:', result.generation5.paternalLine.length, '+', result.generation5.maternalLine.length, '/ 32');
+    
+    return result;
+  } catch (error) {
+    console.error('❌ TABLE Parser error:', error);
+    return null;
+  }
+};
+
+/**
  * Parse ASCII tree pedigree
  * Strategy: Find subject, split paternal/maternal, group by indent level
  */
-export const parseASCIITreePedigree = (text: string): ParsedPedigree | null => {
+const parseTreePedigree = (text: string): ParsedPedigree | null => {
   try {
     const lines = text.split('\n');
     console.log('📄 Total lines:', lines.length);
@@ -237,7 +398,7 @@ export const parseASCIITreePedigree = (text: string): ParsedPedigree | null => {
       result.generation5.paternalLine.filter(Boolean).length +
       result.generation5.maternalLine.filter(Boolean).length;
     
-    console.log('✅ Parse complete - Total ancestors found:', totalFound);
+    console.log('✅ TREE Parse complete - Total ancestors found:', totalFound);
     console.log('   Gen 1:', result.generation1.father ? 'Father ✓' : '', result.generation1.mother ? 'Mother ✓' : '');
     console.log('   Gen 2:', Object.values(result.generation2).filter(Boolean).length, '/ 4');
     console.log('   Gen 3:', Object.values(result.generation3).filter(Boolean).length, '/ 8');
@@ -246,8 +407,21 @@ export const parseASCIITreePedigree = (text: string): ParsedPedigree | null => {
     
     return result;
   } catch (error) {
-    console.error('❌ Parser error:', error);
+    console.error('❌ TREE Parser error:', error);
     return null;
+  }
+};
+
+/**
+ * Main parser - Auto-detects format and routes to appropriate parser
+ */
+export const parseASCIITreePedigree = (text: string): ParsedPedigree | null => {
+  const format = detectFormat(text);
+  
+  if (format === 'table') {
+    return parseTablePedigree(text);
+  } else {
+    return parseTreePedigree(text);
   }
 };
 

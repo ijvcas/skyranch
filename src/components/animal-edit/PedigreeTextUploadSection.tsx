@@ -35,9 +35,10 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
       if (text === '__PDF_FILE__') {
         toast({
           title: 'PDF detectado',
-          description: 'Por favor, copia y pega el texto del PDF en lugar de subirlo directamente.',
-          variant: 'destructive',
+          description: 'Los PDFs se extraen automáticamente. Copiando contenido...',
         });
+        // For PDFs, we need to use the document parser tool from the backend
+        // For now, show message to copy/paste
         setIsProcessing(false);
         return;
       }
@@ -72,7 +73,7 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
     if (!parsed) {
       toast({
         title: 'Error al Analizar',
-        description: 'No se pudo analizar el árbol. Verifica que el texto incluya el animal sujeto con información de raza entre paréntesis, ej: "NOMBRE (Baudet, Mâle, 2021)"',
+        description: 'No se pudo analizar el pedigrí. Formatos aceptados: (1) Tabla con 5 columnas separadas por |, o (2) Árbol con indentación. El texto debe incluir la línea del animal sujeto con información de raza (ej: Baudet Du Poitou, Male).',
         variant: 'destructive',
       });
       return;
@@ -187,41 +188,43 @@ const PedigreeTextUploadSection: React.FC<PedigreeTextUploadSectionProps> = ({
             <Textarea
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
-              placeholder={`Pega aquí el árbol genealógico completo (5 generaciones).
+              placeholder={`Pega aquí el pedigrí completo (5 generaciones).
 
-Formato requerido:
-- El árbol debe contener el ANIMAL SUJETO en alguna línea con información de raza entre paréntesis
-  Ejemplo: "LASCAUX DU VERN  (Baudet du Poitou, Mâle, 2021)"
-- Los ancestros paternos deben estar ARRIBA del animal sujeto
-- Los ancestros maternos deben estar ABAJO del animal sujeto
-- El árbol usa sangrías/indentación para mostrar generaciones (más sangría = más cerca del sujeto)
+FORMATOS SOPORTADOS:
 
-Ejemplo de estructura visual:
-                    BISABUELO (Gen 5)
-                ┌── ABUELO PATERNO (Gen 3)
-            ┌── PADRE (Gen 1)
-            │   └── ABUELA PATERNA
-SUJETO (Baudet, Mâle, 2021)
-            │   ┌── ABUELO MATERNO  
-            └── MADRE (Gen 1)
-                └── ABUELA MATERNA`}
+📋 TABLA (desde PDF copiado):
+GEN5 | GEN4 | GEN3 | GEN2 | GEN1
+...8 filas paternales...
+SUJETO | Raza, Género, Año
+...8 filas maternales...
+
+🌲 ÁRBOL (con indentación):
+         BISABUELO
+     ABUELO
+PADRE
+     ABUELA
+SUJETO (Raza, Género, Año)
+MADRE
+     ...
+
+El formato se detectará automáticamente.`}
               rows={16}
               className="font-mono text-xs"
               disabled={disabled || isProcessing}
             />
             <p className="text-xs text-muted-foreground mt-2">
-              El parser detectará automáticamente la estructura del árbol basándose en sangrías y líneas
+              Se detectará automáticamente si es tabla (con |) o árbol (con indentación)
             </p>
           </div>
 
-          {pastedText.trim() && !parsedData && (
+          {pastedText.trim() && (
             <Button
               type="button"
               onClick={() => handleParse()}
               disabled={disabled || isProcessing}
               className="w-full"
             >
-              {isProcessing ? 'Procesando...' : 'Analizar Árbol'}
+              {isProcessing ? 'Procesando...' : parsedData ? 'Re-analizar' : 'Analizar Pedigrí'}
             </Button>
           )}
 
