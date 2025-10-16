@@ -361,65 +361,66 @@ const parseTreePedigree = (text: string): ParsedPedigree | null => {
       generation5: { paternalLine: [], maternalLine: [] }
     };
     
-    // Assign paternal generations (highest indent = Gen 1, lowest = Gen 5)
-    if (paternalLevels[0]) {
-      const gen1 = paternalGroups.get(paternalLevels[0]) || [];
-      if (gen1.length > 0) result.generation1.father = gen1[0].name;
-    }
-    
-    if (paternalLevels[1]) {
-      const gen2 = paternalGroups.get(paternalLevels[1]) || [];
-      if (gen2.length >= 1) result.generation2.paternalGrandfather = gen2[0].name;
-      if (gen2.length >= 2) result.generation2.paternalGrandmother = gen2[1].name;
-    }
-    
-    if (paternalLevels[2]) {
-      const gen3 = paternalGroups.get(paternalLevels[2]) || [];
-      if (gen3.length >= 1) result.generation3.paternalGreatGrandfatherFather = gen3[0].name;
-      if (gen3.length >= 2) result.generation3.paternalGreatGrandmotherFather = gen3[1].name;
-      if (gen3.length >= 3) result.generation3.paternalGreatGrandfatherMother = gen3[2].name;
-      if (gen3.length >= 4) result.generation3.paternalGreatGrandmotherMother = gen3[3].name;
-    }
-    
-    if (paternalLevels[3]) {
-      const gen4 = paternalGroups.get(paternalLevels[3]) || [];
-      result.generation4.paternalLine = gen4.slice(0, 8).map(n => n.name);
-    }
-    
-    if (paternalLevels[4]) {
-      const gen5 = paternalGroups.get(paternalLevels[4]) || [];
-      result.generation5.paternalLine = gen5.slice(0, 16).map(n => n.name);
-    }
-    
-    // Assign maternal generations (highest indent = Gen 1, lowest = Gen 5)
-    if (maternalLevels[0]) {
-      const gen1 = maternalGroups.get(maternalLevels[0]) || [];
-      if (gen1.length > 0) result.generation1.mother = gen1[0].name;
-    }
-    
-    if (maternalLevels[1]) {
-      const gen2 = maternalGroups.get(maternalLevels[1]) || [];
-      if (gen2.length >= 1) result.generation2.maternalGrandfather = gen2[0].name;
-      if (gen2.length >= 2) result.generation2.maternalGrandmother = gen2[1].name;
-    }
-    
-    if (maternalLevels[2]) {
-      const gen3 = maternalGroups.get(maternalLevels[2]) || [];
-      if (gen3.length >= 1) result.generation3.maternalGreatGrandfatherFather = gen3[0].name;
-      if (gen3.length >= 2) result.generation3.maternalGreatGrandmotherFather = gen3[1].name;
-      if (gen3.length >= 3) result.generation3.maternalGreatGrandfatherMother = gen3[2].name;
-      if (gen3.length >= 4) result.generation3.maternalGreatGrandmotherMother = gen3[3].name;
-    }
-    
-    if (maternalLevels[3]) {
-      const gen4 = maternalGroups.get(maternalLevels[3]) || [];
-      result.generation4.maternalLine = gen4.slice(0, 8).map(n => n.name);
-    }
-    
-    if (maternalLevels[4]) {
-      const gen5 = maternalGroups.get(maternalLevels[4]) || [];
-      result.generation5.maternalLine = gen5.slice(0, 16).map(n => n.name);
-    }
+    // NEW ALGORITHM: Merge all indent levels and assign by position
+    const assignGenerations = (
+      groups: Map<number, TreeNode[]>, 
+      levels: number[]
+    ): {
+      gen1: string,
+      gen2: string[],
+      gen3: string[],
+      gen4: string[],
+      gen5: string[]
+    } => {
+      const allNodes: TreeNode[] = [];
+      
+      // Collect all nodes from all indent levels
+      levels.forEach(level => {
+        const nodes = groups.get(level) || [];
+        allNodes.push(...nodes);
+      });
+      
+      // Sort by indent descending (highest = closest to subject), then by line order
+      allNodes.sort((a, b) => {
+        if (b.indentLevel !== a.indentLevel) {
+          return b.indentLevel - a.indentLevel;
+        }
+        return a.lineIndex - b.lineIndex;
+      });
+      
+      return {
+        gen1: allNodes[0]?.name || '',
+        gen2: allNodes.slice(1, 3).map(n => n.name),
+        gen3: allNodes.slice(3, 7).map(n => n.name),
+        gen4: allNodes.slice(7, 15).map(n => n.name),
+        gen5: allNodes.slice(15, 31).map(n => n.name)
+      };
+    };
+
+    const paternalGens = assignGenerations(paternalGroups, paternalLevels);
+    const maternalGens = assignGenerations(maternalGroups, maternalLevels);
+
+    // Assign paternal side
+    result.generation1.father = paternalGens.gen1;
+    if (paternalGens.gen2[0]) result.generation2.paternalGrandfather = paternalGens.gen2[0];
+    if (paternalGens.gen2[1]) result.generation2.paternalGrandmother = paternalGens.gen2[1];
+    if (paternalGens.gen3[0]) result.generation3.paternalGreatGrandfatherFather = paternalGens.gen3[0];
+    if (paternalGens.gen3[1]) result.generation3.paternalGreatGrandmotherFather = paternalGens.gen3[1];
+    if (paternalGens.gen3[2]) result.generation3.paternalGreatGrandfatherMother = paternalGens.gen3[2];
+    if (paternalGens.gen3[3]) result.generation3.paternalGreatGrandmotherMother = paternalGens.gen3[3];
+    result.generation4.paternalLine = paternalGens.gen4.filter(Boolean);
+    result.generation5.paternalLine = paternalGens.gen5.filter(Boolean);
+
+    // Assign maternal side
+    result.generation1.mother = maternalGens.gen1;
+    if (maternalGens.gen2[0]) result.generation2.maternalGrandfather = maternalGens.gen2[0];
+    if (maternalGens.gen2[1]) result.generation2.maternalGrandmother = maternalGens.gen2[1];
+    if (maternalGens.gen3[0]) result.generation3.maternalGreatGrandfatherFather = maternalGens.gen3[0];
+    if (maternalGens.gen3[1]) result.generation3.maternalGreatGrandmotherFather = maternalGens.gen3[1];
+    if (maternalGens.gen3[2]) result.generation3.maternalGreatGrandfatherMother = maternalGens.gen3[2];
+    if (maternalGens.gen3[3]) result.generation3.maternalGreatGrandmotherMother = maternalGens.gen3[3];
+    result.generation4.maternalLine = maternalGens.gen4.filter(Boolean);
+    result.generation5.maternalLine = maternalGens.gen5.filter(Boolean);
     
     const totalFound = 
       (result.generation1.father ? 1 : 0) + 
