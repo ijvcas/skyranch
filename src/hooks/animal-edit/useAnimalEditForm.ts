@@ -26,54 +26,54 @@ interface AnimalEditFormData {
   paternal_great_grandfather_maternal_id: string;
   paternal_great_grandmother_paternal_id: string;
   paternal_great_grandfather_paternal_id: string;
-  gen4PaternalGgggfP: string;
-  gen4PaternalGgggmP: string;
-  gen4PaternalGggmfP: string;
-  gen4PaternalGggmmP: string;
-  gen4PaternalGgfgfP: string;
-  gen4PaternalGgfgmP: string;
-  gen4PaternalGgmgfP: string;
-  gen4PaternalGgmgmP: string;
-  gen4MaternalGgggfM: string;
-  gen4MaternalGgggmM: string;
-  gen4MaternalGggmfM: string;
-  gen4MaternalGggmmM: string;
-  gen4MaternalGgfgfM: string;
-  gen4MaternalGgfgmM: string;
-  gen4MaternalGgmgfM: string;
-  gen4MaternalGgmgmM: string;
-  gen5Paternal1: string;
-  gen5Paternal2: string;
-  gen5Paternal3: string;
-  gen5Paternal4: string;
-  gen5Paternal5: string;
-  gen5Paternal6: string;
-  gen5Paternal7: string;
-  gen5Paternal8: string;
-  gen5Paternal9: string;
-  gen5Paternal10: string;
-  gen5Paternal11: string;
-  gen5Paternal12: string;
-  gen5Paternal13: string;
-  gen5Paternal14: string;
-  gen5Paternal15: string;
-  gen5Paternal16: string;
-  gen5Maternal1: string;
-  gen5Maternal2: string;
-  gen5Maternal3: string;
-  gen5Maternal4: string;
-  gen5Maternal5: string;
-  gen5Maternal6: string;
-  gen5Maternal7: string;
-  gen5Maternal8: string;
-  gen5Maternal9: string;
-  gen5Maternal10: string;
-  gen5Maternal11: string;
-  gen5Maternal12: string;
-  gen5Maternal13: string;
-  gen5Maternal14: string;
-  gen5Maternal15: string;
-  gen5Maternal16: string;
+  gen4_paternal_ggggf_p: string;
+  gen4_paternal_ggggm_p: string;
+  gen4_paternal_gggmf_p: string;
+  gen4_paternal_gggmm_p: string;
+  gen4_paternal_ggfgf_p: string;
+  gen4_paternal_ggfgm_p: string;
+  gen4_paternal_ggmgf_p: string;
+  gen4_paternal_ggmgm_p: string;
+  gen4_maternal_ggggf_m: string;
+  gen4_maternal_ggggm_m: string;
+  gen4_maternal_gggmf_m: string;
+  gen4_maternal_gggmm_m: string;
+  gen4_maternal_ggfgf_m: string;
+  gen4_maternal_ggfgm_m: string;
+  gen4_maternal_ggmgf_m: string;
+  gen4_maternal_ggmgm_m: string;
+  gen5_paternal_1: string;
+  gen5_paternal_2: string;
+  gen5_paternal_3: string;
+  gen5_paternal_4: string;
+  gen5_paternal_5: string;
+  gen5_paternal_6: string;
+  gen5_paternal_7: string;
+  gen5_paternal_8: string;
+  gen5_paternal_9: string;
+  gen5_paternal_10: string;
+  gen5_paternal_11: string;
+  gen5_paternal_12: string;
+  gen5_paternal_13: string;
+  gen5_paternal_14: string;
+  gen5_paternal_15: string;
+  gen5_paternal_16: string;
+  gen5_maternal_1: string;
+  gen5_maternal_2: string;
+  gen5_maternal_3: string;
+  gen5_maternal_4: string;
+  gen5_maternal_5: string;
+  gen5_maternal_6: string;
+  gen5_maternal_7: string;
+  gen5_maternal_8: string;
+  gen5_maternal_9: string;
+  gen5_maternal_10: string;
+  gen5_maternal_11: string;
+  gen5_maternal_12: string;
+  gen5_maternal_13: string;
+  gen5_maternal_14: string;
+  gen5_maternal_15: string;
+  gen5_maternal_16: string;
   notes: string;
   healthStatus: string;
   image: string | null;
@@ -103,54 +103,54 @@ export const useAnimalEditForm = (animal: Animal | null) => {
     paternal_great_grandfather_maternal_id: '',
     paternal_great_grandmother_paternal_id: '',
     paternal_great_grandfather_paternal_id: '',
-    gen4PaternalGgggfP: '',
-    gen4PaternalGgggmP: '',
-    gen4PaternalGggmfP: '',
-    gen4PaternalGggmmP: '',
-    gen4PaternalGgfgfP: '',
-    gen4PaternalGgfgmP: '',
-    gen4PaternalGgmgfP: '',
-    gen4PaternalGgmgmP: '',
-    gen4MaternalGgggfM: '',
-    gen4MaternalGgggmM: '',
-    gen4MaternalGggmfM: '',
-    gen4MaternalGggmmM: '',
-    gen4MaternalGgfgfM: '',
-    gen4MaternalGgfgmM: '',
-    gen4MaternalGgmgfM: '',
-    gen4MaternalGgmgmM: '',
-    gen5Paternal1: '',
-    gen5Paternal2: '',
-    gen5Paternal3: '',
-    gen5Paternal4: '',
-    gen5Paternal5: '',
-    gen5Paternal6: '',
-    gen5Paternal7: '',
-    gen5Paternal8: '',
-    gen5Paternal9: '',
-    gen5Paternal10: '',
-    gen5Paternal11: '',
-    gen5Paternal12: '',
-    gen5Paternal13: '',
-    gen5Paternal14: '',
-    gen5Paternal15: '',
-    gen5Paternal16: '',
-    gen5Maternal1: '',
-    gen5Maternal2: '',
-    gen5Maternal3: '',
-    gen5Maternal4: '',
-    gen5Maternal5: '',
-    gen5Maternal6: '',
-    gen5Maternal7: '',
-    gen5Maternal8: '',
-    gen5Maternal9: '',
-    gen5Maternal10: '',
-    gen5Maternal11: '',
-    gen5Maternal12: '',
-    gen5Maternal13: '',
-    gen5Maternal14: '',
-    gen5Maternal15: '',
-    gen5Maternal16: '',
+    gen4_paternal_ggggf_p: '',
+    gen4_paternal_ggggm_p: '',
+    gen4_paternal_gggmf_p: '',
+    gen4_paternal_gggmm_p: '',
+    gen4_paternal_ggfgf_p: '',
+    gen4_paternal_ggfgm_p: '',
+    gen4_paternal_ggmgf_p: '',
+    gen4_paternal_ggmgm_p: '',
+    gen4_maternal_ggggf_m: '',
+    gen4_maternal_ggggm_m: '',
+    gen4_maternal_gggmf_m: '',
+    gen4_maternal_gggmm_m: '',
+    gen4_maternal_ggfgf_m: '',
+    gen4_maternal_ggfgm_m: '',
+    gen4_maternal_ggmgf_m: '',
+    gen4_maternal_ggmgm_m: '',
+    gen5_paternal_1: '',
+    gen5_paternal_2: '',
+    gen5_paternal_3: '',
+    gen5_paternal_4: '',
+    gen5_paternal_5: '',
+    gen5_paternal_6: '',
+    gen5_paternal_7: '',
+    gen5_paternal_8: '',
+    gen5_paternal_9: '',
+    gen5_paternal_10: '',
+    gen5_paternal_11: '',
+    gen5_paternal_12: '',
+    gen5_paternal_13: '',
+    gen5_paternal_14: '',
+    gen5_paternal_15: '',
+    gen5_paternal_16: '',
+    gen5_maternal_1: '',
+    gen5_maternal_2: '',
+    gen5_maternal_3: '',
+    gen5_maternal_4: '',
+    gen5_maternal_5: '',
+    gen5_maternal_6: '',
+    gen5_maternal_7: '',
+    gen5_maternal_8: '',
+    gen5_maternal_9: '',
+    gen5_maternal_10: '',
+    gen5_maternal_11: '',
+    gen5_maternal_12: '',
+    gen5_maternal_13: '',
+    gen5_maternal_14: '',
+    gen5_maternal_15: '',
+    gen5_maternal_16: '',
     notes: '',
     healthStatus: 'healthy',
     image: null
@@ -232,54 +232,54 @@ export const useAnimalEditForm = (animal: Animal | null) => {
             paternal_great_grandfather_maternal_id: paternalGreatGrandfatherMaternalDisplayName,
             paternal_great_grandmother_paternal_id: paternalGreatGrandmotherPaternalDisplayName,
             paternal_great_grandfather_paternal_id: paternalGreatGrandfatherPaternalDisplayName,
-            gen4PaternalGgggfP: (animal as any).gen4PaternalGgggfP || '',
-            gen4PaternalGgggmP: (animal as any).gen4PaternalGgggmP || '',
-            gen4PaternalGggmfP: (animal as any).gen4PaternalGggmfP || '',
-            gen4PaternalGggmmP: (animal as any).gen4PaternalGggmmP || '',
-            gen4PaternalGgfgfP: (animal as any).gen4PaternalGgfgfP || '',
-            gen4PaternalGgfgmP: (animal as any).gen4PaternalGgfgmP || '',
-            gen4PaternalGgmgfP: (animal as any).gen4PaternalGgmgfP || '',
-            gen4PaternalGgmgmP: (animal as any).gen4PaternalGgmgmP || '',
-            gen4MaternalGgggfM: (animal as any).gen4MaternalGgggfM || '',
-            gen4MaternalGgggmM: (animal as any).gen4MaternalGgggmM || '',
-            gen4MaternalGggmfM: (animal as any).gen4MaternalGggmfM || '',
-            gen4MaternalGggmmM: (animal as any).gen4MaternalGggmmM || '',
-            gen4MaternalGgfgfM: (animal as any).gen4MaternalGgfgfM || '',
-            gen4MaternalGgfgmM: (animal as any).gen4MaternalGgfgmM || '',
-            gen4MaternalGgmgfM: (animal as any).gen4MaternalGgmgfM || '',
-            gen4MaternalGgmgmM: (animal as any).gen4MaternalGgmgmM || '',
-            gen5Paternal1: (animal as any).gen5Paternal1 || '',
-            gen5Paternal2: (animal as any).gen5Paternal2 || '',
-            gen5Paternal3: (animal as any).gen5Paternal3 || '',
-            gen5Paternal4: (animal as any).gen5Paternal4 || '',
-            gen5Paternal5: (animal as any).gen5Paternal5 || '',
-            gen5Paternal6: (animal as any).gen5Paternal6 || '',
-            gen5Paternal7: (animal as any).gen5Paternal7 || '',
-            gen5Paternal8: (animal as any).gen5Paternal8 || '',
-            gen5Paternal9: (animal as any).gen5Paternal9 || '',
-            gen5Paternal10: (animal as any).gen5Paternal10 || '',
-            gen5Paternal11: (animal as any).gen5Paternal11 || '',
-            gen5Paternal12: (animal as any).gen5Paternal12 || '',
-            gen5Paternal13: (animal as any).gen5Paternal13 || '',
-            gen5Paternal14: (animal as any).gen5Paternal14 || '',
-            gen5Paternal15: (animal as any).gen5Paternal15 || '',
-            gen5Paternal16: (animal as any).gen5Paternal16 || '',
-            gen5Maternal1: (animal as any).gen5Maternal1 || '',
-            gen5Maternal2: (animal as any).gen5Maternal2 || '',
-            gen5Maternal3: (animal as any).gen5Maternal3 || '',
-            gen5Maternal4: (animal as any).gen5Maternal4 || '',
-            gen5Maternal5: (animal as any).gen5Maternal5 || '',
-            gen5Maternal6: (animal as any).gen5Maternal6 || '',
-            gen5Maternal7: (animal as any).gen5Maternal7 || '',
-            gen5Maternal8: (animal as any).gen5Maternal8 || '',
-            gen5Maternal9: (animal as any).gen5Maternal9 || '',
-            gen5Maternal10: (animal as any).gen5Maternal10 || '',
-            gen5Maternal11: (animal as any).gen5Maternal11 || '',
-            gen5Maternal12: (animal as any).gen5Maternal12 || '',
-            gen5Maternal13: (animal as any).gen5Maternal13 || '',
-            gen5Maternal14: (animal as any).gen5Maternal14 || '',
-            gen5Maternal15: (animal as any).gen5Maternal15 || '',
-            gen5Maternal16: (animal as any).gen5Maternal16 || '',
+            gen4_paternal_ggggf_p: (animal as any).gen4_paternal_ggggf_p || '',
+            gen4_paternal_ggggm_p: (animal as any).gen4_paternal_ggggm_p || '',
+            gen4_paternal_gggmf_p: (animal as any).gen4_paternal_gggmf_p || '',
+            gen4_paternal_gggmm_p: (animal as any).gen4_paternal_gggmm_p || '',
+            gen4_paternal_ggfgf_p: (animal as any).gen4_paternal_ggfgf_p || '',
+            gen4_paternal_ggfgm_p: (animal as any).gen4_paternal_ggfgm_p || '',
+            gen4_paternal_ggmgf_p: (animal as any).gen4_paternal_ggmgf_p || '',
+            gen4_paternal_ggmgm_p: (animal as any).gen4_paternal_ggmgm_p || '',
+            gen4_maternal_ggggf_m: (animal as any).gen4_maternal_ggggf_m || '',
+            gen4_maternal_ggggm_m: (animal as any).gen4_maternal_ggggm_m || '',
+            gen4_maternal_gggmf_m: (animal as any).gen4_maternal_gggmf_m || '',
+            gen4_maternal_gggmm_m: (animal as any).gen4_maternal_gggmm_m || '',
+            gen4_maternal_ggfgf_m: (animal as any).gen4_maternal_ggfgf_m || '',
+            gen4_maternal_ggfgm_m: (animal as any).gen4_maternal_ggfgm_m || '',
+            gen4_maternal_ggmgf_m: (animal as any).gen4_maternal_ggmgf_m || '',
+            gen4_maternal_ggmgm_m: (animal as any).gen4_maternal_ggmgm_m || '',
+            gen5_paternal_1: (animal as any).gen5_paternal_1 || '',
+            gen5_paternal_2: (animal as any).gen5_paternal_2 || '',
+            gen5_paternal_3: (animal as any).gen5_paternal_3 || '',
+            gen5_paternal_4: (animal as any).gen5_paternal_4 || '',
+            gen5_paternal_5: (animal as any).gen5_paternal_5 || '',
+            gen5_paternal_6: (animal as any).gen5_paternal_6 || '',
+            gen5_paternal_7: (animal as any).gen5_paternal_7 || '',
+            gen5_paternal_8: (animal as any).gen5_paternal_8 || '',
+            gen5_paternal_9: (animal as any).gen5_paternal_9 || '',
+            gen5_paternal_10: (animal as any).gen5_paternal_10 || '',
+            gen5_paternal_11: (animal as any).gen5_paternal_11 || '',
+            gen5_paternal_12: (animal as any).gen5_paternal_12 || '',
+            gen5_paternal_13: (animal as any).gen5_paternal_13 || '',
+            gen5_paternal_14: (animal as any).gen5_paternal_14 || '',
+            gen5_paternal_15: (animal as any).gen5_paternal_15 || '',
+            gen5_paternal_16: (animal as any).gen5_paternal_16 || '',
+            gen5_maternal_1: (animal as any).gen5_maternal_1 || '',
+            gen5_maternal_2: (animal as any).gen5_maternal_2 || '',
+            gen5_maternal_3: (animal as any).gen5_maternal_3 || '',
+            gen5_maternal_4: (animal as any).gen5_maternal_4 || '',
+            gen5_maternal_5: (animal as any).gen5_maternal_5 || '',
+            gen5_maternal_6: (animal as any).gen5_maternal_6 || '',
+            gen5_maternal_7: (animal as any).gen5_maternal_7 || '',
+            gen5_maternal_8: (animal as any).gen5_maternal_8 || '',
+            gen5_maternal_9: (animal as any).gen5_maternal_9 || '',
+            gen5_maternal_10: (animal as any).gen5_maternal_10 || '',
+            gen5_maternal_11: (animal as any).gen5_maternal_11 || '',
+            gen5_maternal_12: (animal as any).gen5_maternal_12 || '',
+            gen5_maternal_13: (animal as any).gen5_maternal_13 || '',
+            gen5_maternal_14: (animal as any).gen5_maternal_14 || '',
+            gen5_maternal_15: (animal as any).gen5_maternal_15 || '',
+            gen5_maternal_16: (animal as any).gen5_maternal_16 || '',
             notes: animal.notes || '',
             healthStatus: animal.healthStatus || 'healthy',
             image: animal.image

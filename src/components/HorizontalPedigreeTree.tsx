@@ -95,6 +95,9 @@ const AncestorBox: React.FC<{
       <div className={`font-medium text-xs ${isEmpty ? 'text-muted-foreground italic' : 'text-foreground'}`}>
         {isEmpty ? '—' : displayName}
       </div>
+      <div className="text-xs text-muted-foreground mt-1">
+        {gender === 'male' ? '♂' : gender === 'female' ? '♀' : ''}
+      </div>
     </div>
   );
 };
@@ -227,8 +230,7 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
             </div>
 
             {/* Generation 4 - Great-Great-Grandparents */}
-            {stats.gen4 > 0 && (
-              <div className="flex flex-col gap-1 justify-center">
+            <div className="flex flex-col gap-1 justify-center">
                 <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 4</div>
                 {/* Paternal side */}
                 <AncestorBox name={animal.gen4_paternal_ggggf_p} label="GGGGF P" gender="male" generation={4} getDisplayName={getDisplayName} />
@@ -249,11 +251,9 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
                 <AncestorBox name={animal.gen4_maternal_ggmgf_m} label="GGMGF M" gender="male" generation={4} getDisplayName={getDisplayName} />
                 <AncestorBox name={animal.gen4_maternal_ggmgm_m} label="GGMGM M" gender="female" generation={4} getDisplayName={getDisplayName} />
               </div>
-            )}
 
             {/* Generation 5 */}
-            {stats.gen5 > 0 && (
-              <div className="flex flex-col gap-0.5 justify-center">
+            <div className="flex flex-col gap-0.5 justify-center">
                 <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 5</div>
                 <AncestorBox name={animal.gen5_paternal_1} label="G5-P1" gender="male" generation={5} getDisplayName={getDisplayName} />
                 <AncestorBox name={animal.gen5_paternal_2} label="G5-P2" gender="female" generation={5} getDisplayName={getDisplayName} />
@@ -288,7 +288,6 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
                 <AncestorBox name={animal.gen5_maternal_15} label="G5-M15" gender="male" generation={5} getDisplayName={getDisplayName} />
                 <AncestorBox name={animal.gen5_maternal_16} label="G5-M16" gender="female" generation={5} getDisplayName={getDisplayName} />
               </div>
-            )}
           </div>
         </div>
 

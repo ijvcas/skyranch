@@ -188,59 +188,59 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
           {/* Generation 4 - Great-Great-Grandparents */}
           <div className="flex flex-col gap-1 justify-center">
             <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 4</div>
-            <AncestorInputBox field="gen4PaternalGgggfP" value={formData.gen4PaternalGgggfP} label="G4-P1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4PaternalGgggmP" value={formData.gen4PaternalGgggmP} label="G4-P2 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4PaternalGggmfP" value={formData.gen4PaternalGggmfP} label="G4-P3 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4PaternalGggmmP" value={formData.gen4PaternalGggmmP} label="G4-P4 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4PaternalGgfgfP" value={formData.gen4PaternalGgfgfP} label="G4-P5 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4PaternalGgfgmP" value={formData.gen4PaternalGgfgmP} label="G4-P6 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4PaternalGgmgfP" value={formData.gen4PaternalGgmgfP} label="G4-P7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4PaternalGgmgmP" value={formData.gen4PaternalGgmgmP} label="G4-P8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4MaternalGgggfM" value={formData.gen4MaternalGgggfM} label="G4-M1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4MaternalGgggmM" value={formData.gen4MaternalGgggmM} label="G4-M2 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4MaternalGggmfM" value={formData.gen4MaternalGggmfM} label="G4-M3 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4MaternalGggmmM" value={formData.gen4MaternalGggmmM} label="G4-M4 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4MaternalGgfgfM" value={formData.gen4MaternalGgfgfM} label="G4-M5 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4MaternalGgfgmM" value={formData.gen4MaternalGgfgmM} label="G4-M6 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4MaternalGgmgfM" value={formData.gen4MaternalGgmgfM} label="G4-M7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen4MaternalGgmgmM" value={formData.gen4MaternalGgmgmM} label="G4-M8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_paternal_ggggf_p" value={formData.gen4_paternal_ggggf_p} label="G4-P1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_paternal_ggggm_p" value={formData.gen4_paternal_ggggm_p} label="G4-P2 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_paternal_gggmf_p" value={formData.gen4_paternal_gggmf_p} label="G4-P3 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_paternal_gggmm_p" value={formData.gen4_paternal_gggmm_p} label="G4-P4 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_paternal_ggfgf_p" value={formData.gen4_paternal_ggfgf_p} label="G4-P5 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_paternal_ggfgm_p" value={formData.gen4_paternal_ggfgm_p} label="G4-P6 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_paternal_ggmgf_p" value={formData.gen4_paternal_ggmgf_p} label="G4-P7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_paternal_ggmgm_p" value={formData.gen4_paternal_ggmgm_p} label="G4-P8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_maternal_ggggf_m" value={formData.gen4_maternal_ggggf_m} label="G4-M1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_maternal_ggggm_m" value={formData.gen4_maternal_ggggm_m} label="G4-M2 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_maternal_gggmf_m" value={formData.gen4_maternal_gggmf_m} label="G4-M3 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_maternal_gggmm_m" value={formData.gen4_maternal_gggmm_m} label="G4-M4 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_maternal_ggfgf_m" value={formData.gen4_maternal_ggfgf_m} label="G4-M5 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_maternal_ggfgm_m" value={formData.gen4_maternal_ggfgm_m} label="G4-M6 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_maternal_ggmgf_m" value={formData.gen4_maternal_ggmgf_m} label="G4-M7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen4_maternal_ggmgm_m" value={formData.gen4_maternal_ggmgm_m} label="G4-M8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
           </div>
 
           {/* Generation 5 */}
           <div className="flex flex-col gap-0.5 justify-center">
             <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 5</div>
-            <AncestorInputBox field="gen5Paternal1" value={formData.gen5Paternal1} label="G5-P1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal2" value={formData.gen5Paternal2} label="G5-P2 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal3" value={formData.gen5Paternal3} label="G5-P3 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal4" value={formData.gen5Paternal4} label="G5-P4 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal5" value={formData.gen5Paternal5} label="G5-P5 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal6" value={formData.gen5Paternal6} label="G5-P6 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal7" value={formData.gen5Paternal7} label="G5-P7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal8" value={formData.gen5Paternal8} label="G5-P8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal9" value={formData.gen5Paternal9} label="G5-P9 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal10" value={formData.gen5Paternal10} label="G5-P10 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal11" value={formData.gen5Paternal11} label="G5-P11 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal12" value={formData.gen5Paternal12} label="G5-P12 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal13" value={formData.gen5Paternal13} label="G5-P13 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal14" value={formData.gen5Paternal14} label="G5-P14 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal15" value={formData.gen5Paternal15} label="G5-P15 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Paternal16" value={formData.gen5Paternal16} label="G5-P16 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal1" value={formData.gen5Maternal1} label="G5-M1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal2" value={formData.gen5Maternal2} label="G5-M2 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal3" value={formData.gen5Maternal3} label="G5-M3 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal4" value={formData.gen5Maternal4} label="G5-M4 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal5" value={formData.gen5Maternal5} label="G5-M5 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal6" value={formData.gen5Maternal6} label="G5-M6 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal7" value={formData.gen5Maternal7} label="G5-M7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal8" value={formData.gen5Maternal8} label="G5-M8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal9" value={formData.gen5Maternal9} label="G5-M9 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal10" value={formData.gen5Maternal10} label="G5-M10 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal11" value={formData.gen5Maternal11} label="G5-M11 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal12" value={formData.gen5Maternal12} label="G5-M12 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal13" value={formData.gen5Maternal13} label="G5-M13 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal14" value={formData.gen5Maternal14} label="G5-M14 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal15" value={formData.gen5Maternal15} label="G5-M15 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
-            <AncestorInputBox field="gen5Maternal16" value={formData.gen5Maternal16} label="G5-M16 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_1" value={formData.gen5_paternal_1} label="G5-P1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_2" value={formData.gen5_paternal_2} label="G5-P2 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_3" value={formData.gen5_paternal_3} label="G5-P3 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_4" value={formData.gen5_paternal_4} label="G5-P4 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_5" value={formData.gen5_paternal_5} label="G5-P5 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_6" value={formData.gen5_paternal_6} label="G5-P6 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_7" value={formData.gen5_paternal_7} label="G5-P7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_8" value={formData.gen5_paternal_8} label="G5-P8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_9" value={formData.gen5_paternal_9} label="G5-P9 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_10" value={formData.gen5_paternal_10} label="G5-P10 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_11" value={formData.gen5_paternal_11} label="G5-P11 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_12" value={formData.gen5_paternal_12} label="G5-P12 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_13" value={formData.gen5_paternal_13} label="G5-P13 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_14" value={formData.gen5_paternal_14} label="G5-P14 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_15" value={formData.gen5_paternal_15} label="G5-P15 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_paternal_16" value={formData.gen5_paternal_16} label="G5-P16 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_1" value={formData.gen5_maternal_1} label="G5-M1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_2" value={formData.gen5_maternal_2} label="G5-M2 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_3" value={formData.gen5_maternal_3} label="G5-M3 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_4" value={formData.gen5_maternal_4} label="G5-M4 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_5" value={formData.gen5_maternal_5} label="G5-M5 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_6" value={formData.gen5_maternal_6} label="G5-M6 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_7" value={formData.gen5_maternal_7} label="G5-M7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_8" value={formData.gen5_maternal_8} label="G5-M8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_9" value={formData.gen5_maternal_9} label="G5-M9 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_10" value={formData.gen5_maternal_10} label="G5-M10 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_11" value={formData.gen5_maternal_11} label="G5-M11 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_12" value={formData.gen5_maternal_12} label="G5-M12 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_13" value={formData.gen5_maternal_13} label="G5-M13 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_14" value={formData.gen5_maternal_14} label="G5-M14 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_15" value={formData.gen5_maternal_15} label="G5-M15 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
+            <AncestorInputBox field="gen5_maternal_16" value={formData.gen5_maternal_16} label="G5-M16 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
           </div>
         </div>
       </div>
