@@ -23,6 +23,7 @@ export interface ComprehensiveBackupData {
   notifications?: any[];
   reports?: any[];
   properties?: any[];
+  animalAttachments?: any[];
 }
 
 // Lots and related data
@@ -245,4 +246,23 @@ export const importNotifications = async (notifications: any[]): Promise<number>
 export const importReports = async (reports: any[]): Promise<number> => {
   const { error } = await supabase.from('reports').insert(reports);
   return error ? 0 : reports.length;
+};
+
+// Animal attachments (document metadata)
+export const getAllAnimalAttachments = async () => {
+  const { data, error } = await supabase
+    .from('animal_attachments')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+export const importAnimalAttachments = async (attachments: any[]): Promise<number> => {
+  if (!attachments || attachments.length === 0) return 0;
+  
+  // Note: This only imports metadata, not the actual files from storage
+  const { error } = await supabase.from('animal_attachments').insert(attachments);
+  return error ? 0 : attachments.length;
 };

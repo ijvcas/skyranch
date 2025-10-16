@@ -13,6 +13,7 @@ import AnimalBasicInfo from '@/components/animal-detail/AnimalBasicInfo';
 import AnimalSidebar from '@/components/animal-detail/AnimalSidebar';
 import AnimalHealthRecords from '@/components/animal-detail/AnimalHealthRecords';
 import AnimalHistory from '@/components/animal-detail/AnimalHistory';
+import AnimalDocuments from '@/components/animal-detail/AnimalDocuments';
 
 const AnimalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -101,13 +102,14 @@ const AnimalDetail = () => {
           {/* Main Information */}
           <div className="lg:col-span-2 space-y-6">
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="grid w-full grid-cols-1 md:grid-cols-5 h-auto">
-                <TabsTrigger value="general" className="w-full">Información General</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-1 md:grid-cols-6 h-auto">
+                <TabsTrigger value="general" className="w-full">General</TabsTrigger>
                 <TabsTrigger value="health" className="w-full">
                   <Activity className="w-4 h-4 mr-2" />
                   Salud
                 </TabsTrigger>
                 <TabsTrigger value="pedigree" className="w-full">Pedigrí</TabsTrigger>
+                <TabsTrigger value="documents" className="w-full">Documentos</TabsTrigger>
                 <TabsTrigger value="diagnostics" className="w-full">
                   <Wrench className="w-4 h-4 mr-2" />
                   Diagnóstico
@@ -129,6 +131,10 @@ const AnimalDetail = () => {
 
               <TabsContent value="pedigree">
                 <HorizontalPedigreeTree animal={animal} />
+              </TabsContent>
+
+              <TabsContent value="documents">
+                <AnimalDocuments animalId={animal.id} animalName={animal.name} />
               </TabsContent>
 
               <TabsContent value="diagnostics">
