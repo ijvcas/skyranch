@@ -170,14 +170,11 @@ function isImageGenerationRequest(message: string): boolean {
       }
       
       return images;
+    } catch (error) {
+      console.error('❌ Image generation failed:', error);
+      return null;
     }
-        } catch (error) {
-          console.error(`❌ Error generating image ${i + 1}:`, error);
-        }
-      }
-      
-      return images.length > 0 ? images : null;
-    }
+  }
 
     // If file is uploaded, determine handling strategy
     let imageDataForVision: string | null = null;

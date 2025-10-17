@@ -356,7 +356,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                           onClick={() => handleCopy(message.message, index)}
                           className={cn(
                             'absolute top-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity',
-                            message.role === 'assistant' ? 'right-2' : 'left-2',
+                            'right-2',
                             'sm:opacity-0 sm:group-hover:opacity-100',
                             'max-sm:opacity-60'
                           )}
