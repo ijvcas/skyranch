@@ -101,15 +101,27 @@ serve(async (req) => {
       content: h.message
     }));
 
-    // Simple system prompt
-    const systemPrompt = `You are a versatile AI assistant without topic restrictions.
+    // Enhanced system prompt with tool access
+    const systemPrompt = `You are a versatile AI assistant for Skyranch farm management system, without topic restrictions.
 
-You can:
+Available capabilities:
 - Answer any question on any topic
 - Analyze images (photos, diagrams, documents, screenshots)
 - Process and analyze documents (PDF, text, data)
+- Get REAL-TIME WEATHER data for any location
+- Geocode locations (convert addresses to coordinates)
 - Provide detailed contextual analysis
-- Help with technical, creative, analytical tasks
+
+Tools at your disposal:
+- get_current_weather: Get live weather conditions (temperature, humidity, wind, precipitation) for any location
+- geocode_location: Convert location names/addresses to coordinates
+- web_search: Search for current information (placeholder for now)
+
+When users ask about weather, climate, or location data:
+- Use get_current_weather to provide REAL, CURRENT data
+- Don't say "I don't have access" - you DO have access via tools
+- Provide specific, accurate weather information
+- Be proactive - if you can get data, GET IT
 
 Communication style:
 - Conversational, precise, helpful
@@ -128,6 +140,56 @@ Communication style:
           ]
         : message
     };
+
+    // Define available tools for AI
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "get_current_weather",
+          description: "Get current weather conditions for a location. Provide either coordinates (lat/lng) or a location name.",
+          parameters: {
+            type: "object",
+            properties: {
+              location: {
+                type: "string",
+                description: "City name or address (e.g., 'Rozas de Puerto Real, Madrid')"
+              },
+              lat: { type: "number", description: "Latitude" },
+              lng: { type: "number", description: "Longitude" }
+            }
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "geocode_location",
+          description: "Convert a location name/address into coordinates (lat/lng)",
+          parameters: {
+            type: "object",
+            properties: {
+              location: { type: "string", description: "Location to geocode" }
+            },
+            required: ["location"]
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "web_search",
+          description: "Search the internet for current information, news, or data",
+          parameters: {
+            type: "object",
+            properties: {
+              query: { type: "string", description: "Search query" }
+            },
+            required: ["query"]
+          }
+        }
+      }
+    ];
 
     const messages = [
       { role: 'system', content: systemPrompt },
@@ -152,8 +214,8 @@ Communication style:
       body: JSON.stringify({
         model: 'gpt-5-mini-2025-08-07',
         messages: messages,
+        tools: tools,
         max_completion_tokens: 2000,
-        // temperature not supported on GPT-5
       }),
     });
 
@@ -164,9 +226,98 @@ Communication style:
     }
 
     const openAIData = await openAIResponse.json();
-    const assistantMessage = openAIData.choices[0].message.content;
+    const choice = openAIData.choices[0];
+    let assistantMessage = choice.message.content;
 
-    console.log('✅ Response received from OpenAI');
+    // Handle tool calls
+    if (choice.finish_reason === 'tool_calls') {
+      console.log('🔧 AI wants to use tools:', choice.message.tool_calls.length);
+      const toolCalls = choice.message.tool_calls;
+      
+      // Execute each tool call
+      const toolResults = [];
+      for (const toolCall of toolCalls) {
+        const functionName = toolCall.function.name;
+        const args = JSON.parse(toolCall.function.arguments);
+        console.log(`🔨 Executing tool: ${functionName}`, args);
+        
+        let result;
+        if (functionName === 'get_current_weather') {
+          let lat = args.lat;
+          let lng = args.lng;
+          
+          // If location provided, geocode it first
+          if (args.location && !lat) {
+            console.log('📍 Geocoding location:', args.location);
+            const { data: geoData } = await supabase.functions.invoke('places-geocode', {
+              body: { query: args.location, language: 'es' }
+            });
+            if (geoData?.ok && geoData?.result) {
+              lat = geoData.result.lat;
+              lng = geoData.result.lng;
+              console.log('✅ Geocoded to:', lat, lng);
+            }
+          }
+          
+          if (lat && lng) {
+            console.log('🌤️ Getting weather for:', lat, lng);
+            const { data: weatherData } = await supabase.functions.invoke('weather-current', {
+              body: { lat, lng, language: 'es' }
+            });
+            result = weatherData;
+            console.log('✅ Weather data retrieved');
+          } else {
+            result = { error: 'Could not determine location coordinates' };
+          }
+        } else if (functionName === 'geocode_location') {
+          console.log('📍 Geocoding:', args.location);
+          const { data: geoData } = await supabase.functions.invoke('places-geocode', {
+            body: { query: args.location, language: 'es' }
+          });
+          result = geoData;
+          console.log('✅ Geocoding complete');
+        } else if (functionName === 'web_search') {
+          result = { note: "Web search capability coming soon. Please ask about weather or location data for now." };
+        }
+        
+        toolResults.push({
+          tool_call_id: toolCall.id,
+          role: "tool",
+          name: functionName,
+          content: JSON.stringify(result)
+        });
+      }
+      
+      // Call OpenAI again with tool results
+      console.log('🔄 Calling OpenAI again with tool results');
+      messages.push(choice.message);
+      messages.push(...toolResults);
+      
+      const finalResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-mini-2025-08-07',
+          messages: messages,
+          max_completion_tokens: 2000,
+        }),
+      });
+      
+      if (!finalResponse.ok) {
+        const errorText = await finalResponse.text();
+        console.error('❌ OpenAI error on final call:', finalResponse.status, errorText);
+        throw new Error(`OpenAI API error: ${errorText}`);
+      }
+      
+      const finalData = await finalResponse.json();
+      assistantMessage = finalData.choices[0].message.content;
+      console.log('✅ Final response received with tool results');
+    } else {
+      console.log('✅ Response received from OpenAI (no tools used)');
+    }
 
     return new Response(
       JSON.stringify({
