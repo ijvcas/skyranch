@@ -133,9 +133,25 @@ export const deleteAnimalDocument = async (documentId: string, fileUrl: string):
 
 export const downloadAnimalDocument = async (fileUrl: string, fileName: string): Promise<void> => {
   try {
-    const response = await fetch(fileUrl);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+    // Extract file path from URL
+    const urlParts = fileUrl.split('/animal-documents/');
+    const filePath = urlParts[1];
+    
+    if (!filePath) {
+      throw new Error('Invalid file URL');
+    }
+
+    // Download from Supabase storage
+    const { data, error } = await supabase.storage
+      .from('animal-documents')
+      .download(filePath);
+
+    if (error) {
+      throw error;
+    }
+
+    // Create blob URL and trigger download
+    const url = window.URL.createObjectURL(data);
     const a = document.createElement('a');
     a.href = url;
     a.download = fileName;

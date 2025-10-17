@@ -239,13 +239,13 @@ const AnimalDocuments: React.FC<AnimalDocumentsProps> = ({ animalId, animalName 
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{doc.file_name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {doc.description} • {formatFileSize(doc.file_size)}
+                        {formatFileSize(doc.file_size)}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(doc.created_at).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: '2-digit'
                         })}
                       </p>
                     </div>
