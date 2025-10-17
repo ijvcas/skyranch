@@ -68,6 +68,73 @@ serve(async (req) => {
       );
     }
 
+    // Function to detect if user is requesting image generation
+    function isImageGenerationRequest(message: string): boolean {
+      const imageKeywords = [
+        'genera imagen', 'crea imagen', 'dibuja', 'make image', 'create image',
+        'generate image', 'draw', 'ilustra', 'diseña imagen', 'produce imagen',
+        'haz una imagen', 'create a picture', 'make a picture', 'genera una foto',
+        'crea una foto', 'genera gráfico', 'crea gráfico', 'genera un logo',
+        'crea un logo', 'diseña un logo', 'genera banner', 'crea banner',
+        'genera swatch', 'crea swatch', 'genera color', 'crea color'
+      ];
+      
+      const lowerMessage = message.toLowerCase();
+      return imageKeywords.some(keyword => lowerMessage.includes(keyword));
+    }
+
+    // Function to generate images with OpenAI gpt-image-1
+    async function generateImagesWithOpenAI(
+      prompt: string, 
+      apiKey: string, 
+      count: number = 1
+    ): Promise<Array<{ imageUrl: string, revisedPrompt?: string }> | null> {
+      console.log(`🎨 Generating ${count} image(s) with OpenAI gpt-image-1...`);
+      
+      const images: Array<{ imageUrl: string, revisedPrompt?: string }> = [];
+      
+      // Generate images (max 10 per OpenAI limits)
+      for (let i = 0; i < Math.min(count, 10); i++) {
+        try {
+          const response = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'gpt-image-1',
+              prompt: count > 1 ? `${prompt} (variation ${i + 1})` : prompt,
+              n: 1,
+              size: '1024x1024',
+              response_format: 'b64_json',
+            }),
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`❌ Error generating image ${i + 1}:`, response.status, errorText);
+            continue;
+          }
+
+          const data = await response.json();
+          const base64Image = data.data[0].b64_json;
+          const revisedPrompt = data.data[0].revised_prompt;
+          
+          images.push({
+            imageUrl: `data:image/png;base64,${base64Image}`,
+            revisedPrompt
+          });
+          
+          console.log(`✅ Image ${i + 1}/${count} generated successfully`);
+        } catch (error) {
+          console.error(`❌ Error generating image ${i + 1}:`, error);
+        }
+      }
+      
+      return images.length > 0 ? images : null;
+    }
+
     // If file is uploaded, determine handling strategy
     let imageDataForVision: string | null = null;
     if (file) {
@@ -392,9 +459,20 @@ CAPACIDADES PRINCIPALES:
 - Procesar y analizar documentos (PDF, texto, datos)
 - Proporcionar análisis detallados y contextualizados
 - Asistir con tareas técnicas, creativas, analíticas y de planificación
+- **GENERAR IMÁGENES** a partir de descripciones textuales
 
 CONTEXTO ESPECIALIZADO:
 Cuando dispones de contexto específico del rancho (datos de animales, pedigrís, clima, lotes), úsalo para enriquecer tus respuestas sobre gestión ganadera. Cuando el usuario pregunta sobre otros temas o sube imágenes/documentos generales, responde con tu conocimiento amplio.
+
+GENERACIÓN DE IMÁGENES:
+Puedes generar imágenes fotorrealistas y diseños desde cero. Cuando el usuario solicite:
+- "genera imagen", "crea imagen", "dibuja", "diseña", "ilustra"
+- "make image", "create image", "generate", "draw"
+- Logos, banners, swatches, gráficos, ilustraciones
+
+El sistema automáticamente activará la generación de imágenes con OpenAI gpt-image-1 y recibirás imágenes PNG de 1024x1024 píxeles en formato base64.
+
+Simplemente responde que estás generando la imagen y el sistema se encargará del resto. Las imágenes aparecerán automáticamente con botones de descarga en la interfaz.
 
 GENERACIÓN DE CONTENIDO DESCARGABLE:
 Cuando generes archivos descargables (HTML, JSON, CSV, imágenes, etc.), sigue estas reglas ESTRICTAMENTE:
@@ -410,11 +488,11 @@ Cuando generes archivos descargables (HTML, JSON, CSV, imágenes, etc.), sigue e
      <html>...
      \`\`\`
 
-2. **Imágenes** (PNG, JPEG, etc.):
-   - Proporciona datos en formato base64
-   - Formato: data:image/png;base64,iVBORw0KG...
-   - Menciona el nombre del archivo sugerido ANTES de la imagen
-   - Ejemplo: "Aquí está tu imagen swatch-violet.png:"
+2. **Imágenes generadas** (PNG, JPEG, etc.):
+   - El sistema las generará automáticamente cuando detecte la solicitud
+   - Aparecerán como base64: data:image/png;base64,iVBORw0KG...
+   - Tendrán botones de descarga automáticos
+   - Tú solo necesitas confirmar que las estás generando
 
 3. **Interfaz automática**:
    - NO necesitas explicar cómo descargar - el usuario verá botones automáticos
@@ -425,8 +503,9 @@ ESTILO DE COMUNICACIÓN:
 - Adapta tu tono y profundidad según las necesidades del usuario
 - Proporciona respuestas claras y accionables
 - Cuando analices imágenes, describe lo que ves con detalle
+- Cuando generes imágenes, describe brevemente lo que crearás
 
-Eres un asistente completo capaz de ayudar con cualquier consulta o tarea.`;
+Eres un asistente completo capaz de ayudar con cualquier consulta o tarea, incluyendo la generación de imágenes.`;
     
     const systemPrompt = settings?.system_prompt || defaultPrompt;
     const enableAnimalContext = settings?.enable_animal_context ?? true;
@@ -797,7 +876,7 @@ Sé conciso y directo.`;
       });
     }
 
-    // Call OpenAI
+    // Check for OPENAI_API_KEY
     console.log('🔑 Checking for OPENAI_API_KEY...');
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     
@@ -808,7 +887,73 @@ Sé conciso y directo.`;
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    console.log('✅ API key found, calling OpenAI...');
+    console.log('✅ API key found');
+
+    // Check if this is an image generation request
+    const isImageRequest = isImageGenerationRequest(message);
+    
+    if (isImageRequest) {
+      console.log('🎨 Image generation request detected');
+      
+      // Extract number of images requested (default: 1)
+      const countMatch = message.match(/(\d+)\s+(imagen|imágenes|image|images|swatch|swatches|logo|logos)/i);
+      const imageCount = countMatch ? parseInt(countMatch[1]) : 1;
+      
+      console.log(`🎨 Generating ${imageCount} image(s)...`);
+      
+      const imageResults = await generateImagesWithOpenAI(message, OPENAI_API_KEY, imageCount);
+      
+      if (imageResults && imageResults.length > 0) {
+        // Build response with all generated images
+        let aiResponseText = imageCount > 1 
+          ? `He generado ${imageResults.length} imagen(es) para ti:\n\n`
+          : `He generado la imagen que solicitaste:\n\n`;
+        
+        imageResults.forEach((result, index) => {
+          aiResponseText += `${result.imageUrl}\n\n`;
+          if (result.revisedPrompt && imageCount === 1) {
+            aiResponseText += `Descripción: ${result.revisedPrompt}\n\n`;
+          }
+        });
+        
+        aiResponseText += imageCount > 1
+          ? `Haz clic en cualquier imagen para descargarla.`
+          : `Haz clic en la imagen para descargarla.`;
+        
+        console.log('✅ Image generation complete, returning response');
+        
+        return new Response(
+          JSON.stringify({ 
+            response: aiResponseText,
+            metadata: {
+              imageGeneration: true,
+              imageCount: imageResults.length,
+              contextUsed: ['image_generation']
+            }
+          }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      } else {
+        // Image generation failed
+        console.error('❌ Image generation failed');
+        return new Response(
+          JSON.stringify({ 
+            error: 'No pude generar la imagen. Por favor, intenta de nuevo con una descripción diferente.',
+            response: 'Hubo un error al generar la imagen. Por favor, intenta nuevamente o proporciona más detalles en tu solicitud.'
+          }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+    }
+
+    // If not an image request, continue with regular chat
+    console.log('💬 Processing as regular chat request, calling OpenAI...');
 
     // Add timeout to prevent hanging (55s = Supabase max)
     const controller = new AbortController();
