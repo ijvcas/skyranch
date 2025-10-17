@@ -123,7 +123,7 @@ function isImageGenerationRequest(message: string): boolean {
               prompt: count > 1 ? `${prompt} (variation ${i + 1})` : prompt,
               n: 1,
               size: '1024x1024',
-              response_format: 'b64_json',
+              // Note: gpt-image-1 doesn't support response_format parameter
             }),
           });
 
@@ -134,15 +134,43 @@ function isImageGenerationRequest(message: string): boolean {
           }
 
           const data = await response.json();
-          const base64Image = data.data[0].b64_json;
+          console.log(`📊 Response data for image ${i + 1}:`, JSON.stringify(data).substring(0, 200));
+          
+          // gpt-image-1 returns URL by default, fetch and convert to base64
+          const imageUrl = data.data[0].url;
           const revisedPrompt = data.data[0].revised_prompt;
           
+          if (!imageUrl) {
+            console.error(`❌ No URL returned for image ${i + 1}`);
+            continue;
+          }
+          
+          // Fetch the image and convert to base64
+          console.log(`📥 Fetching image from URL...`);
+          const imageResponse = await fetch(imageUrl);
+          const imageBlob = await imageResponse.blob();
+          const arrayBuffer = await imageBlob.arrayBuffer();
+          const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+          
           images.push({
-            imageUrl: `data:image/png;base64,${base64Image}`,
+            imageUrl: `data:image/png;base64,${base64}`,
             revisedPrompt
           });
           
-          console.log(`✅ Image ${i + 1}/${count} generated successfully`);
+          console.log(`✅ Image ${i + 1}/${count} generated and converted to base64`);
+        } catch (error) {
+          console.error(`❌ Error generating image ${i + 1}:`, error);
+          continue;
+        }
+      }
+      
+      if (images.length === 0) {
+        console.error('❌ Image generation failed');
+        return null;
+      }
+      
+      return images;
+    }
         } catch (error) {
           console.error(`❌ Error generating image ${i + 1}:`, error);
         }

@@ -448,29 +448,6 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                 </div>
               )}
               
-              {/* Image generation mode indicator */}
-              {showImagePrompt && (
-                <div className="p-3 bg-accent/50 rounded-md">
-                  <div className="flex items-start gap-2">
-                    <ImagePlus className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium mb-1">Generación de imagen</p>
-                      <p className="text-xs text-muted-foreground">
-                        Describe la imagen que quieres generar. Ejemplo: "5 swatches PNG de color violeta"
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowImagePrompt(false)}
-                      className="h-6 w-6 flex-shrink-0"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-              
               {/* File preview */}
               {selectedFile && (
                 <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
