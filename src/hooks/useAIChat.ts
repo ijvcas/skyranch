@@ -30,7 +30,7 @@ export const useAIChat = () => {
     },
   });
 
-  const sendMessage = async (message: string, file?: File, animalId?: string) => {
+  const sendMessage = async (message: string) => {
     const abortController = new AbortController();
     let timeoutId: NodeJS.Timeout | null = null;
 
@@ -66,7 +66,7 @@ export const useAIChat = () => {
       }
       console.log('✅ User message saved:', userMessage.id);
 
-      // ✅ PHASE 2: Optimistic UI - Show user message immediately
+      // Optimistic UI - Show user message immediately
       queryClient.invalidateQueries({ queryKey: ['chat-history'] });
 
       // Set 60-second timeout for AI response
@@ -78,51 +78,9 @@ export const useAIChat = () => {
       // Call AI edge function with timeout
       console.log('🚀 Calling AI chat function...');
       
-      let aiResponse, aiError;
-      
-      if (file) {
-        // Use fix-pedigree-upload for file uploads via direct fetch
-        const formData = new FormData();
-        formData.append('message', message);
-        formData.append('file', file);
-        if (animalId) {
-          formData.append('animalId', animalId);
-        }
-
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        console.log('🔄 Uploading file to fix-pedigree-upload...');
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fix-pedigree-upload`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${session?.access_token}`,
-            },
-            body: formData,
-            signal: abortController.signal,
-          }
-        );
-        console.log('📥 Upload response status:', response.status);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Edge function error:', errorText);
-          aiError = new Error(`Edge function failed: ${response.status}`);
-          aiResponse = null;
-        } else {
-          aiResponse = await response.json();
-          aiError = null;
-        }
-      } else {
-        // Regular JSON request
-        const response = await supabase.functions.invoke('ai-chat', {
-          body: { message },
-        });
-        
-        aiResponse = response.data;
-        aiError = response.error;
-      }
+      const { data: aiResponse, error: aiError } = await supabase.functions.invoke('ai-chat', {
+        body: { message },
+      });
 
       // Clear timeout on successful response
       if (timeoutId) {

@@ -8,11 +8,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, X, Paperclip, FileImage, Save } from 'lucide-react';
+import { Send, Loader2, Trash2, X } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface ChatDrawerProps {
   open: boolean;
@@ -21,12 +19,8 @@ interface ChatDrawerProps {
 
 const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const [input, setInput] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
-  const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast();
 
   // Scroll to bottom function
   const scrollToBottom = () => {
@@ -52,129 +46,19 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     }
   }, [open]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-    const maxSize = 20 * 1024 * 1024; // 20MB
-
-    if (!validTypes.includes(file.type)) {
-      toast({
-        title: 'Tipo de archivo no válido',
-        description: 'Solo se permiten archivos PDF, JPEG o PNG',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (file.size > maxSize) {
-      toast({
-        title: 'Archivo muy grande',
-        description: 'El tamaño máximo es 20MB',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setSelectedFile(file);
-  };
-
-  const handleRemoveFile = () => {
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    const fileToSend = selectedFile;
-    
     setInput('');
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
     
-    await sendMessage(userMessage, fileToSend || undefined);
+    await sendMessage(userMessage);
   };
 
   const handleClearHistory = () => {
     if (confirm('¿Estás seguro de que quieres borrar todo el historial de chat?')) {
       clearHistory();
-    }
-  };
-
-  const handleSaveToDatabase = async () => {
-    setIsSaving(true);
-    try {
-      // Find the last assistant message with pedigree data
-      const lastAssistantMessage = [...messages].reverse().find(
-        m => m.role === 'assistant' && m.metadata?.pedigreeData
-      );
-
-      if (!lastAssistantMessage?.metadata?.pedigreeData) {
-        toast({
-          title: 'No hay datos de pedigree',
-          description: 'No se encontraron datos de pedigree en el chat',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const pedigreeData = lastAssistantMessage.metadata.pedigreeData;
-      
-      // Check if animal already exists
-      const { data: existingAnimals } = await supabase
-        .from('animals')
-        .select('id, name')
-        .ilike('name', pedigreeData.animalName)
-        .limit(1);
-      
-      if (existingAnimals && existingAnimals.length > 0) {
-        // Update existing animal
-        const { data, error } = await supabase.functions.invoke('update-animal-pedigree', {
-          body: {
-            animalId: existingAnimals[0].id,
-            pedigreeData: pedigreeData,
-          },
-        });
-
-        if (error) throw new Error(error.message);
-
-        toast({
-          title: 'Pedigrí actualizado',
-          description: data.message,
-        });
-      } else {
-        // Create new animal
-        const { data, error } = await supabase.functions.invoke('save-external-pedigree', {
-          body: {
-            pedigreeData: pedigreeData,
-            documentUrl: lastAssistantMessage.metadata.documentUrl || null,
-          },
-        });
-
-        if (error) throw new Error(error.message);
-
-        toast({
-          title: 'Animal guardado',
-          description: `${data.animal.name} ha sido añadido a la base de datos`,
-        });
-      }
-    } catch (error: any) {
-      console.error('Error saving to database:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo procesar el pedigrí',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -188,15 +72,6 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                 Asistente de IA - Skyranch
               </DrawerTitle>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSaveToDatabase}
-                  disabled={isSaving || isLoading}
-                  title="Guardar animal a la base de datos"
-                >
-                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -273,39 +148,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
           </ScrollArea>
 
           <form onSubmit={handleSubmit} className="border-t p-4 flex-shrink-0 bg-background">
-            {selectedFile && (
-              <div className="mb-2 flex items-center gap-2 p-2 bg-muted rounded-md">
-                <FileImage className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveFile}
-                  className="h-6 w-6 p-0"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
             <div className="flex gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isLoading}
-                title="Subir pedigrí (PDF, JPEG, PNG)"
-              >
-                <Paperclip className="h-4 w-4" />
-              </Button>
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

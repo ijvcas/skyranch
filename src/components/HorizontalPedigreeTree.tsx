@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { Animal } from '@/stores/animalStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle2, Upload, Loader2 } from 'lucide-react';
-import { useAIChat } from '@/hooks/useAIChat';
-import { toast } from 'sonner';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAnimalNames } from '@/hooks/useAnimalNames';
 
 interface HorizontalPedigreeTreeProps {
@@ -117,34 +115,12 @@ const AncestorBox: React.FC<{
 };
 
 const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal }) => {
-  const [uploading, setUploading] = useState(false);
-  const { sendMessage } = useAIChat();
   const { getDisplayName } = useAnimalNames();
   
   const stats = getPedigreeStats(animal);
   const totalKnown = stats.gen0 + stats.gen1 + stats.gen2 + stats.gen3 + stats.gen4 + stats.gen5;
   const totalPossible = 1 + 2 + 4 + 8 + 16 + 32; // 63 total ancestors
   const completeness = Math.round((totalKnown / totalPossible) * 100);
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      await sendMessage(
-        `Aquí está el pedigrí de 5 generaciones de ${animal.name}. Extrae toda la información y actualiza automáticamente su ficha.`,
-        file,
-        animal.id
-      );
-      toast.success('Pedigrí procesado correctamente. Recargando página...');
-      setTimeout(() => window.location.reload(), 2000);
-    } catch (error) {
-      toast.error('Error al procesar el pedigrí');
-    } finally {
-      setUploading(false);
-    }
-  };
 
   return (
     <Card className="w-full">
