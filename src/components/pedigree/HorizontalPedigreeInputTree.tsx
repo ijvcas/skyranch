@@ -9,6 +9,20 @@ interface HorizontalPedigreeInputTreeProps {
   animalName?: string;
 }
 
+// Get species-specific color for Gen 0 bubble with reduced opacity
+const getSpeciesColor = (species: string | undefined) => {
+  const colorMap: Record<string, string> = {
+    'equino': 'bg-blue-500/30 text-blue-900 border-2 border-blue-500/50',
+    'bovino': 'bg-yellow-500/30 text-yellow-900 border-2 border-yellow-600/50',
+    'ovino': 'bg-purple-500/30 text-purple-900 border-2 border-purple-500/50',
+    'caprino': 'bg-red-500/30 text-red-900 border-2 border-red-500/50',
+    'porcino': 'bg-pink-500/30 text-pink-900 border-2 border-pink-500/50',
+    'aviar': 'bg-orange-500/30 text-orange-900 border-2 border-orange-600/50',
+    'canino': 'bg-indigo-500/30 text-indigo-900 border-2 border-indigo-500/50'
+  };
+  return colorMap[species?.toLowerCase() || ''] || 'bg-gray-500/30 text-gray-900 border-2 border-gray-500/50';
+};
+
 const AncestorInputBox: React.FC<{
   field: string;
   value: string;
@@ -51,7 +65,7 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
         <div className="flex gap-4 min-w-max p-2">
           {/* Current Animal - Generation 0 */}
           <div className="flex flex-col justify-center">
-            <div className="bg-primary text-primary-foreground p-4 rounded-lg text-center min-w-[150px] shadow-lg">
+            <div className={`p-4 rounded-lg text-center min-w-[150px] shadow-lg ${getSpeciesColor(formData?.species)}`}>
               <div className="text-sm font-semibold mb-1">Gen 0</div>
               <div className="font-bold text-base">{animalName || 'Animal'}</div>
               <div className="text-xs opacity-75 mt-1">Sujeto</div>
