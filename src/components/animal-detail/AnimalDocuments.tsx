@@ -27,7 +27,6 @@ const AnimalDocuments: React.FC<AnimalDocumentsProps> = ({ animalId, animalName 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [documentType, setDocumentType] = useState<DocumentType>('other');
   const [isUploading, setIsUploading] = useState(false);
 
   const { data: documents = [], isLoading } = useQuery({
@@ -42,7 +41,7 @@ const AnimalDocuments: React.FC<AnimalDocumentsProps> = ({ animalId, animalName 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      return uploadAnimalDocument(animalId, user.id, selectedFile, documentType);
+      return uploadAnimalDocument(animalId, user.id, selectedFile, 'other');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['animal-documents', animalId] });
@@ -51,7 +50,6 @@ const AnimalDocuments: React.FC<AnimalDocumentsProps> = ({ animalId, animalName 
         description: 'El documento se ha subido correctamente',
       });
       setSelectedFile(null);
-      setDocumentType('other');
     },
     onError: (error: Error) => {
       toast({
@@ -155,22 +153,6 @@ const AnimalDocuments: React.FC<AnimalDocumentsProps> = ({ animalId, animalName 
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="document-type">Tipo de Documento</Label>
-            <Select value={documentType} onValueChange={(v) => setDocumentType(v as DocumentType)}>
-              <SelectTrigger id="document-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(DOCUMENT_TYPE_LABELS).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="file-upload">Archivo PDF (máx. 10MB)</Label>
             <Input
               id="file-upload"
@@ -232,35 +214,38 @@ const AnimalDocuments: React.FC<AnimalDocumentsProps> = ({ animalId, animalName 
               {documents.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
+                  className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent transition-colors"
                 >
-                  <div className="flex items-center gap-3 flex-1">
-                    <FileText className="w-8 h-8 text-red-600" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{doc.file_name}</p>
-                      <p className="text-sm text-muted-foreground">
+                  <FileText className="w-8 h-8 text-red-600 flex-shrink-0 mt-1" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm break-words">{doc.file_name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-muted-foreground">
                         {formatFileSize(doc.file_size)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
+                      </span>
+                      <span className="text-xs text-muted-foreground">•</span>
+                      <span className="text-xs text-muted-foreground">
                         {new Date(doc.created_at).toLocaleDateString('es-ES', {
                           day: '2-digit',
                           month: '2-digit',
                           year: '2-digit'
                         })}
-                      </p>
+                      </span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 flex-shrink-0">
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={() => handleDownload(doc)}
                     >
                       <Download className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={() => deleteMutation.mutate({ id: doc.id, url: doc.file_url })}
                       disabled={deleteMutation.isPending}
                     >
