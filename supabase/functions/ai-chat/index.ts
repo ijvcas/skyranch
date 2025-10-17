@@ -800,7 +800,7 @@ Sé conciso y directo.`;
         body: JSON.stringify({
           model: 'gpt-5-2025-08-07', // Supports vision
           messages,
-          max_completion_tokens: 2000, // Increased for detailed image analysis
+          max_completion_tokens: 16000, // High limit for reasoning + response
         }),
         signal: controller.signal,
       });
