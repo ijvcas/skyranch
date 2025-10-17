@@ -798,9 +798,9 @@ Sé conciso y directo.`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-5-2025-08-07', // Supports vision
+          model: 'gpt-5-mini-2025-08-07', // Faster, cheaper, supports vision, no reasoning token overhead
           messages,
-          max_completion_tokens: 16000, // High limit for reasoning + response
+          max_completion_tokens: 16000, // High limit for complete responses
         }),
         signal: controller.signal,
       });
