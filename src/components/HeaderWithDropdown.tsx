@@ -11,8 +11,7 @@ import {
   Bell,
   MapPin,
   ChevronDown,
-  LogOut,
-  Bot
+  LogOut
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -110,10 +109,10 @@ const HeaderWithDropdown = () => {
             <Button
               variant="ghost"
               onClick={() => setChatOpen(true)}
-              className="h-12 w-12 p-1.5 hover:bg-green-50 rounded-lg transition-all text-green-700 hover:text-green-900"
+              className="h-12 w-12 p-1.5 hover:bg-green-50 rounded-lg transition-all"
               aria-label="Abrir asistente de IA"
             >
-              <Bot className="w-9 h-9" strokeWidth={2} />
+              <span className="text-3xl leading-none">🤖</span>
             </Button>
             <div className="flex items-center h-full">
               <NotificationBell />
