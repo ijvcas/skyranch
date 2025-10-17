@@ -68,20 +68,36 @@ serve(async (req) => {
       );
     }
 
-    // Function to detect if user is requesting image generation
-    function isImageGenerationRequest(message: string): boolean {
-      const imageKeywords = [
-        'genera imagen', 'crea imagen', 'dibuja', 'make image', 'create image',
-        'generate image', 'draw', 'ilustra', 'diseña imagen', 'produce imagen',
-        'haz una imagen', 'create a picture', 'make a picture', 'genera una foto',
-        'crea una foto', 'genera gráfico', 'crea gráfico', 'genera un logo',
-        'crea un logo', 'diseña un logo', 'genera banner', 'crea banner',
-        'genera swatch', 'crea swatch', 'genera color', 'crea color'
-      ];
-      
-      const lowerMessage = message.toLowerCase();
-      return imageKeywords.some(keyword => lowerMessage.includes(keyword));
-    }
+// Function to detect if user is requesting image generation
+function isImageGenerationRequest(message: string): boolean {
+  const imageKeywords = [
+    // Spanish keywords
+    'genera imagen', 'crea imagen', 'dibuja', 'ilustra', 'diseña imagen', 
+    'produce imagen', 'haz una imagen', 'genera swatch', 'crea swatch',
+    'genera color', 'crea color', 'genera un logo', 'crea un logo',
+    'diseña un logo', 'genera banner', 'crea banner', 'genera una foto',
+    'crea una foto', 'genera gráfico', 'crea gráfico',
+    // English conversational patterns
+    'make image', 'create image', 'generate image', 'draw',
+    'make a picture', 'create a picture', 'generate a picture',
+    'produce downloadable image', 'produce image', 'create downloadable',
+    'generate downloadable', 'make downloadable', 'i want image',
+    'i need image', 'can you make image', 'can you create image',
+    'can you generate image', 'produce swatch', 'make swatch',
+    'create swatch', 'generate swatch', 'want downloadable image',
+    'need downloadable image', 'would like you to produce',
+    'produce links of downloadable', 'produce downloadable'
+  ];
+  
+  const lowerMessage = message.toLowerCase();
+  const matched = imageKeywords.find(keyword => lowerMessage.includes(keyword));
+  
+  if (matched) {
+    console.log(`🎯 Image generation keyword matched: "${matched}"`);
+  }
+  
+  return !!matched;
+}
 
     // Function to generate images with OpenAI gpt-image-1
     async function generateImagesWithOpenAI(
@@ -894,50 +910,77 @@ Sé conciso y directo.`;
     
     if (isImageRequest) {
       console.log('🎨 Image generation request detected');
+      console.log(`📝 Original request: "${message.substring(0, 100)}..."`);
       
       // Extract number of images requested (default: 1)
       const countMatch = message.match(/(\d+)\s+(imagen|imágenes|image|images|swatch|swatches|logo|logos)/i);
       const imageCount = countMatch ? parseInt(countMatch[1]) : 1;
       
-      console.log(`🎨 Generating ${imageCount} image(s)...`);
+      console.log(`🔢 Generating ${imageCount} image(s)...`);
       
-      const imageResults = await generateImagesWithOpenAI(message, OPENAI_API_KEY, imageCount);
-      
-      if (imageResults && imageResults.length > 0) {
-        // Build response with all generated images
-        let aiResponseText = imageCount > 1 
-          ? `He generado ${imageResults.length} imagen(es) para ti:\n\n`
-          : `He generado la imagen que solicitaste:\n\n`;
+      try {
+        const imageResults = await generateImagesWithOpenAI(message, OPENAI_API_KEY, imageCount);
         
-        imageResults.forEach((result, index) => {
-          aiResponseText += `${result.imageUrl}\n\n`;
-          if (result.revisedPrompt && imageCount === 1) {
-            aiResponseText += `Descripción: ${result.revisedPrompt}\n\n`;
-          }
-        });
-        
-        aiResponseText += imageCount > 1
-          ? `Haz clic en cualquier imagen para descargarla.`
-          : `Haz clic en la imagen para descargarla.`;
-        
-        console.log('✅ Image generation complete, returning response');
-        
+        if (imageResults && imageResults.length > 0) {
+          // Build response with all generated images
+          let aiResponseText = imageCount > 1 
+            ? `He generado ${imageResults.length} imagen(es) para ti:\n\n`
+            : `He generado la imagen que solicitaste:\n\n`;
+          
+          imageResults.forEach((result, index) => {
+            aiResponseText += `${result.imageUrl}\n\n`;
+            if (result.revisedPrompt && imageCount === 1) {
+              aiResponseText += `Descripción: ${result.revisedPrompt}\n\n`;
+            }
+          });
+          
+          aiResponseText += imageCount > 1
+            ? `Haz clic en cualquier imagen para descargarla.`
+            : `Haz clic en la imagen para descargarla.`;
+          
+          console.log(`✅ Successfully generated ${imageResults.length} image(s)`);
+          
+          return new Response(
+            JSON.stringify({ 
+              response: aiResponseText,
+              metadata: {
+                imageGeneration: true,
+                imageCount: imageResults.length,
+                contextUsed: ['image_generation']
+              }
+            }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        } else {
+          console.error('❌ Image generation returned no results');
+          return new Response(
+            JSON.stringify({ 
+              error: 'No pude generar la imagen. Por favor, intenta de nuevo con una descripción diferente.',
+              response: 'Hubo un error al generar la imagen. Por favor, intenta de nuevo.'
+            }),
+            { 
+              status: 500, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          );
+        }
+      } catch (error) {
+        console.error('❌ Image generation error:', error);
         return new Response(
           JSON.stringify({ 
-            response: aiResponseText,
-            metadata: {
-              imageGeneration: true,
-              imageCount: imageResults.length,
-              contextUsed: ['image_generation']
-            }
+            error: 'Error al generar la imagen: ' + (error.message || 'Unknown error'),
+            response: 'Hubo un error al generar la imagen. Por favor, intenta de nuevo.'
           }),
           { 
-            status: 200, 
+            status: 500, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         );
-      } else {
-        // Image generation failed
+      }
+    }
         console.error('❌ Image generation failed');
         return new Response(
           JSON.stringify({ 

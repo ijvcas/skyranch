@@ -8,7 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, X, Paperclip, FileIcon, Copy, Check, Download } from 'lucide-react';
+import { Send, Loader2, Trash2, X, Paperclip, FileIcon, Copy, Check, Download, ImagePlus } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -186,6 +186,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const [input, setInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [showImagePrompt, setShowImagePrompt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
@@ -218,11 +219,18 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage = input.trim();
+    // Prefix message with image generation keyword if in image mode
+    const userMessage = showImagePrompt 
+      ? `Genera imagen: ${input.trim()}` 
+      : input.trim();
     const fileToSend = selectedFile;
     
     setInput('');
     setSelectedFile(null);
+    
+    if (showImagePrompt) {
+      setShowImagePrompt(false);
+    }
     
     await sendMessage(userMessage, fileToSend || undefined);
   };
@@ -340,16 +348,17 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                           : 'bg-muted border border-border'
                       )}
                     >
-                      {/* Copy button - only for assistant messages */}
-                      {message.role === 'assistant' && (
+                      {/* Copy button - available for both user and assistant messages */}
+                      {(message.role === 'assistant' || message.role === 'user') && (
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleCopy(message.message, index)}
                           className={cn(
-                            'absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity',
-                            'sm:opacity-0 sm:group-hover:opacity-100', // Desktop: show on hover
-                            'max-sm:opacity-60' // Mobile: always visible but semi-transparent
+                            'absolute top-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity',
+                            message.role === 'assistant' ? 'right-2' : 'left-2',
+                            'sm:opacity-0 sm:group-hover:opacity-100',
+                            'max-sm:opacity-60'
                           )}
                           title="Copiar mensaje"
                         >
@@ -416,6 +425,52 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
 
           <form onSubmit={handleSubmit} className="border-t p-4 flex-shrink-0 bg-background">
             <div className="flex flex-col gap-2">
+              {/* Image generation mode indicator */}
+              {showImagePrompt && (
+                <div className="p-3 bg-accent/50 rounded-md">
+                  <div className="flex items-start gap-2">
+                    <ImagePlus className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium mb-1">Generación de imagen</p>
+                      <p className="text-xs text-muted-foreground">
+                        Describe la imagen que quieres generar. Ejemplo: "5 swatches PNG de color violeta"
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowImagePrompt(false)}
+                      className="h-6 w-6 flex-shrink-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Image generation mode indicator */}
+              {showImagePrompt && (
+                <div className="p-3 bg-accent/50 rounded-md">
+                  <div className="flex items-start gap-2">
+                    <ImagePlus className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium mb-1">Generación de imagen</p>
+                      <p className="text-xs text-muted-foreground">
+                        Describe la imagen que quieres generar. Ejemplo: "5 swatches PNG de color violeta"
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowImagePrompt(false)}
+                      className="h-6 w-6 flex-shrink-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
               {/* File preview */}
               {selectedFile && (
                 <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
@@ -443,11 +498,27 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                       handleSubmit(e as any);
                     }
                   }}
-                  placeholder="Escribe tu pregunta... (Shift+Enter para nueva línea)"
+                  placeholder={showImagePrompt 
+                    ? "Describe la imagen a generar..." 
+                    : "Escribe tu pregunta... (Shift+Enter para nueva línea)"
+                  }
                   disabled={isLoading}
                   className="flex-1 min-h-[60px] max-h-[200px] resize-y"
                   rows={2}
                 />
+                
+                {/* Image generation button */}
+                <Button
+                  type="button"
+                  variant={showImagePrompt ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => setShowImagePrompt(!showImagePrompt)}
+                  disabled={isLoading}
+                  title="Generar imagen con IA"
+                  className="flex-shrink-0"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                </Button>
                 
                 {/* File upload button */}
                 <Button
