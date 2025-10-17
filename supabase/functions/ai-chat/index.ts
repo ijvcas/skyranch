@@ -830,7 +830,34 @@ Sé conciso y directo.`;
 
       console.log('✅ AI response received');
       const aiData = await aiResponse.json();
-      const responseText = aiData.choices?.[0]?.message?.content || 'No response from AI';
+      console.log('📊 Full AI response:', JSON.stringify(aiData, null, 2));
+      
+      // Check if there's an error in the response
+      if (aiData.error) {
+        console.error('❌ OpenAI returned error:', aiData.error);
+        return new Response(
+          JSON.stringify({ 
+            error: `Error de OpenAI: ${aiData.error.message || JSON.stringify(aiData.error)}`,
+            response: `Error: ${aiData.error.message || 'Error desconocido del servicio de IA'}`
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const responseText = aiData.choices?.[0]?.message?.content;
+      
+      if (!responseText) {
+        console.error('❌ No content in AI response. Full response:', JSON.stringify(aiData));
+        return new Response(
+          JSON.stringify({ 
+            error: 'No se recibió respuesta del servicio de IA',
+            response: 'Lo siento, no pude generar una respuesta. Por favor, intenta de nuevo.',
+            debug: aiData
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       console.log('📤 Sending response back to client');
 
       return new Response(
