@@ -84,6 +84,15 @@ const AncestorBox: React.FC<{
   const displayName = getDisplayName ? getDisplayName(name || undefined) : cleanName(name);
   const isEmpty = !displayName || displayName === '—';
   
+  // Split name into lines: first line is the main name, rest are details (UELN, etc.)
+  const lines = displayName ? displayName.split(/(?:UELN\s*:\s*|#)/g).filter(Boolean) : [];
+  const mainName = lines[0]?.trim() || displayName;
+  const details = lines.slice(1).map((detail, i) => (
+    <div key={i} className="text-[10px] text-muted-foreground leading-tight">
+      {i === 0 ? '#' : ''}UELN {detail.trim()}
+    </div>
+  ));
+  
   return (
     <div className={`
       flex flex-col items-center justify-center p-2 rounded border text-center min-w-[120px]
@@ -92,9 +101,14 @@ const AncestorBox: React.FC<{
       ${gender === 'female' ? 'border-l-4 border-l-pink-500' : ''}
     `}>
       <div className="text-xs text-muted-foreground mb-1">{label}</div>
-      <div className={`font-medium text-xs ${isEmpty ? 'text-muted-foreground italic' : 'text-foreground'}`}>
-        {isEmpty ? '—' : displayName}
+      <div className={`font-medium text-xs leading-tight ${isEmpty ? 'text-muted-foreground italic' : 'text-foreground'}`}>
+        {isEmpty ? '—' : mainName}
       </div>
+      {!isEmpty && details.length > 0 && (
+        <div className="mt-1 space-y-0.5">
+          {details}
+        </div>
+      )}
       <div className="text-xs text-muted-foreground mt-1">
         {gender === 'male' ? '♂' : gender === 'female' ? '♀' : ''}
       </div>
