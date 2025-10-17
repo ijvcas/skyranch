@@ -10,7 +10,6 @@ import VersionControlPanel from '@/components/version-management/VersionControlP
 import VersionHistoryPanel from '@/components/version-management/VersionHistoryPanel';
 import FarmProfileSettings from './FarmProfileSettings';
 import UserActivityLogs from './UserActivityLogs';
-import AISettings from './AISettings';
 
 const SystemSettings = () => {
   const { user } = useAuth();
@@ -35,9 +34,6 @@ const SystemSettings = () => {
         {/* We keep sections modular to avoid bloating this file */}
         <UserActivityLogs />
       </div>
-
-      {/* AI Settings - Admin Only */}
-      {isAdmin && <AISettings />}
 
       {/* Farm Profile Settings */}
       <FarmProfileSettings />
