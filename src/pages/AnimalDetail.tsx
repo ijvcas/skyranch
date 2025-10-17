@@ -77,7 +77,7 @@ const AnimalDetail = () => {
               </h1>
               <p className="text-gray-600">ID: #{animal.tag}</p>
             </div>
-            <div className="flex gap-2 mt-4 md:mt-0">
+            <div className="flex gap-2 mt-4 md:mt-0 justify-center">
               <Button
                 onClick={() => navigate(`/animals/${animal.id}/edit`)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -87,11 +87,12 @@ const AnimalDetail = () => {
               </Button>
               <Button
                 variant="outline"
+                size="icon"
                 onClick={() => setDeleteDialogOpen(true)}
                 className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                aria-label="Eliminar animal"
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar
+                <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           </div>
