@@ -86,6 +86,57 @@ Deno.serve(async (req) => {
           );
         }
 
+        // Validate password strength server-side before updating
+        const { data: validationResult, error: validationError } = await supabaseAdmin
+          .rpc('validate_password_server_side', {
+            password: newPassword,
+            email: email,
+            full_name: null
+          });
+
+        if (validationError) {
+          console.error('Password validation RPC error:', validationError);
+          return new Response(
+            JSON.stringify({ 
+              error: 'Password validation failed',
+              details: ['Unable to validate password strength'] 
+            }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        if (!validationResult?.valid) {
+          console.log('Password failed strength requirements:', validationResult?.errors);
+          
+          // Log failed validation attempt
+          await supabaseUser
+            .from('user_role_audit')
+            .insert({
+              user_id: user.id,
+              changed_by: user.id,
+              old_role: 'password_validation_failed',
+              new_role: 'weak_password_rejected',
+              reason: 'Admin attempted to set weak password',
+              metadata: {
+                operation: 'force_password_update',
+                admin_user: user.email,
+                target_user: email,
+                validation_errors: validationResult?.errors || [],
+                timestamp: new Date().toISOString()
+              }
+            });
+
+          return new Response(
+            JSON.stringify({ 
+              error: 'Password does not meet strength requirements',
+              details: validationResult?.errors || ['Password is too weak'] 
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.log(`Password validation passed for ${email}`);
+
         // Find user by email using admin API
         const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
         if (listError) {
@@ -104,7 +155,7 @@ Deno.serve(async (req) => {
           );
         }
 
-        // Update password using admin API
+        // Update password using admin API (password already validated)
         const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(targetUser.id, {
           password: newPassword
         });
