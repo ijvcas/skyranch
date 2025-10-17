@@ -1763,6 +1763,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       weather_settings: {
         Row: {
           created_at: string
@@ -1921,6 +1945,13 @@ export type Database = {
           role: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_active_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1962,6 +1993,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "manager" | "worker"
       owner_type: "individual" | "company" | "cooperative" | "government"
     }
     CompositeTypes: {
@@ -2090,6 +2122,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "manager", "worker"],
       owner_type: ["individual", "company", "cooperative", "government"],
     },
   },
