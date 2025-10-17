@@ -99,8 +99,8 @@ function isImageGenerationRequest(message: string): boolean {
   return !!matched;
 }
 
-    // Function to generate images with OpenAI gpt-image-1
-    async function generateImagesWithOpenAI(
+// Function to generate images with OpenAI gpt-image-1
+async function generateImagesWithOpenAI(
       prompt: string, 
       apiKey: string, 
       count: number = 1
