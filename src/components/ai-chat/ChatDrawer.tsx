@@ -8,18 +8,184 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, X, Paperclip, FileIcon } from 'lucide-react';
+import { Send, Loader2, Trash2, X, Paperclip, FileIcon, Copy, Check, Download } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ChatDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+// Utility types
+interface DownloadableContent {
+  type: 'code' | 'image';
+  content: string;
+  filename: string;
+  language?: string;
+  mimeType?: string;
+}
+
+// Parse downloadable text content (code blocks)
+const parseDownloadableContent = (text: string): DownloadableContent[] => {
+  const items: DownloadableContent[] = [];
+  const codeBlockRegex = /```(\w+)\n([\s\S]*?)```/g;
+  let match;
+  
+  while ((match = codeBlockRegex.exec(text)) !== null) {
+    const language = match[1];
+    const content = match[2];
+    
+    // Determine mime type and file extension
+    const mimeTypes: Record<string, string> = {
+      html: 'text/html',
+      json: 'application/json',
+      csv: 'text/csv',
+      txt: 'text/plain',
+      svg: 'image/svg+xml',
+      xml: 'application/xml',
+      css: 'text/css',
+      javascript: 'text/javascript',
+      typescript: 'text/typescript',
+      python: 'text/x-python',
+      java: 'text/x-java',
+    };
+    
+    const mimeType = mimeTypes[language] || 'text/plain';
+    
+    // Try to find filename in surrounding text
+    const beforeText = text.substring(0, match.index);
+    const filenameMatch = beforeText.match(/([a-zA-Z0-9_-]+\.(html|json|csv|txt|svg|xml|css|js|ts|py|java))(?!.*\1)/i);
+    const filename = filenameMatch ? filenameMatch[1] : `download.${language}`;
+    
+    items.push({
+      type: 'code',
+      content,
+      filename,
+      language,
+      mimeType,
+    });
+  }
+  
+  return items;
+};
+
+// Parse image content (base64 or URLs)
+const parseImageContent = (text: string): DownloadableContent[] => {
+  const items: DownloadableContent[] = [];
+  
+  // Base64 images
+  const base64ImageRegex = /data:image\/(png|jpeg|jpg|webp|gif);base64,([A-Za-z0-9+/=]+)/gi;
+  let match;
+  
+  while ((match = base64ImageRegex.exec(text)) !== null) {
+    const format = match[1];
+    const base64Data = match[0]; // Full data URL
+    
+    // Try to find filename in surrounding text
+    const beforeText = text.substring(0, match.index);
+    const filenameMatch = beforeText.match(/([a-zA-Z0-9_-]+\.(png|jpg|jpeg|webp|gif))(?!.*\1)/i);
+    const filename = filenameMatch ? filenameMatch[1] : `image.${format}`;
+    
+    items.push({
+      type: 'image',
+      content: base64Data,
+      filename,
+      mimeType: `image/${format}`,
+    });
+  }
+  
+  return items;
+};
+
+// Download button component
+const DownloadButton: React.FC<{
+  content: string;
+  filename: string;
+  mimeType: string;
+  type: 'code' | 'image';
+}> = ({ content, filename, mimeType, type }) => {
+  const handleDownload = async () => {
+    try {
+      let blob: Blob;
+      
+      if (type === 'image' && content.startsWith('data:')) {
+        // Handle base64 image
+        const base64String = content.split(',')[1];
+        const byteString = atob(base64String);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        
+        blob = new Blob([ab], { type: mimeType });
+      } else {
+        // Handle text content
+        blob = new Blob([content], { type: mimeType });
+      }
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      toast.success(`Descargado: ${filename}`);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Error al descargar el archivo');
+    }
+  };
+  
+  const fileSize = type === 'image' 
+    ? `${Math.round(content.length * 0.75 / 1024)} KB`
+    : `${Math.round(new Blob([content]).size / 1024)} KB`;
+  
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleDownload}
+      className="gap-2 mt-2"
+    >
+      <Download className="h-3 w-3" />
+      <span className="text-xs">{filename}</span>
+      <span className="text-xs opacity-60">({fileSize})</span>
+    </Button>
+  );
+};
+
+// Image with download component
+const ImageWithDownload: React.FC<{
+  src: string;
+  filename: string;
+  alt?: string;
+}> = ({ src, filename, alt = 'Generated image' }) => {
+  return (
+    <div className="mt-2 space-y-2">
+      <img 
+        src={src} 
+        alt={alt}
+        className="max-w-full rounded-lg border border-border shadow-sm"
+      />
+      <DownloadButton 
+        content={src}
+        filename={filename}
+        mimeType="image/png"
+        type="image"
+      />
+    </div>
+  );
+};
+
 const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const [input, setInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
@@ -90,6 +256,18 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     }
   };
 
+  const handleCopy = async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      toast.success('Mensaje copiado');
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (error) {
+      console.error('Copy error:', error);
+      toast.error('Error al copiar');
+    }
+  };
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent className="h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none">
@@ -138,37 +316,93 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                 </div>
               )}
 
-              {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    'flex',
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
+{messages.map((message, index) => {
+                const downloadableFiles = message.role === 'assistant' 
+                  ? parseDownloadableContent(message.message) 
+                  : [];
+                const images = message.role === 'assistant' 
+                  ? parseImageContent(message.message) 
+                  : [];
+                
+                return (
                   <div
+                    key={index}
                     className={cn(
-                      'max-w-[85%] rounded-2xl px-4 py-3 shadow-sm',
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted border border-border'
+                      'flex',
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed select-text">
-                      {message.message}
-                    </p>
-                    <p className={cn(
-                      "text-xs mt-2 opacity-60",
-                      message.role === 'user' ? 'text-right' : 'text-left'
-                    )}>
-                      {new Date(message.created_at).toLocaleTimeString('es-ES', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
+                    <div
+                      className={cn(
+                        'max-w-[85%] rounded-2xl px-4 py-3 shadow-sm relative group',
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted border border-border'
+                      )}
+                    >
+                      {/* Copy button - only for assistant messages */}
+                      {message.role === 'assistant' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleCopy(message.message, index)}
+                          className={cn(
+                            'absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity',
+                            'sm:opacity-0 sm:group-hover:opacity-100', // Desktop: show on hover
+                            'max-sm:opacity-60' // Mobile: always visible but semi-transparent
+                          )}
+                          title="Copiar mensaje"
+                        >
+                          {copiedIndex === index ? (
+                            <Check className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
+                      )}
+                      
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed select-text pr-8">
+                        {message.message}
+                      </p>
+                      
+                      {/* Render images */}
+                      {images.map((img, imgIndex) => (
+                        <ImageWithDownload
+                          key={`img-${index}-${imgIndex}`}
+                          src={img.content}
+                          filename={img.filename}
+                          alt={`Generated image ${imgIndex + 1}`}
+                        />
+                      ))}
+                      
+                      {/* Render download buttons for code files */}
+                      {downloadableFiles.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {downloadableFiles.map((file, fileIndex) => (
+                            <DownloadButton
+                              key={`file-${index}-${fileIndex}`}
+                              content={file.content}
+                              filename={file.filename}
+                              mimeType={file.mimeType!}
+                              type={file.type}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      <p className={cn(
+                        "text-xs mt-2 opacity-60",
+                        message.role === 'user' ? 'text-right' : 'text-left'
+                      )}>
+                        {new Date(message.created_at).toLocaleTimeString('es-ES', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {isLoading && (
                 <div className="flex justify-start">
