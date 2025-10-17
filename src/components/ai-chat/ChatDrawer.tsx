@@ -8,7 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, X } from 'lucide-react';
+import { Send, Loader2, Trash2, X, Paperclip, FileIcon } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +19,8 @@ interface ChatDrawerProps {
 
 const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const [input, setInput] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
 
@@ -51,9 +53,35 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    setInput('');
+    const fileToSend = selectedFile;
     
-    await sendMessage(userMessage);
+    setInput('');
+    setSelectedFile(null);
+    
+    await sendMessage(userMessage, fileToSend || undefined);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('El archivo es demasiado grande. Máximo 5MB.');
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const clearFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   const handleClearHistory = () => {
@@ -99,8 +127,13 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                 <div className="text-center text-muted-foreground py-12">
                   <div className="mb-4 text-4xl">🤖</div>
                   <p className="text-lg font-medium mb-2">¡Hola! Soy tu asistente de IA</p>
-                  <p className="text-sm max-w-sm mx-auto">
-                    Puedo ayudarte con preguntas sobre animales, reproducción, lotes y mejores prácticas ganaderas.
+                  <p className="text-sm max-w-sm mx-auto mb-3">
+                    Puedo ayudarte con <strong>cualquier pregunta</strong>, analizar imágenes y documentos, 
+                    gestión ganadera, pedigrís y mucho más.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
+                    <Paperclip className="h-3 w-3" />
+                    Sube imágenes o archivos para análisis detallado
                   </p>
                 </div>
               )}
@@ -148,33 +181,73 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
           </ScrollArea>
 
           <form onSubmit={handleSubmit} className="border-t p-4 flex-shrink-0 bg-background">
-            <div className="flex gap-2">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit(e as any);
-                  }
-                }}
-                placeholder="Escribe tu pregunta... (Shift+Enter para nueva línea)"
-                disabled={isLoading}
-                className="flex-1 min-h-[60px] max-h-[200px] resize-y"
-                rows={2}
-              />
-              <Button 
-                type="submit" 
-                disabled={!input.trim() || isLoading}
-                size="icon"
-                className="flex-shrink-0"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
+            <div className="flex flex-col gap-2">
+              {/* File preview */}
+              {selectedFile && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+                  <FileIcon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+                  <Button 
+                    type="button"
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={clearFile}
+                    className="h-6 w-6 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex gap-2">
+                <Textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e as any);
+                    }
+                  }}
+                  placeholder="Escribe tu pregunta... (Shift+Enter para nueva línea)"
+                  disabled={isLoading}
+                  className="flex-1 min-h-[60px] max-h-[200px] resize-y"
+                  rows={2}
+                />
+                
+                {/* File upload button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={triggerFileInput}
+                  disabled={isLoading}
+                  title="Subir archivo o imagen"
+                  className="flex-shrink-0"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,.pdf,.txt,.md"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                
+                <Button 
+                  type="submit" 
+                  disabled={!input.trim() || isLoading}
+                  size="icon"
+                  className="flex-shrink-0"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
           </form>
         </div>

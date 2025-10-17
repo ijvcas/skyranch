@@ -30,13 +30,13 @@ export const useAIChat = () => {
     },
   });
 
-  const sendMessage = async (message: string) => {
+  const sendMessage = async (message: string, file?: File) => {
     const abortController = new AbortController();
     let timeoutId: NodeJS.Timeout | null = null;
 
     try {
       setIsLoading(true);
-      console.log('📤 Sending message:', message.substring(0, 50) + '...');
+      console.log('📤 Sending message:', message.substring(0, 50) + '...', file ? `with file: ${file.name}` : 'text only');
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -54,7 +54,7 @@ export const useAIChat = () => {
           user_id: user.id,
           message,
           role: 'user',
-          metadata: {},
+          metadata: file ? { fileName: file.name, fileType: file.type } : {},
         }])
         .select()
         .single();
@@ -75,12 +75,33 @@ export const useAIChat = () => {
         abortController.abort();
       }, 60000);
 
-      // Call AI edge function with timeout
-      console.log('🚀 Calling AI chat function...');
+      // Call AI edge function with optional file
+      console.log('🚀 Calling AI chat function...', file ? 'with FormData' : 'with JSON');
       
-      const { data: aiResponse, error: aiError } = await supabase.functions.invoke('ai-chat', {
-        body: { message },
-      });
+      let aiResponse, aiError;
+      
+      if (file) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        formData.append('message', message);
+        formData.append('file', file);
+        formData.append('fileType', file.type);
+        
+        const response = await supabase.functions.invoke('ai-chat', {
+          body: formData,
+        });
+        
+        aiResponse = response.data;
+        aiError = response.error;
+      } else {
+        // Use regular JSON for text-only
+        const response = await supabase.functions.invoke('ai-chat', {
+          body: { message },
+        });
+        
+        aiResponse = response.data;
+        aiError = response.error;
+      }
 
       // Clear timeout on successful response
       if (timeoutId) {

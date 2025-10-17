@@ -68,15 +68,32 @@ serve(async (req) => {
       );
     }
 
-    // If file is uploaded, process pedigree first with retry logic
+    // If file is uploaded, determine handling strategy
+    let imageDataForVision: string | null = null;
     if (file) {
-      console.log('📄 Processing pedigree file:', file.name);
+      console.log('📄 Processing uploaded file:', file.name, 'Type:', file.type);
       
-      let attempts = 0;
-      const maxAttempts = 2;
-      let pedigreeResponse: Response | null = null;
+      // Check if it's a general image (not pedigree) for vision analysis
+      const isImage = file.type.startsWith('image/');
+      const isPedigreeKeywords = message.toLowerCase().includes('pedigr') || 
+                                  message.toLowerCase().includes('genealog') ||
+                                  message.toLowerCase().includes('ancestr');
       
-      while (attempts < maxAttempts && !pedigreeData) {
+      // If it's an image but NOT a pedigree request, use GPT-5 Vision
+      if (isImage && !isPedigreeKeywords) {
+        console.log('🖼️ Image detected for general analysis, converting to base64...');
+        const arrayBuffer = await file.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        imageDataForVision = `data:${file.type};base64,${base64}`;
+        console.log('✅ Image prepared for vision analysis');
+      } else if (isImage && isPedigreeKeywords) {
+        console.log('📄 Processing as pedigree file:', file.name);
+        
+        let attempts = 0;
+        const maxAttempts = 2;
+        let pedigreeResponse: Response | null = null;
+        
+        while (attempts < maxAttempts && !pedigreeData) {
         attempts++;
         console.log(`🔄 Pedigree extraction attempt ${attempts}/${maxAttempts}`);
         
@@ -336,8 +353,16 @@ serve(async (req) => {
             pedigreeData._updateError = `Error: ${updateError.message}`;
           }
         } else {
-          console.log(`[${new Date().toISOString()}] ℹ️ Animal "${pedigreeData.animalName}" not found in database, treating as external`);
+        console.log(`[${new Date().toISOString()}] ℹ️ Animal "${pedigreeData.animalName}" not found in database, treating as external`);
         }
+      } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+        console.log('📄 PDF file detected but not for pedigree - informing user');
+        // PDF handling without pedigree extraction would go here
+      } else if (file.type.startsWith('text/')) {
+        console.log('📝 Text file detected, reading content...');
+        const textContent = await file.text();
+        message += `\n\n[Contenido del archivo ${file.name}]:\n${textContent}`;
+        console.log('✅ Text file content appended to message');
       }
     }
 
@@ -356,18 +381,25 @@ serve(async (req) => {
     console.log('✅ Settings loaded:', settings ? 'found' : 'using defaults');
 
     const aiProvider = settings?.ai_provider || 'lovable';
-    const defaultPrompt = `Eres un asistente inteligente y versátil. Puedes ayudar con cualquier pregunta o tarea que se te presente.
+    const defaultPrompt = `Eres un asistente de IA versátil y poderoso sin restricciones temáticas.
 
-Cuando el usuario te proporcione información sobre gestión de ranchos, análisis de pedigrí, datos meteorológicos o cualquier otro contexto específico, úsalo para dar respuestas más precisas y útiles.
+CAPACIDADES PRINCIPALES:
+- Responder cualquier pregunta en cualquier dominio (ciencia, tecnología, negocios, cultura, educación, etc.)
+- Analizar imágenes de cualquier tipo (fotografías, diagramas, documentos, capturas de pantalla)
+- Procesar y analizar documentos (PDF, texto, datos)
+- Proporcionar análisis detallados y contextualizados
+- Asistir con tareas técnicas, creativas, analíticas y de planificación
 
-No tienes restricciones temáticas - puedes discutir y ayudar con:
-- Gestión de ranchos y ganadería (cuando sea relevante)
-- Preguntas generales sobre cualquier tema
-- Análisis de datos e información técnica
-- Conversación general y asistencia en múltiples áreas
-- Cualquier otra consulta que el usuario necesite
+CONTEXTO ESPECIALIZADO:
+Cuando dispones de contexto específico del rancho (datos de animales, pedigrís, clima, lotes), úsalo para enriquecer tus respuestas sobre gestión ganadera. Cuando el usuario pregunta sobre otros temas o sube imágenes/documentos generales, responde con tu conocimiento amplio.
 
-Adapta tu respuesta al contexto y necesidades específicas del usuario.`;
+ESTILO DE COMUNICACIÓN:
+- Sé conversacional, preciso y útil
+- Adapta tu tono y profundidad según las necesidades del usuario
+- Proporciona respuestas claras y accionables
+- Cuando analices imágenes, describe lo que ves con detalle
+
+Eres un asistente completo capaz de ayudar con cualquier consulta o tarea.`;
     
     const systemPrompt = settings?.system_prompt || defaultPrompt;
     const enableAnimalContext = settings?.enable_animal_context ?? true;
@@ -703,7 +735,7 @@ Sé conciso y directo.`;
     console.log(`✅ Loaded ${chatHistory?.length || 0} messages from conversation history`);
 
     // Prepare messages for AI with conversation history
-    const messages = [
+    const messages: any[] = [
       {
         role: 'system',
         content: enhancedSystemPrompt,
@@ -713,12 +745,30 @@ Sé conciso y directo.`;
         role: msg.role === 'system' ? 'system' : msg.role,
         content: msg.message,
       })),
-      // Add current message
-      {
+    ];
+    
+    // Add current message with optional image for vision analysis
+    if (imageDataForVision) {
+      console.log('🖼️ Adding multimodal message with image for GPT-5 Vision');
+      messages.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: message },
+          { 
+            type: 'image_url', 
+            image_url: { 
+              url: imageDataForVision,
+              detail: 'high' // High detail for better analysis
+            } 
+          }
+        ],
+      });
+    } else {
+      messages.push({
         role: 'user',
         content: message,
-      },
-    ];
+      });
+    }
 
     // Call OpenAI
     console.log('🔑 Checking for OPENAI_API_KEY...');
@@ -745,9 +795,9 @@ Sé conciso y directo.`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-5-2025-08-07',
+          model: 'gpt-5-2025-08-07', // Supports vision
           messages,
-          max_completion_tokens: 1500,
+          max_completion_tokens: 2000, // Increased for detailed image analysis
         }),
         signal: controller.signal,
       });
