@@ -81,11 +81,14 @@ serve(async (req) => {
       
       // If it's an image but NOT a pedigree request, use GPT-5 Vision
       if (isImage && !isPedigreeKeywords) {
-        console.log('🖼️ Image detected for general analysis, converting to base64...');
-        const arrayBuffer = await file.arrayBuffer();
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        imageDataForVision = `data:${file.type};base64,${base64}`;
-        console.log('✅ Image prepared for vision analysis');
+      console.log('🖼️ Image detected for general analysis, converting to base64...');
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const base64 = btoa(
+        bytes.reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+      imageDataForVision = `data:${file.type};base64,${base64}`;
+      console.log('✅ Image prepared for vision analysis');
       } else if (isImage && isPedigreeKeywords) {
         console.log('📄 Processing as pedigree file:', file.name);
         
