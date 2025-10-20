@@ -1,10 +1,14 @@
 
 import React, { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Camera, Image as ImageIcon } from 'lucide-react';
 import ImagePreview from './ImagePreview';
 import ImageSelector from './ImageSelector';
 import ImageGallery from './ImageGallery';
 import { ImageUploadProps } from './types';
+import { cameraService } from '@/services/mobile/cameraService';
+import { toast } from 'sonner';
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
   currentImage, 
