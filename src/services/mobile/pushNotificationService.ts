@@ -1,6 +1,6 @@
 import { PushNotifications, Token, ActionPerformed } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
-import { supabase } from '@/integrations/supabase/client';
+import { pushTokenService } from './pushTokenService';
 
 class MobilePushNotificationService {
   private token: string | null = null;
@@ -56,29 +56,7 @@ class MobilePushNotificationService {
   }
 
   private async saveTokenToDatabase(token: string): Promise<void> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { error } = await supabase
-        .from('push_tokens')
-        .upsert({
-          user_id: user.id,
-          token,
-          platform: Capacitor.getPlatform(),
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id,token'
-        });
-
-      if (error) {
-        console.error('❌ Error saving push token:', error);
-      } else {
-        console.log('✅ Push token saved to database');
-      }
-    } catch (error) {
-      console.error('❌ Error in saveTokenToDatabase:', error);
-    }
+    await pushTokenService.saveToken(token);
   }
 
   async getToken(): Promise<string | null> {
@@ -87,27 +65,8 @@ class MobilePushNotificationService {
 
   async removeToken(): Promise<void> {
     if (!this.token) return;
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { error } = await supabase
-        .from('push_tokens')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('token', this.token);
-
-      if (error) {
-        console.error('❌ Error removing push token:', error);
-      } else {
-        console.log('✅ Push token removed from database');
-      }
-
-      this.token = null;
-    } catch (error) {
-      console.error('❌ Error in removeToken:', error);
-    }
+    await pushTokenService.removeToken(this.token);
+    this.token = null;
   }
 
   isAvailable(): boolean {

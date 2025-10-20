@@ -39,7 +39,6 @@ class CameraService {
         source: CameraSource.Camera,
         width: 1920,
         height: 1920,
-        preserveAspectRatio: true,
       });
 
       return photo.dataUrl || null;
@@ -67,7 +66,6 @@ class CameraService {
         source: CameraSource.Photos,
         width: 1920,
         height: 1920,
-        preserveAspectRatio: true,
       });
 
       return photo.dataUrl || null;

@@ -27,6 +27,7 @@ interface SkyRanchDB extends DBSchema {
   cache: {
     key: string;
     value: {
+      key: string;
       data: any;
       timestamp: Date;
       expiresAt: Date;
@@ -174,17 +175,14 @@ class OfflineStorageService {
   // Clear all data
   async clearAll(): Promise<void> {
     await this.initialize();
-    const storeNames: Array<keyof SkyRanchDB> = [
-      'animals',
-      'pending-sync',
-      'health-records',
-      'breeding-records',
-      'cache',
-    ];
+    const stores = ['animals', 'pending-sync', 'health-records', 'breeding-records', 'cache'] as const;
 
-    const tx = this.db!.transaction(storeNames, 'readwrite');
-    await Promise.all(storeNames.map(name => tx.objectStore(name).clear()));
-    await tx.done;
+    for (const storeName of stores) {
+      const tx = this.db!.transaction(storeName, 'readwrite');
+      await tx.store.clear();
+      await tx.done;
+    }
+    
     console.log('🗑️ Cleared all offline storage');
   }
 }
