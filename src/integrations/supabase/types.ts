@@ -1888,6 +1888,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      delete_push_token: {
+        Args: { p_token: string; p_user_id: string }
+        Returns: undefined
+      }
       get_animal_stats_bypass: {
         Args: { target_user_id: string }
         Returns: {
@@ -2008,6 +2012,10 @@ export type Database = {
       }
       update_single_lot_status: {
         Args: { target_lot_id: string }
+        Returns: undefined
+      }
+      upsert_push_token: {
+        Args: { p_platform: string; p_token: string; p_user_id: string }
         Returns: undefined
       }
       validate_password_server_side: {

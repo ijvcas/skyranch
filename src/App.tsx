@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,10 @@ import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 import { createOptimizedQueryClient } from '@/utils/queryConfig';
 // AI Chat using drawer component with OpenAI integration
 import ChatDrawer from '@/components/ai-chat/ChatDrawer';
+import OfflineIndicator from '@/components/OfflineIndicator';
+import { offlineStorage } from '@/services/offline/offlineStorage';
+import { syncService } from '@/services/offline/syncService';
+import { mobilePushService } from '@/services/mobile/pushNotificationService';
 
 // OPTIMIZED: Lazy load heavy pages for better initial bundle size
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
@@ -44,8 +48,29 @@ function AppContent() {
   const { user, loading } = useAuth();
   const { chatOpen, setChatOpen } = useAIChatDialog();
 
+  // Initialize mobile services
+  useEffect(() => {
+    const initServices = async () => {
+      // Initialize offline storage
+      await offlineStorage.initialize();
+      console.log('✅ Offline storage initialized');
+
+      // Setup auto-sync
+      syncService.setupAutoSync();
+      console.log('✅ Auto-sync enabled');
+
+      // Initialize push notifications for native platforms
+      if (user) {
+        await mobilePushService.initialize();
+        console.log('✅ Push notifications initialized');
+      }
+    };
+
+    initServices();
+  }, [user]);
+
   // Log an "app_open" when a user has an active session (once per tab)
-  React.useEffect(() => {
+  useEffect(() => {
     if (!loading && user) {
       logAppOpenOncePerSession();
     }
@@ -136,7 +161,10 @@ function AppContent() {
                  </Routes>
         </Suspense>
       </AppErrorBoundary>
-              <Toaster />
+      <Toaster />
+      
+      {/* Offline Indicator */}
+      <OfflineIndicator />
       
       {/* AI Chat Drawer - Only show when logged in */}
       {user && <ChatDrawer open={chatOpen} onOpenChange={setChatOpen} />}

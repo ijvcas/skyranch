@@ -56,6 +56,36 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setIsSearching(!isSearching);
   };
 
+  const handleTakePhoto = async () => {
+    try {
+      const photoDataUrl = await cameraService.takePicture();
+      if (photoDataUrl) {
+        setPreviewUrl(photoDataUrl);
+        onImageChange(photoDataUrl);
+        toast.success('Foto capturada correctamente');
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      toast.error('Error al capturar la foto');
+    }
+  };
+
+  const handleSelectFromGallery = async () => {
+    try {
+      const photoDataUrl = await cameraService.selectFromGallery();
+      if (photoDataUrl) {
+        setPreviewUrl(photoDataUrl);
+        onImageChange(photoDataUrl);
+        toast.success('Foto seleccionada correctamente');
+      }
+    } catch (error) {
+      console.error('Error selecting photo:', error);
+      toast.error('Error al seleccionar la foto');
+    }
+  };
+
+  const showCameraOptions = cameraService.isAvailable();
+
   return (
     <div className="space-y-4">
       {previewUrl ? (
@@ -64,6 +94,40 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           disabled={disabled}
           onRemove={handleRemoveImage}
         />
+      ) : showCameraOptions && cameraService.isMobile() ? (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleTakePhoto}
+              disabled={disabled}
+              className="w-full"
+            >
+              <Camera className="w-4 h-4 mr-2" />
+              Tomar Foto
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSelectFromGallery}
+              disabled={disabled}
+              className="w-full"
+            >
+              <ImageIcon className="w-4 h-4 mr-2" />
+              Galería
+            </Button>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleFileUploadClick}
+            disabled={disabled}
+            className="w-full text-sm"
+          >
+            O subir desde archivo
+          </Button>
+        </div>
       ) : (
         <ImageSelector
           animalType={animalType}

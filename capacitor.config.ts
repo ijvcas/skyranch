@@ -1,4 +1,3 @@
-
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
@@ -29,6 +28,22 @@ const config: CapacitorConfig = {
     },
     CapacitorPreferences: {
       enabled: true
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"]
+    },
+    Camera: {
+      ios: {
+        NSCameraUsageDescription: "SkyRanch necesita acceso a la cámara para tomar fotos de animales",
+        NSPhotoLibraryUsageDescription: "SkyRanch necesita acceso a la galería para seleccionar fotos de animales"
+      },
+      android: {
+        permissions: [
+          "android.permission.CAMERA",
+          "android.permission.READ_EXTERNAL_STORAGE",
+          "android.permission.WRITE_EXTERNAL_STORAGE"
+        ]
+      }
     }
   }
 };
