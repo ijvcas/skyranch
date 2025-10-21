@@ -42,7 +42,7 @@ class CameraService {
       console.log('📸 Opening camera...');
       const photo: Photo = await Camera.getPhoto({
         quality: 90,
-        allowEditing: true,
+        allowEditing: false,
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera,
         width: 1920,
@@ -73,7 +73,7 @@ class CameraService {
       console.log('📸 Opening gallery...');
       const photo: Photo = await Camera.getPhoto({
         quality: 90,
-        allowEditing: true,
+        allowEditing: false,
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Photos,
         width: 1920,
