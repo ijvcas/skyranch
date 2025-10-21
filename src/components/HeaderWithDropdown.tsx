@@ -76,7 +76,7 @@ const HeaderWithDropdown = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent 
               align="start" 
-              className="w-64 bg-white border border-gray-200 shadow-lg z-50"
+              className="w-64 bg-white border border-gray-200 shadow-lg z-[9999]"
               sideOffset={8}
             >
               {navItems.map((item) => (
