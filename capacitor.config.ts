@@ -4,10 +4,12 @@ const config: CapacitorConfig = {
   appId: 'com.skyranch.app',
   appName: 'SkyRanch Management',
   webDir: 'dist',
-  server: {
-    url: 'https://skyranch.lovable.app?forceHideBadge=true',
-    cleartext: true
-  },
+  // Server config removed for native builds - enables local bundled files
+  // For development hot-reload, uncomment the lines below:
+  // server: {
+  //   url: 'https://skyranch.lovable.app?forceHideBadge=true',
+  //   cleartext: true
+  // },
   bundledWebRuntime: false,
   ios: {
     contentInset: 'automatic',
