@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Home, 
@@ -11,15 +11,16 @@ import {
   Bell,
   MapPin,
   ChevronDown,
-  LogOut
+  LogOut,
+  X
 } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAIChatDialog } from '@/contexts/AIChatContext';
@@ -32,6 +33,7 @@ const HeaderWithDropdown = () => {
   const { signOut } = useAuth();
   const { setChatOpen } = useAIChatDialog();
   const { hasAccess: canAccessSettings } = usePermissionCheck('system_settings');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
     { to: '/dashboard', icon: Home, label: 'Panel' },
@@ -46,6 +48,7 @@ const HeaderWithDropdown = () => {
 
   const handleSignOut = async () => {
     try {
+      setIsMenuOpen(false);
       await signOut();
       navigate('/login');
     } catch (error) {
@@ -53,13 +56,17 @@ const HeaderWithDropdown = () => {
     }
   };
 
+  const handleNavigation = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 bg-green-100 border-b border-green-200 z-50 h-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full">
         <div className="flex justify-between items-center h-full">
-          {/* Logo with Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          {/* Logo with Sheet Menu */}
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-3 hover:bg-green-50 h-14 px-3">
                 <img 
                   src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
@@ -73,36 +80,54 @@ const HeaderWithDropdown = () => {
                   <ChevronDown className="w-4 h-4 ml-2 text-gray-600" />
                 </div>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="start" 
-              className="w-64 bg-white border border-gray-200 shadow-lg z-[9999]"
-              sideOffset={8}
-            >
-              {navItems.map((item) => (
-                <DropdownMenuItem key={item.to} asChild>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 bg-white p-0">
+              <SheetHeader className="p-6 pb-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <SheetTitle className="text-2xl font-bold text-gray-900 uppercase">SkyRanch</SheetTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="h-8 w-8"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </SheetHeader>
+              
+              <nav className="flex flex-col p-4">
+                {navItems.map((item) => (
                   <NavLink
+                    key={item.to}
                     to={item.to}
-                    className="flex items-center px-3 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 cursor-pointer w-full"
+                    onClick={handleNavigation}
+                    className={({ isActive }) =>
+                      `flex items-center px-4 py-3 text-base font-medium rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-green-50 text-green-700'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`
+                    }
                   >
                     <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
                     {item.label}
                   </NavLink>
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+                ))}
+                
+                <div className="h-px bg-gray-200 my-4" />
+                
                 <Button
                   variant="ghost"
                   onClick={handleSignOut}
-                  className="flex items-center px-3 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 cursor-pointer w-full justify-start"
+                  className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 justify-start rounded-lg"
                 >
                   <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
                   Cerrar Sesión
                 </Button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </nav>
+            </SheetContent>
+          </Sheet>
 
           {/* Right side - AI Assistant and notification bell */}
           <div className="flex items-center space-x-1 h-full pr-4 md:pr-3">
