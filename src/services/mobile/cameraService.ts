@@ -28,6 +28,8 @@ class CameraService {
   async takePicture(): Promise<string | null> {
     try {
       console.log('📸 takePicture() called');
+      console.log('📸 Platform:', Capacitor.isNativePlatform() ? 'Native' : 'Web');
+      
       // Check and request permissions
       const hasPermission = await this.checkPermissions();
       if (!hasPermission) {
@@ -39,8 +41,12 @@ class CameraService {
         }
       }
 
-      console.log('📸 Opening camera...');
-      const photo: Photo = await Camera.getPhoto({
+      console.log('📸 Opening camera with timeout protection...');
+      const timeoutPromise = new Promise<null>((_, reject) => {
+        setTimeout(() => reject(new Error('Camera timeout after 30 seconds')), 30000);
+      });
+
+      const cameraPromise = Camera.getPhoto({
         quality: 90,
         allowEditing: false,
         resultType: CameraResultType.DataUrl,
@@ -49,10 +55,16 @@ class CameraService {
         height: 1920,
       });
 
+      const photo: Photo = await Promise.race([cameraPromise, timeoutPromise]) as Photo;
+
       console.log('✅ Photo captured successfully');
       return photo.dataUrl || null;
     } catch (error) {
       console.error('❌ Error taking picture:', error);
+      if (error instanceof Error) {
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+      }
       return null;
     }
   }
@@ -60,6 +72,8 @@ class CameraService {
   async selectFromGallery(): Promise<string | null> {
     try {
       console.log('📸 selectFromGallery() called');
+      console.log('📸 Platform:', Capacitor.isNativePlatform() ? 'Native' : 'Web');
+      
       const hasPermission = await this.checkPermissions();
       if (!hasPermission) {
         console.log('📸 No permission, requesting...');
@@ -70,8 +84,12 @@ class CameraService {
         }
       }
 
-      console.log('📸 Opening gallery...');
-      const photo: Photo = await Camera.getPhoto({
+      console.log('📸 Opening gallery with timeout protection...');
+      const timeoutPromise = new Promise<null>((_, reject) => {
+        setTimeout(() => reject(new Error('Gallery timeout after 30 seconds')), 30000);
+      });
+
+      const galleryPromise = Camera.getPhoto({
         quality: 90,
         allowEditing: false,
         resultType: CameraResultType.DataUrl,
@@ -80,10 +98,16 @@ class CameraService {
         height: 1920,
       });
 
+      const photo: Photo = await Promise.race([galleryPromise, timeoutPromise]) as Photo;
+
       console.log('✅ Photo selected successfully');
       return photo.dataUrl || null;
     } catch (error) {
       console.error('❌ Error selecting from gallery:', error);
+      if (error instanceof Error) {
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+      }
       return null;
     }
   }
