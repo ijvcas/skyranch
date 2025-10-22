@@ -270,7 +270,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none">
+      <DrawerContent className="h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none pb-safe">
         <div className="flex flex-col h-full bg-background">
           <DrawerHeader className="border-b px-6 py-4 flex-shrink-0">
             <div className="flex items-center justify-between">
@@ -299,7 +299,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
             </div>
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 px-6" ref={scrollRef}>
+          <ScrollArea className="flex-1 px-6 pb-4" ref={scrollRef}>
             <div className="space-y-4 py-4">
               {messages.length === 0 && (
                 <div className="text-center text-muted-foreground py-12">
@@ -415,7 +415,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
             </div>
           </ScrollArea>
 
-          <form onSubmit={handleSubmit} className="border-t p-4 flex-shrink-0 bg-background">
+          <form onSubmit={handleSubmit} className="border-t p-4 pb-safe safe-area-pb flex-shrink-0 bg-background">
             <div className="flex flex-col gap-2">
               {/* File preview */}
               {selectedFile && (
