@@ -37,7 +37,8 @@ const config: CapacitorConfig = {
     Camera: {
       ios: {
         NSCameraUsageDescription: "SkyRanch necesita acceso a la cámara para tomar fotos de animales",
-        NSPhotoLibraryUsageDescription: "SkyRanch necesita acceso a la galería para seleccionar fotos de animales"
+        NSPhotoLibraryUsageDescription: "SkyRanch necesita acceso a la galería para seleccionar fotos de animales",
+        NSPhotoLibraryAddUsageDescription: "SkyRanch necesita permiso para guardar fotos en tu galería"
       },
       android: {
         permissions: [
