@@ -72,7 +72,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       }
     } catch (error) {
       console.error('Error taking photo:', error);
-      toast.error('Error al capturar la foto', { id: toastId });
+      const errorMessage = error instanceof Error ? error.message : 'Error al capturar la foto';
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setIsTakingPhoto(false);
     }
@@ -92,7 +93,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       }
     } catch (error) {
       console.error('Error selecting photo:', error);
-      toast.error('Error al seleccionar la foto', { id: toastId });
+      const errorMessage = error instanceof Error ? error.message : 'Error al seleccionar la foto';
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setIsSelectingFromGallery(false);
     }

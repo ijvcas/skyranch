@@ -14,7 +14,8 @@ class CameraService {
 
     const permissions = await Camera.checkPermissions();
     console.log('📸 Permission status:', permissions);
-    return permissions.camera === 'granted' && permissions.photos === 'granted';
+    // Accept if either camera or photos permission is granted
+    return permissions.camera === 'granted' || permissions.photos === 'granted';
   }
 
   async requestPermissions(): Promise<boolean> {
@@ -25,7 +26,8 @@ class CameraService {
 
     const permissions = await Camera.requestPermissions();
     console.log('📸 Permission request result:', permissions);
-    return permissions.camera === 'granted' && permissions.photos === 'granted';
+    // Accept if either camera or photos permission is granted
+    return permissions.camera === 'granted' || permissions.photos === 'granted';
   }
 
   async takePicture(): Promise<string | null> {
@@ -70,8 +72,12 @@ class CameraService {
       if (error instanceof Error) {
         console.error('❌ Error message:', error.message);
         console.error('❌ Error stack:', error.stack);
+        // Show alert on device for debugging
+        if (Capacitor.isNativePlatform()) {
+          alert(`Camera Error: ${error.message}`);
+        }
       }
-      return null;
+      throw error; // Throw error so caller can handle it
     }
   }
 
@@ -116,8 +122,12 @@ class CameraService {
       if (error instanceof Error) {
         console.error('❌ Error message:', error.message);
         console.error('❌ Error stack:', error.stack);
+        // Show alert on device for debugging
+        if (Capacitor.isNativePlatform()) {
+          alert(`Gallery Error: ${error.message}`);
+        }
       }
-      return null;
+      throw error; // Throw error so caller can handle it
     }
   }
 
