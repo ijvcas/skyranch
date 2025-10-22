@@ -415,7 +415,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
             </div>
           </ScrollArea>
 
-          <form onSubmit={handleSubmit} className="border-t p-4 pb-safe safe-area-pb flex-shrink-0 bg-background">
+          <form onSubmit={handleSubmit} className="border-t p-4 flex-shrink-0 bg-background" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
             <div className="flex flex-col gap-2">
               {/* File preview */}
               {selectedFile && (

@@ -35,29 +35,12 @@ class CameraService {
       console.log('📸 takePicture() called');
       console.log('📸 Platform:', Capacitor.isNativePlatform() ? 'Native' : 'Web');
       
-      // DEBUG ALERT 1: Function started
-      if (Capacitor.isNativePlatform()) {
-        alert('DEBUG 1: takePicture started');
-      }
-      
       // Check and request permissions
       const hasPermission = await this.checkPermissions();
-      
-      // DEBUG ALERT 2: Show current permissions
-      if (Capacitor.isNativePlatform()) {
-        const perms = await Camera.checkPermissions();
-        alert(`DEBUG 2: Initial - Camera: ${perms.camera}, Photos: ${perms.photos}`);
-      }
       
       if (!hasPermission) {
         console.log('📸 No permission, requesting...');
         const granted = await this.requestPermissions();
-        
-        // DEBUG ALERT 3: Show what we got after request
-        if (Capacitor.isNativePlatform()) {
-          const perms = await Camera.checkPermissions();
-          alert(`DEBUG 3: After request - Camera: ${perms.camera}, Photos: ${perms.photos}`);
-        }
         
         if (!granted) {
           console.log('❌ Camera permission denied by user');
@@ -66,11 +49,6 @@ class CameraService {
         
         console.log('📸 Waiting 500ms after permission grant...');
         await sleep(500);
-      }
-
-      // DEBUG ALERT 4: About to open camera
-      if (Capacitor.isNativePlatform()) {
-        alert('DEBUG 4: About to call Camera.getPhoto()');
       }
 
       console.log('📸 Opening camera with timeout protection...');
@@ -91,11 +69,6 @@ class CameraService {
 
       console.log('✅ Photo captured successfully');
       
-      // DEBUG ALERT 5: Photo received
-      if (Capacitor.isNativePlatform()) {
-        alert(`DEBUG 5: Photo received, has dataUrl: ${!!photo.dataUrl}`);
-      }
-      
       if (!photo.dataUrl) {
         throw new Error('Camera returned empty photo');
       }
@@ -106,10 +79,6 @@ class CameraService {
       if (error instanceof Error) {
         console.error('❌ Error message:', error.message);
         console.error('❌ Error stack:', error.stack);
-        // Show alert on device for debugging
-        if (Capacitor.isNativePlatform()) {
-          alert(`Camera Error: ${error.message}`);
-        }
       }
       throw error;
     }
@@ -124,12 +93,6 @@ class CameraService {
       if (!hasPermission) {
         console.log('📸 No permission, requesting...');
         const granted = await this.requestPermissions();
-        
-        // DEBUG: Show what we got back
-        if (Capacitor.isNativePlatform()) {
-          const perms = await Camera.checkPermissions();
-          alert(`After request - Camera: ${perms.camera}, Photos: ${perms.photos}`);
-        }
         
         if (!granted) {
           console.log('❌ Gallery permission denied by user');
@@ -163,12 +126,8 @@ class CameraService {
       if (error instanceof Error) {
         console.error('❌ Error message:', error.message);
         console.error('❌ Error stack:', error.stack);
-        // Show alert on device for debugging
-        if (Capacitor.isNativePlatform()) {
-          alert(`Gallery Error: ${error.message}`);
-        }
       }
-      throw error; // Throw error so caller can handle it
+      throw error;
     }
   }
 
