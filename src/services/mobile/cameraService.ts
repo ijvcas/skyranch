@@ -1,6 +1,9 @@
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
 
+// Helper to delay execution - critical for iOS after permission dialogs
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 class CameraService {
   async checkPermissions(): Promise<boolean> {
     console.log('📸 Checking camera permissions...');
@@ -39,6 +42,9 @@ class CameraService {
           console.log('❌ Camera permission denied by user');
           return null;
         }
+        // Critical: iOS needs time to restore UI after permission dialog
+        console.log('📸 Waiting 500ms after permission grant...');
+        await sleep(500);
       }
 
       console.log('📸 Opening camera with timeout protection...');
@@ -82,6 +88,9 @@ class CameraService {
           console.log('❌ Gallery permission denied by user');
           return null;
         }
+        // Critical: iOS needs time to restore UI after permission dialog
+        console.log('📸 Waiting 500ms after permission grant...');
+        await sleep(500);
       }
 
       console.log('📸 Opening gallery with timeout protection...');

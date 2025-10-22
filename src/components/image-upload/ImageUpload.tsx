@@ -19,6 +19,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImage || null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [isTakingPhoto, setIsTakingPhoto] = useState(false);
+  const [isSelectingFromGallery, setIsSelectingFromGallery] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,30 +59,42 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   const handleTakePhoto = async () => {
+    setIsTakingPhoto(true);
+    const toastId = toast.loading('Abriendo cámara...');
     try {
       const photoDataUrl = await cameraService.takePicture();
       if (photoDataUrl) {
         setPreviewUrl(photoDataUrl);
         onImageChange(photoDataUrl);
-        toast.success('Foto capturada correctamente');
+        toast.success('Foto capturada correctamente', { id: toastId });
+      } else {
+        toast.dismiss(toastId);
       }
     } catch (error) {
       console.error('Error taking photo:', error);
-      toast.error('Error al capturar la foto');
+      toast.error('Error al capturar la foto', { id: toastId });
+    } finally {
+      setIsTakingPhoto(false);
     }
   };
 
   const handleSelectFromGallery = async () => {
+    setIsSelectingFromGallery(true);
+    const toastId = toast.loading('Abriendo galería...');
     try {
       const photoDataUrl = await cameraService.selectFromGallery();
       if (photoDataUrl) {
         setPreviewUrl(photoDataUrl);
         onImageChange(photoDataUrl);
-        toast.success('Foto seleccionada correctamente');
+        toast.success('Foto seleccionada correctamente', { id: toastId });
+      } else {
+        toast.dismiss(toastId);
       }
     } catch (error) {
       console.error('Error selecting photo:', error);
-      toast.error('Error al seleccionar la foto');
+      toast.error('Error al seleccionar la foto', { id: toastId });
+    } finally {
+      setIsSelectingFromGallery(false);
     }
   };
 
@@ -101,21 +115,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               type="button"
               variant="outline"
               onClick={handleTakePhoto}
-              disabled={disabled}
+              disabled={disabled || isTakingPhoto || isSelectingFromGallery}
               className="w-full"
             >
               <Camera className="w-4 h-4 mr-2" />
-              Tomar Foto
+              {isTakingPhoto ? 'Abriendo...' : 'Tomar Foto'}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={handleSelectFromGallery}
-              disabled={disabled}
+              disabled={disabled || isTakingPhoto || isSelectingFromGallery}
               className="w-full"
             >
               <ImageIcon className="w-4 h-4 mr-2" />
-              Galería
+              {isSelectingFromGallery ? 'Abriendo...' : 'Galería'}
             </Button>
           </div>
           <Button

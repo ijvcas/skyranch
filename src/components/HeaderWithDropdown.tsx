@@ -66,9 +66,11 @@ const HeaderWithDropdown = () => {
         <div className="flex justify-between items-center h-full">
           {/* Logo with Sheet Menu */}
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger>
-              <div 
-                className="flex items-center space-x-3 hover:bg-green-50 h-14 px-3 rounded-lg cursor-pointer touch-manipulation active:scale-95 transition-transform"
+            <SheetTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                className="flex items-center space-x-3 hover:bg-green-50 h-14 px-3 rounded-lg touch-manipulation active:scale-95 transition-transform"
                 onTouchStart={(e) => {
                   // Prevent iOS click delay
                   e.currentTarget.style.opacity = '0.7';
@@ -88,7 +90,7 @@ const HeaderWithDropdown = () => {
                   <span className="text-2xl font-bold text-gray-900 whitespace-nowrap uppercase leading-none">SkyRanch</span>
                   <ChevronDown className="w-4 h-4 ml-2 text-gray-600" />
                 </div>
-              </div>
+              </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-80 bg-white p-0">
               <SheetHeader className="p-6 pb-4 border-b border-gray-200">
