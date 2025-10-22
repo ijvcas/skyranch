@@ -50,9 +50,8 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
             <CardTitle className="text-xl text-gray-900">Información de Pedigrí (5 Generaciones)</CardTitle>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" disabled={disabled}>
-                  <Eraser className="w-4 h-4 mr-2" />
-                  Limpiar Pedigrí
+                <Button variant="ghost" size="icon" disabled={disabled} title="Limpiar Pedigrí">
+                  <Eraser className="w-4 h-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>

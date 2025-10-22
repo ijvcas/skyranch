@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { getAllUsers } from '@/services/userService';
 import { getAllAnimals } from '@/services/animalService';
 import { getAllFieldReports, importFieldReports } from '@/services/fieldReportBackupService';
@@ -251,10 +252,10 @@ const SystemBackupManager: React.FC = () => {
     return total;
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setIsExporting(true);
     
-    simulateProgress(() => {
+    simulateProgress(async () => {
       try {
         const totalRecords = calculateTotalRecords();
         const selectedCategories = Object.keys(selectedData).filter(key => selectedData[key as keyof BackupData]);
@@ -281,22 +282,40 @@ const SystemBackupManager: React.FC = () => {
         if (selectedData.reports) backupData.reports = reports;
 
         const dataStr = JSON.stringify(backupData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        
         const timestamp = new Date().toISOString().split('T')[0];
         const exportFileName = `farm_comprehensive_backup_${timestamp}_${totalRecords}records.json`;
 
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileName);
-        document.body.appendChild(linkElement);
-        linkElement.click();
-        document.body.removeChild(linkElement);
+        // Check if running on native platform (iOS/Android)
+        const isNative = Capacitor.isNativePlatform();
 
-        toast({
-          title: "Backup Completado",
-          description: `Backup exportado exitosamente: ${totalRecords} registros en ${exportFileName}`,
-        });
+        if (isNative) {
+          // Save to Documents directory for automatic iCloud backup on iOS
+          await Filesystem.writeFile({
+            path: exportFileName,
+            data: dataStr,
+            directory: Directory.Documents,
+            encoding: Encoding.UTF8
+          });
+
+          toast({
+            title: "Backup Completado",
+            description: `Backup guardado en documentos: ${totalRecords} registros. ${Capacitor.getPlatform() === 'ios' ? 'Se sincronizará automáticamente con iCloud si está habilitado.' : ''}`,
+          });
+        } else {
+          // Web platform - download as file
+          const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+          const linkElement = document.createElement('a');
+          linkElement.setAttribute('href', dataUri);
+          linkElement.setAttribute('download', exportFileName);
+          document.body.appendChild(linkElement);
+          linkElement.click();
+          document.body.removeChild(linkElement);
+
+          toast({
+            title: "Backup Completado",
+            description: `Backup exportado exitosamente: ${totalRecords} registros en ${exportFileName}`,
+          });
+        }
       } catch (error) {
         console.error('Error during export:', error);
         toast({
