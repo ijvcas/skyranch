@@ -12,7 +12,7 @@ interface AnimalEditFormContainerProps {
   formData: any;
   updateMutation: any;
   onInputChange: (field: string, value: string) => void;
-  onImageChange: (imageUrl: string) => void;
+  onImageChange: (imageUrl: string | null) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }

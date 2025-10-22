@@ -90,7 +90,7 @@ const AnimalForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageChange = (imageUrl: string) => {
+  const handleImageChange = (imageUrl: string | null) => {
     setFormData(prev => ({ ...prev, image: imageUrl }));
   };
 

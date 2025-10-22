@@ -58,7 +58,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setIsSearching(!isSearching);
   };
 
-  const handleTakePhoto = async () => {
+  const handleTakePhoto = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    
+    // DIAGNOSTIC
+    if (cameraService.isMobile()) {
+      alert('handleTakePhoto called - isMobile=true');
+    }
+    console.log('📸 handleTakePhoto called');
+    
     setIsTakingPhoto(true);
     const toastId = toast.loading('Abriendo cámara...');
     try {
@@ -79,7 +88,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
-  const handleSelectFromGallery = async () => {
+  const handleSelectFromGallery = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    
+    // DIAGNOSTIC
+    if (cameraService.isMobile()) {
+      alert('handleSelectFromGallery called - isMobile=true');
+    }
+    console.log('📸 handleSelectFromGallery called');
+    
     setIsSelectingFromGallery(true);
     const toastId = toast.loading('Abriendo galería...');
     try {
@@ -101,6 +119,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   const showCameraOptions = cameraService.isAvailable();
+  const isMobile = cameraService.isMobile();
+
+  // DIAGNOSTIC
+  console.log('ImageUpload render - isMobile:', isMobile, 'showCameraOptions:', showCameraOptions);
+  if (cameraService.isAvailable()) {
+    console.log('📱 Camera is available on this platform');
+  }
 
   return (
     <div className="space-y-4">
@@ -110,8 +135,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           disabled={disabled}
           onRemove={handleRemoveImage}
         />
-      ) : showCameraOptions && cameraService.isMobile() ? (
+      ) : showCameraOptions && isMobile ? (
         <div className="space-y-2">
+          {/* DIAGNOSTIC - this proves buttons are rendered */}
+          <div className="text-xs text-gray-500 text-center mb-2">
+            DEBUG: Camera buttons rendered (isMobile={isMobile.toString()})
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
