@@ -40,9 +40,16 @@ class CameraService {
       if (!hasPermission) {
         console.log('📸 No permission, requesting...');
         const granted = await this.requestPermissions();
+        
+        // DEBUG: Show what we got back
+        if (Capacitor.isNativePlatform()) {
+          const perms = await Camera.checkPermissions();
+          alert(`After request - Camera: ${perms.camera}, Photos: ${perms.photos}`);
+        }
+        
         if (!granted) {
           console.log('❌ Camera permission denied by user');
-          return null;
+          throw new Error('Permiso de cámara denegado');
         }
         // Critical: iOS needs time to restore UI after permission dialog
         console.log('📸 Waiting 500ms after permission grant...');
@@ -90,9 +97,16 @@ class CameraService {
       if (!hasPermission) {
         console.log('📸 No permission, requesting...');
         const granted = await this.requestPermissions();
+        
+        // DEBUG: Show what we got back
+        if (Capacitor.isNativePlatform()) {
+          const perms = await Camera.checkPermissions();
+          alert(`After request - Camera: ${perms.camera}, Photos: ${perms.photos}`);
+        }
+        
         if (!granted) {
           console.log('❌ Gallery permission denied by user');
-          return null;
+          throw new Error('Permiso de galería denegado');
         }
         // Critical: iOS needs time to restore UI after permission dialog
         console.log('📸 Waiting 500ms after permission grant...');
