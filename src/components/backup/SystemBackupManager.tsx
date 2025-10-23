@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { iCloudBackupService } from '@/services/native/iCloudBackupService';
+import BackupFileBrowser from './BackupFileBrowser';
 import { getAllUsers } from '@/services/userService';
 import { getAllAnimals } from '@/services/animalService';
 import { getAllFieldReports, importFieldReports } from '@/services/fieldReportBackupService';
@@ -47,6 +49,8 @@ interface BackupData {
 const SystemBackupManager: React.FC = () => {
   const { toast } = useToast();
   const [importFile, setImportFile] = useState<File | null>(null);
+  const [nativeBackupContent, setNativeBackupContent] = useState<string | null>(null);
+  const [nativeBackupFileName, setNativeBackupFileName] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -329,11 +333,33 @@ const SystemBackupManager: React.FC = () => {
     });
   };
 
+  const handleNativeBackupSelected = (content: string, fileName: string) => {
+    setNativeBackupContent(content);
+    setNativeBackupFileName(fileName);
+    
+    toast({
+      title: "Backup seleccionado",
+      description: `${fileName} listo para restaurar`,
+    });
+  };
+
   const handleImport = () => {
-    if (!importFile) {
+    // Check if we have either a web file or native backup content
+    const isNative = Capacitor.isNativePlatform();
+    
+    if (!isNative && !importFile) {
       toast({
         title: "Archivo No Seleccionado",
         description: "Por favor selecciona un archivo de backup para importar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (isNative && !nativeBackupContent && !importFile) {
+      toast({
+        title: "Backup No Seleccionado",
+        description: "Por favor selecciona un backup de iCloud Drive o un archivo local para restaurar.",
         variant: "destructive",
       });
       return;
@@ -343,7 +369,17 @@ const SystemBackupManager: React.FC = () => {
 
     simulateProgress(async () => {
       try {
-        const text = await importFile.text();
+        let text: string;
+        
+        // Get backup content from appropriate source
+        if (isNative && nativeBackupContent) {
+          text = nativeBackupContent;
+        } else if (importFile) {
+          text = await importFile.text();
+        } else {
+          throw new Error("No backup source available");
+        }
+        
         const backupData: ComprehensiveBackupData = JSON.parse(text);
 
         // Validate backup structure
@@ -419,6 +455,8 @@ const SystemBackupManager: React.FC = () => {
       } finally {
         setIsImporting(false);
         setImportFile(null);
+        setNativeBackupContent(null);
+        setNativeBackupFileName(null);
       }
     });
   };
@@ -484,6 +522,11 @@ const SystemBackupManager: React.FC = () => {
             </div>
           )}
 
+          {/* iCloud Backup Browser (iOS only) */}
+          {Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios' && (
+            <BackupFileBrowser onSelectBackup={handleNativeBackupSelected} />
+          )}
+
           {/* Export Section */}
           <div className="space-y-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -514,8 +557,18 @@ const SystemBackupManager: React.FC = () => {
           {/* Import Section */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-base font-medium">Restaurar Sistema Completo</Label>
-              <p className="text-sm text-gray-500">Restaurar completamente el sistema desde un archivo de backup integral</p>
+              <Label className="text-base font-medium">
+                {Capacitor.isNativePlatform() 
+                  ? 'Restaurar desde Archivo Local' 
+                  : 'Restaurar Sistema Completo'}
+              </Label>
+              <p className="text-sm text-gray-500">
+                {Capacitor.isNativePlatform()
+                  ? nativeBackupFileName 
+                    ? `Archivo iCloud seleccionado: ${nativeBackupFileName}` 
+                    : 'Selecciona un archivo local para restaurar (o usa un backup de iCloud arriba)'
+                  : 'Restaurar completamente el sistema desde un archivo de backup integral'}
+              </p>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -529,7 +582,7 @@ const SystemBackupManager: React.FC = () => {
               </div>
               <Button
                 onClick={handleImport}
-                disabled={isImporting || isExporting || !importFile || !Object.values(selectedData).some(Boolean)}
+                disabled={isImporting || isExporting || (!importFile && !nativeBackupContent) || !Object.values(selectedData).some(Boolean)}
                 className="flex items-center gap-2"
               >
                 {isImporting ? (
