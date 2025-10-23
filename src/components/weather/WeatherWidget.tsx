@@ -56,11 +56,6 @@ const WeatherWidget: React.FC = () => {
             {getWeatherCondition()}
           </div>
         </div>
-        
-        {/* Location on the right */}
-        <div className="text-xs text-muted-foreground flex-1">
-          {formatLocation()}
-        </div>
       </div>
     </section>
   );
