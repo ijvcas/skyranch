@@ -192,42 +192,36 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const keyboardVisibleRef = useRef(false); // Synchronous ref for immediate keyboard state
 
-  // iOS keyboard detection with proper height tracking
+  // iOS keyboard detection - simplified approach
   useEffect(() => {
     if (!open) return;
 
     const handleResize = () => {
       const viewportHeight = window.visualViewport?.height || window.innerHeight;
       const windowHeight = window.innerHeight;
-      const isKeyboardOpen = viewportHeight < windowHeight * 0.75;
+      const keyboardHeight = windowHeight - viewportHeight;
+      const isKeyboardOpen = keyboardHeight > 100; // More than 100px = keyboard
       
-      // Update BOTH ref (synchronous) and state (asynchronous)
+      // Update both ref and state
       keyboardVisibleRef.current = isKeyboardOpen;
       setKeyboardVisible(isKeyboardOpen);
       
-      console.log('🎹 Keyboard state:', { 
+      console.log('🎹 Keyboard:', { 
         isKeyboardOpen, 
+        keyboardHeight,
         viewportHeight, 
-        windowHeight,
-        refValue: keyboardVisibleRef.current 
+        windowHeight 
       });
-      
-      // Set CSS variable for drawer positioning
-      if (isKeyboardOpen) {
-        const keyboardHeight = windowHeight - viewportHeight;
-        document.documentElement.style.setProperty('--keyboard-offset', `${keyboardHeight}px`);
-      } else {
-        document.documentElement.style.setProperty('--keyboard-offset', '0px');
-      }
     };
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleResize);
       window.visualViewport.addEventListener('scroll', handleResize);
+      handleResize();
     } else {
       window.addEventListener('resize', handleResize);
     }
-    
+
     return () => {
       if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', handleResize);
@@ -235,8 +229,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
       } else {
         window.removeEventListener('resize', handleResize);
       }
-      keyboardVisibleRef.current = false; // Reset ref
-      document.documentElement.style.setProperty('--keyboard-offset', '0px');
+      keyboardVisibleRef.current = false;
     };
   }, [open]);
 
@@ -334,15 +327,12 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
       dismissible={!keyboardVisible}
     >
       <DrawerContent 
-        className="h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none"
+        className="w-full sm:w-[500px] h-full flex flex-col border-l"
         style={{
-          height: keyboardVisible 
-            ? 'calc(100vh - var(--keyboard-offset, 0px))' 
-            : '100vh',
-          transform: keyboardVisible 
-            ? 'translateY(calc(-1 * var(--keyboard-offset, 0px)))' 
-            : 'translateY(0)',
-          transition: 'height 0.2s ease-out, transform 0.2s ease-out'
+          right: 0,
+          left: 'auto',
+          maxHeight: '100vh',
+          borderRadius: 0,
         }}
       >
         <div className="flex flex-col h-full bg-background">
@@ -373,7 +363,15 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
             </div>
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 px-6 pb-4" ref={scrollRef}>
+          <ScrollArea 
+            ref={scrollRef} 
+            className="flex-1 px-6 pb-4"
+            style={{
+              maxHeight: keyboardVisible 
+                ? 'calc(100vh - 400px)' 
+                : 'calc(100vh - 200px)',
+            }}
+          >
             <div className="space-y-4 py-4">
               {messages.length === 0 && (
                 <div className="text-center text-muted-foreground py-12">
@@ -489,7 +487,16 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
             </div>
           </ScrollArea>
 
-          <form onSubmit={handleSubmit} className="border-t p-4 flex-shrink-0 bg-background" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+          <form 
+            onSubmit={handleSubmit} 
+            className="border-t p-4 flex-shrink-0 bg-background"
+            style={{ 
+              position: 'sticky',
+              bottom: 0,
+              zIndex: 10,
+              paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
+            }}
+          >
             <div className="flex flex-col gap-2">
               {/* File preview */}
               {selectedFile && (
@@ -520,9 +527,15 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                 onBlur={() => {
                   console.log('🎯 Textarea BLURRED');
                   setTimeout(() => {
-                    keyboardVisibleRef.current = false;
-                    setKeyboardVisible(false);
-                  }, 300);
+                    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+                    const windowHeight = window.innerHeight;
+                    const stillOpen = windowHeight - viewportHeight > 100;
+                    
+                    if (!stillOpen) {
+                      keyboardVisibleRef.current = false;
+                      setKeyboardVisible(false);
+                    }
+                  }, 150);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
