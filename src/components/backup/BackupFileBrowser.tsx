@@ -138,34 +138,40 @@ const BackupFileBrowser: React.FC<BackupFileBrowserProps> = ({ onSelectBackup })
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {backups.map((backup) => (
                 <div
                   key={backup.name}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+                  className="p-4 border rounded-lg hover:bg-accent/50 transition-colors space-y-3"
                 >
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <div className="flex items-start gap-3">
                     <FileText className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{backup.name}</p>
-                      <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-                        <span>{backup.formattedDate}</span>
-                        <span>•</span>
-                        <span>{iCloudBackupService.formatFileSize(backup.size)}</span>
+                      <p className="font-medium text-sm truncate mb-2">{backup.name}</p>
+                      <div className="space-y-1 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Fecha:</span>
+                          <span>{backup.formattedDate}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Tamaño:</span>
+                          <span>{iCloudBackupService.formatFileSize(backup.size)}</span>
+                        </div>
                         {backup.recordCount > 0 && (
-                          <>
-                            <span>•</span>
-                            <span>{backup.recordCount} registros</span>
-                          </>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Registros:</span>
+                            <span>{backup.recordCount}</span>
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t">
                     <Button
                       size="sm"
                       variant="default"
                       onClick={() => handleRestoreBackup(backup)}
+                      className="flex-1"
                     >
                       <Download className="w-4 h-4 mr-1" />
                       Restaurar
@@ -174,8 +180,10 @@ const BackupFileBrowser: React.FC<BackupFileBrowserProps> = ({ onSelectBackup })
                       size="sm"
                       variant="destructive"
                       onClick={() => setDeleteTarget(backup.name)}
+                      className="sm:w-auto"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 sm:mr-0 mr-1" />
+                      <span className="sm:hidden">Eliminar</span>
                     </Button>
                   </div>
                 </div>

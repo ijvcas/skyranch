@@ -573,7 +573,7 @@ const SystemBackupManager: React.FC = () => {
               </p>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
               <div className="flex-1">
                 <Input
                   type="file"
@@ -585,7 +585,7 @@ const SystemBackupManager: React.FC = () => {
               <Button
                 onClick={handleImport}
                 disabled={isImporting || isExporting || (!importFile && !nativeBackupContent) || !Object.values(selectedData).some(Boolean)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 w-full sm:w-auto flex-shrink-0"
               >
                 {isImporting ? (
                   <>
