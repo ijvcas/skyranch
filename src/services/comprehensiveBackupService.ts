@@ -3,14 +3,26 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAllUsers } from './userService';
 import { getAllAnimals } from './animalService';
 import { getAllFieldReports, importFieldReports } from './fieldReportBackupService';
+import { Preferences } from '@capacitor/preferences';
 
 export interface ComprehensiveBackupData {
   metadata: {
     exportDate: string;
     version: string;
+    platform: 'web' | 'ios';
+    appVersion: string;
     selectedCategories: string[];
     totalRecords: number;
     checksum?: string;
+  };
+  farmProfile?: {
+    farm_name: string;
+    farm_logo_url?: string;
+    theme_primary_color: string;
+    theme_secondary_color: string;
+    location_name?: string;
+    location_coordinates?: string;
+    owner_email: string;
   };
   users?: any[];
   animals?: any[];
@@ -265,4 +277,104 @@ export const importAnimalAttachments = async (attachments: any[]): Promise<numbe
   // Note: This only imports metadata, not the actual files from storage
   const { error } = await supabase.from('animal_attachments').insert(attachments);
   return error ? 0 : attachments.length;
+};
+
+// Get farm profile for backup
+export const getFarmProfile = async () => {
+  const { data: profile, error } = await supabase
+    .from('farm_profiles')
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  return {
+    farm_name: profile?.farm_name || 'Mi Finca',
+    farm_logo_url: profile?.farm_logo_url,
+    theme_primary_color: profile?.theme_primary_color || '#16a34a',
+    theme_secondary_color: profile?.theme_secondary_color || '#22c55e',
+    location_name: profile?.location_name,
+    location_coordinates: profile?.location_coordinates,
+    owner_email: user?.email || ''
+  };
+};
+
+// Create comprehensive backup with farm branding
+export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): Promise<ComprehensiveBackupData> => {
+  const farmProfile = await getFarmProfile();
+  const users = await getAllUsers();
+  const animals = await getAllAnimals();
+  const fieldReports = await getAllFieldReports();
+  const lotsData = await getAllLots();
+  const cadastralData = await getAllCadastralData();
+  const healthRecords = await getAllHealthRecords();
+  const breedingData = await getAllBreedingData();
+  const calendarData = await getAllCalendarData();
+  const notifications = await getAllNotifications();
+  const reports = await getAllReports();
+  const attachments = await getAllAnimalAttachments();
+
+  const backupData: ComprehensiveBackupData = {
+    metadata: {
+      exportDate: new Date().toISOString(),
+      version: '2.0.0',
+      platform: 'ios',
+      appVersion: '1.0.0',
+      selectedCategories: ['all'],
+      totalRecords: users.length + animals.length + fieldReports.length + 
+        lotsData.lots.length + cadastralData.parcels.length + healthRecords.length +
+        breedingData.breedingRecords.length + calendarData.events.length
+    },
+    farmProfile,
+    users,
+    animals,
+    fieldReports,
+    lots: lotsData.lots,
+    cadastralParcels: cadastralData.parcels,
+    healthRecords,
+    breedingRecords: breedingData.breedingRecords,
+    calendarEvents: calendarData.events,
+    notifications,
+    reports,
+    properties: cadastralData.properties,
+    animalAttachments: attachments
+  };
+
+  // Save to Capacitor Preferences for quick access
+  if (storageType === 'icloud') {
+    await Preferences.set({
+      key: 'farmika_last_backup',
+      value: JSON.stringify({
+        date: backupData.metadata.exportDate,
+        farmName: farmProfile.farm_name,
+        recordCount: backupData.metadata.totalRecords
+      })
+    });
+  }
+
+  return backupData;
+};
+
+// Restore farm profile from backup
+export const restoreFarmProfile = async (farmProfile: any): Promise<void> => {
+  const { data: existingProfile } = await supabase
+    .from('farm_profiles')
+    .select('id')
+    .single();
+
+  if (existingProfile) {
+    await supabase
+      .from('farm_profiles')
+      .update({
+        farm_name: farmProfile.farm_name,
+        farm_logo_url: farmProfile.farm_logo_url,
+        theme_primary_color: farmProfile.theme_primary_color,
+        theme_secondary_color: farmProfile.theme_secondary_color,
+        location_name: farmProfile.location_name,
+        location_coordinates: farmProfile.location_coordinates
+      })
+      .eq('id', existingProfile.id);
+  }
 };

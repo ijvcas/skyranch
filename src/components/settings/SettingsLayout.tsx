@@ -1,8 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Database, Shield, Settings as SettingsIcon, Rocket } from 'lucide-react';
+import { Users, Database, Shield, Settings as SettingsIcon, Palette, AlertTriangle } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useIsOwner } from '@/hooks/useIsOwner';
 
 interface SettingsLayoutProps {
   activeTab: string;
@@ -12,6 +13,7 @@ interface SettingsLayoutProps {
 
 const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProps) => {
   const { checkPermission } = usePermissions();
+  const { isOwner } = useIsOwner();
   const [availableTabs, setAvailableTabs] = useState<string[]>([]);
 
   useEffect(() => {
@@ -26,6 +28,11 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
         tabs.push('backup', 'permissions', 'system');
       }
       
+      // Owner-only tabs
+      if (isOwner) {
+        tabs.push('customization', 'danger');
+      }
+      
       setAvailableTabs(tabs);
       
       // If current active tab is not available, switch to first available
@@ -35,7 +42,7 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
     };
 
     checkTabPermissions();
-  }, [checkPermission, activeTab, onTabChange]);
+  }, [checkPermission, isOwner, activeTab, onTabChange]);
 
   return (
     <div className="page-with-logo">
@@ -72,6 +79,18 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
               <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-center">
                 <SettingsIcon className="w-4 h-4" />
                 Sistema
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('customization') && (
+              <TabsTrigger value="customization" className="flex items-center gap-2 w-full justify-center">
+                <Palette className="w-4 h-4" />
+                Personalización
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('danger') && (
+              <TabsTrigger value="danger" className="flex items-center gap-2 w-full justify-center">
+                <AlertTriangle className="w-4 h-4" />
+                Zona de Peligro
               </TabsTrigger>
             )}
           </TabsList>

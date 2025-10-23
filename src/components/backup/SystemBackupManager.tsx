@@ -268,6 +268,8 @@ const SystemBackupManager: React.FC = () => {
           metadata: {
             exportDate: new Date().toISOString(),
             version: '2.0.0',
+            platform: 'ios',
+            appVersion: '1.0.0',
             selectedCategories,
             totalRecords
           }
