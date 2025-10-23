@@ -190,6 +190,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const keyboardVisibleRef = useRef(false); // Synchronous ref for immediate keyboard state
 
   // iOS keyboard detection with proper height tracking
   useEffect(() => {
@@ -200,7 +201,16 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
       const windowHeight = window.innerHeight;
       const isKeyboardOpen = viewportHeight < windowHeight * 0.75;
       
+      // Update BOTH ref (synchronous) and state (asynchronous)
+      keyboardVisibleRef.current = isKeyboardOpen;
       setKeyboardVisible(isKeyboardOpen);
+      
+      console.log('🎹 Keyboard state:', { 
+        isKeyboardOpen, 
+        viewportHeight, 
+        windowHeight,
+        refValue: keyboardVisibleRef.current 
+      });
       
       // Set CSS variable for drawer positioning
       if (isKeyboardOpen) {
@@ -225,6 +235,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
       } else {
         window.removeEventListener('resize', handleResize);
       }
+      keyboardVisibleRef.current = false; // Reset ref
       document.documentElement.style.setProperty('--keyboard-offset', '0px');
     };
   }, [open]);
@@ -311,9 +322,12 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     <Drawer 
       open={open} 
       onOpenChange={(newOpen) => {
-        if (!newOpen && keyboardVisible) {
+        // Use REF for synchronous check, not state
+        if (!newOpen && keyboardVisibleRef.current) {
+          console.log('🚫 BLOCKED drawer close - keyboard is visible (ref check)');
           return;
         }
+        console.log('✅ ALLOWING drawer state change:', newOpen);
         onOpenChange(newOpen);
       }} 
       direction="right"
@@ -498,6 +512,18 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onFocus={() => {
+                  console.log('🎯 Textarea FOCUSED');
+                  keyboardVisibleRef.current = true;
+                  setKeyboardVisible(true);
+                }}
+                onBlur={() => {
+                  console.log('🎯 Textarea BLURRED');
+                  setTimeout(() => {
+                    keyboardVisibleRef.current = false;
+                    setKeyboardVisible(false);
+                  }, 300);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
