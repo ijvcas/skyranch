@@ -13,7 +13,7 @@ const DashboardPlatformBranding = () => {
           className="h-16 w-auto object-contain"
         />
       </div>
-      <p className="text-xs text-muted-foreground text-center mt-3 mb-2">
+      <p className="text-xs text-muted-foreground text-center mt-3 mb-0">
         28649 Rozas de Puerto Real, Madrid, Spain
       </p>
     </div>
