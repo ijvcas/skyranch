@@ -4,8 +4,8 @@ import WeatherWidget from '@/components/weather/WeatherWidget';
 
 const DashboardPlatformBranding = () => {
   return (
-    <div className="py-2">
-      <div className="flex items-center justify-center gap-4">
+    <div className="py-1">
+      <div className="flex items-center justify-center gap-2">
         <WeatherWidget />
         <img 
           src={farmikaLogo} 
@@ -13,7 +13,7 @@ const DashboardPlatformBranding = () => {
           className="h-16 w-auto object-contain"
         />
       </div>
-      <p className="text-sm text-muted-foreground text-center mt-2">
+      <p className="text-sm text-muted-foreground text-center mt-1 mb-1">
         28649 Rozas de Puerto Real, Madrid, Spain
       </p>
     </div>
