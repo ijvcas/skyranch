@@ -8,7 +8,8 @@ const DashboardPlatformBranding = () => {
       <img 
         src={farmikaLogo} 
         alt="FARMIKA - Sistema de Gestión Integral para Fincas" 
-        className="h-24 w-auto object-contain brightness-75"
+        className="h-24 w-auto object-contain opacity-70 saturate-50 contrast-90"
+        style={{ filter: 'sepia(0.15) hue-rotate(80deg)' }}
       />
     </div>
   );
