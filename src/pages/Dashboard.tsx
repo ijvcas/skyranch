@@ -174,6 +174,7 @@ const Dashboard = () => {
               disabled={true}
             />
           </div>
+          <DashboardPlatformBranding />
         </div>
       </div>
       
@@ -225,8 +226,6 @@ const Dashboard = () => {
           <DashboardWeeklyEvents />
           
           <DashboardQuickActions />
-          
-          <DashboardPlatformBranding />
           
           <DashboardSupportInfo />
         </div>
