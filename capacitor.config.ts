@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.skyranch.app',
-  appName: 'SkyRanch Management',
+  appId: 'app.farmika.manager',
+  appName: 'FARMIKA',
   webDir: 'dist',
   // Server config removed for native builds - enables local bundled files
   // For development hot-reload, uncomment the lines below:
@@ -13,11 +13,11 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false,
   ios: {
     contentInset: 'automatic',
-    scheme: 'skyranch'
+    scheme: 'farmika'
   },
   android: {
     allowMixedContent: true,
-    scheme: 'skyranch'
+    scheme: 'farmika'
   },
   plugins: {
     SplashScreen: {
@@ -36,9 +36,9 @@ const config: CapacitorConfig = {
     },
     Camera: {
       ios: {
-        NSCameraUsageDescription: "SkyRanch necesita acceso a la cámara para tomar fotos de animales",
-        NSPhotoLibraryUsageDescription: "SkyRanch necesita acceso a la galería para seleccionar fotos de animales",
-        NSPhotoLibraryAddUsageDescription: "SkyRanch necesita permiso para guardar fotos en tu galería"
+        NSCameraUsageDescription: "FARMIKA necesita acceso a la cámara para tomar fotos de animales",
+        NSPhotoLibraryUsageDescription: "FARMIKA necesita acceso a la galería para seleccionar fotos de animales",
+        NSPhotoLibraryAddUsageDescription: "FARMIKA necesita permiso para guardar fotos en tu galería"
       },
       android: {
         permissions: [
