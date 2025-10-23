@@ -243,6 +243,25 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     }
   };
 
+  // Force drawer to full height when keyboard opens
+  useEffect(() => {
+    if (open && keyboardVisible) {
+      // Give drawer time to detect keyboard, then force full height
+      const timer = setTimeout(() => {
+        // Scroll drawer content to ensure it's visible
+        if (scrollRef.current) {
+          const drawerElement = scrollRef.current.closest('[role="dialog"]');
+          if (drawerElement instanceof HTMLElement) {
+            drawerElement.style.height = '100vh';
+            drawerElement.style.transform = 'none';
+          }
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [open, keyboardVisible]);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     scrollToBottom();
@@ -325,17 +344,22 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
       }} 
       direction="right"
       dismissible={!keyboardVisible}
+      modal={false}
+      snapPoints={[1]}
+      activeSnapPoint={1}
     >
       <DrawerContent 
         className="w-full sm:w-[500px] h-full flex flex-col border-l"
         style={{
           right: 0,
           left: 'auto',
+          height: '100vh',
           maxHeight: '100vh',
           borderRadius: 0,
+          transform: 'translateX(0)',
         }}
       >
-        <div className="flex flex-col h-full bg-background">
+        <div className="flex flex-col h-full bg-background" style={{ touchAction: 'pan-y' }}>
           <DrawerHeader className="border-b px-6 py-4 flex-shrink-0">
             <div className="flex items-center justify-between">
               <DrawerTitle className="text-xl font-semibold">
@@ -523,6 +547,15 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                   console.log('🎯 Textarea FOCUSED');
                   keyboardVisibleRef.current = true;
                   setKeyboardVisible(true);
+                  
+                  // Force drawer to full height immediately
+                  setTimeout(() => {
+                    const drawerElement = document.querySelector('[role="dialog"]');
+                    if (drawerElement instanceof HTMLElement) {
+                      drawerElement.style.height = '100vh';
+                      drawerElement.style.transform = 'translateX(0)';
+                    }
+                  }, 50);
                 }}
                 onBlur={() => {
                   console.log('🎯 Textarea BLURRED');
