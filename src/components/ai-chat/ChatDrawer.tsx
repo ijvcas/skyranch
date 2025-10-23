@@ -191,18 +191,29 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  // iOS keyboard detection
+  // iOS keyboard detection with proper height tracking
   useEffect(() => {
     if (!open) return;
 
     const handleResize = () => {
       const viewportHeight = window.visualViewport?.height || window.innerHeight;
-      const isKeyboardOpen = viewportHeight < window.innerHeight * 0.75;
+      const windowHeight = window.innerHeight;
+      const isKeyboardOpen = viewportHeight < windowHeight * 0.75;
+      
       setKeyboardVisible(isKeyboardOpen);
+      
+      // Set CSS variable for drawer positioning
+      if (isKeyboardOpen) {
+        const keyboardHeight = windowHeight - viewportHeight;
+        document.documentElement.style.setProperty('--keyboard-offset', `${keyboardHeight}px`);
+      } else {
+        document.documentElement.style.setProperty('--keyboard-offset', '0px');
+      }
     };
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleResize);
+      window.visualViewport.addEventListener('scroll', handleResize);
     } else {
       window.addEventListener('resize', handleResize);
     }
@@ -210,9 +221,11 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     return () => {
       if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', handleResize);
+        window.visualViewport.removeEventListener('scroll', handleResize);
       } else {
         window.removeEventListener('resize', handleResize);
       }
+      document.documentElement.style.setProperty('--keyboard-offset', '0px');
     };
   }, [open]);
 
@@ -307,14 +320,16 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
       dismissible={!keyboardVisible}
     >
       <DrawerContent 
-        className={cn(
-          "h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none",
-          keyboardVisible ? "pb-0" : "pb-safe"
-        )}
-        style={keyboardVisible ? {
-          height: `${window.visualViewport?.height || window.innerHeight}px`,
-          transition: 'height 0.2s ease'
-        } : undefined}
+        className="h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none"
+        style={{
+          height: keyboardVisible 
+            ? 'calc(100vh - var(--keyboard-offset, 0px))' 
+            : '100vh',
+          transform: keyboardVisible 
+            ? 'translateY(calc(-1 * var(--keyboard-offset, 0px)))' 
+            : 'translateY(0)',
+          transition: 'height 0.2s ease-out, transform 0.2s ease-out'
+        }}
       >
         <div className="flex flex-col h-full bg-background">
           <DrawerHeader className="border-b px-6 py-4 flex-shrink-0">
@@ -483,8 +498,6 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onFocus={() => setKeyboardVisible(true)}
-                onBlur={() => setTimeout(() => setKeyboardVisible(false), 300)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
