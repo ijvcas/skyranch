@@ -23,6 +23,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [versionInfo, setVersionInfo] = useState<{ version: string; buildNumber: number; releaseDate?: string } | null>(null);
   const [farmLogoUrl, setFarmLogoUrl] = useState<string | null>(null);
+  const [rememberEmail, setRememberEmail] = useState(false);
 
   // Load version info and farm logo
   useEffect(() => {
@@ -51,6 +52,15 @@ const Login = () => {
     };
     
     loadAppData();
+  }, []);
+
+  // Load saved email from localStorage
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('skyranch-remember-email');
+    if (savedEmail) {
+      setFormData(prev => ({ ...prev, email: savedEmail }));
+      setRememberEmail(true);
+    }
   }, []);
 
   // Redirect if already logged in
@@ -105,6 +115,14 @@ const Login = () => {
         });
       } else {
         console.log('✅ Login successful');
+
+        // Save or remove email based on "Remember Me" checkbox
+        if (rememberEmail) {
+          localStorage.setItem('skyranch-remember-email', formData.email);
+        } else {
+          localStorage.removeItem('skyranch-remember-email');
+        }
+
         toast({
           title: "¡Bienvenido!",
           description: "Has iniciado sesión correctamente.",
@@ -218,6 +236,24 @@ const Login = () => {
                   )}
                 </button>
               </div>
+            </div>
+
+            {/* Remember Email Checkbox */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="remember-email"
+                checked={rememberEmail}
+                onChange={(e) => setRememberEmail(e.target.checked)}
+                disabled={isSubmitting}
+                className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer"
+              />
+              <Label 
+                htmlFor="remember-email" 
+                className="text-sm font-medium cursor-pointer select-none"
+              >
+                Recordar mi correo electrónico
+              </Label>
             </div>
 
             <Button

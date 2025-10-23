@@ -189,6 +189,32 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  // iOS keyboard detection
+  useEffect(() => {
+    if (!open) return;
+
+    const handleResize = () => {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const isKeyboardOpen = viewportHeight < window.innerHeight * 0.75;
+      setKeyboardVisible(isKeyboardOpen);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+    } else {
+      window.addEventListener('resize', handleResize);
+    }
+    
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+      } else {
+        window.removeEventListener('resize', handleResize);
+      }
+    };
+  }, [open]);
 
   // Scroll to bottom function
   const scrollToBottom = () => {
@@ -269,8 +295,27 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none pb-safe">
+    <Drawer 
+      open={open} 
+      onOpenChange={(newOpen) => {
+        if (!newOpen && keyboardVisible) {
+          return;
+        }
+        onOpenChange(newOpen);
+      }} 
+      direction="right"
+      dismissible={!keyboardVisible}
+    >
+      <DrawerContent 
+        className={cn(
+          "h-screen top-0 right-0 left-auto mt-0 w-full sm:w-[500px] rounded-none",
+          keyboardVisible ? "pb-0" : "pb-safe"
+        )}
+        style={keyboardVisible ? {
+          height: `${window.visualViewport?.height || window.innerHeight}px`,
+          transition: 'height 0.2s ease'
+        } : undefined}
+      >
         <div className="flex flex-col h-full bg-background">
           <DrawerHeader className="border-b px-6 py-4 flex-shrink-0">
             <div className="flex items-center justify-between">
@@ -435,20 +480,28 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
               )}
               
               <div className="flex gap-2">
-                <Textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSubmit(e as any);
-                    }
-                  }}
-                  placeholder="Escribe tu pregunta... (Shift+Enter para nueva línea)"
-                  disabled={isLoading}
-                  className="flex-1 min-h-[60px] max-h-[200px] resize-y"
-                  rows={2}
-                />
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onFocus={() => setKeyboardVisible(true)}
+                onBlur={() => setTimeout(() => setKeyboardVisible(false), 300)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e as any);
+                  }
+                }}
+                placeholder="Escribe tu pregunta... (Shift+Enter para nueva línea)"
+                disabled={isLoading}
+                className="flex-1 min-h-[60px] max-h-[200px] resize-y"
+                rows={2}
+                autoCapitalize="sentences"
+                autoCorrect="on"
+                autoComplete="off"
+                style={{
+                  fontSize: '16px'
+                }}
+              />
                 
                 {/* File upload button */}
                 <Button
