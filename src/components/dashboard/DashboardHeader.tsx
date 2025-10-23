@@ -20,7 +20,7 @@ const DashboardHeader = ({ userEmail, userName, totalAnimals, onForceRefresh }: 
   };
 
   return (
-    <div className="mb-4 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+    <div className="mb-2 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
       <div className="flex-1">
         <p className="text-sm text-gray-600 text-center">
           {getTimeBasedGreeting()}, {userName || userEmail}

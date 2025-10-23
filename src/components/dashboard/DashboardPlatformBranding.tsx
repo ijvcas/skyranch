@@ -4,7 +4,7 @@ import WeatherWidget from '@/components/weather/WeatherWidget';
 
 const DashboardPlatformBranding = () => {
   return (
-    <div className="py-3">
+    <div className="py-3 pb-1">
       <div className="flex items-center justify-center gap-6">
         <WeatherWidget />
         <img 
