@@ -10,7 +10,7 @@ export interface FarmBranding {
 }
 
 const DEFAULT_BRANDING: FarmBranding = {
-  farm_name: 'Mi Finca',
+  farm_name: 'FARMIKA',
   theme_primary_color: '#16a34a',
   theme_secondary_color: '#22c55e',
 };
