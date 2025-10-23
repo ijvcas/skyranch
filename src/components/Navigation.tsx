@@ -14,8 +14,12 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NotificationBell from './NotificationBell';
+import { useFarmBranding } from '@/hooks/useFarmBranding';
+import farmikaLogo from '@/assets/farmika-logo.png';
 
 const Navigation = () => {
+  const { branding, isLoading } = useFarmBranding();
+  
   const navItems = [
     { to: '/dashboard', icon: Home, label: 'Panel' },
     { to: '/animals', icon: Users, label: 'Animales' },
@@ -31,16 +35,18 @@ const Navigation = () => {
     <nav className="hidden md:flex fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 h-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full">
         <div className="flex justify-between items-center h-full">
-          {/* Logo */}
+          {/* Logo - Dynamic farm branding */}
           <div className="flex items-center flex-shrink-0 min-w-0 mr-8 h-full">
             <img 
-              src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
-              alt="SkyRanch"
-              className="h-14 w-14 flex-shrink-0"
+              src={branding.farm_logo_url || farmikaLogo}
+              alt={branding.farm_name}
+              className="h-14 w-14 flex-shrink-0 object-contain"
               loading="lazy"
               decoding="async"
             />
-            <span className="ml-4 text-xl font-bold text-gray-900 whitespace-nowrap leading-none">SkyRanch</span>
+            <span className="ml-4 text-xl font-bold text-gray-900 whitespace-nowrap leading-none">
+              {isLoading ? 'Cargando...' : branding.farm_name}
+            </span>
           </div>
 
           {/* Navigation Links */}

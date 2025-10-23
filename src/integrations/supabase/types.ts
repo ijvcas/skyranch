@@ -889,6 +889,47 @@ export type Database = {
           },
         ]
       }
+      factory_reset_logs: {
+        Row: {
+          backup_created: boolean | null
+          backup_file_name: string | null
+          farm_profile_id: string | null
+          id: string
+          records_deleted: Json | null
+          reset_date: string | null
+          reset_reason: string | null
+          user_id: string
+        }
+        Insert: {
+          backup_created?: boolean | null
+          backup_file_name?: string | null
+          farm_profile_id?: string | null
+          id?: string
+          records_deleted?: Json | null
+          reset_date?: string | null
+          reset_reason?: string | null
+          user_id: string
+        }
+        Update: {
+          backup_created?: boolean | null
+          backup_file_name?: string | null
+          farm_profile_id?: string | null
+          id?: string
+          records_deleted?: Json | null
+          reset_date?: string | null
+          reset_reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factory_reset_logs_farm_profile_id_fkey"
+            columns: ["farm_profile_id"]
+            isOneToOne: false
+            referencedRelation: "farm_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       farm_ledger: {
         Row: {
           amount: number
@@ -932,34 +973,52 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          farm_logo_url: string | null
           farm_name: string
           id: string
+          initialized: boolean | null
           location_coordinates: string | null
           location_name: string | null
           logo_url: string | null
+          owner_user_id: string | null
           picture_url: string | null
+          platform: string | null
+          theme_primary_color: string | null
+          theme_secondary_color: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          farm_logo_url?: string | null
           farm_name: string
           id?: string
+          initialized?: boolean | null
           location_coordinates?: string | null
           location_name?: string | null
           logo_url?: string | null
+          owner_user_id?: string | null
           picture_url?: string | null
+          platform?: string | null
+          theme_primary_color?: string | null
+          theme_secondary_color?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          farm_logo_url?: string | null
           farm_name?: string
           id?: string
+          initialized?: boolean | null
           location_coordinates?: string | null
           location_name?: string | null
           logo_url?: string | null
+          owner_user_id?: string | null
           picture_url?: string | null
+          platform?: string | null
+          theme_primary_color?: string | null
+          theme_secondary_color?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1757,6 +1816,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          invitation_token: string
+          invited_by: string
+          role: string
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          invitation_token: string
+          invited_by: string
+          role?: string
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          invited_by?: string
+          role?: string
+          status?: string
+        }
+        Relationships: []
+      }
       user_role_audit: {
         Row: {
           changed_at: string
@@ -1871,16 +1966,10 @@ export type Database = {
         Args: { last_grazing_end_date: string; rest_days_required: number }
         Returns: string
       }
-      cleanup_old_connection_logs: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_old_notifications: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_old_connection_logs: { Args: never; Returns: undefined }
+      cleanup_old_notifications: { Args: never; Returns: undefined }
       create_lots_from_propiedad_parcels: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           lots_created: number
           lots_deleted: number
@@ -1900,7 +1989,7 @@ export type Database = {
         }[]
       }
       get_animals_lean_with_timeout: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           id: string
           species: string
@@ -1918,7 +2007,7 @@ export type Database = {
         }[]
       }
       get_auth_users: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           email: string
@@ -1926,12 +2015,9 @@ export type Database = {
           raw_user_meta_data: Json
         }[]
       }
-      get_current_app_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_current_app_role: { Args: never; Returns: string }
       get_dashboard_animal_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           species_counts: Json
           total_count: number
@@ -1983,10 +2069,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_active_user: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_active_user: { Args: never; Returns: boolean }
       log_admin_operation: {
         Args: {
           new_data?: Json
@@ -1998,18 +2081,10 @@ export type Database = {
         }
         Returns: undefined
       }
-      sync_auth_users_to_app_users: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      system_health_check: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      trigger_daily_grazing_notifications: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      perform_factory_reset: { Args: { reset_user_id: string }; Returns: Json }
+      sync_auth_users_to_app_users: { Args: never; Returns: undefined }
+      system_health_check: { Args: never; Returns: Json }
+      trigger_daily_grazing_notifications: { Args: never; Returns: Json }
       update_single_lot_status: {
         Args: { target_lot_id: string }
         Returns: undefined
@@ -2022,10 +2097,7 @@ export type Database = {
         Args: { email?: string; full_name?: string; password: string }
         Returns: Json
       }
-      validate_strong_password: {
-        Args: { password: string }
-        Returns: boolean
-      }
+      validate_strong_password: { Args: { password: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "manager" | "worker"

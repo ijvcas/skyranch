@@ -10,6 +10,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import AcceptInvitation from '@/pages/AcceptInvitation';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 import { createOptimizedQueryClient } from '@/utils/queryConfig';
@@ -85,6 +86,7 @@ function AppContent() {
                   <Route path="/register" element={<Register />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />
                   <Route path="/auth/gmail/callback" element={<GmailCallback />} />
                   
                   <Route path="/" element={

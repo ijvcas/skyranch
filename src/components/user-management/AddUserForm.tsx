@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import InviteUserDialog from './InviteUserDialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -34,6 +36,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   onCancel,
   isLoading
 }) => {
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  
   const handleNotificationPreferenceChange = (field: string, value: boolean) => {
     onUserChange({
       ...newUser,
@@ -45,11 +49,28 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Agregar Nuevo Usuario</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Agregar Nuevo Usuario</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="invite" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="invite">Invitar por Email</TabsTrigger>
+              <TabsTrigger value="direct">Crear Directamente</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="invite" className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Envía una invitación por correo electrónico. El usuario recibirá un enlace para crear su propia cuenta.
+              </p>
+              <Button onClick={() => setInviteDialogOpen(true)} className="w-full">
+                Abrir Formulario de Invitación
+              </Button>
+            </TabsContent>
+            
+            <TabsContent value="direct">
         <form onSubmit={onSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
@@ -120,8 +141,16 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+      
+      <InviteUserDialog 
+        isOpen={inviteDialogOpen} 
+        onOpenChange={setInviteDialogOpen} 
+      />
+    </>
   );
 };
 
