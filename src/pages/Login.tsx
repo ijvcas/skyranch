@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Users, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { unifiedVersionManager } from '@/services/version-management';
-import { farmProfileService } from '@/services/farmProfileService';
+import farmikaLogo from '@/assets/farmika-logo.png';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,14 +22,12 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [versionInfo, setVersionInfo] = useState<{ version: string; buildNumber: number; releaseDate?: string } | null>(null);
-  const [farmLogoUrl, setFarmLogoUrl] = useState<string | null>(null);
   const [rememberEmail, setRememberEmail] = useState(false);
 
-  // Load version info and farm logo
+  // Load version info
   useEffect(() => {
-    const loadAppData = async () => {
+    const loadVersion = async () => {
       try {
-        // Load version info
         const currentVersion = await unifiedVersionManager.getCurrentVersion();
         if (currentVersion) {
           setVersionInfo({
@@ -38,20 +36,12 @@ const Login = () => {
             releaseDate: currentVersion.releaseDate
           });
         }
-
-        // Load farm logo
-        const farmProfile = await farmProfileService.getFarmProfile();
-        console.log('Farm profile loaded:', farmProfile);
-        if (farmProfile?.logo_url) {
-          console.log('Setting farm logo URL:', farmProfile.logo_url);
-          setFarmLogoUrl(farmProfile.logo_url);
-        }
       } catch (error) {
-        console.error('Error loading app data:', error);
+        console.error('Error loading version info:', error);
       }
     };
     
-    loadAppData();
+    loadVersion();
   }, []);
 
   // Load saved email from localStorage
@@ -161,22 +151,15 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center pb-6">
-          <div className="w-20 h-20 rounded-lg flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden bg-white">
-            {farmLogoUrl ? (
-              <img 
-                src={farmLogoUrl} 
-                alt="SKYRANCH Logo" 
-                className="w-full h-full object-contain"
-                onError={() => setFarmLogoUrl(null)}
-              />
-            ) : (
-              <div className="w-full h-full bg-green-600 rounded-lg flex items-center justify-center">
-                <Users className="w-10 h-10 text-white" />
-              </div>
-            )}
+          <div className="flex justify-center mb-4">
+            <img 
+              src={farmikaLogo} 
+              alt="FARMIKA Logo" 
+              className="h-24 w-auto object-contain"
+            />
           </div>
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            SKYRANCH
+            FARMIKA
           </CardTitle>
           {versionInfo && (
             <div className="text-xs text-gray-500 mb-3">

@@ -20,6 +20,7 @@ import DashboardLoadingState from '@/components/dashboard/DashboardLoadingState'
 import DashboardErrorState from '@/components/dashboard/DashboardErrorState';
 import DashboardSupportInfo from '@/components/dashboard/DashboardSupportInfo';
 import DashboardSkeletonLoader from '@/components/dashboard/DashboardSkeletonLoader';
+import DashboardPlatformBranding from '@/components/dashboard/DashboardPlatformBranding';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { applySEO, injectJSONLD } from '@/utils/seo';
 
@@ -224,6 +225,8 @@ const Dashboard = () => {
           <DashboardWeeklyEvents />
           
           <DashboardQuickActions />
+          
+          <DashboardPlatformBranding />
           
           <DashboardSupportInfo />
         </div>

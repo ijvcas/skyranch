@@ -6,7 +6,7 @@ import { supportSettingsService } from '@/services/supportSettingsService';
 
 const DashboardSupportInfo = () => {
   const [supportInfo, setSupportInfo] = useState({
-    email: 'soporte@skyranch.es',
+    email: 'soporte@farmika.app',
     phone: '+34636391352',
     hours: 'Lunes a Viernes 8:00 AM - 6:00 PM'
   });
