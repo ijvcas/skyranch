@@ -42,7 +42,7 @@ const WeatherWidget: React.FC = () => {
   };
 
   return (
-    <section aria-label="Clima actual" className="w-full">
+    <section aria-label="Clima actual">
       <div className="flex items-start gap-3">
         <TempIcon className="h-6 w-6 text-yellow-500 flex-shrink-0" aria-hidden />
         
