@@ -4,13 +4,18 @@ import WeatherWidget from '@/components/weather/WeatherWidget';
 
 const DashboardPlatformBranding = () => {
   return (
-    <div className="flex items-center justify-center gap-4 py-2">
-      <WeatherWidget />
-      <img 
-        src={farmikaLogo} 
-        alt="FARMIKA - Sistema de Gestión Integral para Fincas" 
-        className="h-16 w-auto object-contain"
-      />
+    <div className="py-2">
+      <div className="flex items-center justify-center gap-4">
+        <WeatherWidget />
+        <img 
+          src={farmikaLogo} 
+          alt="FARMIKA - Sistema de Gestión Integral para Fincas" 
+          className="h-16 w-auto object-contain"
+        />
+      </div>
+      <p className="text-sm text-muted-foreground text-center mt-2">
+        28649 Rozas de Puerto Real, Madrid, Spain
+      </p>
     </div>
   );
 };
