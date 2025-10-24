@@ -255,7 +255,7 @@ const AcceptInvitation = () => {
           </div>
           <CardTitle className="text-2xl">Has sido invitado a {invitation.farm_name}</CardTitle>
           <CardDescription className="text-base">
-            <strong>{invitation.inviter_name}</strong> te ha invitado a unirte a su equipo de gestión de finca en FARMIKA
+            <strong>{invitation.inviter_name}</strong> te ha invitado a unirte a su equipo de gestión de finca
           </CardDescription>
         </CardHeader>
 

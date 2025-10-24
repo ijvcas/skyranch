@@ -345,7 +345,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
   // Save to Capacitor Preferences for quick access
   if (storageType === 'icloud') {
     await Preferences.set({
-      key: 'farmika_last_backup',
+      key: 'skyranch_last_backup',
       value: JSON.stringify({
         date: backupData.metadata.exportDate,
         farmName: farmProfile.farm_name,

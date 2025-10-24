@@ -15,7 +15,6 @@ import {
 import { cn } from '@/lib/utils';
 import NotificationBell from './NotificationBell';
 import { useFarmBranding } from '@/hooks/useFarmBranding';
-import farmikaLogo from '@/assets/farmika-logo.png';
 
 const Navigation = () => {
   const { branding, isLoading } = useFarmBranding();
@@ -37,13 +36,15 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-full">
           {/* Logo - Dynamic farm branding */}
           <div className="flex items-center flex-shrink-0 min-w-0 mr-8 h-full">
-            <img 
-              src={branding.farm_logo_url || farmikaLogo}
-              alt={branding.farm_name}
-              className="h-14 w-14 flex-shrink-0 object-contain"
-              loading="lazy"
-              decoding="async"
-            />
+            {branding.farm_logo_url && (
+              <img 
+                src={branding.farm_logo_url}
+                alt={branding.farm_name}
+                className="h-14 w-14 flex-shrink-0 object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+            )}
             <span className="ml-4 text-xl font-bold text-gray-900 whitespace-nowrap leading-none">
               {isLoading ? 'Cargando...' : branding.farm_name}
             </span>
