@@ -156,13 +156,13 @@ const Login = () => {
             <div className="flex justify-center mb-4">
               <img 
                 src={branding.farm_logo_url} 
-                alt={`${branding.farm_name} Logo`}
+                alt="SKYRANCH Logo"
                 className="h-24 w-auto object-contain"
               />
             </div>
           )}
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            {brandingLoading ? 'Cargando...' : branding.farm_name}
+            SKYRANCH
           </CardTitle>
           {versionInfo && (
             <div className="text-xs text-gray-500 mb-3">
