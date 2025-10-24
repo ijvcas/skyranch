@@ -1,17 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, X, Paperclip, FileIcon, Copy, Check, Download } from 'lucide-react';
+import { Send, Loader2, Trash2, Paperclip, FileIcon, Copy, Check, Download, X } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { RightSheet, RightSheetHeader, RightSheetContent, RightSheetFooter } from '@/components/ui/right-sheet';
 
 interface ChatDrawerProps {
   open: boolean;
@@ -188,50 +183,8 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { messages, isLoading, sendMessage, clearHistory } = useAIChat();
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const keyboardVisibleRef = useRef(false); // Synchronous ref for immediate keyboard state
-
-  // iOS keyboard detection - simplified approach
-  useEffect(() => {
-    if (!open) return;
-
-    const handleResize = () => {
-      const viewportHeight = window.visualViewport?.height || window.innerHeight;
-      const windowHeight = window.innerHeight;
-      const keyboardHeight = windowHeight - viewportHeight;
-      const isKeyboardOpen = keyboardHeight > 100; // More than 100px = keyboard
-      
-      // Update both ref and state
-      keyboardVisibleRef.current = isKeyboardOpen;
-      setKeyboardVisible(isKeyboardOpen);
-      
-      console.log('🎹 Keyboard:', { 
-        isKeyboardOpen, 
-        keyboardHeight,
-        viewportHeight, 
-        windowHeight 
-      });
-    };
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleResize);
-      window.visualViewport.addEventListener('scroll', handleResize);
-      handleResize();
-    } else {
-      window.addEventListener('resize', handleResize);
-    }
-
-    return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleResize);
-        window.visualViewport.removeEventListener('scroll', handleResize);
-      } else {
-        window.removeEventListener('resize', handleResize);
-      }
-      keyboardVisibleRef.current = false;
-    };
-  }, [open]);
 
   // Scroll to bottom function
   const scrollToBottom = () => {
@@ -243,36 +196,17 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     }
   };
 
-  // Force drawer to full height when keyboard opens
-  useEffect(() => {
-    if (open && keyboardVisible) {
-      // Give drawer time to detect keyboard, then force full height
-      const timer = setTimeout(() => {
-        // Scroll drawer content to ensure it's visible
-        if (scrollRef.current) {
-          const drawerElement = scrollRef.current.closest('[role="dialog"]');
-          if (drawerElement instanceof HTMLElement) {
-            drawerElement.style.height = '100vh';
-            drawerElement.style.transform = 'none';
-          }
-        }
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [open, keyboardVisible]);
-
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (open) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [messages, open]);
 
   // Scroll to bottom when drawer opens
   useEffect(() => {
     if (open) {
-      setTimeout(() => {
-        scrollToBottom();
-      }, 150);
+      setTimeout(scrollToBottom, 300);
     }
   }, [open]);
 
@@ -286,6 +220,11 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     setInput('');
     setSelectedFile(null);
     
+    // Blur textarea to close keyboard on mobile
+    if (textareaRef.current) {
+      textareaRef.current.blur();
+    }
+    
     await sendMessage(userMessage, fileToSend || undefined);
   };
 
@@ -294,7 +233,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     if (file) {
       // Check file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        alert('El archivo es demasiado grande. Máximo 5MB.');
+        toast.error('El archivo es demasiado grande. Máximo 5MB.');
         return;
       }
       setSelectedFile(file);
@@ -331,245 +270,166 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   };
 
   return (
-    <Drawer 
-      open={open} 
-      onOpenChange={(newOpen) => {
-        // Use REF for synchronous check, not state
-        if (!newOpen && keyboardVisibleRef.current) {
-          console.log('🚫 BLOCKED drawer close - keyboard is visible (ref check)');
-          return;
-        }
-        console.log('✅ ALLOWING drawer state change:', newOpen);
-        onOpenChange(newOpen);
-      }} 
-      direction="right"
-      dismissible={!keyboardVisible}
-      modal={false}
-      snapPoints={[1]}
-      activeSnapPoint={1}
-    >
-      <DrawerContent 
-        className="w-full sm:w-[500px] h-full flex flex-col border-l"
-        style={{
-          right: 0,
-          left: 'auto',
-          height: '100vh',
-          maxHeight: '100vh',
-          borderRadius: 0,
-          transform: 'translateX(0)',
-        }}
-      >
-        <div className="flex flex-col h-full bg-background" style={{ touchAction: 'pan-y' }}>
-          <DrawerHeader className="border-b px-6 py-4 flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <DrawerTitle className="text-xl font-semibold">
-                Asistente de IA - Skyranch
-              </DrawerTitle>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearHistory}
-                  disabled={messages.length === 0}
-                  title="Borrar historial"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onOpenChange(false)}
-                  title="Cerrar"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </DrawerHeader>
-
-          <ScrollArea 
-            ref={scrollRef} 
-            className="flex-1 px-6 pb-4"
-            style={{
-              maxHeight: keyboardVisible 
-                ? 'calc(100vh - 400px)' 
-                : 'calc(100vh - 200px)',
-            }}
+    <RightSheet open={open} onOpenChange={onOpenChange}>
+      <RightSheetHeader onClose={() => onOpenChange(false)}>
+        <div className="flex items-center justify-between flex-1">
+          <h2 className="text-xl font-semibold">Asistente de IA - Skyranch</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearHistory}
+            disabled={messages.length === 0}
+            title="Borrar historial"
+            className="mr-2"
           >
-            <div className="space-y-4 py-4">
-              {messages.length === 0 && (
-                <div className="text-center text-muted-foreground py-12">
-                  <div className="mb-4 text-4xl">🤖</div>
-                  <p className="text-lg font-medium mb-2">¡Hola! Soy tu asistente de IA</p>
-                  <p className="text-sm max-w-sm mx-auto mb-3">
-                    Puedo ayudarte con <strong>cualquier pregunta o tema</strong>, analizar imágenes y documentos, 
-                    ayudarte con tareas técnicas, creativas y mucho más.
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
-                    <Paperclip className="h-3 w-3" />
-                    Adjunta archivos o imágenes para análisis con IA
-                  </p>
-                </div>
-              )}
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </RightSheetHeader>
 
-{messages.map((message, index) => {
-                const downloadableFiles = message.role === 'assistant' 
-                  ? parseDownloadableContent(message.message) 
-                  : [];
-                const images = message.role === 'assistant' 
-                  ? parseImageContent(message.message) 
-                  : [];
-                
-                return (
+      <RightSheetContent>
+        <ScrollArea ref={scrollRef} className="h-full">
+          <div className="space-y-4 py-4">
+            {messages.length === 0 && (
+              <div className="text-center text-muted-foreground py-12">
+                <div className="mb-4 text-4xl">🤖</div>
+                <p className="text-lg font-medium mb-2">¡Hola! Soy tu asistente de IA</p>
+                <p className="text-sm max-w-sm mx-auto mb-3">
+                  Puedo ayudarte con <strong>cualquier pregunta o tema</strong>, analizar imágenes y documentos, 
+                  ayudarte con tareas técnicas, creativas y mucho más.
+                </p>
+                <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
+                  <Paperclip className="h-3 w-3" />
+                  Adjunta archivos o imágenes para análisis con IA
+                </p>
+              </div>
+            )}
+
+            {messages.map((message, index) => {
+              const downloadableFiles = message.role === 'assistant' 
+                ? parseDownloadableContent(message.message) 
+                : [];
+              const images = message.role === 'assistant' 
+                ? parseImageContent(message.message) 
+                : [];
+              
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    'flex',
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                >
                   <div
-                    key={index}
                     className={cn(
-                      'flex',
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                      'max-w-[85%] rounded-2xl px-4 py-3 shadow-sm relative group',
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted border border-border'
                     )}
                   >
-                    <div
-                      className={cn(
-                        'max-w-[85%] rounded-2xl px-4 py-3 shadow-sm relative group',
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted border border-border'
-                      )}
-                    >
-                      {/* Copy button - available for both user and assistant messages */}
-                      {(message.role === 'assistant' || message.role === 'user') && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleCopy(message.message, index)}
-                          className={cn(
-                            'absolute top-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity',
-                            'right-2',
-                            'sm:opacity-0 sm:group-hover:opacity-100',
-                            'max-sm:opacity-60'
-                          )}
-                          title="Copiar mensaje"
-                        >
-                          {copiedIndex === index ? (
-                            <Check className="h-3 w-3 text-green-500" />
-                          ) : (
-                            <Copy className="h-3 w-3" />
-                          )}
-                        </Button>
-                      )}
-                      
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed select-text pr-8">
-                        {message.message}
-                      </p>
-                      
-                      {/* Render images */}
-                      {images.map((img, imgIndex) => (
-                        <ImageWithDownload
-                          key={`img-${index}-${imgIndex}`}
-                          src={img.content}
-                          filename={img.filename}
-                          alt={`Generated image ${imgIndex + 1}`}
-                        />
-                      ))}
-                      
-                      {/* Render download buttons for code files */}
-                      {downloadableFiles.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {downloadableFiles.map((file, fileIndex) => (
-                            <DownloadButton
-                              key={`file-${index}-${fileIndex}`}
-                              content={file.content}
-                              filename={file.filename}
-                              mimeType={file.mimeType!}
-                              type={file.type}
-                            />
-                          ))}
-                        </div>
-                      )}
-                      
-                      <p className={cn(
-                        "text-xs mt-2 opacity-60",
-                        message.role === 'user' ? 'text-right' : 'text-left'
-                      )}>
-                        {new Date(message.created_at).toLocaleTimeString('es-ES', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-muted border border-border rounded-2xl px-4 py-3 shadow-sm">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    {/* Copy button */}
+                    {(message.role === 'assistant' || message.role === 'user') && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleCopy(message.message, index)}
+                        className={cn(
+                          'absolute top-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity',
+                          'right-2',
+                          'sm:opacity-0 sm:group-hover:opacity-100',
+                          'max-sm:opacity-60'
+                        )}
+                        title="Copiar mensaje"
+                      >
+                        {copiedIndex === index ? (
+                          <Check className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </Button>
+                    )}
+                    
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed select-text pr-8">
+                      {message.message}
+                    </p>
+                    
+                    {/* Render images */}
+                    {images.map((img, imgIndex) => (
+                      <ImageWithDownload
+                        key={`img-${index}-${imgIndex}`}
+                        src={img.content}
+                        filename={img.filename}
+                        alt={`Generated image ${imgIndex + 1}`}
+                      />
+                    ))}
+                    
+                    {/* Render download buttons for code files */}
+                    {downloadableFiles.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {downloadableFiles.map((file, fileIndex) => (
+                          <DownloadButton
+                            key={`file-${index}-${fileIndex}`}
+                            content={file.content}
+                            filename={file.filename}
+                            mimeType={file.mimeType!}
+                            type={file.type}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    
+                    <p className={cn(
+                      "text-xs mt-2 opacity-60",
+                      message.role === 'user' ? 'text-right' : 'text-left'
+                    )}>
+                      {new Date(message.created_at).toLocaleTimeString('es-ES', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
                   </div>
                 </div>
-              )}
-            </div>
-          </ScrollArea>
+              );
+            })}
 
-          <form 
-            onSubmit={handleSubmit} 
-            className="border-t p-4 flex-shrink-0 bg-background"
-            style={{ 
-              position: 'sticky',
-              bottom: 0,
-              zIndex: 10,
-              paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
-            }}
-          >
-            <div className="flex flex-col gap-2">
-              {/* File preview */}
-              {selectedFile && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
-                  <FileIcon className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
-                  <Button 
-                    type="button"
-                    size="sm" 
-                    variant="ghost" 
-                    onClick={clearFile}
-                    className="h-6 w-6 p-0"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-muted border border-border rounded-2xl px-4 py-3 shadow-sm">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
-              )}
-              
-              <div className="flex gap-2">
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </RightSheetContent>
+
+      <RightSheetFooter>
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="flex flex-col gap-2">
+            {/* File preview */}
+            {selectedFile && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+                <FileIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+                <Button 
+                  type="button"
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={clearFile}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+            
+            <div className="flex gap-2">
               <Textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onFocus={() => {
-                  console.log('🎯 Textarea FOCUSED');
-                  keyboardVisibleRef.current = true;
-                  setKeyboardVisible(true);
-                  
-                  // Force drawer to full height immediately
-                  setTimeout(() => {
-                    const drawerElement = document.querySelector('[role="dialog"]');
-                    if (drawerElement instanceof HTMLElement) {
-                      drawerElement.style.height = '100vh';
-                      drawerElement.style.transform = 'translateX(0)';
-                    }
-                  }, 50);
-                }}
-                onBlur={() => {
-                  console.log('🎯 Textarea BLURRED');
-                  setTimeout(() => {
-                    const viewportHeight = window.visualViewport?.height || window.innerHeight;
-                    const windowHeight = window.innerHeight;
-                    const stillOpen = windowHeight - viewportHeight > 100;
-                    
-                    if (!stillOpen) {
-                      keyboardVisibleRef.current = false;
-                      setKeyboardVisible(false);
-                    }
-                  }, 150);
-                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -587,45 +447,44 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                   fontSize: '16px'
                 }}
               />
-                
-                {/* File upload button */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={triggerFileInput}
-                  disabled={isLoading}
-                  title="Subir archivo o imagen"
-                  className="flex-shrink-0"
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*,.pdf,.txt,.md"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                
-                <Button 
-                  type="submit" 
-                  disabled={!input.trim() || isLoading}
-                  size="icon"
-                  className="flex-shrink-0"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
+              
+              {/* File upload button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={triggerFileInput}
+                disabled={isLoading}
+                title="Subir archivo o imagen"
+                className="flex-shrink-0"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,.pdf,.txt,.md"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              
+              <Button 
+                type="submit" 
+                disabled={!input.trim() || isLoading}
+                size="icon"
+                className="flex-shrink-0"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
             </div>
-          </form>
-        </div>
-      </DrawerContent>
-    </Drawer>
+          </div>
+        </form>
+      </RightSheetFooter>
+    </RightSheet>
   );
 };
 
