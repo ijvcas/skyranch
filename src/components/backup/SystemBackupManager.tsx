@@ -573,19 +573,20 @@ const SystemBackupManager: React.FC = () => {
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              <div className="flex-1">
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full">
+              <div className="flex-1 min-w-0">
                 <Input
                   type="file"
                   accept=".json"
                   onChange={handleFileChange}
                   disabled={isImporting || isExporting}
+                  className="max-w-full"
                 />
               </div>
               <Button
                 onClick={handleImport}
                 disabled={isImporting || isExporting || (!importFile && !nativeBackupContent) || !Object.values(selectedData).some(Boolean)}
-                className="flex items-center gap-2 w-full sm:w-auto flex-shrink-0"
+                className="flex items-center gap-2 w-full sm:w-auto whitespace-nowrap"
               >
                 {isImporting ? (
                   <>
