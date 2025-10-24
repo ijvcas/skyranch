@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3 } from 'lucide-react';
+import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3, Cloud } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { Capacitor } from '@capacitor/core';
@@ -288,8 +288,10 @@ const SystemBackupManager: React.FC = () => {
         if (selectedData.reports) backupData.reports = reports;
 
         const dataStr = JSON.stringify(backupData, null, 2);
-        const timestamp = new Date().toISOString().split('T')[0];
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
         const exportFileName = `farm_comprehensive_backup_${timestamp}_${totalRecords}records.json`;
+        
+        console.log('💾 Creating backup:', exportFileName);
 
         // Check if running on native platform (iOS/Android)
         const isNative = Capacitor.isNativePlatform();
@@ -303,9 +305,13 @@ const SystemBackupManager: React.FC = () => {
             encoding: Encoding.UTF8
           });
 
+          console.log('✅ Backup saved to Documents directory:', exportFileName);
+          console.log('📱 Platform:', Capacitor.getPlatform());
+          console.log('☁️ iCloud sync:', Capacitor.getPlatform() === 'ios' ? 'Will sync automatically if enabled' : 'Not applicable');
+
           toast({
             title: "Backup Completado",
-            description: `Backup guardado en documentos: ${totalRecords} registros. ${Capacitor.getPlatform() === 'ios' ? 'Se sincronizará automáticamente con iCloud si está habilitado.' : ''}`,
+            description: `Backup guardado: ${exportFileName}. ${Capacitor.getPlatform() === 'ios' ? 'Se sincronizará con iCloud si está habilitado.' : ''}`,
           });
         } else {
           // Web platform - download as file
@@ -526,7 +532,16 @@ const SystemBackupManager: React.FC = () => {
 
           {/* iCloud Backup Browser (iOS only) */}
           {Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios' && (
-            <BackupFileBrowser onSelectBackup={handleNativeBackupSelected} />
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <Cloud className="w-4 h-4 text-blue-600" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-blue-900">iCloud Drive</p>
+                  <p className="text-xs text-blue-700">Los backups se sincronizan automáticamente si iCloud está habilitado en Ajustes</p>
+                </div>
+              </div>
+              <BackupFileBrowser onSelectBackup={handleNativeBackupSelected} />
+            </div>
           )}
 
           {/* Export Section */}
