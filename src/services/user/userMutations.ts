@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { type AppUser } from './types';
 import { sanitizeUserInput, isValidEmail, isValidPhone, isValidName } from '@/utils/security';
+import { permissionCache } from '@/services/permissionCache';
 
 // Add a new user to the app_users table
 export const addUser = async (userData: Omit<AppUser, 'id' | 'created_at' | 'created_by'>): Promise<boolean> => {
@@ -104,6 +105,13 @@ export const updateUser = async (userId: string, updates: Partial<AppUser>): Pro
     if (error) {
       console.error('❌ Error updating user:', error);
       throw new Error(`Error updating user: ${error.message}`);
+    }
+
+    // Clear permission cache for the updated user if role or status changed
+    if (updates.role !== undefined || updates.is_active !== undefined) {
+      permissionCache.clearKey(`role:${userId}`);
+      permissionCache.clearKey(`permission:${userId}`);
+      console.log('🔄 Cleared permission cache for user:', userId);
     }
 
     console.log('✅ User updated successfully');

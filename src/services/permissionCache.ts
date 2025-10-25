@@ -10,6 +10,7 @@ interface CacheEntry<T> {
 class PermissionCache {
   private cache: Map<string, CacheEntry<any>> = new Map();
   private readonly DEFAULT_TTL = 30 * 60 * 1000; // 30 minutes (session duration)
+  private readonly SENSITIVE_TTL = 5 * 60 * 1000; // 5 minutes for critical permissions
 
   set<T>(key: string, data: T, ttl: number = this.DEFAULT_TTL): void {
     this.cache.set(key, {
@@ -65,5 +66,11 @@ export const setCachedUserRole = (userId: string, role: string) =>
 export const getCachedPermission = (userId: string, permission: string) => 
   permissionCache.get<boolean>(`permission:${userId}:${permission}`);
 
-export const setCachedPermission = (userId: string, permission: string, hasAccess: boolean) => 
-  permissionCache.set(`permission:${userId}:${permission}`, hasAccess, 30 * 60 * 1000);
+export const setCachedPermission = (userId: string, permission: string, hasAccess: boolean) => {
+  // Use shorter TTL for sensitive permissions
+  const sensitivePermissions = ['delete_user', 'system_settings', 'manage_roles'];
+  const ttl = sensitivePermissions.includes(permission) 
+    ? 5 * 60 * 1000  // 5 minutes for sensitive permissions
+    : 30 * 60 * 1000; // 30 minutes for regular permissions
+  permissionCache.set(`permission:${userId}:${permission}`, hasAccess, ttl);
+};

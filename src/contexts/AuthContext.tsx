@@ -5,6 +5,7 @@ import { validatePasswordStrength } from '@/utils/passwordPolicy';
 import { logConnection, logTokenRefreshedThrottled } from '@/utils/connectionLogger';
 import { UserRole, Permission, getCurrentUserRole } from '@/services/permissionService';
 import { ROLE_PERMISSIONS } from '@/services/permissionService';
+import { permissionCache } from '@/services/permissionCache';
 
 interface AuthContextType {
   user: User | null;
@@ -53,6 +54,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'TOKEN_REFRESHED') {
           // Throttled to avoid noise
           logTokenRefreshedThrottled().catch((e) => console.warn('[AUTH CONTEXT] token refresh log failed', e));
+          // Clear cache on token refresh to pick up any role changes
+          permissionCache.clearAuthCache();
+          console.log('🔄 [AUTH CONTEXT] Cleared permission cache on token refresh');
         }
 
         if (event === 'SIGNED_OUT') {
@@ -62,6 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } catch (e) {
             console.warn('⚠️ [AUTH CONTEXT] Storage clear failed', e);
           }
+          permissionCache.clear();
           setUserRole(null);
           setPermissions([]);
         }
@@ -71,6 +76,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Load role and permissions once on sign in
         if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+          // Clear cache on sign in to ensure fresh permissions
+          permissionCache.clearAuthCache();
           setTimeout(async () => {
             try {
               const role = await getCurrentUserRole(session.user);
