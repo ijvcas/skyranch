@@ -860,6 +860,45 @@ export type Database = {
         }
         Relationships: []
       }
+      email_audit_log: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string | null
+          organization_name: string | null
+          recipient: string
+          sender_name: string | null
+          sent_at: string
+          status: string
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          organization_name?: string | null
+          recipient: string
+          sender_name?: string | null
+          sent_at?: string
+          status?: string
+          subject: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          organization_name?: string | null
+          recipient?: string
+          sender_name?: string | null
+          sent_at?: string
+          status?: string
+          subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       event_notifications: {
         Row: {
           created_at: string
