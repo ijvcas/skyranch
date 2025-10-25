@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Resend } from "npm:resend@2.0.0";
 import { EmailRequestV2 } from './types.ts';
 import { EmailValidator } from './validator.ts';
@@ -23,7 +24,53 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log('📧 [EMAIL V2] Function called');
     console.log('📧 [EMAIL V2] Method:', req.method);
-    console.log('📧 [EMAIL V2] Headers:', Object.fromEntries(req.headers.entries()));
+    
+    // Authenticate user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('❌ [EMAIL V2] Missing Authorization header');
+      return new Response(JSON.stringify({ error: 'unauthorized', message: 'Authorization header required' }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    // Verify user authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('❌ [EMAIL V2] Authentication failed:', authError);
+      return new Response(JSON.stringify({ error: 'unauthorized', message: 'Invalid authentication token' }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log(`✅ [EMAIL V2] User authenticated: ${user.id}`);
+
+    // Check user is active
+    const { data: userData, error: userError } = await supabase
+      .from('app_users')
+      .select('role, is_active')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userData?.is_active) {
+      console.error('❌ [EMAIL V2] User not active or not found');
+      return new Response(JSON.stringify({ error: 'forbidden', message: 'User account is not active' }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log(`✅ [EMAIL V2] User role: ${userData.role}, active: ${userData.is_active}`);
     
     // Check if RESEND_API_KEY is available
     const apiKey = Deno.env.get("RESEND_API_KEY");
@@ -162,6 +209,22 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("✅ [EMAIL V2] Email sent successfully:", emailResponse.data);
       console.log("✅ [EMAIL V2] Check your inbox (including spam folder) for email delivery");
       console.log("✅ [EMAIL V2] Also check your Resend dashboard at https://resend.com/emails for delivery status");
+      
+      // Log email send to audit log
+      try {
+        await supabase.from('email_audit_log').insert({
+          user_id: user.id,
+          recipient: requestData.to,
+          subject: requestData.subject,
+          status: 'success',
+          message_id: emailResponse.data.id,
+          sender_name: requestData.senderName,
+          organization_name: requestData.organizationName
+        });
+      } catch (auditError) {
+        console.error('⚠️ [EMAIL V2] Failed to log email audit:', auditError);
+        // Don't fail the request if audit logging fails
+      }
       
       const successResponse = ResponseBuilder.buildSuccessResponse(emailResponse.data, recipientDomain);
       
