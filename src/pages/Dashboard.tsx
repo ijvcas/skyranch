@@ -79,11 +79,10 @@ const Dashboard = () => {
     loadUserData();
   }, []); // Removed toast dependency to prevent re-runs
   
-  // Enhanced query with admin fallback and better error handling
   // Use optimized dashboard stats hook
   const { data: statsData, isLoading, error, refetch } = useDashboardStats();
 
-  // Use statsData for display (removed duplicate legacy query)
+  // Use statsData for display
   const allAnimals = statsData?.animals || [];
 
   // Force a complete refresh of all data with user sync retry
@@ -121,11 +120,9 @@ const Dashboard = () => {
     }
   };
 
-  // Extract stats from optimized hook with debugging
-  console.log('📊 Dashboard stats data:', { statsData, isLoading, error });
+  // Extract stats from optimized hook
   const totalAnimals = statsData?.totalAnimals || 0;
   const speciesCounts = statsData?.speciesCounts || {};
-  console.log('📊 Dashboard totals:', { totalAnimals, speciesCounts });
 
   const handleSignOut = async () => {
     try {
@@ -148,17 +145,16 @@ const Dashboard = () => {
     return <DashboardSkeletonLoader />;
   }
 
-  // Handle error state but continue with fallback data
+  // Handle error state
   if (error) {
-    console.error('❌ Dashboard stats error:', error);
-    // Continue rendering with fallback data
-  }
-
-  // Additional safety check for undefined statsData
-  if (!isLoading && !statsData) {
-    console.warn('⚠️ No stats data available, forcing refetch...');
-    // Trigger a refetch if data is missing
-    setTimeout(() => refetch(), 100);
+    console.error('❌ Dashboard error:', error);
+    return (
+      <DashboardErrorState 
+        userEmail={user?.email}
+        onForceRefresh={handleForceRefresh}
+        onSignOut={handleSignOut}
+      />
+    );
   }
 
 
