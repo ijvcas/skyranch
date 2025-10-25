@@ -471,6 +471,13 @@ export type Database = {
             referencedRelation: "animal_sales"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "animals_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "animal_sales_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       app_users: {
@@ -1950,7 +1957,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      animal_sales_view: {
+        Row: {
+          amount_paid: number | null
+          amount_pending: number | null
+          animal_id: string | null
+          buyer_contact: string | null
+          buyer_email: string | null
+          buyer_name: string | null
+          created_at: string | null
+          id: string | null
+          payment_method: string | null
+          payment_status: string | null
+          sale_date: string | null
+          sale_notes: string | null
+          sale_price: number | null
+          total_amount: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_paid?: number | null
+          amount_pending?: number | null
+          animal_id?: string | null
+          buyer_contact?: never
+          buyer_email?: never
+          buyer_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          sale_date?: string | null
+          sale_notes?: never
+          sale_price?: number | null
+          total_amount?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_paid?: number | null
+          amount_pending?: number | null
+          animal_id?: string | null
+          buyer_contact?: never
+          buyer_email?: never
+          buyer_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          sale_date?: string | null
+          sale_notes?: never
+          sale_price?: number | null
+          total_amount?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_expected_exit_date: {

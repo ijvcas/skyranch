@@ -1,10 +1,14 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
 interface GmailRequest {
   to: string;
@@ -27,6 +31,72 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     console.log('📧 [GMAIL SKYRANCH] Function called');
+    
+    // 🔒 SECURITY: Verify authenticated user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('❌ [GMAIL SKYRANCH] No authorization header provided');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'authentication_required',
+        message: 'Authentication required to send emails'
+      }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('❌ [GMAIL SKYRANCH] Authentication failed:', authError?.message);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'invalid_authentication',
+        message: 'Invalid authentication credentials'
+      }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log(`✅ [GMAIL SKYRANCH] Authenticated user: ${user.id}`);
+
+    // 🔒 SECURITY: Check user role - only admin/manager can send emails
+    const { data: userRole, error: roleError } = await supabase
+      .from('app_users')
+      .select('role, is_active')
+      .eq('id', user.id)
+      .single();
+
+    if (roleError || !userRole || !userRole.is_active) {
+      console.error('❌ [GMAIL SKYRANCH] Failed to fetch user role:', roleError?.message);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'user_not_found',
+        message: 'User not found or inactive'
+      }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    if (!['admin', 'manager'].includes(userRole.role)) {
+      console.error(`❌ [GMAIL SKYRANCH] Insufficient permissions. User role: ${userRole.role}`);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'insufficient_permissions',
+        message: 'Only admin and manager roles can send emails'
+      }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log(`✅ [GMAIL SKYRANCH] User has ${userRole.role} role - permission granted`);
     
     let requestData: GmailRequest;
     try {
@@ -135,6 +205,31 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log('✅ [GMAIL SKYRANCH] Email sent successfully via Gmail API');
+
+    // 📝 AUDIT: Log email send for compliance and security tracking
+    try {
+      const { error: auditError } = await supabase
+        .from('email_audit_log')
+        .insert({
+          user_id: user.id,
+          recipient: requestData.to,
+          subject: requestData.subject,
+          sent_at: new Date().toISOString(),
+          status: 'success',
+          message_id: gmailData.id,
+          sender_name: requestData.senderName || 'SkyRanch',
+          organization_name: requestData.organizationName || 'SkyRanch'
+        });
+      
+      if (auditError) {
+        console.warn('⚠️ [GMAIL SKYRANCH] Failed to log audit trail:', auditError.message);
+        // Don't fail the request if audit logging fails
+      } else {
+        console.log('✅ [GMAIL SKYRANCH] Audit log recorded');
+      }
+    } catch (auditErr) {
+      console.warn('⚠️ [GMAIL SKYRANCH] Audit logging exception:', auditErr);
+    }
 
     return new Response(JSON.stringify({
       success: true,
