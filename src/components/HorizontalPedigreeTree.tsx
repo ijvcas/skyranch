@@ -130,17 +130,42 @@ const AncestorBox: React.FC<{
 
 const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal }) => {
   const { getDisplayName } = useAnimalNames();
+  const maxGeneration = animal.pedigree_max_generation || 5;
   
   const stats = getPedigreeStats(animal);
-  const totalKnown = stats.gen0 + stats.gen1 + stats.gen2 + stats.gen3 + stats.gen4 + stats.gen5;
-  const totalPossible = 1 + 2 + 4 + 8 + 16 + 32; // 63 total ancestors
+  
+  // Calculate total possible ancestors based on maxGeneration
+  const getPossibleAncestors = (maxGen: number) => {
+    let total = 1; // Gen 0
+    for (let i = 1; i <= maxGen; i++) {
+      total += Math.pow(2, i);
+    }
+    return total;
+  };
+  
+  const totalPossible = getPossibleAncestors(maxGeneration);
+  
+  // Only count stats up to maxGeneration
+  const getKnownCount = () => {
+    let count = stats.gen0;
+    if (maxGeneration >= 1) count += stats.gen1;
+    if (maxGeneration >= 2) count += stats.gen2;
+    if (maxGeneration >= 3) count += stats.gen3;
+    if (maxGeneration >= 4) count += stats.gen4;
+    if (maxGeneration >= 5) count += stats.gen5;
+    return count;
+  };
+  
+  const totalKnown = getKnownCount();
   const completeness = Math.round((totalKnown / totalPossible) * 100);
 
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl">Árbol Genealógico (5 Generaciones)</CardTitle>
+          <CardTitle className="text-xl">
+            Árbol Genealógico ({maxGeneration} {maxGeneration === 1 ? 'Generación' : 'Generaciones'})
+          </CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant={completeness > 80 ? 'default' : completeness > 50 ? 'secondary' : 'outline'}>
               {completeness}% completo
@@ -148,44 +173,54 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
           </div>
         </div>
         
-        {/* Generation summary */}
+        {/* Generation summary - only show relevant generations */}
         <div className="flex gap-2 mt-2 text-xs">
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3 text-green-600" />
-            <span>Gen 0-1: {stats.gen0 + stats.gen1}/3</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {stats.gen2 === 4 ? (
+          {maxGeneration >= 1 && (
+            <div className="flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-green-600" />
-            ) : (
-              <AlertCircle className="w-3 h-3 text-amber-600" />
-            )}
-            <span>Gen 2: {stats.gen2}/4</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {stats.gen3 === 8 ? (
-              <CheckCircle2 className="w-3 h-3 text-green-600" />
-            ) : (
-              <AlertCircle className="w-3 h-3 text-amber-600" />
-            )}
-            <span>Gen 3: {stats.gen3}/8</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {stats.gen4 > 0 ? (
-              <CheckCircle2 className="w-3 h-3 text-green-600" />
-            ) : (
-              <AlertCircle className="w-3 h-3 text-muted-foreground" />
-            )}
-            <span>Gen 4: {stats.gen4}/16</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {stats.gen5 > 0 ? (
-              <CheckCircle2 className="w-3 h-3 text-green-600" />
-            ) : (
-              <AlertCircle className="w-3 h-3 text-muted-foreground" />
-            )}
-            <span>Gen 5: {stats.gen5}/32</span>
-          </div>
+              <span>Gen 0-1: {stats.gen0 + stats.gen1}/3</span>
+            </div>
+          )}
+          {maxGeneration >= 2 && (
+            <div className="flex items-center gap-1">
+              {stats.gen2 === 4 ? (
+                <CheckCircle2 className="w-3 h-3 text-green-600" />
+              ) : (
+                <AlertCircle className="w-3 h-3 text-amber-600" />
+              )}
+              <span>Gen 2: {stats.gen2}/4</span>
+            </div>
+          )}
+          {maxGeneration >= 3 && (
+            <div className="flex items-center gap-1">
+              {stats.gen3 === 8 ? (
+                <CheckCircle2 className="w-3 h-3 text-green-600" />
+              ) : (
+                <AlertCircle className="w-3 h-3 text-amber-600" />
+              )}
+              <span>Gen 3: {stats.gen3}/8</span>
+            </div>
+          )}
+          {maxGeneration >= 4 && (
+            <div className="flex items-center gap-1">
+              {stats.gen4 > 0 ? (
+                <CheckCircle2 className="w-3 h-3 text-green-600" />
+              ) : (
+                <AlertCircle className="w-3 h-3 text-muted-foreground" />
+              )}
+              <span>Gen 4: {stats.gen4}/16</span>
+            </div>
+          )}
+          {maxGeneration >= 5 && (
+            <div className="flex items-center gap-1">
+              {stats.gen5 > 0 ? (
+                <CheckCircle2 className="w-3 h-3 text-green-600" />
+              ) : (
+                <AlertCircle className="w-3 h-3 text-muted-foreground" />
+              )}
+              <span>Gen 5: {stats.gen5}/32</span>
+            </div>
+          )}
         </div>
       </CardHeader>
       
@@ -205,36 +240,43 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
             </div>
 
             {/* Parents - Generation 1 */}
-            <div className="flex flex-col gap-2 justify-center">
-              <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 1 - Padres</div>
-              <AncestorBox name={animal.fatherId} label="Padre" gender="male" generation={1} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.motherId} label="Madre" gender="female" generation={1} getDisplayName={getDisplayName} />
-            </div>
+            {maxGeneration >= 1 && (
+              <div className="flex flex-col gap-2 justify-center">
+                <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 1 - Padres</div>
+                <AncestorBox name={animal.fatherId} label="Padre" gender="male" generation={1} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.motherId} label="Madre" gender="female" generation={1} getDisplayName={getDisplayName} />
+              </div>
+            )}
 
             {/* Grandparents - Generation 2 */}
-            <div className="flex flex-col gap-2 justify-center">
-              <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 2 - Abuelos</div>
-              <AncestorBox name={animal.paternal_grandfather_id} label="Abuelo P" gender="male" generation={2} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.paternal_grandmother_id} label="Abuela P" gender="female" generation={2} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.maternal_grandfather_id} label="Abuelo M" gender="male" generation={2} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.maternal_grandmother_id} label="Abuela M" gender="female" generation={2} getDisplayName={getDisplayName} />
-            </div>
+            {maxGeneration >= 2 && (
+              <div className="flex flex-col gap-2 justify-center">
+                <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 2 - Abuelos</div>
+                <AncestorBox name={animal.paternal_grandfather_id} label="Abuelo P" gender="male" generation={2} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.paternal_grandmother_id} label="Abuela P" gender="female" generation={2} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.maternal_grandfather_id} label="Abuelo M" gender="male" generation={2} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.maternal_grandmother_id} label="Abuela M" gender="female" generation={2} getDisplayName={getDisplayName} />
+              </div>
+            )}
 
             {/* Great-Grandparents - Generation 3 */}
-            <div className="flex flex-col gap-2 justify-center">
-              <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 3 - Bisabuelos</div>
-              <AncestorBox name={animal.paternal_great_grandfather_paternal_id} label="Bisabuelo PP" gender="male" generation={3} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.paternal_great_grandmother_paternal_id} label="Bisabuela PP" gender="female" generation={3} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.paternal_great_grandfather_maternal_id} label="Bisabuelo PM" gender="male" generation={3} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.paternal_great_grandmother_maternal_id} label="Bisabuela PM" gender="female" generation={3} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.maternal_great_grandfather_paternal_id} label="Bisabuelo MP" gender="male" generation={3} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.maternal_great_grandmother_paternal_id} label="Bisabuela MP" gender="female" generation={3} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.maternal_great_grandfather_maternal_id} label="Bisabuelo MM" gender="male" generation={3} getDisplayName={getDisplayName} />
-              <AncestorBox name={animal.maternal_great_grandmother_maternal_id} label="Bisabuela MM" gender="female" generation={3} getDisplayName={getDisplayName} />
-            </div>
+            {maxGeneration >= 3 && (
+              <div className="flex flex-col gap-2 justify-center">
+                <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 3 - Bisabuelos</div>
+                <AncestorBox name={animal.paternal_great_grandfather_paternal_id} label="Bisabuelo PP" gender="male" generation={3} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.paternal_great_grandmother_paternal_id} label="Bisabuela PP" gender="female" generation={3} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.paternal_great_grandfather_maternal_id} label="Bisabuelo PM" gender="male" generation={3} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.paternal_great_grandmother_maternal_id} label="Bisabuela PM" gender="female" generation={3} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.maternal_great_grandfather_paternal_id} label="Bisabuelo MP" gender="male" generation={3} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.maternal_great_grandmother_paternal_id} label="Bisabuela MP" gender="female" generation={3} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.maternal_great_grandfather_maternal_id} label="Bisabuelo MM" gender="male" generation={3} getDisplayName={getDisplayName} />
+                <AncestorBox name={animal.maternal_great_grandmother_maternal_id} label="Bisabuela MM" gender="female" generation={3} getDisplayName={getDisplayName} />
+              </div>
+            )}
 
             {/* Generation 4 - Great-Great-Grandparents */}
-            <div className="flex flex-col gap-1 justify-center">
+            {maxGeneration >= 4 && (
+              <div className="flex flex-col gap-1 justify-center">
                 <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 4</div>
                 {/* Paternal side */}
                 <AncestorBox name={animal.gen4_paternal_ggggf_p} label="GGGGF P" gender="male" generation={4} getDisplayName={getDisplayName} />
@@ -255,9 +297,11 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
                 <AncestorBox name={animal.gen4_maternal_ggmgf_m} label="GGMGF M" gender="male" generation={4} getDisplayName={getDisplayName} />
                 <AncestorBox name={animal.gen4_maternal_ggmgm_m} label="GGMGM M" gender="female" generation={4} getDisplayName={getDisplayName} />
               </div>
+            )}
 
             {/* Generation 5 */}
-            <div className="flex flex-col gap-0.5 justify-center">
+            {maxGeneration >= 5 && (
+              <div className="flex flex-col gap-0.5 justify-center">
                 <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 5</div>
                 <AncestorBox name={animal.gen5_paternal_1} label="G5-P1" gender="male" generation={5} getDisplayName={getDisplayName} />
                 <AncestorBox name={animal.gen5_paternal_2} label="G5-P2" gender="female" generation={5} getDisplayName={getDisplayName} />
@@ -292,6 +336,7 @@ const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal 
                 <AncestorBox name={animal.gen5_maternal_15} label="G5-M15" gender="male" generation={5} getDisplayName={getDisplayName} />
                 <AncestorBox name={animal.gen5_maternal_16} label="G5-M16" gender="female" generation={5} getDisplayName={getDisplayName} />
               </div>
+            )}
           </div>
         </div>
 
