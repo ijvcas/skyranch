@@ -75,9 +75,20 @@ const SystemBackupManager: React.FC = () => {
   });
 
   const { data: animals = [] } = useQuery({
-    queryKey: ['backup-animals'],
-    queryFn: () => getAllAnimalsForBackup(true),
+    queryKey: ['backup-animals-optimized'],
+    queryFn: async () => {
+      console.log('🔄 Fetching optimized animals for backup...');
+      const data = await getAllAnimalsForBackup(true);
+      console.log(`📊 Fetched ${data.length} animals`);
+      if (data.length > 0) {
+        const sample = data[0];
+        const keys = Object.keys(sample);
+        console.log(`🔍 Sample animal fields (${keys.length} total):`, keys);
+      }
+      return data;
+    },
     enabled: selectedData.animals,
+    staleTime: 0, // Always fetch fresh data
   });
 
   const { data: fieldReports = [] } = useQuery({
@@ -276,22 +287,55 @@ const SystemBackupManager: React.FC = () => {
         };
 
         // Add selected data categories with actual data
-        if (selectedData.users) backupData.users = users;
-        if (selectedData.animals) backupData.animals = animals;
-        if (selectedData.fieldReports) backupData.fieldReports = fieldReports;
-        if (selectedData.lots && lotsData) backupData.lots = [lotsData];
-        if (selectedData.cadastralData && cadastralData) backupData.cadastralParcels = [cadastralData];
-        if (selectedData.healthRecords) backupData.healthRecords = healthRecords;
-        if (selectedData.breedingRecords && breedingData) backupData.breedingRecords = [breedingData];
-        if (selectedData.calendarEvents && calendarData) backupData.calendarEvents = [calendarData];
-        if (selectedData.notifications) backupData.notifications = notifications;
-        if (selectedData.reports) backupData.reports = reports;
+        if (selectedData.users) {
+          backupData.users = users;
+          console.log(`📦 Users: ${users.length} records, ${JSON.stringify(users).length} bytes`);
+        }
+        if (selectedData.animals) {
+          backupData.animals = animals;
+          const animalsSize = JSON.stringify(animals).length;
+          console.log(`📦 Animals: ${animals.length} records, ${(animalsSize / 1024 / 1024).toFixed(2)} MB`);
+        }
+        if (selectedData.fieldReports) {
+          backupData.fieldReports = fieldReports;
+          console.log(`📦 Field Reports: ${fieldReports.length} records, ${(JSON.stringify(fieldReports).length / 1024).toFixed(2)} KB`);
+        }
+        if (selectedData.lots && lotsData) {
+          backupData.lots = [lotsData];
+          console.log(`📦 Lots: ${(JSON.stringify(lotsData).length / 1024).toFixed(2)} KB`);
+        }
+        if (selectedData.cadastralData && cadastralData) {
+          backupData.cadastralParcels = [cadastralData];
+          console.log(`📦 Cadastral: ${(JSON.stringify(cadastralData).length / 1024).toFixed(2)} KB`);
+        }
+        if (selectedData.healthRecords) {
+          backupData.healthRecords = healthRecords;
+          console.log(`📦 Health: ${healthRecords.length} records, ${(JSON.stringify(healthRecords).length / 1024).toFixed(2)} KB`);
+        }
+        if (selectedData.breedingRecords && breedingData) {
+          backupData.breedingRecords = [breedingData];
+          console.log(`📦 Breeding: ${(JSON.stringify(breedingData).length / 1024).toFixed(2)} KB`);
+        }
+        if (selectedData.calendarEvents && calendarData) {
+          backupData.calendarEvents = [calendarData];
+          console.log(`📦 Calendar: ${(JSON.stringify(calendarData).length / 1024).toFixed(2)} KB`);
+        }
+        if (selectedData.notifications) {
+          backupData.notifications = notifications;
+          console.log(`📦 Notifications: ${notifications.length} records, ${(JSON.stringify(notifications).length / 1024).toFixed(2)} KB`);
+        }
+        if (selectedData.reports) {
+          backupData.reports = reports;
+          console.log(`📦 Reports: ${reports.length} records, ${(JSON.stringify(reports).length / 1024).toFixed(2)} KB`);
+        }
 
         const dataStr = JSON.stringify(backupData, null, 2);
+        const backupSizeMB = (dataStr.length / 1024 / 1024).toFixed(2);
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
         const exportFileName = `farm_comprehensive_backup_${timestamp}_${totalRecords}records.json`;
         
         console.log('💾 Creating backup:', exportFileName);
+        console.log(`📏 TOTAL BACKUP SIZE: ${backupSizeMB} MB`);
 
         // Check if running on native platform (iOS/Android)
         const isNative = Capacitor.isNativePlatform();
