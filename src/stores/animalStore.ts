@@ -75,7 +75,7 @@ export interface Animal {
   gen5_maternal_14?: string;
   gen5_maternal_15?: string;
   gen5_maternal_16?: string;
-  pedigree_max_generation?: number;
+  pedigree_max_generation?: number | string;
   healthStatus: string;
   notes: string;
   image: string | null;

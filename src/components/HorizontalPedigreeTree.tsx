@@ -130,7 +130,7 @@ const AncestorBox: React.FC<{
 
 const HorizontalPedigreeTree: React.FC<HorizontalPedigreeTreeProps> = ({ animal }) => {
   const { getDisplayName } = useAnimalNames();
-  const maxGeneration = animal.pedigree_max_generation || 5;
+  const maxGeneration = animal.pedigree_max_generation ? parseInt(animal.pedigree_max_generation.toString()) : 5;
   
   const stats = getPedigreeStats(animal);
   
