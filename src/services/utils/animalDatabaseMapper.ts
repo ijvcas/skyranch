@@ -18,6 +18,7 @@ export const mapAnimalToDatabase = (animal: Omit<Animal, 'id'>, userId: string) 
     lifecycle_status: animal.lifecycleStatus || 'active',
     date_of_death: animal.dateOfDeath || null,
     cause_of_death: animal.causeOfDeath || null,
+    pedigree_max_generation: animal.pedigree_max_generation || 5,
     user_id: userId,
   };
 };
@@ -39,6 +40,7 @@ export const createUpdateObject = (animal: Omit<Animal, 'id'>) => {
     lifecycle_status: animal.lifecycleStatus || 'active',
     date_of_death: animal.dateOfDeath || null,
     cause_of_death: animal.causeOfDeath || null,
+    pedigree_max_generation: animal.pedigree_max_generation || 5,
   };
 };
 
@@ -60,6 +62,7 @@ export const fromDatabase = (dbAnimal: any): Animal => {
     lifecycleStatus: dbAnimal.lifecycle_status || 'active',
     dateOfDeath: dbAnimal.date_of_death || '',
     causeOfDeath: dbAnimal.cause_of_death || '',
+    pedigree_max_generation: dbAnimal.pedigree_max_generation || 5,
     fatherId: dbAnimal.father_id || '',
     motherId: dbAnimal.mother_id || '',
     paternal_grandfather_id: dbAnimal.paternal_grandfather_id || '',
