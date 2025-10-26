@@ -601,7 +601,13 @@ const SystemBackupManager: React.FC = () => {
                 <p className="text-sm text-gray-500">Crear un backup integral de todas las categorías seleccionadas</p>
               </div>
               <Button
-                onClick={handleExport}
+                onClick={() => {
+                  console.log('🎯 ========== BUTTON CLICKED - BEFORE handleExport ==========');
+                  console.log('🎯 Is exporting?', isExporting);
+                  console.log('🎯 Is importing?', isImporting);
+                  console.log('🎯 Selected data:', selectedData);
+                  handleExport();
+                }}
                 disabled={isExporting || isImporting || !Object.values(selectedData).some(Boolean)}
                 className="flex items-center gap-2 w-full md:w-auto flex-shrink-0"
               >
