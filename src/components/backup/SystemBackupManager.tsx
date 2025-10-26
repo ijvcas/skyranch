@@ -268,9 +268,14 @@ const SystemBackupManager: React.FC = () => {
   };
 
   const handleExport = async () => {
+    console.log('🚀 ========== EXPORT BUTTON CLICKED ==========');
+    console.log('Selected data:', selectedData);
+    console.log('Total records to export:', calculateTotalRecords());
+    
     setIsExporting(true);
     
     simulateProgress(async () => {
+      console.log('⏳ Starting backup data collection...');
       try {
         const totalRecords = calculateTotalRecords();
         const selectedCategories = Object.keys(selectedData).filter(key => selectedData[key as keyof BackupData]);
