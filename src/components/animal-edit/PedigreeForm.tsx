@@ -46,7 +46,7 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
     });
   };
 
-  const maxGeneration = parseInt(formData.pedigreeMaxGeneration || '5');
+  const maxGeneration = parseInt(formData.pedigree_max_generation?.toString() || '5');
 
   return (
     <Card className="shadow-lg">
@@ -82,8 +82,8 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
               Profundidad de Pedigrí:
             </Label>
             <Select 
-              value={formData.pedigreeMaxGeneration?.toString() || '5'}
-              onValueChange={(val) => onInputChange('pedigreeMaxGeneration', val)}
+              value={formData.pedigree_max_generation?.toString() || '5'}
+              onValueChange={(val) => onInputChange('pedigree_max_generation', val)}
               disabled={disabled}
             >
               <SelectTrigger id="pedigree-depth" className="w-[280px]">
