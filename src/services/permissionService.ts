@@ -42,18 +42,14 @@ export const getCurrentUserRole = async (authUser?: User | null): Promise<UserRo
     }
     
     if (!user) {
-      console.log('❌ No current user found');
       return null;
     }
 
     // Check cache first
     const cachedRole = getCachedUserRole(user.id);
     if (cachedRole) {
-      console.log('✅ Using cached user role:', cachedRole);
       return cachedRole as UserRole;
     }
-    
-    console.log('🔍 Getting current user role from database...');
     
     // Try multiple approaches to get user role
     let appUser = null;
@@ -70,7 +66,7 @@ export const getCurrentUserRole = async (authUser?: User | null): Promise<UserRo
         appUser = data;
       }
     } catch (error) {
-      console.warn('❌ Error getting user by ID:', error);
+      // Silent error handling
     }
     
     // Second try: by email if ID failed
@@ -84,22 +80,19 @@ export const getCurrentUserRole = async (authUser?: User | null): Promise<UserRo
         
         if (!error && data) {
           appUser = data;
-          console.log('✅ Found user by email fallback');
         }
       } catch (error) {
-        console.warn('❌ Error getting user by email:', error);
+        // Silent error handling
       }
     }
     
     if (!appUser) {
-      console.log('❌ User not found in app_users table, defaulting to worker role');
       // Cache the default role
       if (user) setCachedUserRole(user.id, 'worker');
       return 'worker';
     }
     
     const role = appUser.role as UserRole;
-    console.log('✅ Current user role:', role);
     
     // Cache the role
     if (user) setCachedUserRole(user.id, role);
@@ -125,16 +118,13 @@ export const hasPermission = async (permission: Permission, authUser?: User | nu
     if (user) {
       const cachedPermission = getCachedPermission(user.id, permission);
       if (cachedPermission !== null) {
-        console.log('✅ Using cached permission:', permission, cachedPermission);
         return cachedPermission;
       }
     }
     
-    console.log('🔍 Checking permission from database:', permission);
     const userRole = await getCurrentUserRole(authUser);
     
     if (!userRole) {
-      console.log('❌ No user role found, defaulting to basic permissions');
       // For basic permissions, allow authenticated users even if role detection fails
       const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records', 'cadastral_view'];
       return basicPermissions.includes(permission);
@@ -143,12 +133,6 @@ export const hasPermission = async (permission: Permission, authUser?: User | nu
     const rolePermissions = ROLE_PERMISSIONS[userRole];
     const hasAccess = rolePermissions.includes(permission);
     
-    console.log(`${hasAccess ? '✅' : '❌'} Permission check result:`, {
-      permission,
-      userRole,
-      hasAccess
-    });
-    
     // Cache the result
     if (user) {
       setCachedPermission(user.id, permission, hasAccess);
@@ -156,7 +140,6 @@ export const hasPermission = async (permission: Permission, authUser?: User | nu
     
     return hasAccess;
   } catch (error) {
-    console.error('❌ Error checking permission:', error);
     // For basic permissions, be permissive when there are auth context issues
     const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records', 'cadastral_view'];
     return basicPermissions.includes(permission);
@@ -177,7 +160,6 @@ export const checkPermission = async (permission: Permission, authUser?: User | 
     // For basic permissions like animals_view, don't block if there's an auth context issue
     const basicPermissions: Permission[] = ['animals_view', 'calendar_manage', 'lots_manage', 'health_records', 'cadastral_view'];
     if (basicPermissions.includes(permission)) {
-      console.warn(`⚠️ Permission check failed for ${permission}, allowing due to auth context issues:`, error);
       return; // Allow the operation to continue
     }
     // For sensitive operations, still block

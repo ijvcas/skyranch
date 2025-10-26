@@ -40,11 +40,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
 
   useEffect(() => {
-    console.log('🔄 [AUTH CONTEXT] Initializing auth...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 [AUTH CONTEXT] Initializing auth...');
+    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('🔄 [AUTH CONTEXT] Auth state changed:', event, session?.user?.email || 'No user');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔄 [AUTH CONTEXT] Auth state changed:', event);
+        }
 
         if (event === 'PASSWORD_RECOVERY') {
           setLoading(false);
@@ -53,10 +57,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (event === 'TOKEN_REFRESHED') {
           // Throttled to avoid noise
-          logTokenRefreshedThrottled().catch((e) => console.warn('[AUTH CONTEXT] token refresh log failed', e));
+          logTokenRefreshedThrottled().catch((e) => {
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('[AUTH CONTEXT] token refresh log failed', e);
+            }
+          });
           // Clear cache on token refresh to pick up any role changes
           permissionCache.clearAuthCache();
-          console.log('🔄 [AUTH CONTEXT] Cleared permission cache on token refresh');
         }
 
         if (event === 'SIGNED_OUT') {
@@ -84,9 +91,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               setUserRole(role);
               const perms = role ? ROLE_PERMISSIONS[role] : [];
               setPermissions(perms);
-              console.log('✅ [AUTH CONTEXT] Loaded role and permissions:', role, perms.length);
             } catch (error) {
-              console.error('❌ [AUTH CONTEXT] Failed to load role:', error);
+              if (process.env.NODE_ENV === 'development') {
+                console.error('❌ [AUTH CONTEXT] Failed to load role:', error);
+              }
             }
           }, 0);
         }
@@ -97,8 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     supabase.auth.getSession()
       .then(async ({ data: { session }, error }) => {
-        console.log('📋 [AUTH CONTEXT] Initial session check:', session?.user?.email || 'No session');
-        if (error) {
+        if (error && process.env.NODE_ENV === 'development') {
           console.error('❌ [AUTH CONTEXT] Error getting initial session:', error);
         }
         setSession(session);
@@ -111,19 +118,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUserRole(role);
             const perms = role ? ROLE_PERMISSIONS[role] : [];
             setPermissions(perms);
-            console.log('✅ [AUTH CONTEXT] Loaded initial role and permissions:', role, perms.length);
           } catch (error) {
-            console.error('❌ [AUTH CONTEXT] Failed to load initial role:', error);
+            if (process.env.NODE_ENV === 'development') {
+              console.error('❌ [AUTH CONTEXT] Failed to load initial role:', error);
+            }
           }
         }
       })
       .catch((error) => {
-        console.error('❌ [AUTH CONTEXT] Exception getting initial session:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ [AUTH CONTEXT] Exception getting initial session:', error);
+        }
       })
       .finally(() => setLoading(false));
 
     return () => {
-      console.log('🧹 [AUTH CONTEXT] Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, []);
@@ -143,19 +152,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
     
-    if (error) {
+    if (error && process.env.NODE_ENV === 'development') {
       console.error('❌ [AUTH CONTEXT] Sign up error:', error);
-    } else {
-      console.log('✅ [AUTH CONTEXT] Sign up successful for:', email);
+    } else if (!error) {
       try {
         const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
-        if (syncError) {
+        if (syncError && process.env.NODE_ENV === 'development') {
           console.warn('⚠️ [AUTH CONTEXT] Post-signup sync failed:', syncError);
-        } else {
-          console.log('🔄 [AUTH CONTEXT] Post-signup sync completed');
         }
       } catch (e) {
-        console.warn('⚠️ [AUTH CONTEXT] Post-signup sync exception:', e);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ [AUTH CONTEXT] Post-signup sync exception:', e);
+        }
       }
     }
     
@@ -163,34 +171,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    console.log('🔐 [AUTH CONTEXT] Attempting sign in for:', email);
-    
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
-    if (error) {
-      console.error('❌ [AUTH CONTEXT] Sign in error for', email, ':', error);
-      console.error('❌ [AUTH CONTEXT] Error details:', {
-        message: error.message,
-        status: error.status,
-        name: error.name
-      });
-      // Note: cannot log failed sign-ins via table due to RLS (no user session yet).
-    } else {
-      console.log('✅ [AUTH CONTEXT] Sign in successful for:', email);
+    if (error && process.env.NODE_ENV === 'development') {
+      console.error('❌ [AUTH CONTEXT] Sign in error:', error.message);
+    } else if (!error) {
       // Lightweight connection log
       await logConnection('signed_in', { method: 'password' });
       try {
         const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
-        if (syncError) {
+        if (syncError && process.env.NODE_ENV === 'development') {
           console.warn('⚠️ [AUTH CONTEXT] Post-signin sync failed:', syncError);
-        } else {
-          console.log('🔄 [AUTH CONTEXT] Post-signin sync completed');
         }
       } catch (e) {
-        console.warn('⚠️ [AUTH CONTEXT] Post-signin sync exception:', e);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ [AUTH CONTEXT] Post-signin sync exception:', e);
+        }
       }
     }
     
@@ -198,7 +197,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    console.log('🚪 [AUTH CONTEXT] Signing out...');
     // Clear permission cache on sign out
     const { permissionCache } = await import('@/services/permissionCache');
     permissionCache.clearAuthCache();
@@ -215,57 +213,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const resetPassword = async (email: string) => {
-    console.log('🔑 [AUTH CONTEXT] Sending password reset for:', email);
-    
     // Use dynamic redirect URL based on environment
     const redirectUrl = `${window.location.origin}/reset-password`;
-    
-    console.log('📧 [AUTH CONTEXT] Using redirect URL:', redirectUrl);
-    console.log('📧 [AUTH CONTEXT] Current window origin:', window.location.origin);
-    console.log('📧 [AUTH CONTEXT] Current window URL:', window.location.href);
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl
     });
     
-    if (error) {
-      console.error('❌ [AUTH CONTEXT] Password reset error:', error);
-      console.error('❌ [AUTH CONTEXT] Reset error details:', {
-        message: error.message,
-        status: error.status,
-        name: error.name,
-        code: error.code
-      });
-    } else {
-      console.log('✅ [AUTH CONTEXT] Password reset email sent to:', email);
-      console.log('✅ [AUTH CONTEXT] Reset email should contain link to:', redirectUrl);
+    if (error && process.env.NODE_ENV === 'development') {
+      console.error('❌ [AUTH CONTEXT] Password reset error:', error.message);
     }
     
     return { error };
   };
 
   const updatePassword = async (newPassword: string) => {
-    console.log('🔑 [AUTH CONTEXT] Updating password for current user');
-    
     // Enhanced session verification
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
-      console.error('❌ [AUTH CONTEXT] Session verification error:', sessionError);
       return { error: sessionError };
     }
     
     if (!session) {
-      console.error('❌ [AUTH CONTEXT] No active session for password update');
       return { error: { message: 'No active session found' } };
     }
-    
-    console.log('✅ [AUTH CONTEXT] Session verified for password update:', session.user.email);
     
     // Enforce strong password policy (client-side guard)
     const check = validatePasswordStrength(newPassword, session.user.email || undefined);
     if (!check.valid) {
-      console.error('❌ [AUTH CONTEXT] Weak password per policy:', check.errors);
       return { error: { message: check.errors[0] } } as any;
     }
     
@@ -273,24 +249,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       password: newPassword
     });
     
-    if (error) {
-      console.error('❌ [AUTH CONTEXT] Password update error:', error);
-      console.error('❌ [AUTH CONTEXT] Update error details:', {
-        message: error.message,
-        status: error.status,
-        name: error.name,
-        code: error.code
-      });
-    } else {
-      console.log('✅ [AUTH CONTEXT] Password updated successfully');
+    if (error && process.env.NODE_ENV === 'development') {
+      console.error('❌ [AUTH CONTEXT] Password update error:', error.message);
     }
     
     return { error };
   };
 
   const forcePasswordUpdate = async (email: string, newPassword: string) => {
-    console.log('🔧 Force updating password for:', email);
-    
     try {
       // Use secure edge function for admin operations
       const { data, error } = await supabase.functions.invoke('admin-user-management', {
@@ -302,7 +268,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        console.error('❌ Admin password update failed:', error);
         return { error: { message: error.message || 'Error al actualizar contraseña' } };
       }
       
@@ -310,18 +275,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error: { message: data?.error || 'Error al actualizar contraseña' } };
       }
       
-      console.log('✅ Password force updated successfully via secure edge function');
       return { error: null };
       
     } catch (error) {
-      console.error('❌ Force password update error:', error);
       return { error: { message: 'Error al actualizar contraseña directamente' } };
     }
   };
 
   const clearCorruptedSession = async () => {
-    console.log('🧹 Clearing corrupted session data...');
-    
     try {
       // Sign out completely
       await supabase.auth.signOut();
@@ -335,7 +296,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       allKeys.forEach(key => {
         if (key.includes('supabase') || key.includes('auth')) {
           localStorage.removeItem(key);
-          console.log('🗑️ Removed key:', key);
         }
       });
       
@@ -343,10 +303,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(null);
       setUser(null);
       
-      console.log('✅ Session cleared successfully');
-      
     } catch (error) {
-      console.error('❌ Error clearing session:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Error clearing session:', error);
+      }
     }
   };
 
