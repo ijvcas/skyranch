@@ -1,18 +1,19 @@
-
 import type { PedigreeNode, InbreedingAnalysis } from './types';
 import { PedigreeTreeBuilder } from './pedigreeTreeBuilder';
 
 export class InbreedingCalculator {
   
-  static calculateInbreedingCoefficient(pedigree: PedigreeNode): InbreedingAnalysis {
-    console.log('🧮 Calculating inbreeding coefficient for:', pedigree.name);
+  static calculateInbreedingCoefficient(pedigree: PedigreeNode, maxDepth?: number): InbreedingAnalysis {
+    console.log('🧮 Calculating inbreeding coefficient for:', pedigree.name, 'maxDepth:', maxDepth);
     
-    const ancestors = PedigreeTreeBuilder.getAllAncestors(pedigree);
+    const ancestors = PedigreeTreeBuilder.getAllAncestors(pedigree, maxDepth);
     const ancestorCounts = new Map<string, number>();
     
-    // Count occurrences of each ancestor
+    // Count occurrences of each ancestor (only within maxDepth if specified)
     ancestors.forEach(ancestor => {
-      ancestorCounts.set(ancestor.id, (ancestorCounts.get(ancestor.id) || 0) + 1);
+      if (!maxDepth || ancestor.generation <= maxDepth) {
+        ancestorCounts.set(ancestor.id, (ancestorCounts.get(ancestor.id) || 0) + 1);
+      }
     });
 
     // Find common ancestors (appearing more than once)
@@ -63,10 +64,14 @@ export class InbreedingCalculator {
     return recommendations;
   }
 
-  static calculatePotentialInbreeding(malePedigree: PedigreeNode, femalePedigree: PedigreeNode): InbreedingAnalysis {
-    // Simplified analysis of potential common ancestors
-    const maleAncestors = PedigreeTreeBuilder.getAllAncestors(malePedigree);
-    const femaleAncestors = PedigreeTreeBuilder.getAllAncestors(femalePedigree);
+  static calculatePotentialInbreeding(
+    malePedigree: PedigreeNode, 
+    femalePedigree: PedigreeNode,
+    maxDepth?: number
+  ): InbreedingAnalysis {
+    // Simplified analysis of potential common ancestors (respecting pedigree depth)
+    const maleAncestors = PedigreeTreeBuilder.getAllAncestors(malePedigree, maxDepth);
+    const femaleAncestors = PedigreeTreeBuilder.getAllAncestors(femalePedigree, maxDepth);
     
     const commonAncestorIds = new Set();
     const commonAncestorNames: string[] = [];

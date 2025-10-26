@@ -1,7 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { getAllUsers } from './userService';
-import { getAllAnimals } from './animalService';
+import { getAllAnimalsForBackup } from './animal/animalBackupQueries';
 import { getAllFieldReports, importFieldReports } from './fieldReportBackupService';
 import { Preferences } from '@capacitor/preferences';
 
@@ -305,7 +304,8 @@ export const getFarmProfile = async () => {
 export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): Promise<ComprehensiveBackupData> => {
   const farmProfile = await getFarmProfile();
   const users = await getAllUsers();
-  const animals = await getAllAnimals();
+  // Use optimized backup query that excludes empty genealogy fields beyond pedigree_max_generation
+  const animals = await getAllAnimalsForBackup(true);
   const fieldReports = await getAllFieldReports();
   const lotsData = await getAllLots();
   const cadastralData = await getAllCadastralData();

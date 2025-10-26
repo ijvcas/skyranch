@@ -89,11 +89,25 @@ export class PedigreeTreeBuilder {
     return uuidRegex.test(str);
   }
 
-  static getAllAncestors(node: PedigreeNode, ancestors: PedigreeNode[] = []): PedigreeNode[] {
+  /**
+   * Get all ancestors from a pedigree node, optionally limiting to a maximum depth
+   * @param node The pedigree node to start from
+   * @param maxDepth Optional maximum generation depth to include (e.g., 3 = up to great-grandparents)
+   * @param ancestors Internal accumulator for recursion
+   * @returns Array of all ancestor nodes
+   */
+  static getAllAncestors(
+    node: PedigreeNode, 
+    maxDepth?: number,
+    ancestors: PedigreeNode[] = []
+  ): PedigreeNode[] {
     if (node.children && node.children.length > 0) {
       node.children.forEach(child => {
-        ancestors.push(child);
-        this.getAllAncestors(child, ancestors);
+        // Only include ancestor if within maxDepth (if specified)
+        if (!maxDepth || child.generation <= maxDepth) {
+          ancestors.push(child);
+          this.getAllAncestors(child, maxDepth, ancestors);
+        }
       });
     }
     return ancestors;

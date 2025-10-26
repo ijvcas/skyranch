@@ -26,7 +26,7 @@ export class OptimizedBreedingRecommendationGenerator {
         .from('animals')
         .select(`
           id, name, species, gender, health_status,
-          mother_id, father_id
+          mother_id, father_id, pedigree_max_generation
         `)
         .eq('lifecycle_status', 'active')
         .not('gender', 'is', null)
@@ -62,8 +62,9 @@ export class OptimizedBreedingRecommendationGenerator {
         paternalGrandmotherId: '',
         paternalGrandfatherId: '',
         notes: '',
-        image: null
-      }));
+        image: null,
+        pedigreeMaxGeneration: animal.pedigree_max_generation || 5
+      } as any));
 
 
       console.log(`📊 Found ${animals.length} total animals for analysis`);
@@ -112,14 +113,19 @@ export class OptimizedBreedingRecommendationGenerator {
 
       // Process fewer combinations more efficiently
       outerLoop: for (let m = 0; m < males.length && combinationCount < maxCombinations; m++) {
-        const male = males[m];
+          const male = males[m];
         for (let f = 0; f < females.length && combinationCount < maxCombinations; f++) {
           const female = females[f];
           
           if (combinationCount >= maxCombinations) break outerLoop;
           if (male.id === female.id) continue;
 
-          const recommendation = await this.analyzeBreedingPairOptimized(male, female, maxDepth);
+          // Use the minimum pedigree depth between the two animals
+          const malePedigreeDepth = (male as any).pedigreeMaxGeneration || maxDepth;
+          const femalePedigreeDepth = (female as any).pedigreeMaxGeneration || maxDepth;
+          const effectiveDepth = Math.min(malePedigreeDepth, femalePedigreeDepth, maxDepth);
+
+          const recommendation = await this.analyzeBreedingPairOptimized(male, female, effectiveDepth);
           if (recommendation) {
             recommendations.push(recommendation);
             successfulRecommendations++;

@@ -7,6 +7,7 @@ interface HorizontalPedigreeInputTreeProps {
   onInputChange: (field: string, value: string) => void;
   disabled?: boolean;
   animalName?: string;
+  maxGeneration?: number;
 }
 
 // Get species-specific color for Gen 0 bubble with reduced opacity
@@ -57,7 +58,8 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
   formData, 
   onInputChange, 
   disabled = false,
-  animalName 
+  animalName,
+  maxGeneration = 5
 }) => {
   return (
     <ScrollArea className="w-full">
@@ -72,8 +74,9 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
             </div>
           </div>
 
-          {/* Parents - Generation 1 */}
-          <div className="flex flex-col gap-2 justify-center">
+            {/* Parents - Generation 1 */}
+            {maxGeneration >= 1 && (
+            <div className="flex flex-col gap-2 justify-center">
             <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 1 - Padres</div>
             <AncestorInputBox 
               field="fatherId" 
@@ -92,8 +95,10 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
               disabled={disabled}
             />
           </div>
+            )}
 
           {/* Grandparents - Generation 2 */}
+          {maxGeneration >= 2 && (
           <div className="flex flex-col gap-2 justify-center">
             <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 2 - Abuelos</div>
             <AncestorInputBox 
@@ -129,8 +134,10 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
               disabled={disabled}
             />
           </div>
+            )}
 
           {/* Great-Grandparents - Generation 3 */}
+          {maxGeneration >= 3 && (
           <div className="flex flex-col gap-2 justify-center">
             <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 3 - Bisabuelos</div>
             <AncestorInputBox 
@@ -198,8 +205,10 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
               disabled={disabled}
             />
           </div>
+            )}
 
           {/* Generation 4 - Great-Great-Grandparents */}
+          {maxGeneration >= 4 && (
           <div className="flex flex-col gap-1 justify-center">
             <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 4</div>
             <AncestorInputBox field="gen4_paternal_ggggf_p" value={formData.gen4_paternal_ggggf_p} label="G4-P1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
@@ -219,8 +228,10 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
             <AncestorInputBox field="gen4_maternal_ggmgf_m" value={formData.gen4_maternal_ggmgf_m} label="G4-M7 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
             <AncestorInputBox field="gen4_maternal_ggmgm_m" value={formData.gen4_maternal_ggmgm_m} label="G4-M8 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
           </div>
+            )}
 
           {/* Generation 5 */}
+          {maxGeneration >= 5 && (
           <div className="flex flex-col gap-0.5 justify-center">
             <div className="text-center text-xs font-semibold text-muted-foreground mb-1">Gen 5</div>
             <AncestorInputBox field="gen5_paternal_1" value={formData.gen5_paternal_1} label="G5-P1 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
@@ -256,6 +267,7 @@ const HorizontalPedigreeInputTree: React.FC<HorizontalPedigreeInputTreeProps> = 
             <AncestorInputBox field="gen5_maternal_15" value={formData.gen5_maternal_15} label="G5-M15 ♂" gender="male" onChange={onInputChange} disabled={disabled} />
             <AncestorInputBox field="gen5_maternal_16" value={formData.gen5_maternal_16} label="G5-M16 ♀" gender="female" onChange={onInputChange} disabled={disabled} />
           </div>
+            )}
         </div>
       </div>
       <ScrollBar orientation="horizontal" />

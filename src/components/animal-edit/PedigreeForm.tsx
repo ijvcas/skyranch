@@ -2,9 +2,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Eraser } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Eraser, Info } from 'lucide-react';
 import HorizontalPedigreeInputTree from '@/components/pedigree/HorizontalPedigreeInputTree';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PedigreeFormProps {
   formData: any;
@@ -43,11 +46,13 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
     });
   };
 
+  const maxGeneration = parseInt(formData.pedigreeMaxGeneration || '5');
+
   return (
     <Card className="shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl text-gray-900">Información de Pedigrí (5 Generaciones)</CardTitle>
+            <CardTitle className="text-xl text-gray-900">Información de Pedigrí</CardTitle>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="icon" disabled={disabled} title="Limpiar Pedigrí">
@@ -72,11 +77,46 @@ const PedigreeForm = ({ formData, onInputChange, disabled = false, animalId, ani
           </div>
         </CardHeader>
         <CardContent>
+          <div className="flex items-center gap-4 mb-4 pb-4 border-b">
+            <Label htmlFor="pedigree-depth" className="text-sm font-medium whitespace-nowrap">
+              Profundidad de Pedigrí:
+            </Label>
+            <Select 
+              value={formData.pedigreeMaxGeneration?.toString() || '5'}
+              onValueChange={(val) => onInputChange('pedigreeMaxGeneration', val)}
+              disabled={disabled}
+            >
+              <SelectTrigger id="pedigree-depth" className="w-[280px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Gen 1 - Solo Padres</SelectItem>
+                <SelectItem value="2">Gen 2 - Hasta Abuelos</SelectItem>
+                <SelectItem value="3">Gen 3 - Hasta Bisabuelos</SelectItem>
+                <SelectItem value="4">Gen 4 - Hasta Tatarabuelos</SelectItem>
+                <SelectItem value="5">Gen 5 - Completo (5 Generaciones)</SelectItem>
+              </SelectContent>
+            </Select>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-sm">
+                    Selecciona hasta qué generación conoces el pedigrí. Esto optimiza el espacio y los respaldos.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          
           <HorizontalPedigreeInputTree
             formData={formData}
             onInputChange={onInputChange}
             disabled={disabled}
             animalName={animalName}
+            maxGeneration={maxGeneration}
           />
         </CardContent>
     </Card>
