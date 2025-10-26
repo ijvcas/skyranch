@@ -13,7 +13,7 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { iCloudBackupService } from '@/services/native/iCloudBackupService';
 import BackupFileBrowser from './BackupFileBrowser';
 import { getAllUsers } from '@/services/userService';
-import { getAllAnimals } from '@/services/animalService';
+import { getAllAnimalsForBackup } from '@/services/animal/animalBackupQueries';
 import { getAllFieldReports, importFieldReports } from '@/services/fieldReportBackupService';
 import { 
   getAllLots, 
@@ -76,7 +76,7 @@ const SystemBackupManager: React.FC = () => {
 
   const { data: animals = [] } = useQuery({
     queryKey: ['backup-animals'],
-    queryFn: () => getAllAnimals(true),
+    queryFn: () => getAllAnimalsForBackup(true),
     enabled: selectedData.animals,
   });
 
