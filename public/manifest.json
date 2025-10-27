@@ -1,8 +1,8 @@
 
 {
-  "name": "SkyRanch - Gestión de Rancho",
-  "short_name": "SkyRanch",
-  "description": "Sistema de gestión para SkyRanch - animales y operaciones",
+  "name": "FARMIKA - Gestión de Finca",
+  "short_name": "FARMIKA",
+  "description": "Sistema de gestión integral para fincas - animales, lotes y operaciones",
   "theme_color": "#16a34a",
   "background_color": "#f0fdf4",
   "display": "standalone",

@@ -9,13 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Users, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { unifiedVersionManager } from '@/services/version-management';
-import { useFarmBranding } from '@/hooks/useFarmBranding';
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn, user, loading } = useAuth();
-  const { branding, isLoading: brandingLoading } = useFarmBranding();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -152,18 +150,17 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center pb-6">
-          {branding.farm_logo_url && (
-            <div className="flex justify-center mb-4">
-              <img 
-                src={branding.farm_logo_url} 
-                alt="SKYRANCH Logo"
-                className="h-24 w-auto object-contain"
-              />
-            </div>
-          )}
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
+              alt="FARMIKA Logo"
+              className="h-24 w-auto object-contain"
+            />
+          </div>
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            SKYRANCH
+            FARMIKA
           </CardTitle>
+          <p className="text-sm text-gray-600">Gestión de Finca</p>
           {versionInfo && (
             <div className="text-xs text-gray-500 mb-3">
               <p>Versión v{versionInfo.version} • Build #{versionInfo.buildNumber}</p>
