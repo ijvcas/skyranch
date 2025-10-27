@@ -51,9 +51,9 @@
     --brand-green: 160 84% 39%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-green)));
     /* FARMIKA barn-inspired gradient (terracotta to green) */
-    --farmika-barn: 25 75% 50%;
-    --farmika-field: 135 55% 45%;
-    --gradient-farmika: linear-gradient(135deg, hsl(var(--farmika-barn)), hsl(var(--farmika-field)));
+    --farmika-barn: 18 85% 55%;
+    --farmika-field: 145 65% 40%;
+    --gradient-farmika: linear-gradient(135deg, hsl(18 85% 55%), hsl(145 65% 40%));
   }
 
   .dark {
@@ -92,9 +92,9 @@
     --brand-green: 160 84% 39%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-green)));
     /* FARMIKA barn-inspired gradient (terracotta to green) */
-    --farmika-barn: 25 75% 50%;
-    --farmika-field: 135 55% 45%;
-    --gradient-farmika: linear-gradient(135deg, hsl(var(--farmika-barn)), hsl(var(--farmika-field)));
+    --farmika-barn: 18 85% 55%;
+    --farmika-field: 145 65% 40%;
+    --gradient-farmika: linear-gradient(135deg, hsl(18 85% 55%), hsl(145 65% 40%));
   }
 }
 
