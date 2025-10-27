@@ -50,6 +50,10 @@
     --brand-blue: 217 91% 60%;
     --brand-green: 160 84% 39%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-green)));
+    /* FARMIKA barn-inspired gradient (terracotta to green) */
+    --farmika-barn: 25 75% 50%;
+    --farmika-field: 135 55% 45%;
+    --gradient-farmika: linear-gradient(135deg, hsl(var(--farmika-barn)), hsl(var(--farmika-field)));
   }
 
   .dark {
@@ -87,6 +91,10 @@
     --brand-blue: 217 91% 60%;
     --brand-green: 160 84% 39%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-green)));
+    /* FARMIKA barn-inspired gradient (terracotta to green) */
+    --farmika-barn: 25 75% 50%;
+    --farmika-field: 135 55% 45%;
+    --gradient-farmika: linear-gradient(135deg, hsl(var(--farmika-barn)), hsl(var(--farmika-field)));
   }
 }
 
@@ -155,8 +163,9 @@
     }
   }
 
-  /* Gradient button utility */
+  /* Gradient button utilities */
   .btn-gradient { background-image: var(--gradient-primary); }
+  .btn-gradient-farmika { background-image: var(--gradient-farmika); }
 
   /* Background logo watermark */
   .page-with-logo {

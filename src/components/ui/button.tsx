@@ -19,6 +19,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         gradient: "btn-gradient text-primary-foreground hover:opacity-90",
+        farmika: "btn-gradient-farmika text-white hover:opacity-90 shadow-lg",
       },
       size: {
         default: "h-10 px-4 py-2",

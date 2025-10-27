@@ -241,8 +241,9 @@ const Login = () => {
 
             <Button
               type="submit"
+              variant="farmika"
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white h-12 text-base font-semibold mt-8"
+              className="w-full h-12 text-base font-semibold mt-8"
             >
               {isSubmitting ? (
                 <div className="flex items-center">
