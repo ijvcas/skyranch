@@ -2056,6 +2056,62 @@ export type Database = {
         }
         Relationships: []
       }
+      parcel_owners_view: {
+        Row: {
+          contact_address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string | null
+          identification_number: string | null
+          is_primary_contact: boolean | null
+          notes: string | null
+          owner_name: string | null
+          owner_type: Database["public"]["Enums"]["owner_type"] | null
+          ownership_percentage: number | null
+          parcel_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contact_address?: never
+          contact_email?: never
+          contact_phone?: never
+          created_at?: string | null
+          id?: string | null
+          identification_number?: string | null
+          is_primary_contact?: boolean | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_type?: Database["public"]["Enums"]["owner_type"] | null
+          ownership_percentage?: number | null
+          parcel_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contact_address?: never
+          contact_email?: never
+          contact_phone?: never
+          created_at?: string | null
+          id?: string | null
+          identification_number?: string | null
+          is_primary_contact?: boolean | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_type?: Database["public"]["Enums"]["owner_type"] | null
+          ownership_percentage?: number | null
+          parcel_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parcel_owners_parcel_id_fkey"
+            columns: ["parcel_id"]
+            isOneToOne: false
+            referencedRelation: "cadastral_parcels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       calculate_expected_exit_date: {

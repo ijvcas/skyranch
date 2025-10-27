@@ -17,8 +17,9 @@ export interface ParcelOwner {
 }
 
 export const getParcelOwners = async (parcelId: string): Promise<ParcelOwner[]> => {
+  // Use secure view that masks PII for non-admin/manager users
   const { data, error } = await supabase
-    .from('parcel_owners')
+    .from('parcel_owners_view')
     .select('*')
     .eq('parcel_id', parcelId)
     .order('ownership_percentage', { ascending: false });
@@ -75,9 +76,9 @@ export const deleteParcelOwner = async (id: string): Promise<void> => {
 };
 
 export const findSimilarOwners = async (ownerName: string): Promise<ParcelOwner[]> => {
-  // Use fuzzy matching with trigram similarity
+  // Use secure view that masks PII for non-admin/manager users
   const { data, error } = await supabase
-    .from('parcel_owners')
+    .from('parcel_owners_view')
     .select('*')
     .ilike('owner_name', `%${ownerName}%`)
     .limit(10);
