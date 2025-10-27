@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAIChatDialog } from '@/contexts/AIChatContext';
 import { usePermissionCheck } from '@/hooks/usePermissions';
+import { useFarmProfile } from '@/hooks/useFarmProfile';
 import NotificationBell from './NotificationBell';
 
 
@@ -33,7 +34,11 @@ const HeaderWithDropdown = () => {
   const { signOut } = useAuth();
   const { setChatOpen } = useAIChatDialog();
   const { hasAccess: canAccessSettings } = usePermissionCheck('system_settings');
+  const { data: farmProfile } = useFarmProfile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const farmName = farmProfile?.farm_name || 'FARMIKA';
+  const farmLogo = farmProfile?.logo_url || '/farmika-logo.png';
 
   const navItems = [
     { to: '/dashboard', icon: Home, label: 'Panel' },
@@ -80,14 +85,14 @@ const HeaderWithDropdown = () => {
                 }}
               >
                 <img 
-                  src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
-                  alt="SkyRanch"
-                  className="h-14 w-14 rounded flex-shrink-0"
+                  src={farmLogo}
+                  alt={farmName}
+                  className="h-14 w-14 rounded flex-shrink-0 object-contain"
                   loading="lazy"
                   decoding="async"
                 />
                 <div className="flex items-center">
-                  <span className="text-2xl font-bold text-gray-900 whitespace-nowrap uppercase leading-none">SkyRanch</span>
+                  <span className="text-2xl font-bold text-gray-900 whitespace-nowrap uppercase leading-none">{farmName}</span>
                   <ChevronDown className="w-4 h-4 ml-2 text-gray-600" />
                 </div>
               </Button>
@@ -95,7 +100,7 @@ const HeaderWithDropdown = () => {
             <SheetContent side="left" className="w-80 bg-white p-0">
               <SheetHeader className="p-6 pb-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <SheetTitle className="text-2xl font-bold text-gray-900 uppercase">SkyRanch</SheetTitle>
+                  <SheetTitle className="text-2xl font-bold text-gray-900 uppercase">{farmName}</SheetTitle>
                   <Button
                     variant="ghost"
                     size="icon"
