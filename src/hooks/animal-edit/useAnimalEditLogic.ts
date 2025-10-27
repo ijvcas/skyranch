@@ -98,7 +98,8 @@ export const useAnimalEditLogic = () => {
     gen5_paternal_13: '',
     gen5_paternal_14: '',
     gen5_paternal_15: '',
-    gen5_paternal_16: ''
+    gen5_paternal_16: '',
+    pedigree_max_generation: 5
   });
 
   const { getNameOnly, getDisplayName, animalNamesMap } = useAnimalNames();
@@ -211,7 +212,8 @@ export const useAnimalEditLogic = () => {
         gen5_paternal_13: (animal as any).gen5_paternal_13 || '',
         gen5_paternal_14: (animal as any).gen5_paternal_14 || '',
         gen5_paternal_15: (animal as any).gen5_paternal_15 || '',
-        gen5_paternal_16: (animal as any).gen5_paternal_16 || ''
+        gen5_paternal_16: (animal as any).gen5_paternal_16 || '',
+        pedigree_max_generation: Number(animal.pedigree_max_generation) || 5
       };
       
       console.log('🔄 Initial formData set with lifecycleStatus:', newFormData.lifecycleStatus);
