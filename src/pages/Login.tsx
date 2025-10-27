@@ -152,7 +152,7 @@ const Login = () => {
         <CardHeader className="text-center pb-6">
           <div className="flex justify-center mb-4">
             <img 
-              src="/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png" 
+              src="/farmika-logo.png" 
               alt="FARMIKA Logo"
               className="h-24 w-auto object-contain"
             />

@@ -12,18 +12,18 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png",
+      "src": "/farmika-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png",
+      "src": "/farmika-logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png",
+      "src": "/farmika-logo.png",
       "sizes": "144x144",
       "type": "image/png"
     }
@@ -38,7 +38,7 @@
       "url": "/animals",
       "icons": [
         {
-          "src": "/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png",
+          "src": "/farmika-logo.png",
           "sizes": "96x96"
         }
       ]
@@ -50,7 +50,7 @@
       "url": "/calendar",
       "icons": [
         {
-          "src": "/lovable-uploads/953e2699-9daf-4fea-86c8-e505a1e54eb3.png",
+          "src": "/farmika-logo.png",
           "sizes": "96x96"
         }
       ]
