@@ -68,7 +68,7 @@ const Register = () => {
       } else {
         toast({
           title: "Registro exitoso",
-          description: "Cuenta creada correctamente. Bienvenido a SkyRanch.",
+          description: "Cuenta creada correctamente. Bienvenido a FARMIKA.",
         });
         navigate('/dashboard');
       }
@@ -99,15 +99,17 @@ const Register = () => {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Users className="w-10 h-10 text-white" />
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/farmika-logo.png" 
+              alt="FARMIKA Logo"
+              className="h-24 w-auto object-contain"
+            />
           </div>
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            Crear Cuenta
+            Crear Cuenta en FARMIKA
           </CardTitle>
-          <p className="text-gray-600 text-lg">
-            Únete a SkyRanch
-          </p>
+          <p className="text-sm text-gray-600">Sistema de Gestión Ganadera</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">

@@ -8,7 +8,7 @@ import {
 } from '@/services/userService';
 import EditUserDialog from './EditUserDialog';
 import UserManagementHeader from './user-management/UserManagementHeader';
-import SimplifiedInviteDialog from './user-management/SimplifiedInviteDialog';
+import InviteUserDialog from './user-management/InviteUserDialog';
 import UsersTable from './user-management/UsersTable';
 import ExpandableUsersList from './user-management/ExpandableUsersList';
 import { useUserManagement } from './user-management/useUserManagement';
@@ -125,7 +125,7 @@ const UserManagement = () => {
         onToggleAddForm={() => setShowInviteDialog(true)}
       />
 
-      <SimplifiedInviteDialog
+      <InviteUserDialog
         isOpen={showInviteDialog}
         onOpenChange={setShowInviteDialog}
       />

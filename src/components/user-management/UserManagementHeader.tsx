@@ -25,7 +25,7 @@ const UserManagementHeader: React.FC<UserManagementHeaderProps> = ({
         size="sm"
       >
         <Share2 className="w-4 h-4" />
-        Compartir Enlace de Invitación
+        Invitar por Email
       </Button>
     </div>
   );
