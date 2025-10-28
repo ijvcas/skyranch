@@ -21,8 +21,31 @@ serve(async (req) => {
 
     const { email, role, invitedBy } = await req.json();
     
+    // Validate required fields
     if (!email || !role || !invitedBy) {
       throw new Error('Missing required fields: email, role, or invitedBy');
+    }
+
+    // Validate email format and length
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const MAX_EMAIL_LENGTH = 255;
+    
+    if (typeof email !== 'string') {
+      throw new Error('Email must be a string');
+    }
+    
+    if (email.length > MAX_EMAIL_LENGTH) {
+      throw new Error(`Email exceeds maximum length of ${MAX_EMAIL_LENGTH} characters`);
+    }
+    
+    if (!EMAIL_REGEX.test(email)) {
+      throw new Error('Invalid email address format');
+    }
+
+    // Validate role
+    const VALID_ROLES = ['worker', 'manager', 'admin'];
+    if (!VALID_ROLES.includes(role)) {
+      throw new Error(`Invalid role. Must be one of: ${VALID_ROLES.join(', ')}`);
     }
 
     // Generate unique token

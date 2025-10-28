@@ -28,6 +28,67 @@ const handler = async (req: Request): Promise<Response> => {
     
     const { to, subject, html, senderName, organizationName }: EmailRequest = await req.json();
     
+    // Validate required fields
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const MAX_EMAIL_LENGTH = 255;
+    const MAX_SUBJECT_LENGTH = 200;
+    const MAX_HTML_LENGTH = 100000;
+    
+    if (!to || !subject || !html) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'validation_error',
+          message: 'Missing required fields: to, subject, or html'
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
+    // Validate email format and length
+    if (typeof to !== 'string' || to.length > MAX_EMAIL_LENGTH || !EMAIL_REGEX.test(to)) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'validation_error',
+          message: 'Invalid email address format or length'
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
+    // Validate subject length
+    if (typeof subject !== 'string' || subject.trim().length === 0 || subject.length > MAX_SUBJECT_LENGTH) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'validation_error',
+          message: `Subject must be between 1 and ${MAX_SUBJECT_LENGTH} characters`
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
+    // Validate HTML content length
+    if (typeof html !== 'string' || html.trim().length === 0 || html.length > MAX_HTML_LENGTH) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'validation_error',
+          message: `HTML content must be between 1 and ${MAX_HTML_LENGTH} characters`
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
     console.log(`📧 Sending email to: ${to}, subject: ${subject}`);
 
     // Use verified skyranch.es domain
