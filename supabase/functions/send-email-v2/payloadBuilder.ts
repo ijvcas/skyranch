@@ -8,7 +8,7 @@ export class PayloadBuilder {
     
     // Use your verified skyranch.es domain
     const fromEmail = "noreply@skyranch.es";
-    const fromName = request.senderName || "SkyRanch - Sistema de Gestión Ganadera";
+    const fromName = request.senderName || "FARMIKA - Sistema de Gestión Ganadera";
 
     const finalTags = TagManager.prepareTags(request.metadata?.tags);
 
@@ -18,9 +18,9 @@ export class PayloadBuilder {
       subject: request.subject,
       html: request.html,
       headers: {
-        'X-Entity-Ref-ID': 'skyranch-sistema-ganadero-v2',
-        'Organization': request.organizationName || 'SkyRanch',
-        'X-Mailer': 'SkyRanch Sistema de Gestión Ganadera v2',
+        'X-Entity-Ref-ID': 'farmika-sistema-ganadero-v2',
+        'Organization': request.organizationName || 'FARMIKA',
+        'X-Mailer': 'FARMIKA Sistema de Gestión Ganadera v2',
         'X-Debug-Domain': recipientDomain,
         'X-Debug-Timestamp': new Date().toISOString(),
         ...(request.metadata?.headers || {})

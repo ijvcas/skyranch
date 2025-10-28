@@ -72,7 +72,7 @@ serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'FARMIKA <onboarding@resend.dev>',
+        from: 'FARMIKA <noreply@skyranch.es>',
         to: email,
         subject: `Invitación a ${farmProfile?.farm_name || 'FARMIKA'}`,
         html: `

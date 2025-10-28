@@ -30,8 +30,8 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log(`📧 Sending email to: ${to}, subject: ${subject}`);
 
-    // Use Resend's verified default domain to avoid domain verification issues
-    const fromEmail = "onboarding@resend.dev";
+    // Use verified skyranch.es domain
+    const fromEmail = "noreply@skyranch.es";
 
     const emailResponse = await resend.emails.send({
       from: fromEmail,
