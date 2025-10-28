@@ -45,7 +45,7 @@ const Register = () => {
     if (!check.valid) {
       toast({
         title: "Contraseña débil",
-        description: `${check.errors[0]} Requisitos: mínimo 12 caracteres, mayúsculas, minúsculas, número y símbolo.`,
+        description: `${check.errors[0]} Requisitos: mínimo 6 caracteres e incluye al menos un número.`,
         variant: "destructive"
       });
       return;
@@ -155,9 +155,9 @@ const Register = () => {
                 type="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                placeholder="Mínimo 12 caracteres, incluye mayúsculas, minúsculas, número y símbolo"
+                placeholder="Mínimo 6 caracteres, incluye al menos un número"
                 required
-                minLength={12}
+                minLength={6}
                 className="mt-2 h-12 text-base"
                 disabled={isLoading}
                 autoComplete="new-password"

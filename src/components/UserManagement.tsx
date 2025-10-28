@@ -8,7 +8,7 @@ import {
 } from '@/services/userService';
 import EditUserDialog from './EditUserDialog';
 import UserManagementHeader from './user-management/UserManagementHeader';
-import AddUserForm from './user-management/AddUserForm';
+import SimplifiedInviteDialog from './user-management/SimplifiedInviteDialog';
 import UsersTable from './user-management/UsersTable';
 import ExpandableUsersList from './user-management/ExpandableUsersList';
 import { useUserManagement } from './user-management/useUserManagement';
@@ -21,18 +21,12 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
   const isMobile = useIsMobile();
   
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  
   const {
-    showAddForm,
-    setShowAddForm,
-    newUser,
-    setNewUser,
-    handleAddUser,
-    handleSyncUsers,
-    addUserMutation,
     deleteUserMutation,
     deleteUserCompleteMutation,
     toggleStatusMutation,
-    syncUsersMutation
   } = useUserManagement();
 
   // Fetch users from Supabase with aggressive refetching
@@ -60,16 +54,6 @@ const UserManagement = () => {
     refetch();
   }, [refetch, queryClient]);
 
-  // Auto-refresh after user operations
-  useEffect(() => {
-    if (!addUserMutation.isPending && addUserMutation.isSuccess) {
-      setTimeout(() => {
-        console.log('Auto-refreshing after user addition...');
-        queryClient.invalidateQueries({ queryKey: ['app-users'] });
-        refetch();
-      }, 1000);
-    }
-  }, [addUserMutation.isPending, addUserMutation.isSuccess, queryClient, refetch]);
 
   const handleDeleteUser = (id: string, userName: string) => {
     if (currentUser?.id === id) {
@@ -138,18 +122,13 @@ const UserManagement = () => {
   return (
     <div className="space-y-6">
       <UserManagementHeader
-        onToggleAddForm={() => setShowAddForm(!showAddForm)}
+        onToggleAddForm={() => setShowInviteDialog(true)}
       />
 
-      {showAddForm && (
-        <AddUserForm
-          newUser={newUser}
-          onUserChange={setNewUser}
-          onSubmit={handleAddUser}
-          onCancel={() => setShowAddForm(false)}
-          isLoading={addUserMutation.isPending}
-        />
-      )}
+      <SimplifiedInviteDialog
+        isOpen={showInviteDialog}
+        onOpenChange={setShowInviteDialog}
+      />
 
       {isMobile ? (
         <ExpandableUsersList

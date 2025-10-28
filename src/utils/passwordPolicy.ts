@@ -14,17 +14,11 @@ export function validatePasswordStrength(password: string, email?: string, fullN
   const errors: string[] = [];
   let score = 0;
 
-  const minLength = 12;
+  const minLength = 6;
   if (password.length >= minLength) score += 1; else errors.push(`La contraseña debe tener al menos ${minLength} caracteres.`);
 
-  const hasLower = /[a-z]/.test(password);
-  const hasUpper = /[A-Z]/.test(password);
   const hasDigit = /\d/.test(password);
-  const hasSymbol = /[^A-Za-z0-9]/.test(password);
-
-  if (hasLower && hasUpper) score += 1; else errors.push('Usa mayúsculas y minúsculas.');
   if (hasDigit) score += 1; else errors.push('Incluye al menos un número.');
-  if (hasSymbol) score += 1; else errors.push('Incluye al menos un símbolo.');
 
   // No 3 identical consecutive chars
   if (/(.)\1\1/.test(password)) errors.push('Evita caracteres repetidos más de 2 veces.'); else score += 1;

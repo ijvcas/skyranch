@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Users, UserPlus } from 'lucide-react';
+import { Users, Share2 } from 'lucide-react';
 
 interface UserManagementHeaderProps {
   onToggleAddForm: () => void;
@@ -24,8 +24,8 @@ const UserManagementHeader: React.FC<UserManagementHeaderProps> = ({
         className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white"
         size="sm"
       >
-        <UserPlus className="w-4 h-4" />
-        Agregar Usuario
+        <Share2 className="w-4 h-4" />
+        Compartir Enlace de Invitación
       </Button>
     </div>
   );
