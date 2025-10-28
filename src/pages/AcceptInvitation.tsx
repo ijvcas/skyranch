@@ -1,3 +1,4 @@
+// Password Policy: 6 characters minimum + 1 number (Updated 2025-10-28)
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
