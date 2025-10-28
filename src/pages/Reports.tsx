@@ -19,7 +19,7 @@ const Reports: React.FC = () => {
           <TabsList className="flex flex-col w-full md:grid md:grid-cols-2">
             <TabsTrigger value="analytics" className="flex items-center">
               <BarChart3 className="w-4 h-4 mr-2" />
-              Análisis y Estadísticas
+              Finanzas
             </TabsTrigger>
             <TabsTrigger value="field-reports" className="flex items-center">
               <FileText className="w-4 h-4 mr-2" />

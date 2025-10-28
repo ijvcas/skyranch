@@ -41,8 +41,16 @@ const FarmLedger: React.FC<FarmLedgerProps> = ({ summary }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* No Sales Notice */}
-          {summary.totalRevenue === 0 && summary.totalExpenses > 0 && (
+          {/* Sales vs Payments Notice */}
+          {summary.totalSales > 0 && summary.totalPayments === 0 && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription className="text-sm">
+                Hay ventas registradas (€{summary.totalSales.toFixed(2)}) pero aún no se han registrado pagos recibidos.
+              </AlertDescription>
+            </Alert>
+          )}
+          {summary.totalSales === 0 && summary.totalExpenses > 0 && (
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
@@ -57,13 +65,13 @@ const FarmLedger: React.FC<FarmLedgerProps> = ({ summary }) => {
             <div className="space-y-1">
               <div className="flex items-center gap-1">
                 <DollarSign className="w-3 h-3 text-green-600" />
-                <span className="text-xs font-medium text-muted-foreground">Ingresos Reales</span>
+                <span className="text-xs font-medium text-muted-foreground">Pagos Cobrados</span>
               </div>
               <p className="text-lg font-bold text-green-600 dark:text-green-400">
                 {formatCurrency(summary.totalRevenue)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {summary.totalRevenue === 0 ? 'Sin ventas' : 'Cobrado'}
+                {summary.totalRevenue === 0 ? 'Sin cobros' : 'Efectivo recibido'}
               </p>
             </div>
 

@@ -209,9 +209,9 @@ export const getSalesAnalytics = async (dateRange?: { start: string; end: string
     }
 
     const totalSales = salesData.length;
-    const totalRevenue = salesData.reduce((sum, sale) => sum + sale.sale_price, 0);
+    const totalRevenue = salesData.reduce((sum, sale) => sum + sale.total_amount, 0);
     const averageSalePrice = totalSales > 0 ? totalRevenue / totalSales : 0;
-    const outstandingPayments = salesData.reduce((sum, sale) => sum + sale.amount_pending, 0);
+    const outstandingPayments = salesData.reduce((sum, sale) => sum + (sale.total_amount - sale.amount_paid), 0);
 
     // Group by species
     const salesBySpecies: Record<string, { count: number; revenue: number }> = {};
@@ -221,7 +221,7 @@ export const getSalesAnalytics = async (dateRange?: { start: string; end: string
         salesBySpecies[species] = { count: 0, revenue: 0 };
       }
       salesBySpecies[species].count++;
-      salesBySpecies[species].revenue += sale.sale_price;
+      salesBySpecies[species].revenue += sale.total_amount;
     });
 
     // Group by month
@@ -232,7 +232,7 @@ export const getSalesAnalytics = async (dateRange?: { start: string; end: string
         salesByMonth[month] = { count: 0, revenue: 0 };
       }
       salesByMonth[month].count++;
-      salesByMonth[month].revenue += sale.sale_price;
+      salesByMonth[month].revenue += sale.total_amount;
     });
 
     return {

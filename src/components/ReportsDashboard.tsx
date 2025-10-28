@@ -109,7 +109,7 @@ const ReportsDashboard: React.FC = () => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="animal">Animales</TabsTrigger>
           <TabsTrigger value="health">Salud</TabsTrigger>
-          <TabsTrigger value="sales">Ventas y Finanzas</TabsTrigger>
+          <TabsTrigger value="sales">Finanzas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="animal" className="space-y-6">
