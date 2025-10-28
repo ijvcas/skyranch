@@ -35,7 +35,6 @@ class HealthRecordNotificationService {
           animal_id,
           animals!health_records_animal_id_fkey(name)
         `)
-        .eq('user_id', user.id)
         .gte('next_due_date', todayString)
         .lte('next_due_date', sevenDaysString)
         .not('next_due_date', 'is', null);

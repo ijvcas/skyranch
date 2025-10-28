@@ -69,8 +69,7 @@ export const getLedgerSummary = async (dateRange?: { start: string; end: string 
     // Get actual payments received from sale_payments table
     let paymentsQuery = supabase
       .from('sale_payments')
-      .select('amount, payment_date')
-      .eq('user_id', user.id);
+      .select('amount, payment_date');
     
     if (dateRange) {
       paymentsQuery = paymentsQuery
@@ -84,8 +83,7 @@ export const getLedgerSummary = async (dateRange?: { start: string; end: string 
     // Get sales summary
     let salesQuery = supabase
       .from('animal_sales')
-      .select('total_amount, sale_date')
-      .eq('user_id', user.id);
+      .select('total_amount, sale_date');
     
     if (dateRange) {
       salesQuery = salesQuery
