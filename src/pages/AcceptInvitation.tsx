@@ -103,20 +103,12 @@ const AcceptInvitation = () => {
   };
 
   const validatePassword = (pwd: string): boolean => {
-    if (pwd.length < 12) {
-      setPasswordError('La contraseña debe tener al menos 12 caracteres');
-      return false;
-    }
-    if (!/[a-z]/.test(pwd) || !/[A-Z]/.test(pwd)) {
-      setPasswordError('Debe contener mayúsculas y minúsculas');
+    if (pwd.length < 6) {
+      setPasswordError('La contraseña debe tener al menos 6 caracteres');
       return false;
     }
     if (!/[0-9]/.test(pwd)) {
       setPasswordError('Debe contener al menos un número');
-      return false;
-    }
-    if (!/[^A-Za-z0-9]/.test(pwd)) {
-      setPasswordError('Debe contener al menos un carácter especial');
       return false;
     }
     setPasswordError('');
@@ -302,14 +294,14 @@ const AcceptInvitation = () => {
                   setPassword(e.target.value);
                   validatePassword(e.target.value);
                 }}
-                placeholder="Mínimo 12 caracteres"
+                placeholder="Mínimo 6 caracteres"
                 required
               />
               {passwordError && (
                 <p className="text-sm text-destructive">{passwordError}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                Debe contener: mayúsculas, minúsculas, números y caracteres especiales
+                Debe contener al menos un número
               </p>
             </div>
 
