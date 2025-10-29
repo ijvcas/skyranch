@@ -73,37 +73,54 @@ const Login = () => {
   }, [user, loading, navigate]);
 
   const handleBiometricLogin = async () => {
-    // If biometric is not enabled, show setup instructions
+    // If not enabled, try to enable it (if user is logged in)
     if (!isEnabled) {
-      toast({
-        title: "Configuración requerida",
-        description: "Ve a Configuración → Seguridad para habilitar Face ID",
-      });
-      return;
-    }
-
-    setIsBiometricSubmitting(true);
-    try {
-      const { error, showSetup } = await signInWithBiometric();
+      if (!user) {
+        toast({
+          title: "Inicia sesión primero",
+          description: "Debes iniciar sesión con tu contraseña primero para configurar Face ID",
+        });
+        return;
+      }
       
-      if (error) {
-        if (showSetup) {
-          // Credentials not found, user needs to enable biometric
+      // Enable biometric with current session
+      setIsBiometricSubmitting(true);
+      try {
+        const { BiometricService } = await import('@/services/biometricService');
+        const authenticated = await BiometricService.authenticate(
+          "Habilitar Face ID para iniciar sesión"
+        );
+        
+        if (authenticated && user.email && lastLoginCredentials?.password) {
+          await BiometricService.saveCredentials(user.email, lastLoginCredentials.password);
+          await refresh();
           toast({
-            title: "Configuración requerida",
-            description: "Inicia sesión con tu contraseña para habilitar la autenticación biométrica",
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: "No se pudo autenticar con biometría",
-            variant: "destructive",
+            title: "¡Face ID activado!",
+            description: "Ahora puedes iniciar sesión con Face ID",
           });
         }
-      } else {
+      } catch (error) {
+        console.error('❌ Enable biometric error:', error);
         toast({
-          title: "¡Bienvenido!",
-          description: "Has iniciado sesión con biometría",
+          title: "Error",
+          description: "No se pudo activar Face ID",
+          variant: "destructive",
+        });
+      } finally {
+        setIsBiometricSubmitting(false);
+      }
+      return;
+    }
+    
+    // Biometric is enabled, login with it
+    setIsBiometricSubmitting(true);
+    try {
+      const { error } = await signInWithBiometric();
+      if (error) {
+        toast({
+          title: "Error",
+          description: "No se pudo autenticar con Face ID",
+          variant: "destructive",
         });
       }
     } catch (error) {
@@ -354,8 +371,7 @@ const Login = () => {
             </Button>
           </div>
 
-
-          <div className="mt-6 text-center">
+          <div className="mt-2 text-center">
             <p className="text-base text-gray-600">
               ¿No tienes cuenta?{' '}
               <Button 

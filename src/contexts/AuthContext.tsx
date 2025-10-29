@@ -227,13 +227,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signOut = async () => {
-    // Clear biometric credentials on sign out
-    try {
-      const { BiometricService } = await import('@/services/biometricService');
-      await BiometricService.deleteCredentials();
-    } catch (e) {
-      console.warn('⚠️ Failed to clear biometric credentials:', e);
+  const signOut = async (clearBiometric = false) => {
+    // Only clear biometric credentials if explicitly requested
+    if (clearBiometric) {
+      try {
+        const { BiometricService } = await import('@/services/biometricService');
+        await BiometricService.deleteCredentials();
+      } catch (e) {
+        console.warn('⚠️ Failed to clear biometric credentials:', e);
+      }
     }
 
     // Clear permission cache on sign out
