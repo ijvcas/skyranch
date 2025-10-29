@@ -71,22 +71,38 @@ export const BiometricSettings = () => {
 
     setIsDisabling(true);
     try {
+      console.log('🔐 [BiometricSettings] Starting password verification flow...');
       const success = await enableBiometric(email, password);
       
       if (success) {
+        console.log('✅ [BiometricSettings] Enable successful, showing toast...');
         toast({
-          title: '¡Listo!',
-          description: `${biometricTypeName} habilitado correctamente`,
+          title: "Biométrico activado",
+          description: `${biometricTypeName} configurado correctamente`,
         });
+        
         setShowPasswordDialog(false);
+        
+        // Refresh status multiple times to ensure persistence
+        console.log('🔄 [BiometricSettings] Refreshing status...');
         await refresh();
+        setTimeout(() => {
+          console.log('🔄 [BiometricSettings] Second refresh (500ms delay)...');
+          refresh();
+        }, 500);
+        setTimeout(() => {
+          console.log('🔄 [BiometricSettings] Third refresh (1000ms delay)...');
+          refresh();
+        }, 1000);
       } else {
+        console.log('❌ [BiometricSettings] Enable failed or cancelled');
         toast({
           title: 'Cancelado',
           description: 'La autenticación biométrica fue cancelada',
         });
       }
     } catch (error) {
+      console.error('❌ [BiometricSettings] Error:', error);
       toast({
         title: 'Error',
         description: 'No se pudo habilitar la autenticación biométrica',

@@ -72,21 +72,30 @@ export const useBiometric = () => {
 
   const enableBiometric = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Verify biometric first
-      const authenticated = await BiometricService.authenticate(
-        'Verifica tu identidad para habilitar el acceso biométrico'
-      );
+      console.log('🔐 [useBiometric] Starting enableBiometric flow...');
       
+      // First authenticate
+      const authenticated = await BiometricService.authenticate('Configurar autenticación biométrica');
       if (!authenticated) {
+        console.log('❌ [useBiometric] Authentication failed or cancelled');
         return false;
       }
 
+      console.log('✅ [useBiometric] Authentication successful, saving credentials...');
+      
       // Save credentials
       await BiometricService.saveCredentials(email, password);
-      setIsEnabled(true);
+      
+      console.log('✅ [useBiometric] Credentials saved, refreshing status...');
+      
+      // Force immediate status refresh
+      await checkBiometricStatus();
+      
+      console.log('✅ [useBiometric] Enable biometric complete!');
+      
       return true;
     } catch (error) {
-      console.error('Failed to enable biometric:', error);
+      console.error('❌ [useBiometric] Failed to enable biometric:', error);
       return false;
     }
   };

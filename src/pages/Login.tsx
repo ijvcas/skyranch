@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { unifiedVersionManager } from '@/services/version-management';
 import { useBiometric } from '@/hooks/useBiometric';
 import { BiometricSetupDialog } from '@/components/BiometricSetupDialog';
+import { cn } from '@/lib/utils';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -214,85 +215,60 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="text-center pb-6">
-          <div className="flex justify-center mb-4">
+        <CardHeader className="text-center pb-4">
+          <div className="flex justify-center mb-3">
             <img 
               src="/farmika-logo.png" 
               alt="FARMIKA Logo"
-              className="h-24 w-auto object-contain"
+              className="h-16 w-auto object-contain"
             />
           </div>
-          <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+          <CardTitle className="text-2xl font-bold text-gray-900 mb-1">
             FARMIKA
           </CardTitle>
           <p className="text-sm text-gray-600">Gestión de Finca</p>
           {versionInfo && (
-            <div className="text-xs text-gray-500 mb-3">
-              <p>Versión v{versionInfo.version} • Build #{versionInfo.buildNumber}</p>
-              {versionInfo.releaseDate && (
-                <p>{new Date(versionInfo.releaseDate).toLocaleDateString('es-ES', { 
-                  year: 'numeric', 
-                  month: 'short', 
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}</p>
-              )}
+            <div className="text-xs text-gray-500 mt-2">
+              <p>v{versionInfo.version} • Build #{versionInfo.buildNumber}</p>
             </div>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           {/* Biometric Login Button - Always visible when available */}
           {isAvailable && (
-            <div className="mb-6">
-              <Button
+            <div className="flex justify-center mb-4">
+              <button
                 type="button"
-                variant="outline"
                 onClick={handleBiometricLogin}
                 disabled={!isEnabled || isBiometricSubmitting || isSubmitting}
-                className={`w-full h-14 text-base font-semibold border-2 ${
-                  !isEnabled ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={cn(
+                  "flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all",
+                  isEnabled 
+                    ? "border-green-500 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900" 
+                    : "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 opacity-60 cursor-not-allowed"
+                )}
               >
                 {isBiometricSubmitting ? (
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Autenticando...
+                  <div className="flex items-center justify-center w-12 h-12">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-2">
-                      {biometricType.includes('face') || biometricType.includes('Face') ? (
-                        <Scan className="w-5 h-5" />
-                      ) : (
-                        <Fingerprint className="w-5 h-5" />
-                      )}
-                      <span>Iniciar con {biometricTypeName}</span>
-                    </div>
+                  <>
+                    <Scan className="w-12 h-12 text-primary" />
                     {!isEnabled && (
-                      <span className="text-xs text-muted-foreground">
-                        Configura en Ajustes
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                        Configurar
                       </span>
                     )}
-                  </div>
+                  </>
                 )}
-              </Button>
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    O continúa con contraseña
-                  </span>
-                </div>
-              </div>
+              </button>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Label htmlFor="email" className="text-base font-medium">Correo Electrónico</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Correo Electrónico</Label>
               <Input
                 id="email"
                 type="email"
@@ -300,14 +276,14 @@ const Login = () => {
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="tu@correo.com"
                 required
-                className="mt-2 h-12 text-base"
+                className="h-11"
                 disabled={isSubmitting}
               />
             </div>
             
-            <div>
-              <Label htmlFor="password" className="text-base font-medium">Contraseña</Label>
-              <div className="relative mt-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Contraseña</Label>
+              <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -315,7 +291,7 @@ const Login = () => {
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   placeholder="Tu contraseña"
                   required
-                  className="h-12 text-base pr-12"
+                  className="h-11 pr-12"
                   disabled={isSubmitting}
                 />
                 <button
@@ -356,7 +332,7 @@ const Login = () => {
               type="submit"
               variant="farmika"
               disabled={isSubmitting}
-              className="w-full h-12 text-base font-semibold mt-8"
+              className="w-full h-11 font-semibold mt-6"
             >
               {isSubmitting ? (
                 <div className="flex items-center">

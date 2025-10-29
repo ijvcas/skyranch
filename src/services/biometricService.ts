@@ -121,6 +121,7 @@ export class BiometricService {
   static async saveCredentials(email: string, password: string): Promise<void> {
     try {
       console.log('💾 [BiometricService] Saving credentials to storage...');
+      console.log('💾 [BiometricService] Email:', email);
       const credentials: StoredCredentials = { email, password };
       
       if (Capacitor.isNativePlatform()) {
@@ -130,15 +131,29 @@ export class BiometricService {
           password: password,
           server: CREDENTIALS_KEY,
         });
+        console.log('💾 [BiometricService] Saved to native storage');
       } else {
         // For web, use localStorage (less secure but functional)
         // In production, you'd want to use a more secure method
         const encoded = btoa(JSON.stringify(credentials));
         localStorage.setItem(CREDENTIALS_KEY, encoded);
+        console.log('💾 [BiometricService] Saved to localStorage');
       }
-      console.log('💾 [BiometricService] Credentials saved successfully');
+      
+      // VERIFY: Immediately read back to confirm persistence
+      console.log('🔍 [BiometricService] Verifying saved credentials...');
+      const verify = await this.getCredentials();
+      
+      if (!verify || verify.email !== email) {
+        console.error('❌ [BiometricService] Verification failed!');
+        console.error('❌ Expected:', email);
+        console.error('❌ Got:', verify);
+        throw new Error('Verification failed: credentials not persisted');
+      }
+      
+      console.log('✅ [BiometricService] Credentials saved and verified successfully!');
     } catch (error) {
-      console.error('Failed to save credentials:', error);
+      console.error('❌ [BiometricService] Save failed:', error);
       throw new Error('No se pudieron guardar las credenciales');
     }
   }
