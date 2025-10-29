@@ -9,6 +9,26 @@ export const useBiometric = () => {
 
   useEffect(() => {
     checkBiometricStatus();
+    
+    // Re-check when page becomes visible (handles tab switching, app returning from background)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkBiometricStatus();
+      }
+    };
+    
+    // Re-check when window gains focus (handles navigation, mobile app switching)
+    const handleFocus = () => {
+      checkBiometricStatus();
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const checkBiometricStatus = async () => {
