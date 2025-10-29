@@ -6,11 +6,23 @@ import { useGoogleWeatherAPI } from "@/hooks/useGoogleWeatherAPI";
 
 function pickIcon(text?: string | null) {
   const t = (text || "").toLowerCase();
-  if (/lluvia|rain|chubasco/.test(t)) return CloudRain;
-  if (/nieve|snow/.test(t)) return Snowflake;
-  if (/viento|wind/.test(t)) return Wind;
-  if (/nubes|cloud/.test(t)) return Cloud;
-  if (/parcial|intervalos|partly/.test(t)) return CloudSun;
+  
+  // Rain patterns - include drizzle, light rain, heavy rain
+  if (/lluvia|llovizna|garúa|rain|drizzle|chubasco|aguacero/.test(t)) return CloudRain;
+  
+  // Snow patterns
+  if (/nieve|snow|nevada/.test(t)) return Snowflake;
+  
+  // Wind patterns
+  if (/viento|wind|ventoso|windy/.test(t)) return Wind;
+  
+  // Cloudy patterns
+  if (/nubes|nubla|cloud|overcast/.test(t)) return Cloud;
+  
+  // Partly cloudy patterns
+  if (/parcial|intervalos|partly|soleado con nubes/.test(t)) return CloudSun;
+  
+  // Clear/sunny is the default
   return Sun;
 }
 
