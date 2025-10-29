@@ -20,9 +20,6 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
     const checkTabPermissions = async () => {
       const tabs = [];
       
-      // User settings - always available
-      tabs.push('user');
-      
       // Security settings - always available (biometric)
       tabs.push('security');
       
@@ -63,12 +60,6 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
 
         <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
           <TabsList className="flex flex-col w-full gap-2 h-auto p-2">
-            {availableTabs.includes('user') && (
-              <TabsTrigger value="user" className="flex items-center gap-2 w-full justify-center">
-                <Users className="w-4 h-4" />
-                Mi Cuenta
-              </TabsTrigger>
-            )}
             {availableTabs.includes('security') && (
               <TabsTrigger value="security" className="flex items-center gap-2 w-full justify-center">
                 <Fingerprint className="w-4 h-4" />

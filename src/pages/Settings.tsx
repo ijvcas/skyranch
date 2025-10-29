@@ -14,16 +14,12 @@ import { useIsOwner } from '@/hooks/useIsOwner';
 import { TabsContent } from '@/components/ui/tabs';
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState('user');
+  const [activeTab, setActiveTab] = useState('security');
   const { hasPermission } = useAuthPermissions();
   const { isOwner } = useIsOwner();
 
   return (
     <SettingsLayout activeTab={activeTab} onTabChange={setActiveTab}>
-      <TabsContent value="user" className="mt-8">
-        <UserSettings />
-      </TabsContent>
-
       <TabsContent value="security" className="mt-8">
         <BiometricSettings />
       </TabsContent>
