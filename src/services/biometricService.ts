@@ -137,12 +137,7 @@ export class BiometricService {
       const credentials: StoredCredentials = { email, password };
       
       if (Capacitor.isNativePlatform()) {
-        // CRITICAL iOS FIX: Add delay to allow authentication UI to properly dismiss
-        // This prevents race conditions and context conflicts on iOS
-        console.log('⏳ [BiometricService] Waiting 500ms for auth UI to dismiss...');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Use native secure storage
+        // Use native secure storage - setCredentials will handle authentication automatically
         console.log('💾 [BiometricService] Calling native setCredentials...');
         await NativeBiometric.setCredentials({
           username: email,

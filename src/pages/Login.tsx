@@ -10,8 +10,8 @@ import { Users, AlertCircle, Eye, EyeOff, Fingerprint, Scan } from 'lucide-react
 import { useAuth } from '@/contexts/AuthContext';
 import { unifiedVersionManager } from '@/services/version-management';
 import { useBiometric } from '@/hooks/useBiometric';
-import { BiometricSetupDialog } from '@/components/BiometricSetupDialog';
 import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -32,8 +32,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [versionInfo, setVersionInfo] = useState<{ version: string; buildNumber: number; releaseDate?: string } | null>(null);
   const [rememberEmail, setRememberEmail] = useState(false);
-  const [showBiometricSetup, setShowBiometricSetup] = useState(false);
-  const [lastLoginCredentials, setLastLoginCredentials] = useState<{ email: string; password: string } | null>(null);
+  const [enableFaceId, setEnableFaceId] = useState(false);
 
   // Load version info
   useEffect(() => {
@@ -91,8 +90,8 @@ const Login = () => {
           "Habilitar Face ID para iniciar sesión"
         );
         
-        if (authenticated && user.email && lastLoginCredentials?.password) {
-          await BiometricService.saveCredentials(user.email, lastLoginCredentials.password);
+        if (authenticated && user.email && formData.password) {
+          await BiometricService.saveCredentials(user.email, formData.password);
           await refresh();
           toast({
             title: "¡Face ID activado!",
@@ -187,12 +186,24 @@ const Login = () => {
           localStorage.removeItem('skyranch-remember-email');
         }
 
-        // Store credentials for biometric setup
-        setLastLoginCredentials({ email: formData.email, password: formData.password });
-
-        // Show biometric setup dialog if available and not already enabled
-        if (isAvailable && !isEnabled) {
-          setTimeout(() => setShowBiometricSetup(true), 500);
+        // Enable Face ID if checkbox was checked
+        if (enableFaceId && isAvailable && !isEnabled) {
+          try {
+            const { BiometricService } = await import('@/services/biometricService');
+            await BiometricService.saveCredentials(formData.email, formData.password);
+            await refresh();
+            toast({
+              title: "¡Face ID activado!",
+              description: "Ahora puedes iniciar sesión con Face ID",
+            });
+          } catch (error) {
+            console.error('❌ Face ID setup error:', error);
+            // Don't block login on biometric setup failure
+            toast({
+              title: "Face ID no activado",
+              description: "Puedes habilitarlo desde ajustes",
+            });
+          }
         }
 
         toast({
@@ -326,13 +337,11 @@ const Login = () => {
 
             {/* Remember Email Checkbox */}
             <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 id="remember-email"
                 checked={rememberEmail}
-                onChange={(e) => setRememberEmail(e.target.checked)}
+                onCheckedChange={(checked) => setRememberEmail(checked === true)}
                 disabled={isSubmitting}
-                className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer"
               />
               <Label 
                 htmlFor="remember-email" 
@@ -341,6 +350,24 @@ const Login = () => {
                 Recordar mi correo electrónico
               </Label>
             </div>
+
+            {/* Enable Face ID Checkbox */}
+            {isAvailable && !isEnabled && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="enable-faceid"
+                  checked={enableFaceId}
+                  onCheckedChange={(checked) => setEnableFaceId(checked === true)}
+                  disabled={isSubmitting}
+                />
+                <Label 
+                  htmlFor="enable-faceid" 
+                  className="text-sm font-medium cursor-pointer select-none"
+                >
+                  Activar {biometricTypeName}
+                </Label>
+              </div>
+            )}
 
             <Button
               type="submit"
@@ -387,18 +414,6 @@ const Login = () => {
         </CardContent>
       </Card>
 
-      {/* Biometric Setup Dialog */}
-      {lastLoginCredentials && (
-        <BiometricSetupDialog
-          open={showBiometricSetup}
-          onOpenChange={setShowBiometricSetup}
-          email={lastLoginCredentials.email}
-          password={lastLoginCredentials.password}
-          onSuccess={() => {
-            setLastLoginCredentials(null);
-          }}
-        />
-      )}
     </div>
   );
 };
