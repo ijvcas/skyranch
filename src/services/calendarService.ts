@@ -267,15 +267,28 @@ export const updateCalendarEvent = async (
 };
 
 export const deleteCalendarEvent = async (id: string): Promise<boolean> => {
+  console.log('🗑️ [DELETE EVENT] Starting deletion for event ID:', id);
+  
+  const { data: session } = await supabase.auth.getSession();
+  console.log('🗑️ [DELETE EVENT] Current user:', session.session?.user?.id);
+  
   const { error } = await supabase
     .from('calendar_events')
     .delete()
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting calendar event:', error);
-    return false;
+    console.error('🗑️ [DELETE EVENT] Error deleting calendar event:', {
+      eventId: id,
+      error: error,
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    });
+    throw new Error(`Failed to delete event: ${error.message}`);
   }
 
+  console.log('🗑️ [DELETE EVENT] Successfully deleted event:', id);
   return true;
 };

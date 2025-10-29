@@ -119,19 +119,35 @@ export const useCalendarEventOperations = (sendNotificationsToUsers: (selectedUs
   };
 
   const deleteEvent = async (eventId: string) => {
-    const success = await deleteCalendarEvent(eventId);
-    if (success) {
-      toast({
-        title: "Éxito",
-        description: "Evento eliminado correctamente"
-      });
-      queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
-    } else {
+    console.log('🗑️ [DELETE HANDLER] Starting delete handler for event:', eventId);
+    
+    try {
+      const success = await deleteCalendarEvent(eventId);
+      
+      if (success) {
+        console.log('🗑️ [DELETE HANDLER] Deletion successful, refreshing cache...');
+        
+        // Force refetch to ensure UI updates immediately
+        await queryClient.refetchQueries({ 
+          queryKey: ['calendar-events'],
+          type: 'active'
+        });
+        
+        console.log('🗑️ [DELETE HANDLER] Cache refreshed successfully');
+        
+        toast({
+          title: "Éxito",
+          description: "Evento eliminado correctamente"
+        });
+      }
+    } catch (error: any) {
+      console.error('🗑️ [DELETE HANDLER] Error during deletion:', error);
       toast({
         title: "Error",
-        description: "No se pudo eliminar el evento",
+        description: error.message || "No se pudo eliminar el evento",
         variant: "destructive"
       });
+      throw error;
     }
   };
 
