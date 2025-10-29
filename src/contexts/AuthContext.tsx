@@ -206,29 +206,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { BiometricService } = await import('@/services/biometricService');
       
-      // Check if biometric is available and enabled
+      // Check if enabled
       const isEnabled = await BiometricService.isEnabled();
       if (!isEnabled) {
-        return { error: { message: 'Biometric not enabled' }, showSetup: true };
+        return { error: { message: 'Biometric not enabled' } };
       }
 
-      // Authenticate with biometric
+      // CRITICAL: Authenticate FIRST - this must succeed
+      console.log('🔐 [AuthContext] Requesting biometric authentication...');
       const authenticated = await BiometricService.authenticate();
+      
       if (!authenticated) {
-        return { error: { message: 'Biometric authentication cancelled or failed' } };
+        console.error('❌ [AuthContext] Biometric authentication failed');
+        return { error: { message: 'Authentication failed or cancelled' } };
       }
+      
+      console.log('✅ [AuthContext] Biometric authenticated, retrieving credentials...');
 
-      // Get stored credentials
+      // Only get credentials AFTER successful authentication
       const credentials = await BiometricService.getCredentials();
       if (!credentials) {
-        return { error: { message: 'No credentials found' }, showSetup: true };
+        return { error: { message: 'No credentials found' } };
       }
 
       // Sign in with stored credentials
       return await signIn(credentials.email, credentials.password);
     } catch (error) {
-      console.error('❌ Biometric sign in error:', error);
-      return { error: { message: 'Biometric authentication failed' } };
+      console.error('❌ [AuthContext] Biometric sign in error:', error);
+      return { error: { message: 'Biometric authentication error' } };
     }
   };
 

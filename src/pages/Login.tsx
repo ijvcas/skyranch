@@ -81,7 +81,7 @@ const Login = () => {
       toast({
         variant: "destructive",
         title: "No disponible",
-        description: "Face ID no está activado. Activa la casilla y inicia sesión primero.",
+        description: "Face ID no está activado.",
       });
       return;
     }
@@ -89,31 +89,56 @@ const Login = () => {
     setIsBiometricSubmitting(true);
 
     try {
-      // Perform biometric login
-      const { error } = await signInWithBiometric();
-
+      console.log('🔐 Starting biometric login...');
+      
+      // THIS MUST SUCCEED BEFORE WE GET CREDENTIALS
+      const { BiometricService } = await import('@/services/biometricService');
+      const authenticated = await BiometricService.authenticate();
+      
+      if (!authenticated) {
+        console.error('❌ Biometric authentication failed or was cancelled');
+        toast({
+          variant: "destructive",
+          title: "Autenticación cancelada",
+          description: "Debes completar la autenticación biométrica para continuar",
+        });
+        setIsBiometricSubmitting(false);
+        return; // STOP HERE - don't proceed to get credentials
+      }
+      
+      console.log('✅ Biometric authentication succeeded, getting credentials...');
+      
+      // Only NOW can we get the credentials
+      const credentials = await BiometricService.getCredentials();
+      if (!credentials) {
+        throw new Error('No credentials found');
+      }
+      
+      // Sign in with the credentials
+      const { error } = await signIn(credentials.email, credentials.password);
+      
       if (error) {
         toast({
           variant: "destructive",
-          title: "Error de autenticación",
-          description: error.message || "No se pudo autenticar con Face ID",
+          title: "Error de inicio de sesión",
+          description: error.message,
         });
         setIsBiometricSubmitting(false);
         return;
       }
 
       toast({
-        title: "Inicio de sesión exitoso",
-        description: `Bienvenido de vuelta`,
+        title: "¡Bienvenido!",
+        description: "Has iniciado sesión correctamente.",
       });
 
       navigate('/dashboard');
     } catch (error) {
-      console.error('Biometric login error:', error);
+      console.error('❌ Biometric login error:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Ocurrió un error durante la autenticación biométrica",
+        description: "No se pudo completar la autenticación biométrica",
       });
     } finally {
       setIsBiometricSubmitting(false);
@@ -174,31 +199,40 @@ const Login = () => {
 
         // Enable Face ID if checkbox was checked (don't block navigation)
         if (enableFaceId && isAvailable && !isEnabled) {
-          Promise.race([
-            (async () => {
-              try {
-                const { BiometricService } = await import('@/services/biometricService');
-                await BiometricService.saveCredentials(formData.email, formData.password);
+          (async () => {
+            try {
+              const { BiometricService } = await import('@/services/biometricService');
+              
+              // Save credentials first (web: only to localStorage, no WebAuthn yet)
+              await BiometricService.saveCredentials(formData.email, formData.password, true);
+              
+              // Then register WebAuthn in user gesture context
+              const registered = await BiometricService.registerWebAuthnCredential(formData.email);
+              
+              if (registered) {
                 await refresh();
                 toast({
                   title: "¡Face ID activado!",
                   description: "Ahora puedes iniciar sesión con Face ID",
                 });
-              } catch (error) {
-                console.error('❌ Face ID setup error:', error);
+              } else {
+                // Registration failed - clear everything
+                await BiometricService.deleteCredentials();
                 toast({
                   variant: "destructive",
                   title: "Error al activar Face ID",
-                  description: "Puedes intentarlo nuevamente desde ajustes",
+                  description: "Tu navegador no soporta autenticación biométrica o la cancelaste",
                 });
               }
-            })(),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Timeout')), 5000)
-            )
-          ]).catch(() => {
-            // Timeout or other error - already handled above
-          });
+            } catch (error) {
+              console.error('❌ Face ID setup error:', error);
+              toast({
+                variant: "destructive",
+                title: "Error al activar Face ID",
+                description: "Puedes intentarlo nuevamente desde ajustes",
+              });
+            }
+          })();
         }
 
         toast({

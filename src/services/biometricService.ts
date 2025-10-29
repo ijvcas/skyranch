@@ -135,12 +135,11 @@ export class BiometricService {
   }
 
   /**
-   * Save credentials securely
+   * Save credentials securely (without WebAuthn registration on web)
    */
-  static async saveCredentials(email: string, password: string): Promise<void> {
+  static async saveCredentials(email: string, password: string, skipWebAuthnRegistration = false): Promise<void> {
     try {
       console.log('💾 [BiometricService] Saving credentials to storage...');
-      console.log('💾 [BiometricService] Email:', email);
       const credentials: StoredCredentials = { email, password };
       
       if (Capacitor.isNativePlatform()) {
@@ -154,25 +153,43 @@ export class BiometricService {
         console.log('💾 [BiometricService] Saved to native storage');
         await new Promise(resolve => setTimeout(resolve, 200));
       } else {
-        // Web: Use localStorage + register WebAuthn credential
+        // Web: Use localStorage only (WebAuthn registration must happen separately)
         const encoded = btoa(JSON.stringify(credentials));
         localStorage.setItem(CREDENTIALS_KEY, encoded);
         console.log('💾 [BiometricService] Saved to localStorage');
         
-        // Register WebAuthn credential for biometric auth
-        console.log('💾 [BiometricService] Registering WebAuthn credential...');
-        const registered = await WebAuthnHelper.register(email);
-        
-        if (!registered) {
-          throw new Error('Failed to register biometric credential');
+        if (!skipWebAuthnRegistration) {
+          console.warn('⚠️ WebAuthn registration must be triggered separately with user gesture');
         }
-        console.log('✅ [BiometricService] WebAuthn credential registered');
       }
       
       console.log('✅ [BiometricService] Credentials saved successfully!');
     } catch (error) {
       console.error('❌ [BiometricService] Save failed:', error);
       throw new Error('No se pudieron guardar las credenciales');
+    }
+  }
+
+  /**
+   * Register WebAuthn credential (must be called from user gesture context)
+   */
+  static async registerWebAuthnCredential(userId: string): Promise<boolean> {
+    if (Capacitor.isNativePlatform()) {
+      return true; // Not needed on native
+    }
+    
+    try {
+      console.log('🔐 [BiometricService] Registering WebAuthn credential...');
+      const registered = await WebAuthnHelper.register(userId);
+      if (registered) {
+        console.log('✅ [BiometricService] WebAuthn credential registered successfully');
+      } else {
+        console.error('❌ [BiometricService] WebAuthn registration failed');
+      }
+      return registered;
+    } catch (error) {
+      console.error('❌ [BiometricService] WebAuthn registration error:', error);
+      return false;
     }
   }
 
@@ -305,10 +322,12 @@ class WebAuthnHelper {
     try {
       const credentialIdBase64 = localStorage.getItem(this.CREDENTIAL_ID_KEY);
       if (!credentialIdBase64) {
-        console.warn('No WebAuthn credential found');
+        console.error('❌ No WebAuthn credential ID found in storage');
         return false;
       }
 
+      console.log('🔐 Found credential ID, requesting biometric authentication...');
+      
       const credentialId = Uint8Array.from(atob(credentialIdBase64), c => c.charCodeAt(0));
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
@@ -322,14 +341,27 @@ class WebAuthnHelper {
             type: 'public-key',
             transports: ['internal']
           }],
-          userVerification: "required",
+          userVerification: "required", // This triggers Face ID/Touch ID
           timeout: 60000
         }
       });
 
-      return !!assertion;
-    } catch (error) {
-      console.error('WebAuthn authentication failed:', error);
+      if (assertion) {
+        console.log('✅ Biometric authentication successful!');
+        return true;
+      }
+      
+      console.error('❌ No assertion returned');
+      return false;
+    } catch (error: any) {
+      console.error('❌ WebAuthn authentication failed:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        console.error('User cancelled or permission denied');
+      } else if (error.name === 'InvalidStateError') {
+        console.error('Credential not recognized');
+      }
+      
       return false;
     }
   }
