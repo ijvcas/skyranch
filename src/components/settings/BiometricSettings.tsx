@@ -7,6 +7,8 @@ import { Fingerprint, Scan, Shield, AlertCircle } from 'lucide-react';
 import { useBiometric } from '@/hooks/useBiometric';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/AuthContext';
+import { PasswordVerificationDialog } from './PasswordVerificationDialog';
 
 export const BiometricSettings = () => {
   const {
@@ -15,14 +17,17 @@ export const BiometricSettings = () => {
     biometricTypeName,
     isEnabled,
     loading,
+    enableBiometric,
     disableBiometric,
     testBiometric,
     refresh,
   } = useBiometric();
   
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isDisabling, setIsDisabling] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
   useEffect(() => {
     refresh();
@@ -48,11 +53,47 @@ export const BiometricSettings = () => {
         setIsDisabling(false);
       }
     } else {
-      // To enable, user needs to log in again with the setup dialog
+      // Enable biometric - open password dialog
+      setShowPasswordDialog(true);
+    }
+  };
+
+  const handlePasswordVerified = async (password: string) => {
+    const email = user?.email;
+    if (!email) {
       toast({
-        title: 'Información',
-        description: 'Inicia sesión nuevamente para habilitar la autenticación biométrica',
+        title: 'Error',
+        description: 'No se pudo obtener el email del usuario',
+        variant: 'destructive',
       });
+      return;
+    }
+
+    setIsDisabling(true);
+    try {
+      const success = await enableBiometric(email, password);
+      
+      if (success) {
+        toast({
+          title: '¡Listo!',
+          description: `${biometricTypeName} habilitado correctamente`,
+        });
+        setShowPasswordDialog(false);
+        await refresh();
+      } else {
+        toast({
+          title: 'Cancelado',
+          description: 'La autenticación biométrica fue cancelada',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo habilitar la autenticación biométrica',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDisabling(false);
     }
   };
 
@@ -223,6 +264,13 @@ export const BiometricSettings = () => {
           </ul>
         </div>
       </CardContent>
+
+      <PasswordVerificationDialog
+        open={showPasswordDialog}
+        onOpenChange={setShowPasswordDialog}
+        onPasswordVerified={handlePasswordVerified}
+        userEmail={user?.email || ''}
+      />
     </Card>
   );
 };
