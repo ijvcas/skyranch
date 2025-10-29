@@ -72,6 +72,15 @@ const Login = () => {
   }, [user, loading, navigate]);
 
   const handleBiometricLogin = async () => {
+    // If biometric is not enabled, show setup instructions
+    if (!isEnabled) {
+      toast({
+        title: "Configuración requerida",
+        description: "Ve a Configuración → Seguridad para habilitar Face ID",
+      });
+      return;
+    }
+
     setIsBiometricSubmitting(true);
     try {
       const { error, showSetup } = await signInWithBiometric();
@@ -233,15 +242,17 @@ const Login = () => {
           )}
         </CardHeader>
         <CardContent>
-          {/* Biometric Login Button - Show if available and enabled */}
-          {isAvailable && isEnabled && (
+          {/* Biometric Login Button - Always visible when available */}
+          {isAvailable && (
             <div className="mb-6">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleBiometricLogin}
-                disabled={isBiometricSubmitting || isSubmitting}
-                className="w-full h-14 text-base font-semibold border-2"
+                disabled={!isEnabled || isBiometricSubmitting || isSubmitting}
+                className={`w-full h-14 text-base font-semibold border-2 ${
+                  !isEnabled ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 {isBiometricSubmitting ? (
                   <div className="flex items-center">
@@ -249,13 +260,20 @@ const Login = () => {
                     Autenticando...
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    {biometricType.includes('face') || biometricType.includes('Face') ? (
-                      <Scan className="w-5 h-5" />
-                    ) : (
-                      <Fingerprint className="w-5 h-5" />
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-2">
+                      {biometricType.includes('face') || biometricType.includes('Face') ? (
+                        <Scan className="w-5 h-5" />
+                      ) : (
+                        <Fingerprint className="w-5 h-5" />
+                      )}
+                      <span>Iniciar con {biometricTypeName}</span>
+                    </div>
+                    {!isEnabled && (
+                      <span className="text-xs text-muted-foreground">
+                        Configura en Ajustes
+                      </span>
                     )}
-                    <span>Iniciar con {biometricTypeName}</span>
                   </div>
                 )}
               </Button>
