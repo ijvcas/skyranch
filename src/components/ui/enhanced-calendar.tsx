@@ -147,7 +147,35 @@ function EnhancedCalendar({
     return dateEvents[0].eventType;
   };
 
-  // Note: Custom day rendering removed to preserve default click functionality
+  // Custom day component with event indicators
+  const CustomDay = ({ date, displayMonth }: { date: Date; displayMonth: Date }) => {
+    const isToday = date.toDateString() === new Date().toDateString();
+    const hasEvent = hasEvents(date);
+    const eventType = hasEvent ? getEventType(date) : null;
+    
+    // Event type color mapping
+    const eventColors: Record<string, string> = {
+      vaccination: 'bg-blue-500',
+      checkup: 'bg-green-500',
+      breeding: 'bg-pink-500',
+      appointment: 'bg-yellow-500',
+      treatment: 'bg-red-500',
+    };
+    
+    const dotColor = eventType ? eventColors[eventType] || 'bg-gray-400' : '';
+    
+    return (
+      <div className="relative w-full h-full flex items-center justify-center">
+        {date.getDate()}
+        {hasEvent && (
+          <div className={cn(
+            "absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full",
+            dotColor
+          )} />
+        )}
+      </div>
+    );
+  };
 
   // Custom header component
   const CustomHeader = () => (
@@ -312,12 +340,15 @@ function EnhancedCalendar({
           ),
           day_range_end: "day-range-end",
           day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-          day_today: "",
+          day_today: "bg-gradient-blue-green text-white",
           day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
           day_disabled: "text-muted-foreground opacity-50",
           day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
           day_hidden: "invisible",
           ...classNames,
+        }}
+        components={{
+          DayContent: CustomDay,
         }}
         {...props}
       />
