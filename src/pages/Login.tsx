@@ -34,6 +34,11 @@ const Login = () => {
   const [rememberEmail, setRememberEmail] = useState(false);
   const [enableFaceId, setEnableFaceId] = useState(false);
 
+  // Sync checkbox with actual biometric status
+  useEffect(() => {
+    setEnableFaceId(isEnabled);
+  }, [isEnabled]);
+
   // Load version info
   useEffect(() => {
     const loadVersion = async () => {
@@ -72,62 +77,43 @@ const Login = () => {
   }, [user, loading, navigate]);
 
   const handleBiometricLogin = async () => {
-    // If not enabled, try to enable it (if user is logged in)
-    if (!isEnabled) {
-      if (!user) {
-        toast({
-          title: "Inicia sesión primero",
-          description: "Debes iniciar sesión con tu contraseña primero para configurar Face ID",
-        });
-        return;
-      }
-      
-      // Enable biometric with current session
-      setIsBiometricSubmitting(true);
-      try {
-        const { BiometricService } = await import('@/services/biometricService');
-        const authenticated = await BiometricService.authenticate(
-          "Habilitar Face ID para iniciar sesión"
-        );
-        
-        if (authenticated && user.email && formData.password) {
-          await BiometricService.saveCredentials(user.email, formData.password);
-          await refresh();
-          toast({
-            title: "¡Face ID activado!",
-            description: "Ahora puedes iniciar sesión con Face ID",
-          });
-        }
-      } catch (error) {
-        console.error('❌ Enable biometric error:', error);
-        toast({
-          title: "Error",
-          description: "No se pudo activar Face ID",
-          variant: "destructive",
-        });
-      } finally {
-        setIsBiometricSubmitting(false);
-      }
+    if (!isAvailable || !isEnabled) {
+      toast({
+        variant: "destructive",
+        title: "No disponible",
+        description: "Face ID no está activado. Activa la casilla y inicia sesión primero.",
+      });
       return;
     }
-    
-    // Biometric is enabled, login with it
+
     setIsBiometricSubmitting(true);
+
     try {
+      // Perform biometric login
       const { error } = await signInWithBiometric();
+
       if (error) {
         toast({
-          title: "Error",
-          description: "No se pudo autenticar con Face ID",
           variant: "destructive",
+          title: "Error de autenticación",
+          description: error.message || "No se pudo autenticar con Face ID",
         });
+        setIsBiometricSubmitting(false);
+        return;
       }
-    } catch (error) {
-      console.error('❌ Biometric login error:', error);
+
       toast({
-        title: "Error",
-        description: "Error con autenticación biométrica",
+        title: "Inicio de sesión exitoso",
+        description: `Bienvenido de vuelta`,
+      });
+
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Biometric login error:', error);
+      toast({
         variant: "destructive",
+        title: "Error",
+        description: "Ocurrió un error durante la autenticación biométrica",
       });
     } finally {
       setIsBiometricSubmitting(false);
@@ -228,6 +214,29 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFaceIdToggle = async (checked: boolean) => {
+    if (!checked && isEnabled) {
+      // User is turning OFF Face ID - disable immediately
+      try {
+        const { BiometricService } = await import('@/services/biometricService');
+        await BiometricService.deleteCredentials();
+        await refresh();
+        toast({
+          title: "Face ID desactivado",
+          description: "Ya no podrás usar Face ID para iniciar sesión",
+        });
+      } catch (error) {
+        console.error('Error disabling Face ID:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No se pudo desactivar Face ID",
+        });
+      }
+    }
+    setEnableFaceId(checked);
+  };
+
   // Show loading while checking authentication state
   if (loading) {
     return (
@@ -268,12 +277,13 @@ const Login = () => {
               <button
                 type="button"
                 onClick={handleBiometricLogin}
-                disabled={isBiometricSubmitting || isSubmitting}
+                disabled={!isEnabled || isBiometricSubmitting || isSubmitting}
+                title={!isEnabled ? "Activa Face ID primero" : "Iniciar sesión con Face ID"}
                 className={cn(
                   "transition-all",
                   isEnabled 
                     ? "opacity-100 hover:scale-105" 
-                    : "opacity-40"
+                    : "opacity-40 cursor-not-allowed"
                 )}
               >
                 {isBiometricSubmitting ? (
@@ -352,19 +362,19 @@ const Login = () => {
             </div>
 
             {/* Enable Face ID Checkbox */}
-            {isAvailable && !isEnabled && (
+            {isAvailable && (
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="enable-faceid"
                   checked={enableFaceId}
-                  onCheckedChange={(checked) => setEnableFaceId(checked === true)}
+                  onCheckedChange={(checked) => handleFaceIdToggle(checked === true)}
                   disabled={isSubmitting}
                 />
                 <Label 
                   htmlFor="enable-faceid" 
                   className="text-sm font-medium cursor-pointer select-none"
                 >
-                  Activar {biometricTypeName}
+                  {isEnabled ? `Usar ${biometricTypeName} para iniciar sesión` : `Activar ${biometricTypeName}`}
                 </Label>
               </div>
             )}
