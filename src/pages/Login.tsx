@@ -250,30 +250,30 @@ const Login = () => {
             </div>
           )}
         </CardHeader>
-        <CardContent className="pt-4">
+        <CardContent className="pt-2">
           {/* Biometric Login Button - Always visible when available */}
           {isAvailable && (
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-2">
               <button
                 type="button"
                 onClick={handleBiometricLogin}
                 disabled={isBiometricSubmitting || isSubmitting}
                 className={cn(
-                  "p-2 transition-all",
+                  "transition-all",
                   isEnabled 
                     ? "opacity-100 hover:scale-105" 
                     : "opacity-40"
                 )}
               >
                 {isBiometricSubmitting ? (
-                  <div className="flex items-center justify-center w-16 h-16">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                  <div className="flex items-center justify-center w-12 h-12">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
                   </div>
                 ) : (
                   <img 
                     src="/faceid-logo.png" 
                     alt="Face ID" 
-                    className="w-16 h-16"
+                    className="w-12 h-12"
                   />
                 )}
               </button>
