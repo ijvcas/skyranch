@@ -38,7 +38,8 @@ const config: CapacitorConfig = {
       ios: {
         NSCameraUsageDescription: "FARMIKA necesita acceso a la cámara para tomar fotos de animales",
         NSPhotoLibraryUsageDescription: "FARMIKA necesita acceso a la galería para seleccionar fotos de animales",
-        NSPhotoLibraryAddUsageDescription: "FARMIKA necesita permiso para guardar fotos en tu galería"
+        NSPhotoLibraryAddUsageDescription: "FARMIKA necesita permiso para guardar fotos en tu galería",
+        NSFaceIDUsageDescription: "FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta"
       },
       android: {
         permissions: [
@@ -46,6 +47,11 @@ const config: CapacitorConfig = {
           "android.permission.READ_EXTERNAL_STORAGE",
           "android.permission.WRITE_EXTERNAL_STORAGE"
         ]
+      }
+    },
+    NativeBiometric: {
+      ios: {
+        NSFaceIDUsageDescription: "FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta"
       }
     }
   }

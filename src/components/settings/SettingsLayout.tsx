@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Database, Shield, Settings as SettingsIcon, Palette, AlertTriangle } from 'lucide-react';
+import { Users, Database, Shield, Settings as SettingsIcon, Palette, AlertTriangle, Fingerprint } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useIsOwner } from '@/hooks/useIsOwner';
 
@@ -19,6 +19,12 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
   useEffect(() => {
     const checkTabPermissions = async () => {
       const tabs = [];
+      
+      // User settings - always available
+      tabs.push('user');
+      
+      // Security settings - always available (biometric)
+      tabs.push('security');
       
       // Check permissions for each tab
       if (await checkPermission('users_manage')) {
@@ -57,6 +63,18 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
 
         <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
           <TabsList className="flex flex-col w-full gap-2 h-auto p-2">
+            {availableTabs.includes('user') && (
+              <TabsTrigger value="user" className="flex items-center gap-2 w-full justify-center">
+                <Users className="w-4 h-4" />
+                Mi Cuenta
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('security') && (
+              <TabsTrigger value="security" className="flex items-center gap-2 w-full justify-center">
+                <Fingerprint className="w-4 h-4" />
+                Seguridad
+              </TabsTrigger>
+            )}
             {availableTabs.includes('users') && (
               <TabsTrigger value="users" className="flex items-center gap-2 w-full justify-center">
                 <Users className="w-4 h-4" />

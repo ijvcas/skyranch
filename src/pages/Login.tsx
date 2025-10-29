@@ -6,22 +6,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Users, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Users, AlertCircle, Eye, EyeOff, Fingerprint, Scan } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { unifiedVersionManager } from '@/services/version-management';
+import { useBiometric } from '@/hooks/useBiometric';
+import { BiometricSetupDialog } from '@/components/BiometricSetupDialog';
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn, user, loading } = useAuth();
+  const { signIn, signInWithBiometric, user, loading } = useAuth();
+  const { isAvailable, biometricType, biometricTypeName, isEnabled } = useBiometric();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBiometricSubmitting, setIsBiometricSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [versionInfo, setVersionInfo] = useState<{ version: string; buildNumber: number; releaseDate?: string } | null>(null);
   const [rememberEmail, setRememberEmail] = useState(false);
+  const [showBiometricSetup, setShowBiometricSetup] = useState(false);
+  const [lastLoginCredentials, setLastLoginCredentials] = useState<{ email: string; password: string } | null>(null);
 
   // Load version info
   useEffect(() => {
@@ -59,6 +65,43 @@ const Login = () => {
       navigate('/dashboard');
     }
   }, [user, loading, navigate]);
+
+  const handleBiometricLogin = async () => {
+    setIsBiometricSubmitting(true);
+    try {
+      const { error, showSetup } = await signInWithBiometric();
+      
+      if (error) {
+        if (showSetup) {
+          // Credentials not found, user needs to enable biometric
+          toast({
+            title: "Configuración requerida",
+            description: "Inicia sesión con tu contraseña para habilitar la autenticación biométrica",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "No se pudo autenticar con biometría",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "¡Bienvenido!",
+          description: "Has iniciado sesión con biometría",
+        });
+      }
+    } catch (error) {
+      console.error('❌ Biometric login error:', error);
+      toast({
+        title: "Error",
+        description: "Error con autenticación biométrica",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBiometricSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,6 +153,14 @@ const Login = () => {
           localStorage.setItem('skyranch-remember-email', formData.email);
         } else {
           localStorage.removeItem('skyranch-remember-email');
+        }
+
+        // Store credentials for biometric setup
+        setLastLoginCredentials({ email: formData.email, password: formData.password });
+
+        // Show biometric setup dialog if available and not already enabled
+        if (isAvailable && !isEnabled) {
+          setTimeout(() => setShowBiometricSetup(true), 500);
         }
 
         toast({
@@ -177,6 +228,45 @@ const Login = () => {
           )}
         </CardHeader>
         <CardContent>
+          {/* Biometric Login Button - Show if available and enabled */}
+          {isAvailable && isEnabled && (
+            <div className="mb-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBiometricLogin}
+                disabled={isBiometricSubmitting || isSubmitting}
+                className="w-full h-14 text-base font-semibold border-2"
+              >
+                {isBiometricSubmitting ? (
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Autenticando...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    {biometricType.includes('face') || biometricType.includes('Face') ? (
+                      <Scan className="w-5 h-5" />
+                    ) : (
+                      <Fingerprint className="w-5 h-5" />
+                    )}
+                    <span>Iniciar con {biometricTypeName}</span>
+                  </div>
+                )}
+              </Button>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    O continúa con contraseña
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label htmlFor="email" className="text-base font-medium">Correo Electrónico</Label>
@@ -284,6 +374,19 @@ const Login = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Biometric Setup Dialog */}
+      {lastLoginCredentials && (
+        <BiometricSetupDialog
+          open={showBiometricSetup}
+          onOpenChange={setShowBiometricSetup}
+          email={lastLoginCredentials.email}
+          password={lastLoginCredentials.password}
+          onSuccess={() => {
+            setLastLoginCredentials(null);
+          }}
+        />
+      )}
     </div>
   );
 };

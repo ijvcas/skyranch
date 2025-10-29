@@ -15,6 +15,7 @@ interface AuthContextType {
   permissions: Permission[];
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithBiometric: () => Promise<{ error: any; showSetup?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
@@ -196,7 +197,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
+  const signInWithBiometric = async () => {
+    try {
+      const { BiometricService } = await import('@/services/biometricService');
+      
+      // Check if biometric is available and enabled
+      const isEnabled = await BiometricService.isEnabled();
+      if (!isEnabled) {
+        return { error: { message: 'Biometric not enabled' }, showSetup: true };
+      }
+
+      // Authenticate with biometric
+      const authenticated = await BiometricService.authenticate();
+      if (!authenticated) {
+        return { error: { message: 'Biometric authentication cancelled or failed' } };
+      }
+
+      // Get stored credentials
+      const credentials = await BiometricService.getCredentials();
+      if (!credentials) {
+        return { error: { message: 'No credentials found' }, showSetup: true };
+      }
+
+      // Sign in with stored credentials
+      return await signIn(credentials.email, credentials.password);
+    } catch (error) {
+      console.error('❌ Biometric sign in error:', error);
+      return { error: { message: 'Biometric authentication failed' } };
+    }
+  };
+
   const signOut = async () => {
+    // Clear biometric credentials on sign out
+    try {
+      const { BiometricService } = await import('@/services/biometricService');
+      await BiometricService.deleteCredentials();
+    } catch (e) {
+      console.warn('⚠️ Failed to clear biometric credentials:', e);
+    }
+
     // Clear permission cache on sign out
     const { permissionCache } = await import('@/services/permissionCache');
     permissionCache.clearAuthCache();
@@ -318,6 +357,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     permissions,
     signUp,
     signIn,
+    signInWithBiometric,
     signOut,
     resetPassword,
     updatePassword,
