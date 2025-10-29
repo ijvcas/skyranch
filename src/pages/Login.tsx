@@ -16,7 +16,12 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn, signInWithBiometric, user, loading } = useAuth();
-  const { isAvailable, biometricType, biometricTypeName, isEnabled } = useBiometric();
+  const { isAvailable, biometricType, biometricTypeName, isEnabled, refresh } = useBiometric();
+  
+  // Force refresh biometric status when Login page mounts
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
   const [formData, setFormData] = useState({
     email: '',
     password: ''

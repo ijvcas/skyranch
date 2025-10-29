@@ -120,6 +120,7 @@ export class BiometricService {
    */
   static async saveCredentials(email: string, password: string): Promise<void> {
     try {
+      console.log('💾 [BiometricService] Saving credentials to storage...');
       const credentials: StoredCredentials = { email, password };
       
       if (Capacitor.isNativePlatform()) {
@@ -135,6 +136,7 @@ export class BiometricService {
         const encoded = btoa(JSON.stringify(credentials));
         localStorage.setItem(CREDENTIALS_KEY, encoded);
       }
+      console.log('💾 [BiometricService] Credentials saved successfully');
     } catch (error) {
       console.error('Failed to save credentials:', error);
       throw new Error('No se pudieron guardar las credenciales');
@@ -146,21 +148,29 @@ export class BiometricService {
    */
   static async getCredentials(): Promise<StoredCredentials | null> {
     try {
+      console.log('🔐 [BiometricService] Getting credentials from storage...');
       if (Capacitor.isNativePlatform()) {
         const result = await NativeBiometric.getCredentials({
           server: CREDENTIALS_KEY,
         });
         
-        return {
+        const credentials = {
           email: result.username,
           password: result.password,
         };
+        console.log('🔐 [BiometricService] Found credentials:', credentials.email ? 'YES' : 'NO');
+        return credentials;
       } else {
         // Web fallback
         const encoded = localStorage.getItem(CREDENTIALS_KEY);
-        if (!encoded) return null;
+        if (!encoded) {
+          console.log('🔐 [BiometricService] Found credentials: NO');
+          return null;
+        }
         
-        return JSON.parse(atob(encoded));
+        const credentials = JSON.parse(atob(encoded));
+        console.log('🔐 [BiometricService] Found credentials:', credentials && credentials.email ? 'YES' : 'NO');
+        return credentials;
       }
     } catch (error) {
       console.error('Failed to retrieve credentials:', error);
@@ -189,7 +199,16 @@ export class BiometricService {
    * Check if biometric login is enabled (has stored credentials)
    */
   static async isEnabled(): Promise<boolean> {
-    const credentials = await this.getCredentials();
-    return credentials !== null;
+    try {
+      const credentials = await this.getCredentials();
+      const enabled = credentials !== null && 
+                     credentials.email !== '' && 
+                     credentials.password !== '';
+      console.log('✅ [BiometricService] isEnabled:', enabled);
+      return enabled;
+    } catch (error) {
+      console.error('Failed to check if biometric is enabled:', error);
+      return false;
+    }
   }
 }

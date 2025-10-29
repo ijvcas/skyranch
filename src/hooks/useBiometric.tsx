@@ -33,6 +33,7 @@ export const useBiometric = () => {
 
   const checkBiometricStatus = async () => {
     try {
+      console.log('🔄 [useBiometric] Checking biometric status...');
       setLoading(true);
       const available = await BiometricService.isAvailable();
       setIsAvailable(available);
@@ -42,6 +43,7 @@ export const useBiometric = () => {
         setBiometricType(type);
         
         const enabled = await BiometricService.isEnabled();
+        console.log('🔄 [useBiometric] isEnabled:', enabled);
         setIsEnabled(enabled);
       }
     } catch (error) {
