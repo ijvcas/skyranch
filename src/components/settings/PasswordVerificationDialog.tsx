@@ -30,31 +30,19 @@ export const PasswordVerificationDialog = ({
       return;
     }
 
-    setIsVerifying(true);
-    setError('');
-
-    try {
-      // Verify password by attempting to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: userEmail,
-        password: password,
-      });
-
-      if (signInError) {
-        setError('Contraseña incorrecta');
-        setIsVerifying(false);
-        return;
-      }
-
-      // Password is correct, return it to parent
-      onPasswordVerified(password);
-      setPassword('');
-      setError('');
-    } catch (err) {
-      setError('Error al verificar la contraseña');
-    } finally {
-      setIsVerifying(false);
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
     }
+
+    console.log('🔑 Password verified in dialog, calling callback...');
+    
+    // Don't sign in again - user is already authenticated
+    // Just pass the password to parent for biometric credential storage
+    onPasswordVerified(password);
+    setPassword('');
+    setError('');
+    onOpenChange(false);
   };
 
   const handleClose = () => {

@@ -240,27 +240,24 @@ const Login = () => {
               <button
                 type="button"
                 onClick={handleBiometricLogin}
-                disabled={!isEnabled || isBiometricSubmitting || isSubmitting}
+                disabled={isBiometricSubmitting || isSubmitting}
                 className={cn(
-                  "flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all",
+                  "p-2 transition-all",
                   isEnabled 
-                    ? "border-green-500 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900" 
-                    : "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 opacity-60 cursor-not-allowed"
+                    ? "opacity-100 hover:scale-105" 
+                    : "opacity-40"
                 )}
               >
                 {isBiometricSubmitting ? (
-                  <div className="flex items-center justify-center w-12 h-12">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  <div className="flex items-center justify-center w-16 h-16">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                   </div>
                 ) : (
-                  <>
-                    <Scan className="w-12 h-12 text-primary" />
-                    {!isEnabled && (
-                      <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                        Configurar
-                      </span>
-                    )}
-                  </>
+                  <img 
+                    src="/faceid-logo.png" 
+                    alt="Face ID" 
+                    className="w-16 h-16"
+                  />
                 )}
               </button>
             </div>
