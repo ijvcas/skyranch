@@ -237,7 +237,7 @@ const Login = () => {
             <img 
               src="/farmika-logo.png" 
               alt="FARMIKA Logo"
-              className="h-16 w-auto object-contain"
+              className="h-20 w-auto object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900 mb-1">
@@ -266,14 +266,14 @@ const Login = () => {
                 )}
               >
                 {isBiometricSubmitting ? (
-                  <div className="flex items-center justify-center w-20 h-20">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
+                  <div className="flex items-center justify-center w-14 h-14">
+                    <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-green-600"></div>
                   </div>
                 ) : (
                   <img 
                     src="/faceid-icon-new.png" 
                     alt="Face ID" 
-                    className="w-20 h-20"
+                    className="w-14 h-14"
                   />
                 )}
               </button>
