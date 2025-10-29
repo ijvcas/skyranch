@@ -259,21 +259,21 @@ const Login = () => {
                 onClick={handleBiometricLogin}
                 disabled={isBiometricSubmitting || isSubmitting}
                 className={cn(
-                  "transition-all bg-[#F4F6A3] rounded-lg p-2 shadow-sm",
+                  "transition-all",
                   isEnabled 
                     ? "opacity-100 hover:scale-105" 
                     : "opacity-40"
                 )}
               >
                 {isBiometricSubmitting ? (
-                  <div className="flex items-center justify-center w-16 h-16">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                  <div className="flex items-center justify-center w-20 h-20">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
                   </div>
                 ) : (
                   <img 
-                    src="/faceid-logo.png" 
+                    src="/faceid-icon-new.png" 
                     alt="Face ID" 
-                    className="w-16 h-16"
+                    className="w-20 h-20"
                   />
                 )}
               </button>
