@@ -95,21 +95,33 @@ export class BiometricService {
         return true;
       }
 
-      await NativeBiometric.verifyIdentity({
+      console.log('🔐 [BiometricService] Starting authentication...');
+
+      // Add timeout protection to prevent freezing
+      const authPromise = NativeBiometric.verifyIdentity({
         reason,
         title: 'Autenticación',
         subtitle: 'FARMIKA',
         description: reason,
       });
 
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Authentication timeout')), 10000);
+      });
+
+      await Promise.race([authPromise, timeoutPromise]);
+      console.log('✅ [BiometricService] Authentication successful');
+
       return true;
     } catch (error: any) {
       // User cancelled or authentication failed
       if (error.code === 10 || error.code === 13) {
         // User cancelled
-        console.log('User cancelled biometric authentication');
+        console.log('❌ [BiometricService] User cancelled biometric authentication');
+      } else if (error.message === 'Authentication timeout') {
+        console.error('❌ [BiometricService] Authentication timeout');
       } else {
-        console.error('Biometric authentication failed:', error);
+        console.error('❌ [BiometricService] Biometric authentication failed:', error);
       }
       return false;
     }
@@ -125,13 +137,22 @@ export class BiometricService {
       const credentials: StoredCredentials = { email, password };
       
       if (Capacitor.isNativePlatform()) {
+        // CRITICAL iOS FIX: Add delay to allow authentication UI to properly dismiss
+        // This prevents race conditions and context conflicts on iOS
+        console.log('⏳ [BiometricService] Waiting 500ms for auth UI to dismiss...');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         // Use native secure storage
+        console.log('💾 [BiometricService] Calling native setCredentials...');
         await NativeBiometric.setCredentials({
           username: email,
           password: password,
           server: CREDENTIALS_KEY,
         });
         console.log('💾 [BiometricService] Saved to native storage');
+        
+        // Add another small delay after save to prevent immediate verification pressure
+        await new Promise(resolve => setTimeout(resolve, 200));
       } else {
         // For web, use localStorage (less secure but functional)
         // In production, you'd want to use a more secure method
@@ -140,18 +161,7 @@ export class BiometricService {
         console.log('💾 [BiometricService] Saved to localStorage');
       }
       
-      // VERIFY: Immediately read back to confirm persistence
-      console.log('🔍 [BiometricService] Verifying saved credentials...');
-      const verify = await this.getCredentials();
-      
-      if (!verify || verify.email !== email) {
-        console.error('❌ [BiometricService] Verification failed!');
-        console.error('❌ Expected:', email);
-        console.error('❌ Got:', verify);
-        throw new Error('Verification failed: credentials not persisted');
-      }
-      
-      console.log('✅ [BiometricService] Credentials saved and verified successfully!');
+      console.log('✅ [BiometricService] Credentials saved successfully!');
     } catch (error) {
       console.error('❌ [BiometricService] Save failed:', error);
       throw new Error('No se pudieron guardar las credenciales');

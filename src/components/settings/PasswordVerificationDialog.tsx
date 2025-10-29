@@ -35,14 +35,26 @@ export const PasswordVerificationDialog = ({
       return;
     }
 
-    console.log('🔑 Password verified in dialog, calling callback...');
-    
-    // Don't sign in again - user is already authenticated
-    // Just pass the password to parent for biometric credential storage
-    onPasswordVerified(password);
-    setPassword('');
+    setIsVerifying(true);
     setError('');
-    onOpenChange(false);
+    
+    try {
+      console.log('🔑 [PasswordDialog] Password verified, calling parent callback...');
+      
+      // Call parent handler and wait for completion
+      await onPasswordVerified(password);
+      
+      console.log('✅ [PasswordDialog] Parent callback completed successfully');
+      
+      // Only clear and close after successful completion
+      setPassword('');
+      onOpenChange(false);
+    } catch (error) {
+      console.error('❌ [PasswordDialog] Error in parent callback:', error);
+      setError('Error al configurar la autenticación biométrica. Intenta de nuevo.');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const handleClose = () => {

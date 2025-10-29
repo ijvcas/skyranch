@@ -66,16 +66,17 @@ export const BiometricSettings = () => {
         description: 'No se pudo obtener el email del usuario',
         variant: 'destructive',
       });
-      return;
+      throw new Error('No user email');
     }
 
     setIsDisabling(true);
     try {
-      console.log('🔐 [BiometricSettings] Starting password verification flow...');
+      console.log('🔐 [BiometricSettings] Starting biometric enablement...');
       const success = await enableBiometric(email, password);
       
       if (success) {
-        console.log('✅ [BiometricSettings] Enable successful, showing toast...');
+        console.log('✅ [BiometricSettings] Enable successful!');
+        
         toast({
           title: "Biométrico activado",
           description: `${biometricTypeName} configurado correctamente`,
@@ -83,23 +84,18 @@ export const BiometricSettings = () => {
         
         setShowPasswordDialog(false);
         
-        // Refresh status multiple times to ensure persistence
-        console.log('🔄 [BiometricSettings] Refreshing status...');
-        await refresh();
-        setTimeout(() => {
-          console.log('🔄 [BiometricSettings] Second refresh (500ms delay)...');
-          refresh();
-        }, 500);
-        setTimeout(() => {
-          console.log('🔄 [BiometricSettings] Third refresh (1000ms delay)...');
-          refresh();
-        }, 1000);
+        // Single refresh with small delay to allow native storage to settle
+        setTimeout(async () => {
+          console.log('🔄 [BiometricSettings] Refreshing status...');
+          await refresh();
+        }, 800);
       } else {
         console.log('❌ [BiometricSettings] Enable failed or cancelled');
         toast({
           title: 'Cancelado',
           description: 'La autenticación biométrica fue cancelada',
         });
+        throw new Error('Biometric enable cancelled');
       }
     } catch (error) {
       console.error('❌ [BiometricSettings] Error:', error);
@@ -108,6 +104,7 @@ export const BiometricSettings = () => {
         description: 'No se pudo habilitar la autenticación biométrica',
         variant: 'destructive',
       });
+      throw error; // Re-throw to trigger dialog error handling
     } finally {
       setIsDisabling(false);
     }
