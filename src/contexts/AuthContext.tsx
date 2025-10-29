@@ -156,16 +156,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (error && process.env.NODE_ENV === 'development') {
       console.error('❌ [AUTH CONTEXT] Sign up error:', error);
     } else if (!error) {
-      try {
-        const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
-        if (syncError && process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ [AUTH CONTEXT] Post-signup sync failed:', syncError);
-        }
-      } catch (e) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ [AUTH CONTEXT] Post-signup sync exception:', e);
-        }
-      }
+      // Fire sync in background - don't block signup
+      Promise.resolve(supabase.rpc('sync_auth_users_to_app_users'))
+        .then(({ error: syncError }) => {
+          if (syncError && process.env.NODE_ENV === 'development') {
+            console.warn('⚠️ [AUTH CONTEXT] Post-signup sync failed:', syncError);
+          }
+        })
+        .catch((e) => {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('⚠️ [AUTH CONTEXT] Post-signup sync exception:', e);
+          }
+        });
     }
     
     return { error };
@@ -182,16 +184,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else if (!error) {
       // Lightweight connection log
       await logConnection('signed_in', { method: 'password' });
-      try {
-        const { error: syncError } = await supabase.rpc('sync_auth_users_to_app_users');
-        if (syncError && process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ [AUTH CONTEXT] Post-signin sync failed:', syncError);
-        }
-      } catch (e) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ [AUTH CONTEXT] Post-signin sync exception:', e);
-        }
-      }
+      
+      // Fire sync in background - don't block login
+      Promise.resolve(supabase.rpc('sync_auth_users_to_app_users'))
+        .then(({ error: syncError }) => {
+          if (syncError && process.env.NODE_ENV === 'development') {
+            console.warn('⚠️ [AUTH CONTEXT] Post-signin sync failed:', syncError);
+          }
+        })
+        .catch((e) => {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('⚠️ [AUTH CONTEXT] Post-signin sync exception:', e);
+          }
+        });
     }
     
     return { error };

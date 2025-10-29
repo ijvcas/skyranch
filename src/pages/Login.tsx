@@ -172,24 +172,33 @@ const Login = () => {
           localStorage.removeItem('skyranch-remember-email');
         }
 
-        // Enable Face ID if checkbox was checked
+        // Enable Face ID if checkbox was checked (don't block navigation)
         if (enableFaceId && isAvailable && !isEnabled) {
-          try {
-            const { BiometricService } = await import('@/services/biometricService');
-            await BiometricService.saveCredentials(formData.email, formData.password);
-            await refresh();
-            toast({
-              title: "¡Face ID activado!",
-              description: "Ahora puedes iniciar sesión con Face ID",
-            });
-          } catch (error) {
-            console.error('❌ Face ID setup error:', error);
-            // Don't block login on biometric setup failure
-            toast({
-              title: "Face ID no activado",
-              description: "Puedes habilitarlo desde ajustes",
-            });
-          }
+          Promise.race([
+            (async () => {
+              try {
+                const { BiometricService } = await import('@/services/biometricService');
+                await BiometricService.saveCredentials(formData.email, formData.password);
+                await refresh();
+                toast({
+                  title: "¡Face ID activado!",
+                  description: "Ahora puedes iniciar sesión con Face ID",
+                });
+              } catch (error) {
+                console.error('❌ Face ID setup error:', error);
+                toast({
+                  variant: "destructive",
+                  title: "Error al activar Face ID",
+                  description: "Puedes intentarlo nuevamente desde ajustes",
+                });
+              }
+            })(),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout')), 5000)
+            )
+          ]).catch(() => {
+            // Timeout or other error - already handled above
+          });
         }
 
         toast({

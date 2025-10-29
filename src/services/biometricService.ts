@@ -91,13 +91,22 @@ export class BiometricService {
   static async authenticate(reason: string = 'Iniciar sesión en FARMIKA'): Promise<boolean> {
     try {
       if (!Capacitor.isNativePlatform()) {
-        // For web, we'll just return true as credentials are stored separately
-        return true;
+        // Use WebAuthn for web platform
+        console.log('🔐 [BiometricService] Starting WebAuthn authentication...');
+        const authenticated = await WebAuthnHelper.authenticate();
+        
+        if (authenticated) {
+          console.log('✅ [BiometricService] WebAuthn authentication successful');
+        } else {
+          console.log('❌ [BiometricService] WebAuthn authentication failed');
+        }
+        
+        return authenticated;
       }
 
-      console.log('🔐 [BiometricService] Starting authentication...');
+      // Native platform implementation
+      console.log('🔐 [BiometricService] Starting native authentication...');
 
-      // Add timeout protection to prevent freezing
       const authPromise = NativeBiometric.verifyIdentity({
         reason,
         title: 'Autenticación',
@@ -110,13 +119,11 @@ export class BiometricService {
       });
 
       await Promise.race([authPromise, timeoutPromise]);
-      console.log('✅ [BiometricService] Authentication successful');
+      console.log('✅ [BiometricService] Native authentication successful');
 
       return true;
     } catch (error: any) {
-      // User cancelled or authentication failed
       if (error.code === 10 || error.code === 13) {
-        // User cancelled
         console.log('❌ [BiometricService] User cancelled biometric authentication');
       } else if (error.message === 'Authentication timeout') {
         console.error('❌ [BiometricService] Authentication timeout');
@@ -137,7 +144,7 @@ export class BiometricService {
       const credentials: StoredCredentials = { email, password };
       
       if (Capacitor.isNativePlatform()) {
-        // Use native secure storage - setCredentials will handle authentication automatically
+        // Native: Use secure keychain
         console.log('💾 [BiometricService] Calling native setCredentials...');
         await NativeBiometric.setCredentials({
           username: email,
@@ -145,15 +152,21 @@ export class BiometricService {
           server: CREDENTIALS_KEY,
         });
         console.log('💾 [BiometricService] Saved to native storage');
-        
-        // Add another small delay after save to prevent immediate verification pressure
         await new Promise(resolve => setTimeout(resolve, 200));
       } else {
-        // For web, use localStorage (less secure but functional)
-        // In production, you'd want to use a more secure method
+        // Web: Use localStorage + register WebAuthn credential
         const encoded = btoa(JSON.stringify(credentials));
         localStorage.setItem(CREDENTIALS_KEY, encoded);
         console.log('💾 [BiometricService] Saved to localStorage');
+        
+        // Register WebAuthn credential for biometric auth
+        console.log('💾 [BiometricService] Registering WebAuthn credential...');
+        const registered = await WebAuthnHelper.register(email);
+        
+        if (!registered) {
+          throw new Error('Failed to register biometric credential');
+        }
+        console.log('✅ [BiometricService] WebAuthn credential registered');
       }
       
       console.log('✅ [BiometricService] Credentials saved successfully!');
@@ -209,6 +222,7 @@ export class BiometricService {
         });
       } else {
         localStorage.removeItem(CREDENTIALS_KEY);
+        WebAuthnHelper.clearCredential();
       }
     } catch (error) {
       console.error('Failed to delete credentials:', error);
@@ -230,5 +244,107 @@ export class BiometricService {
       console.error('Failed to check if biometric is enabled:', error);
       return false;
     }
+  }
+}
+
+// WebAuthn helper for browser-based biometric authentication
+class WebAuthnHelper {
+  private static CREDENTIAL_ID_KEY = 'farmika_webauthn_credential_id';
+
+  /**
+   * Register a new WebAuthn credential (one-time setup)
+   */
+  static async register(userId: string): Promise<boolean> {
+    try {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: {
+            name: "FARMIKA",
+            id: window.location.hostname
+          },
+          user: {
+            id: new TextEncoder().encode(userId),
+            name: userId,
+            displayName: userId
+          },
+          pubKeyCredParams: [
+            { alg: -7, type: "public-key" },  // ES256
+            { alg: -257, type: "public-key" } // RS256
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required"
+          },
+          timeout: 60000,
+          attestation: "none"
+        }
+      }) as PublicKeyCredential;
+
+      if (credential) {
+        localStorage.setItem(
+          this.CREDENTIAL_ID_KEY,
+          btoa(String.fromCharCode(...new Uint8Array(credential.rawId)))
+        );
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('WebAuthn registration failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Authenticate using existing WebAuthn credential
+   */
+  static async authenticate(): Promise<boolean> {
+    try {
+      const credentialIdBase64 = localStorage.getItem(this.CREDENTIAL_ID_KEY);
+      if (!credentialIdBase64) {
+        console.warn('No WebAuthn credential found');
+        return false;
+      }
+
+      const credentialId = Uint8Array.from(atob(credentialIdBase64), c => c.charCodeAt(0));
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          rpId: window.location.hostname,
+          allowCredentials: [{
+            id: credentialId,
+            type: 'public-key',
+            transports: ['internal']
+          }],
+          userVerification: "required",
+          timeout: 60000
+        }
+      });
+
+      return !!assertion;
+    } catch (error) {
+      console.error('WebAuthn authentication failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if WebAuthn credential exists
+   */
+  static hasCredential(): boolean {
+    return !!localStorage.getItem(this.CREDENTIAL_ID_KEY);
+  }
+
+  /**
+   * Remove WebAuthn credential
+   */
+  static clearCredential(): void {
+    localStorage.removeItem(this.CREDENTIAL_ID_KEY);
   }
 }
