@@ -273,9 +273,31 @@ class WebAuthnHelper {
    */
   static async register(userId: string): Promise<boolean> {
     try {
+      console.log('🔐 [WebAuthn] Starting registration...');
+      console.log('🔐 [WebAuthn] User ID:', userId);
+      console.log('🔐 [WebAuthn] Hostname:', window.location.hostname);
+      console.log('🔐 [WebAuthn] Protocol:', window.location.protocol);
+      console.log('🔐 [WebAuthn] User Agent:', navigator.userAgent);
+      
+      // Check if WebAuthn is available
+      if (!window.PublicKeyCredential) {
+        console.error('❌ [WebAuthn] PublicKeyCredential not available');
+        throw new Error('WebAuthn not supported in this browser');
+      }
+      
+      // Check if platform authenticator is available
+      const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      console.log('🔐 [WebAuthn] Platform authenticator available:', available);
+      
+      if (!available) {
+        throw new Error('No platform authenticator (Touch ID/Face ID) available');
+      }
+
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
 
+      console.log('🔐 [WebAuthn] Calling navigator.credentials.create...');
+      
       const credential = await navigator.credentials.create({
         publicKey: {
           challenge,
@@ -306,12 +328,33 @@ class WebAuthnHelper {
           this.CREDENTIAL_ID_KEY,
           btoa(String.fromCharCode(...new Uint8Array(credential.rawId)))
         );
+        console.log('✅ [WebAuthn] Credential registered successfully');
+        console.log('✅ [WebAuthn] Credential ID stored in localStorage');
         return true;
       }
+      
+      console.error('❌ [WebAuthn] No credential returned');
       return false;
-    } catch (error) {
-      console.error('WebAuthn registration failed:', error);
-      return false;
+    } catch (error: any) {
+      console.error('❌ [WebAuthn] Registration failed:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      
+      if (error.name === 'NotAllowedError') {
+        console.error('❌ [WebAuthn] NotAllowedError - User cancelled, not in gesture context, or permission denied');
+      } else if (error.name === 'NotSupportedError') {
+        console.error('❌ [WebAuthn] NotSupportedError - WebAuthn not supported on this device/browser');
+      } else if (error.name === 'SecurityError') {
+        console.error('❌ [WebAuthn] SecurityError - Check HTTPS requirement or rpId configuration');
+      } else if (error.name === 'InvalidStateError') {
+        console.error('❌ [WebAuthn] InvalidStateError - Credential may already exist');
+      } else if (error.name === 'AbortError') {
+        console.error('❌ [WebAuthn] AbortError - Operation was aborted');
+      }
+      
+      throw error; // Re-throw to propagate to caller
     }
   }
 

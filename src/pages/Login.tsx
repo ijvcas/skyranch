@@ -197,42 +197,51 @@ const Login = () => {
           localStorage.removeItem('skyranch-remember-email');
         }
 
-        // Enable Face ID if checkbox was checked (don't block navigation)
+        // Enable Face ID if checkbox was checked (synchronous promise chain for user gesture)
         if (enableFaceId && isAvailable && !isEnabled) {
-          (async () => {
-            try {
-              const { BiometricService } = await import('@/services/biometricService');
-              
+          console.log('🔐 [Login] Starting Face ID activation...');
+          
+          import('@/services/biometricService')
+            .then(({ BiometricService }) => {
+              console.log('🔐 [Login] BiometricService loaded, saving credentials...');
               // Save credentials first (web: only to localStorage, no WebAuthn yet)
-              await BiometricService.saveCredentials(formData.email, formData.password, true);
-              
-              // Then register WebAuthn in user gesture context
-              const registered = await BiometricService.registerWebAuthnCredential(formData.email);
-              
+              return BiometricService.saveCredentials(formData.email, formData.password, true)
+                .then(() => {
+                  console.log('🔐 [Login] Credentials saved, registering WebAuthn...');
+                  // Register WebAuthn - THIS MUST BE IN THE SAME CALL CHAIN
+                  return BiometricService.registerWebAuthnCredential(formData.email);
+                });
+            })
+            .then(registered => {
+              console.log('🔐 [Login] WebAuthn registration result:', registered);
               if (registered) {
-                await refresh();
-                toast({
-                  title: "¡Face ID activado!",
-                  description: "Ahora puedes iniciar sesión con Face ID",
+                return refresh().then(() => {
+                  toast({
+                    title: "¡Touch ID activado!",
+                    description: "Ahora puedes iniciar sesión con Touch ID",
+                  });
                 });
               } else {
                 // Registration failed - clear everything
-                await BiometricService.deleteCredentials();
-                toast({
-                  variant: "destructive",
-                  title: "Error al activar Face ID",
-                  description: "Tu navegador no soporta autenticación biométrica o la cancelaste",
+                return import('@/services/biometricService').then(({ BiometricService }) => {
+                  return BiometricService.deleteCredentials().then(() => {
+                    toast({
+                      variant: "destructive",
+                      title: "Error al activar Touch ID",
+                      description: "Chrome requiere permisos de Touch ID. Intenta desde Ajustes.",
+                    });
+                  });
                 });
               }
-            } catch (error) {
-              console.error('❌ Face ID setup error:', error);
+            })
+            .catch(error => {
+              console.error('❌ [Login] Face ID setup error:', error);
               toast({
                 variant: "destructive",
-                title: "Error al activar Face ID",
-                description: "Puedes intentarlo nuevamente desde ajustes",
+                title: "Error al activar Touch ID",
+                description: error.message || "Puedes intentarlo nuevamente desde ajustes",
               });
-            }
-          })();
+            });
         }
 
         toast({
