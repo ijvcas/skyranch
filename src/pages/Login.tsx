@@ -222,13 +222,17 @@ const Login = () => {
                   });
                 });
               } else {
-                // Registration failed - clear everything
+                // Registration failed - clear EVERYTHING including localStorage credentials
                 return import('@/services/biometricService').then(({ BiometricService }) => {
+                  console.log('❌ [Login] WebAuthn failed, clearing all biometric data...');
                   return BiometricService.deleteCredentials().then(() => {
+                    // Force refresh to update checkbox state
+                    return refresh();
+                  }).then(() => {
                     toast({
                       variant: "destructive",
                       title: "Error al activar Touch ID",
-                      description: "Chrome requiere permisos de Touch ID. Intenta desde Ajustes.",
+                      description: "No se pudo completar el registro. Los datos no se guardaron.",
                     });
                   });
                 });
@@ -365,6 +369,7 @@ const Login = () => {
                 required
                 className="h-11"
                 disabled={isSubmitting}
+                autoComplete="username"
               />
             </div>
             
@@ -380,6 +385,7 @@ const Login = () => {
                   required
                   className="h-11 pr-12"
                   disabled={isSubmitting}
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"

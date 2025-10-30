@@ -90,7 +90,8 @@ export const useBiometric = () => {
   const disableBiometric = async (): Promise<void> => {
     try {
       await BiometricService.deleteCredentials();
-      setIsEnabled(false);
+      // Immediately refresh status instead of just setting state
+      await checkBiometricStatus();
     } catch (error) {
       console.error('Failed to disable biometric:', error);
       throw error;

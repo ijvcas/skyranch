@@ -252,11 +252,23 @@ export class BiometricService {
   static async isEnabled(): Promise<boolean> {
     try {
       const credentials = await this.getCredentials();
-      const enabled = credentials !== null && 
-                     credentials.email !== '' && 
-                     credentials.password !== '';
-      console.log('✅ [BiometricService] isEnabled:', enabled);
-      return enabled;
+      const hasCredentials = credentials !== null && 
+                            credentials.email !== '' && 
+                            credentials.password !== '';
+      
+      // For web platform, also check if WebAuthn credential exists
+      if (!Capacitor.isNativePlatform()) {
+        const hasWebAuthnCredential = WebAuthnHelper.hasCredential();
+        const enabled = hasCredentials && hasWebAuthnCredential;
+        console.log('✅ [BiometricService] isEnabled:', enabled, 
+                    '(credentials:', hasCredentials, 
+                    ', webauthn:', hasWebAuthnCredential, ')');
+        return enabled;
+      }
+      
+      // For native platform, only check credentials
+      console.log('✅ [BiometricService] isEnabled:', hasCredentials);
+      return hasCredentials;
     } catch (error) {
       console.error('Failed to check if biometric is enabled:', error);
       return false;
@@ -344,10 +356,13 @@ class WebAuthnHelper {
       
       if (error.name === 'NotAllowedError') {
         console.error('❌ [WebAuthn] NotAllowedError - User cancelled, not in gesture context, or permission denied');
+        console.error('💡 [WebAuthn] Chrome may require explicit Touch ID permission in System Preferences > Security & Privacy > Privacy > Touch ID');
       } else if (error.name === 'NotSupportedError') {
         console.error('❌ [WebAuthn] NotSupportedError - WebAuthn not supported on this device/browser');
       } else if (error.name === 'SecurityError') {
         console.error('❌ [WebAuthn] SecurityError - Check HTTPS requirement or rpId configuration');
+        console.error('💡 [WebAuthn] Current hostname:', window.location.hostname);
+        console.error('💡 [WebAuthn] Current protocol:', window.location.protocol);
       } else if (error.name === 'InvalidStateError') {
         console.error('❌ [WebAuthn] InvalidStateError - Credential may already exist');
       } else if (error.name === 'AbortError') {
