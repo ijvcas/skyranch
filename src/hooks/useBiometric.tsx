@@ -73,12 +73,8 @@ export const useBiometric = () => {
   const enableBiometric = async (email: string, password: string): Promise<boolean> => {
     try {
       console.log('🔐 [useBiometric] Enabling biometric...');
-      
-      // Save credentials - native keychain will handle authentication automatically
-      // This avoids double authentication and iOS LAContext conflicts
       await BiometricService.saveCredentials(email, password);
       await checkBiometricStatus();
-      
       console.log('✅ [useBiometric] Biometric enabled successfully');
       return true;
     } catch (error) {

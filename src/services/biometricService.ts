@@ -91,17 +91,9 @@ export class BiometricService {
   static async authenticate(reason: string = 'Iniciar sesión en FARMIKA'): Promise<boolean> {
     try {
       if (!Capacitor.isNativePlatform()) {
-        // Use WebAuthn for web platform
-        console.log('🔐 [BiometricService] Starting WebAuthn authentication...');
-        const authenticated = await WebAuthnHelper.authenticate();
-        
-        if (authenticated) {
-          console.log('✅ [BiometricService] WebAuthn authentication successful');
-        } else {
-          console.log('❌ [BiometricService] WebAuthn authentication failed');
-        }
-        
-        return authenticated;
+        // Web: Auto-login with saved credentials (no biometric prompt)
+        console.log('🔐 [BiometricService] Web platform - checking saved credentials...');
+        return true;
       }
 
       // Native platform implementation
@@ -135,9 +127,9 @@ export class BiometricService {
   }
 
   /**
-   * Save credentials securely (without WebAuthn registration on web)
+   * Save credentials securely
    */
-  static async saveCredentials(email: string, password: string, skipWebAuthnRegistration = false): Promise<void> {
+  static async saveCredentials(email: string, password: string): Promise<void> {
     try {
       console.log('💾 [BiometricService] Saving credentials to storage...');
       const credentials: StoredCredentials = { email, password };
@@ -153,14 +145,10 @@ export class BiometricService {
         console.log('💾 [BiometricService] Saved to native storage');
         await new Promise(resolve => setTimeout(resolve, 200));
       } else {
-        // Web: Use localStorage only (WebAuthn registration must happen separately)
+        // Web: Use localStorage for auto-login
         const encoded = btoa(JSON.stringify(credentials));
         localStorage.setItem(CREDENTIALS_KEY, encoded);
         console.log('💾 [BiometricService] Saved to localStorage');
-        
-        if (!skipWebAuthnRegistration) {
-          console.warn('⚠️ WebAuthn registration must be triggered separately with user gesture');
-        }
       }
       
       console.log('✅ [BiometricService] Credentials saved successfully!');
@@ -170,47 +158,6 @@ export class BiometricService {
     }
   }
 
-  /**
-   * Register WebAuthn credential (must be called from user gesture context)
-   */
-  static async registerWebAuthnCredential(userId: string): Promise<boolean> {
-    if (Capacitor.isNativePlatform()) {
-      return true; // Not needed on native
-    }
-    
-    // Check HTTPS requirement (except localhost)
-    if (window.location.protocol !== 'https:' && !window.location.hostname.includes('localhost')) {
-      console.error('❌ [BiometricService] HTTPS required for WebAuthn');
-      throw new Error('Touch ID requiere HTTPS. Por favor usa una conexión segura.');
-    }
-    
-    try {
-      console.log('🔐 [BiometricService] Registering WebAuthn credential...');
-      console.log('🔐 [BiometricService] Protocol:', window.location.protocol);
-      console.log('🔐 [BiometricService] Hostname:', window.location.hostname);
-      
-      const registered = await WebAuthnHelper.register(userId);
-      if (registered) {
-        console.log('✅ [BiometricService] WebAuthn credential registered successfully');
-      } else {
-        console.error('❌ [BiometricService] WebAuthn registration failed');
-      }
-      return registered;
-    } catch (error: any) {
-      console.error('❌ [BiometricService] WebAuthn registration error:', error);
-      
-      // Provide user-friendly error messages
-      if (error.name === 'NotAllowedError') {
-        throw new Error('Permiso denegado. Verifica que Touch ID esté habilitado en Configuración del Sistema.');
-      } else if (error.name === 'NotSupportedError') {
-        throw new Error('Tu navegador no soporta Touch ID.');
-      } else if (error.message) {
-        throw error;
-      }
-      
-      return false;
-    }
-  }
 
   /**
    * Retrieve stored credentials
@@ -258,7 +205,6 @@ export class BiometricService {
         });
       } else {
         localStorage.removeItem(CREDENTIALS_KEY);
-        WebAuthnHelper.clearCredential();
       }
     } catch (error) {
       console.error('Failed to delete credentials:', error);
@@ -275,17 +221,6 @@ export class BiometricService {
                             credentials.email !== '' && 
                             credentials.password !== '';
       
-      // For web platform, also check if WebAuthn credential exists
-      if (!Capacitor.isNativePlatform()) {
-        const hasWebAuthnCredential = WebAuthnHelper.hasCredential();
-        const enabled = hasCredentials && hasWebAuthnCredential;
-        console.log('✅ [BiometricService] isEnabled:', enabled, 
-                    '(credentials:', hasCredentials, 
-                    ', webauthn:', hasWebAuthnCredential, ')');
-        return enabled;
-      }
-      
-      // For native platform, only check credentials
       console.log('✅ [BiometricService] isEnabled:', hasCredentials);
       return hasCredentials;
     } catch (error) {
@@ -295,165 +230,3 @@ export class BiometricService {
   }
 }
 
-// WebAuthn helper for browser-based biometric authentication
-class WebAuthnHelper {
-  private static CREDENTIAL_ID_KEY = 'farmika_webauthn_credential_id';
-
-  /**
-   * Register a new WebAuthn credential (one-time setup)
-   */
-  static async register(userId: string): Promise<boolean> {
-    try {
-      console.log('🔐 [WebAuthn] Starting registration...');
-      console.log('🔐 [WebAuthn] User ID:', userId);
-      console.log('🔐 [WebAuthn] Hostname:', window.location.hostname);
-      console.log('🔐 [WebAuthn] Protocol:', window.location.protocol);
-      console.log('🔐 [WebAuthn] User Agent:', navigator.userAgent);
-      
-      // Check if WebAuthn is available
-      if (!window.PublicKeyCredential) {
-        console.error('❌ [WebAuthn] PublicKeyCredential not available');
-        throw new Error('WebAuthn not supported in this browser');
-      }
-      
-      // Check if platform authenticator is available
-      const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-      console.log('🔐 [WebAuthn] Platform authenticator available:', available);
-      
-      if (!available) {
-        throw new Error('No platform authenticator (Touch ID/Face ID) available');
-      }
-
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-
-      console.log('🔐 [WebAuthn] Calling navigator.credentials.create...');
-      
-      const credential = await navigator.credentials.create({
-        publicKey: {
-          challenge,
-          rp: {
-            name: "FARMIKA",
-            id: window.location.hostname
-          },
-          user: {
-            id: new TextEncoder().encode(userId),
-            name: userId,
-            displayName: userId
-          },
-          pubKeyCredParams: [
-            { alg: -7, type: "public-key" },  // ES256
-            { alg: -257, type: "public-key" } // RS256
-          ],
-          authenticatorSelection: {
-            authenticatorAttachment: "platform",
-            userVerification: "required"
-          },
-          timeout: 60000,
-          attestation: "none"
-        }
-      }) as PublicKeyCredential;
-
-      if (credential) {
-        localStorage.setItem(
-          this.CREDENTIAL_ID_KEY,
-          btoa(String.fromCharCode(...new Uint8Array(credential.rawId)))
-        );
-        console.log('✅ [WebAuthn] Credential registered successfully');
-        console.log('✅ [WebAuthn] Credential ID stored in localStorage');
-        return true;
-      }
-      
-      console.error('❌ [WebAuthn] No credential returned');
-      return false;
-    } catch (error: any) {
-      console.error('❌ [WebAuthn] Registration failed:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
-      
-      if (error.name === 'NotAllowedError') {
-        console.error('❌ [WebAuthn] NotAllowedError - User cancelled, not in gesture context, or permission denied');
-        console.error('💡 [WebAuthn] Chrome may require explicit Touch ID permission in System Preferences > Security & Privacy > Privacy > Touch ID');
-      } else if (error.name === 'NotSupportedError') {
-        console.error('❌ [WebAuthn] NotSupportedError - WebAuthn not supported on this device/browser');
-      } else if (error.name === 'SecurityError') {
-        console.error('❌ [WebAuthn] SecurityError - Check HTTPS requirement or rpId configuration');
-        console.error('💡 [WebAuthn] Current hostname:', window.location.hostname);
-        console.error('💡 [WebAuthn] Current protocol:', window.location.protocol);
-      } else if (error.name === 'InvalidStateError') {
-        console.error('❌ [WebAuthn] InvalidStateError - Credential may already exist');
-      } else if (error.name === 'AbortError') {
-        console.error('❌ [WebAuthn] AbortError - Operation was aborted');
-      }
-      
-      throw error; // Re-throw to propagate to caller
-    }
-  }
-
-  /**
-   * Authenticate using existing WebAuthn credential
-   */
-  static async authenticate(): Promise<boolean> {
-    try {
-      const credentialIdBase64 = localStorage.getItem(this.CREDENTIAL_ID_KEY);
-      if (!credentialIdBase64) {
-        console.error('❌ No WebAuthn credential ID found in storage');
-        return false;
-      }
-
-      console.log('🔐 Found credential ID, requesting biometric authentication...');
-      
-      const credentialId = Uint8Array.from(atob(credentialIdBase64), c => c.charCodeAt(0));
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-
-      const assertion = await navigator.credentials.get({
-        publicKey: {
-          challenge,
-          rpId: window.location.hostname,
-          allowCredentials: [{
-            id: credentialId,
-            type: 'public-key',
-            transports: ['internal']
-          }],
-          userVerification: "required", // This triggers Face ID/Touch ID
-          timeout: 60000
-        }
-      });
-
-      if (assertion) {
-        console.log('✅ Biometric authentication successful!');
-        return true;
-      }
-      
-      console.error('❌ No assertion returned');
-      return false;
-    } catch (error: any) {
-      console.error('❌ WebAuthn authentication failed:', error);
-      
-      if (error.name === 'NotAllowedError') {
-        console.error('User cancelled or permission denied');
-      } else if (error.name === 'InvalidStateError') {
-        console.error('Credential not recognized');
-      }
-      
-      return false;
-    }
-  }
-
-  /**
-   * Check if WebAuthn credential exists
-   */
-  static hasCredential(): boolean {
-    return !!localStorage.getItem(this.CREDENTIAL_ID_KEY);
-  }
-
-  /**
-   * Remove WebAuthn credential
-   */
-  static clearCredential(): void {
-    localStorage.removeItem(this.CREDENTIAL_ID_KEY);
-  }
-}

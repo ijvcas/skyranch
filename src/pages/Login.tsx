@@ -197,48 +197,18 @@ const Login = () => {
           localStorage.removeItem('skyranch-remember-email');
         }
 
-        // Enable Face ID if checkbox was checked (direct calls preserve user gesture context)
+        // Save credentials for auto-login if checkbox was checked
         if (enableFaceId && isAvailable && !isEnabled) {
-          console.log('🔐 [Login] Starting Face ID activation...');
-          
-          // DIRECT synchronous promise chain - NO dynamic import
-          BiometricService.saveCredentials(formData.email, formData.password, true)
-            .then(() => {
-              console.log('🔐 [Login] Credentials saved, registering WebAuthn...');
-              // Register WebAuthn - THIS MUST BE IN THE SAME CALL CHAIN
-              return BiometricService.registerWebAuthnCredential(formData.email);
-            })
-            .then(registered => {
-              console.log('🔐 [Login] WebAuthn registration result:', registered);
-              if (registered) {
-                return refresh().then(() => {
-                  toast({
-                    title: "¡Touch ID activado!",
-                    description: "Ahora puedes iniciar sesión con Touch ID",
-                  });
-                });
-              } else {
-                // Registration failed - clear EVERYTHING including localStorage credentials
-                console.log('❌ [Login] WebAuthn failed, clearing all biometric data...');
-                return BiometricService.deleteCredentials()
-                  .then(() => refresh())
-                  .then(() => {
-                    toast({
-                      variant: "destructive",
-                      title: "Error al activar Touch ID",
-                      description: "No se pudo completar el registro. Los datos no se guardaron.",
-                    });
-                  });
-              }
-            })
-            .catch(error => {
-              console.error('❌ [Login] Face ID setup error:', error);
-              toast({
-                variant: "destructive",
-                title: "Error al activar Touch ID",
-                description: error.message || "Puedes intentarlo nuevamente desde ajustes",
-              });
+          try {
+            await BiometricService.saveCredentials(formData.email, formData.password);
+            await refresh();
+            toast({
+              title: "¡Credenciales guardadas!",
+              description: "Ahora puedes usar auto-login con el ícono de Face ID",
             });
+          } catch (error) {
+            console.error('Error saving credentials:', error);
+          }
         }
 
         toast({
@@ -425,7 +395,7 @@ const Login = () => {
                   htmlFor="enable-faceid" 
                   className="text-sm font-medium cursor-pointer select-none"
                 >
-                  {isEnabled ? `Usar ${biometricTypeName} para iniciar sesión` : `Activar ${biometricTypeName}`}
+                  {isEnabled ? 'Recordar credenciales para auto-login' : 'Recordar credenciales'}
                 </Label>
               </div>
             )}
