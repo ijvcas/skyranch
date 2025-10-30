@@ -1,210 +1,189 @@
-# Face ID Setup Guide for FARMIKA iOS App
+# Face ID Setup for FARMIKA iOS
 
-## 🎯 Quick Setup Checklist
+## Overview
+Face ID enables biometric authentication on iOS devices. The code is already implemented - you just need to configure the native iOS project.
 
-- [ ] Generate iOS native folder
-- [ ] Add Face ID permission to Info.plist
-- [ ] Build and test on physical device
+## Prerequisites
+- Mac with Xcode installed
+- iPhone/iPad with Face ID (iPhone X or newer)
+- Face ID enabled in device Settings → Face ID & Passcode
+- Git and Node.js 18+
 
----
+## Setup Steps
 
-## Step 1: Generate iOS Native Folder
+### 1. Generate iOS Folder
 
-On your Mac, after pulling the latest code:
+The `ios/` folder is gitignored and must be generated locally:
 
 ```bash
 # Install dependencies
 npm install
 
-# Add iOS platform (creates ios/ folder)
+# Generate iOS platform folder
 npx cap add ios
 
-# Build the web assets
+# Build web assets
 npm run build
 
 # Sync to iOS
 npx cap sync ios
 ```
 
-**Important**: The `ios/` folder is git-ignored, so you need to generate it locally every time you clone or pull.
+### 2. Add Face ID Permission to Info.plist
 
----
+**This is the critical step that makes Face ID work.**
 
-## Step 2: Add Face ID Permission to Info.plist
+#### Using Xcode (Recommended):
 
-This is the **CRITICAL STEP** that makes Face ID work.
+```bash
+# Open project in Xcode
+npx cap open ios
+```
 
-### Option A: Using Xcode (Recommended)
+In Xcode:
+1. Navigate to: `App` (folder) → `App` (sub-folder) → `Info.plist`
+2. Hover over any row, click the `+` button
+3. Add new entry:
+   - **Key**: `NSFaceIDUsageDescription`
+   - **Type**: String
+   - **Value**: `FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta`
+4. Save (Cmd+S)
 
-1. **Open the project in Xcode:**
-   ```bash
-   npx cap open ios
-   ```
+#### Manual Edit (Alternative):
 
-2. **Navigate to Info.plist:**
-   - In the left sidebar (Project Navigator)
-   - Click on `App` (top folder)
-   - Click on `App` (sub-folder)
-   - Click on `Info.plist`
-
-3. **Add the Face ID permission:**
-   - Hover over any row in the list
-   - Click the `+` button that appears
-   - In the new row:
-     - **Key**: `NSFaceIDUsageDescription`
-     - **Type**: String (should be default)
-     - **Value**: `FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta`
-
-4. **Save the file** (Cmd+S)
-
-### Option B: Manual Edit
-
-If you prefer to edit the XML directly, open `ios/App/App/Info.plist` in a text editor and add this entry inside the root `<dict>` tag:
+Edit `ios/App/App/Info.plist` directly:
 
 ```xml
 <key>NSFaceIDUsageDescription</key>
 <string>FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta</string>
 ```
 
----
+Add this inside the root `<dict>` tag.
 
-## Step 3: Build and Test on Physical Device
+### 3. Build and Test on Physical Device
 
-Face ID **only works on physical devices**, not the simulator.
+**Face ID only works on physical devices, not simulators.**
 
-### Build and Run:
+1. Connect your iPhone/iPad via USB
+2. In Xcode, select your device from the device dropdown
+3. Click Run (▶️) or press Cmd+R
+4. Wait for build to complete
 
-1. **Connect your iPhone/iPad** via USB or WiFi
+### 4. Test Face ID Flow
 
-2. **Select your device** in Xcode:
-   - Top bar: Click the device dropdown
-   - Select your connected device
+**Enable Biometric:**
+1. Login to FARMIKA
+2. Go to Settings → Biometric Authentication
+3. Toggle ON "Habilitar Autenticación Biométrica"
+4. Enter password in verification dialog
+5. Face ID prompt should appear
+6. Complete Face ID scan
+7. Success message should show
 
-3. **Build and Run:**
-   - Press the Play button (▶️) or press `Cmd+R`
-   - Wait for the build to complete
-   - App should launch on your device
+**Test Login:**
+1. Logout from app
+2. On login screen, tap biometric icon (fingerprint)
+3. Face ID prompt should appear
+4. Complete Face ID scan
+5. Should login automatically
 
-### Test Face ID:
-
-1. **Enable Face ID:**
-   - Login to FARMIKA
-   - Go to Settings → Biometric Authentication
-   - Toggle ON "Habilitar Autenticación Biométrica"
-   - Enter your password in the verification dialog
-   - **Face ID prompt should appear** ✨
-   - Complete the Face ID scan
-   - You should see "Autenticación biométrica activada"
-
-2. **Test Authentication:**
-   - Logout from the app
-   - On the login screen, tap the biometric icon (fingerprint icon)
-   - **Face ID prompt should appear** ✨
-   - Complete the Face ID scan
-   - You should login automatically! 🎉
-
----
-
-## How It Works
-
-### Native iOS Flow:
-
-1. **Check Availability**: `NativeBiometric.isAvailable()` checks if Face ID is available
-2. **Save Credentials**: `NativeBiometric.setCredentials()` stores email/password in iOS Keychain
-3. **Authenticate**: `NativeBiometric.verifyIdentity()` shows Face ID prompt
-4. **Retrieve**: `NativeBiometric.getCredentials()` gets stored credentials from Keychain
-
-### Security:
-
-- ✅ Credentials stored in **iOS Keychain** (most secure storage)
-- ✅ Protected by Face ID biometric authentication
-- ✅ Automatically deleted if biometric is disabled
-- ✅ Persists across app updates and device restarts
-
----
-
-## Troubleshooting
+## Common Issues
 
 ### Face ID prompt doesn't appear
 
 **Cause**: Missing `NSFaceIDUsageDescription` in Info.plist
 
-**Fix**:
-1. Verify you added the permission key to Info.plist (see Step 2)
-2. Clean build folder: Xcode → Product → Clean Build Folder
-3. Rebuild and run again
+**Solution**:
+```bash
+# Clean build folder
+# In Xcode: Product → Clean Build Folder
+
+# Verify Info.plist has the key (see Step 2)
+# Rebuild and run
+```
 
 ### App crashes when enabling Face ID
 
-**Cause**: Missing permission always causes a crash
+**Cause**: Missing permission causes immediate crash
 
-**Fix**: Add `NSFaceIDUsageDescription` to Info.plist
+**Solution**: Add `NSFaceIDUsageDescription` to Info.plist (see Step 2)
 
 ### "Biometric not available" message
 
+**Cause**: Device or Face ID not configured
+
 **Check**:
-- Device has Face ID hardware (iPhone X or newer)
-- Face ID is enabled: Settings → Face ID & Passcode
-- At least one face is enrolled
+- Device has Face ID hardware (iPhone X+)
+- Face ID enabled: Settings → Face ID & Passcode
+- At least one face enrolled
 
-### Face ID works but doesn't login
+### Changes not syncing to device
 
-**Check console logs in Xcode** for errors:
-- Window → Devices and Simulators → Select device → View Device Logs
-- Look for BiometricService logs
+**Cause**: Native platform not synced
 
----
+**Solution**:
+```bash
+npm run build
+npx cap sync ios
+```
+
+### iOS folder missing after git pull
+
+**Cause**: Normal - ios/ is gitignored
+
+**Solution**:
+```bash
+npx cap add ios
+npx cap sync ios
+```
 
 ## Important Notes
 
-⚠️ **Every time you regenerate ios/ folder**, you must:
-1. Re-add the `NSFaceIDUsageDescription` to Info.plist
-2. It's not automatically synced from capacitor.config.ts
+⚠️ **Info.plist must be edited manually** every time you regenerate the ios/ folder
 
-💡 **Consider committing ios/ folder** to git if you want to keep the Info.plist changes. Remove `ios/` from `.gitignore`:
-```bash
-# In .gitignore, comment out or remove:
-# ios/
-```
+⚠️ **capacitor.config.ts settings don't auto-sync** to Info.plist
 
-🔄 **After every git pull**, run:
+💡 **After every git pull**, run:
 ```bash
 npm install
 npm run build
 npx cap sync ios
 ```
 
----
+💡 **Consider committing ios/ folder** to keep Info.plist changes - remove `ios/` from `.gitignore`
 
-## Expected Console Logs (Success)
+## Quick Reference Commands
 
-When enabling Face ID successfully, you should see:
+```bash
+# Full setup from scratch
+npm install
+npx cap add ios
+npm run build
+npx cap sync ios
+npx cap open ios
+# Then add NSFaceIDUsageDescription to Info.plist in Xcode
 
+# After git pull
+npm install
+npm run build
+npx cap sync ios
+# If you regenerated ios/, add NSFaceIDUsageDescription again
+
+# Force resync
+npm run build
+npx cap sync ios --force
 ```
-✅ [BiometricService] Biometric available: true
-✅ [BiometricService] Biometric type: faceId
-💾 [BiometricService] Calling native setCredentials...
-✅ [BiometricService] Credentials saved successfully
-✅ [BiometricService] isEnabled: true
-```
 
-When authenticating with Face ID successfully:
+## Key Files
 
-```
-🔐 [BiometricService] Starting authenticate...
-✅ [BiometricService] Authentication successful
-📱 [BiometricService] Fetching credentials from native...
-✅ [BiometricService] Got credentials: [email protected]
-```
+- `capacitor.config.ts` - Face ID permission reference (not auto-synced)
+- `src/services/biometricService.ts` - Biometric implementation
+- `ios/App/App/Info.plist` - Native iOS permissions (manual edit required)
 
----
+## Need Help?
 
-## Summary
-
-The code is **already fully implemented** for Face ID! You just need to:
-
-1. ✅ Generate the iOS folder locally
-2. ✅ Manually add the Face ID permission to Info.plist
-3. ✅ Build and test on a real iPhone/iPad with Face ID
-
-That's it! The BiometricService handles everything else automatically.
+If Face ID still doesn't work:
+1. Check Xcode console logs for errors
+2. Verify Info.plist has `NSFaceIDUsageDescription`
+3. Clean build folder in Xcode (Product → Clean Build Folder)
+4. Test on physical device with Face ID enrolled
