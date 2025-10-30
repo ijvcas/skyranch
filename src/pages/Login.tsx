@@ -12,6 +12,7 @@ import { unifiedVersionManager } from '@/services/version-management';
 import { useBiometric } from '@/hooks/useBiometric';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
+import { BiometricService } from '@/services/biometricService';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -92,7 +93,6 @@ const Login = () => {
       console.log('🔐 Starting biometric login...');
       
       // THIS MUST SUCCEED BEFORE WE GET CREDENTIALS
-      const { BiometricService } = await import('@/services/biometricService');
       const authenticated = await BiometricService.authenticate();
       
       if (!authenticated) {
@@ -197,20 +197,16 @@ const Login = () => {
           localStorage.removeItem('skyranch-remember-email');
         }
 
-        // Enable Face ID if checkbox was checked (synchronous promise chain for user gesture)
+        // Enable Face ID if checkbox was checked (direct calls preserve user gesture context)
         if (enableFaceId && isAvailable && !isEnabled) {
           console.log('🔐 [Login] Starting Face ID activation...');
           
-          import('@/services/biometricService')
-            .then(({ BiometricService }) => {
-              console.log('🔐 [Login] BiometricService loaded, saving credentials...');
-              // Save credentials first (web: only to localStorage, no WebAuthn yet)
-              return BiometricService.saveCredentials(formData.email, formData.password, true)
-                .then(() => {
-                  console.log('🔐 [Login] Credentials saved, registering WebAuthn...');
-                  // Register WebAuthn - THIS MUST BE IN THE SAME CALL CHAIN
-                  return BiometricService.registerWebAuthnCredential(formData.email);
-                });
+          // DIRECT synchronous promise chain - NO dynamic import
+          BiometricService.saveCredentials(formData.email, formData.password, true)
+            .then(() => {
+              console.log('🔐 [Login] Credentials saved, registering WebAuthn...');
+              // Register WebAuthn - THIS MUST BE IN THE SAME CALL CHAIN
+              return BiometricService.registerWebAuthnCredential(formData.email);
             })
             .then(registered => {
               console.log('🔐 [Login] WebAuthn registration result:', registered);
@@ -223,19 +219,16 @@ const Login = () => {
                 });
               } else {
                 // Registration failed - clear EVERYTHING including localStorage credentials
-                return import('@/services/biometricService').then(({ BiometricService }) => {
-                  console.log('❌ [Login] WebAuthn failed, clearing all biometric data...');
-                  return BiometricService.deleteCredentials().then(() => {
-                    // Force refresh to update checkbox state
-                    return refresh();
-                  }).then(() => {
+                console.log('❌ [Login] WebAuthn failed, clearing all biometric data...');
+                return BiometricService.deleteCredentials()
+                  .then(() => refresh())
+                  .then(() => {
                     toast({
                       variant: "destructive",
                       title: "Error al activar Touch ID",
                       description: "No se pudo completar el registro. Los datos no se guardaron.",
                     });
                   });
-                });
               }
             })
             .catch(error => {

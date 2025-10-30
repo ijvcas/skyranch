@@ -178,8 +178,17 @@ export class BiometricService {
       return true; // Not needed on native
     }
     
+    // Check HTTPS requirement (except localhost)
+    if (window.location.protocol !== 'https:' && !window.location.hostname.includes('localhost')) {
+      console.error('❌ [BiometricService] HTTPS required for WebAuthn');
+      throw new Error('Touch ID requiere HTTPS. Por favor usa una conexión segura.');
+    }
+    
     try {
       console.log('🔐 [BiometricService] Registering WebAuthn credential...');
+      console.log('🔐 [BiometricService] Protocol:', window.location.protocol);
+      console.log('🔐 [BiometricService] Hostname:', window.location.hostname);
+      
       const registered = await WebAuthnHelper.register(userId);
       if (registered) {
         console.log('✅ [BiometricService] WebAuthn credential registered successfully');
@@ -187,8 +196,18 @@ export class BiometricService {
         console.error('❌ [BiometricService] WebAuthn registration failed');
       }
       return registered;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ [BiometricService] WebAuthn registration error:', error);
+      
+      // Provide user-friendly error messages
+      if (error.name === 'NotAllowedError') {
+        throw new Error('Permiso denegado. Verifica que Touch ID esté habilitado en Configuración del Sistema.');
+      } else if (error.name === 'NotSupportedError') {
+        throw new Error('Tu navegador no soporta Touch ID.');
+      } else if (error.message) {
+        throw error;
+      }
+      
       return false;
     }
   }

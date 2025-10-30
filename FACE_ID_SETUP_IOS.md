@@ -3,6 +3,9 @@
 ## Overview
 Face ID enables biometric authentication on iOS devices. The code is already implemented - you just need to configure the native iOS project.
 
+## Important Update
+✅ **The `ios/` folder is now tracked in git** - Face ID configuration (NSFaceIDUsageDescription in Info.plist) is automatically included! You no longer need to manually edit Info.plist.
+
 ## Prerequisites
 - Mac with Xcode installed
 - iPhone/iPad with Face ID (iPhone X or newer)
@@ -11,54 +14,30 @@ Face ID enables biometric authentication on iOS devices. The code is already imp
 
 ## Setup Steps
 
-### 1. Generate iOS Folder
+### 1. Sync iOS Platform
 
-The `ios/` folder is gitignored and must be generated locally:
+The `ios/` folder now comes with the repository:
 
 ```bash
 # Install dependencies
 npm install
 
-# Generate iOS platform folder
-npx cap add ios
-
 # Build web assets
 npm run build
 
-# Sync to iOS
+# Sync to iOS (updates existing ios/ folder from git)
 npx cap sync ios
 ```
 
-### 2. Add Face ID Permission to Info.plist
+### 2. Face ID Permission (Already Configured!)
 
-**This is the critical step that makes Face ID work.**
+✅ **NSFaceIDUsageDescription is already in Info.plist** - no manual editing needed!
 
-#### Using Xcode (Recommended):
-
-```bash
-# Open project in Xcode
-npx cap open ios
-```
-
-In Xcode:
-1. Navigate to: `App` (folder) → `App` (sub-folder) → `Info.plist`
-2. Hover over any row, click the `+` button
-3. Add new entry:
-   - **Key**: `NSFaceIDUsageDescription`
-   - **Type**: String
-   - **Value**: `FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta`
-4. Save (Cmd+S)
-
-#### Manual Edit (Alternative):
-
-Edit `ios/App/App/Info.plist` directly:
-
+The configuration is preserved in `ios/App/App/Info.plist`:
 ```xml
 <key>NSFaceIDUsageDescription</key>
 <string>FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta</string>
 ```
-
-Add this inside the root `<dict>` tag.
 
 ### 3. Build and Test on Physical Device
 
@@ -91,22 +70,19 @@ Add this inside the root `<dict>` tag.
 
 ### Face ID prompt doesn't appear
 
-**Cause**: Missing `NSFaceIDUsageDescription` in Info.plist
+**Cause**: Sync issue or cached build
 
 **Solution**:
 ```bash
 # Clean build folder
 # In Xcode: Product → Clean Build Folder
 
-# Verify Info.plist has the key (see Step 2)
+# Force resync
+npm run build
+npx cap sync ios --force
+
 # Rebuild and run
 ```
-
-### App crashes when enabling Face ID
-
-**Cause**: Missing permission causes immediate crash
-
-**Solution**: Add `NSFaceIDUsageDescription` to Info.plist (see Step 2)
 
 ### "Biometric not available" message
 
@@ -127,21 +103,9 @@ npm run build
 npx cap sync ios
 ```
 
-### iOS folder missing after git pull
-
-**Cause**: Normal - ios/ is gitignored
-
-**Solution**:
-```bash
-npx cap add ios
-npx cap sync ios
-```
-
 ## Important Notes
 
-⚠️ **Info.plist must be edited manually** every time you regenerate the ios/ folder
-
-⚠️ **capacitor.config.ts settings don't auto-sync** to Info.plist
+✅ **Info.plist changes are now tracked in git** - Face ID configuration is preserved!
 
 💡 **After every git pull**, run:
 ```bash
@@ -150,24 +114,19 @@ npm run build
 npx cap sync ios
 ```
 
-💡 **Consider committing ios/ folder** to keep Info.plist changes - remove `ios/` from `.gitignore`
-
 ## Quick Reference Commands
 
 ```bash
 # Full setup from scratch
 npm install
-npx cap add ios
 npm run build
 npx cap sync ios
 npx cap open ios
-# Then add NSFaceIDUsageDescription to Info.plist in Xcode
 
 # After git pull
 npm install
 npm run build
 npx cap sync ios
-# If you regenerated ios/, add NSFaceIDUsageDescription again
 
 # Force resync
 npm run build
@@ -176,9 +135,9 @@ npx cap sync ios --force
 
 ## Key Files
 
-- `capacitor.config.ts` - Face ID permission reference (not auto-synced)
+- `capacitor.config.ts` - Face ID permission reference (auto-synced to Info.plist)
 - `src/services/biometricService.ts` - Biometric implementation
-- `ios/App/App/Info.plist` - Native iOS permissions (manual edit required)
+- `ios/App/App/Info.plist` - Native iOS permissions (tracked in git)
 
 ## Need Help?
 
