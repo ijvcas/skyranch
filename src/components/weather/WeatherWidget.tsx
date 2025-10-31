@@ -26,6 +26,28 @@ function pickIcon(text?: string | null) {
   return Sun;
 }
 
+function pickIconColor(text?: string | null) {
+  const t = (text || "").toLowerCase();
+  
+  // Rain patterns - blue tones
+  if (/lluvia|llovizna|garúa|rain|drizzle|chubasco|aguacero/.test(t)) return "text-blue-500";
+  
+  // Snow patterns - light blue/cyan
+  if (/nieve|snow|nevada/.test(t)) return "text-cyan-400";
+  
+  // Wind patterns - gray
+  if (/viento|wind|ventoso|windy/.test(t)) return "text-gray-500";
+  
+  // Cloudy patterns - gray
+  if (/nubes|nubla|cloud|overcast/.test(t)) return "text-gray-400";
+  
+  // Partly cloudy patterns - amber/orange
+  if (/parcial|intervalos|partly|soleado con nubes/.test(t)) return "text-amber-500";
+  
+  // Clear/sunny - yellow
+  return "text-yellow-500";
+}
+
 const WeatherWidget: React.FC = () => {
   const { data: weatherSettings, isLoading: settingsLoading } = useWeatherSettings();
   console.log("🌤️ [WeatherWidget] Weather settings:", weatherSettings);
@@ -40,6 +62,7 @@ const WeatherWidget: React.FC = () => {
   console.log("🌤️ [WeatherWidget] Weather error:", error);
 
   const TempIcon = pickIcon(weather?.conditionText);
+  const iconColor = pickIconColor(weather?.conditionText);
   const tempValue = weather?.temperatureC;
   
   const formatLocation = () => {
@@ -56,7 +79,7 @@ const WeatherWidget: React.FC = () => {
   return (
     <section aria-label="Clima actual">
       <div className="flex items-start gap-3">
-        <TempIcon className="h-6 w-6 text-yellow-500 flex-shrink-0" aria-hidden />
+        <TempIcon className={`h-6 w-6 ${iconColor} flex-shrink-0`} aria-hidden />
         
         {/* Temperature and condition grouped */}
         <div className="flex-shrink-0">
