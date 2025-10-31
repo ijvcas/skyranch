@@ -13,15 +13,15 @@ const TabTrigger: React.FC<TabTriggerProps> = ({ icon, label, isActive, onClick 
   <button
     onClick={onClick}
     className={cn(
-      "flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg transition-all",
+      "flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all",
       "border hover:border-primary/30",
       isActive 
         ? "btn-gradient text-white border-transparent shadow-md" 
         : "bg-card/50 text-muted-foreground border-border/50 hover:bg-accent/50"
     )}
   >
-    <div className="text-xl">{icon}</div>
-    <span className="text-xs font-medium">{label}</span>
+    <div className="text-lg">{icon}</div>
+    <span className="text-sm font-medium">{label}</span>
   </button>
 );
 
