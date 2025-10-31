@@ -29,23 +29,23 @@ function pickIcon(text?: string | null) {
 function pickIconColor(text?: string | null) {
   const t = (text || "").toLowerCase();
   
-  // Rain patterns - blue tones
-  if (/lluvia|llovizna|garúa|rain|drizzle|chubasco|aguacero/.test(t)) return "text-blue-500";
+  // Rain patterns - vivid blue
+  if (/lluvia|llovizna|garúa|rain|drizzle|chubasco|aguacero/.test(t)) return "text-sky-600";
   
-  // Snow patterns - light blue/cyan
-  if (/nieve|snow|nevada/.test(t)) return "text-cyan-400";
+  // Snow patterns - icy cyan
+  if (/nieve|snow|nevada/.test(t)) return "text-cyan-300";
   
-  // Wind patterns - gray
-  if (/viento|wind|ventoso|windy/.test(t)) return "text-gray-500";
+  // Wind patterns - slate gray
+  if (/viento|wind|ventoso|windy/.test(t)) return "text-slate-500";
   
-  // Cloudy patterns - gray
-  if (/nubes|nubla|cloud|overcast/.test(t)) return "text-gray-400";
+  // Cloudy/overcast patterns - darker gray
+  if (/nubes|nubla|cloud|overcast|cubierto/.test(t)) return "text-slate-600";
   
-  // Partly cloudy patterns - amber/orange
-  if (/parcial|intervalos|partly|soleado con nubes/.test(t)) return "text-amber-500";
+  // Partly cloudy patterns - warm orange
+  if (/parcial|intervalos|partly|soleado con nubes/.test(t)) return "text-orange-400";
   
-  // Clear/sunny - yellow
-  return "text-yellow-500";
+  // Clear/sunny - golden yellow
+  return "text-amber-400";
 }
 
 const WeatherWidget: React.FC = () => {
@@ -79,7 +79,7 @@ const WeatherWidget: React.FC = () => {
   return (
     <section aria-label="Clima actual">
       <div className="flex items-start gap-3">
-        <TempIcon className={`h-6 w-6 ${iconColor} flex-shrink-0`} aria-hidden />
+        <TempIcon className={`h-7 w-7 ${iconColor} flex-shrink-0`} strokeWidth={2.5} aria-hidden />
         
         {/* Temperature and condition grouped */}
         <div className="flex-shrink-0">
