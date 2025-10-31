@@ -184,47 +184,46 @@ const Breeding: React.FC = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Activos</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3 md:p-6 md:pb-2">
+              <CardTitle className="text-xs md:text-sm font-medium">Activos</CardTitle>
+              <Activity className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{activeRecords.length}</div>
+            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+              <div className="text-xl md:text-2xl font-bold">{activeRecords.length}</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completados</CardTitle>
-              <Archive className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3 md:p-6 md:pb-2">
+              <CardTitle className="text-xs md:text-sm font-medium">Completados</CardTitle>
+              <Archive className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{completedRecords.length}</div>
+            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+              <div className="text-xl md:text-2xl font-bold">{completedRecords.length}</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Embarazos Confirmados</CardTitle>
-              <Heart className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3 md:p-6 md:pb-2">
+              <CardTitle className="text-xs md:text-sm font-medium leading-tight">Embarazos Confirmados</CardTitle>
+              <Heart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
+            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+              <div className="text-xl md:text-2xl font-bold">
                 {breedingRecords.filter(record => record.pregnancyConfirmed).length}
               </div>
             </CardContent>
           </Card>
 
-
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Crías</CardTitle>
-              <Heart className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3 md:p-6 md:pb-2">
+              <CardTitle className="text-xs md:text-sm font-medium">Total Crías</CardTitle>
+              <Heart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
+            <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
+              <div className="text-xl md:text-2xl font-bold">
                 {breedingRecords.reduce((total, record) => total + (record.offspringCount || 0), 0)}
               </div>
             </CardContent>
