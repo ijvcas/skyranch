@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Heart, Calendar, TrendingUp, Bell } from 'lucide-react';
+import { Plus, Heart, Calendar, TrendingUp, Bell, Activity, Archive } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBreedingRecords, deleteBreedingRecord, BreedingRecord } from '@/services/breedingService';
 import { getAnimalsByIds } from '@/services/animal/animalQueries';
@@ -15,11 +15,12 @@ import BreedingDetail from '@/components/BreedingDetail';
 import BreedingCalendarView from '@/components/BreedingCalendarView';
 import BreedingPlanningTab from '@/components/breeding-planning/BreedingPlanningTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TabTrigger as GridTabTrigger, TabsListGrid } from '@/components/breeding/BreedingTabsGrid';
 
 const Breeding: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<BreedingRecord | null>(null);
-  const [activeTab, setActiveTab] = useState('list');
+  const [activeTab, setActiveTab] = useState('activos');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { triggerNotificationCheck } = useBreedingNotifications();
@@ -94,6 +95,39 @@ const Breeding: React.FC = () => {
     await triggerNotificationCheck();
   };
 
+  // Filter records into active and completed
+  const activeRecords = React.useMemo(() => {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 60);
+    
+    return breedingRecords.filter(record => {
+      if (record.status === 'planned' || record.status === 'completed' || record.status === 'confirmed_pregnant') {
+        return true;
+      }
+      if (record.status === 'not_pregnant') {
+        const recordDate = new Date(record.breedingDate);
+        return recordDate > cutoffDate;
+      }
+      return false;
+    });
+  }, [breedingRecords]);
+
+  const completedRecords = React.useMemo(() => {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 60);
+    
+    return breedingRecords.filter(record => {
+      if (record.status === 'birth_completed' || record.status === 'failed') {
+        return true;
+      }
+      if (record.status === 'not_pregnant') {
+        const recordDate = new Date(record.breedingDate);
+        return recordDate <= cutoffDate;
+      }
+      return false;
+    });
+  }, [breedingRecords]);
+
   if (isLoadingRecords) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -153,11 +187,21 @@ const Breeding: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Apareamientos</CardTitle>
-              <Heart className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Activos</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{breedingRecords.length}</div>
+              <div className="text-2xl font-bold">{activeRecords.length}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completados</CardTitle>
+              <Archive className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{completedRecords.length}</div>
             </CardContent>
           </Card>
 
@@ -173,17 +217,6 @@ const Breeding: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Partos Completados</CardTitle>
-              <Heart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {breedingRecords.filter(record => record.status === 'birth_completed').length}
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -200,22 +233,64 @@ const Breeding: React.FC = () => {
 
         {/* Tabs for different views */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="list">Lista</TabsTrigger>
-            <TabsTrigger value="calendar">Calendario</TabsTrigger>
-            <TabsTrigger value="planning">Planificación</TabsTrigger>
-          </TabsList>
+          <TabsListGrid>
+            <GridTabTrigger
+              value="activos"
+              icon={<Activity />}
+              label="Activos"
+              isActive={activeTab === 'activos'}
+              onClick={() => setActiveTab('activos')}
+            />
+            <GridTabTrigger
+              value="historial"
+              icon={<Archive />}
+              label="Historial"
+              isActive={activeTab === 'historial'}
+              onClick={() => setActiveTab('historial')}
+            />
+            <GridTabTrigger
+              value="calendar"
+              icon={<Calendar />}
+              label="Calendario"
+              isActive={activeTab === 'calendar'}
+              onClick={() => setActiveTab('calendar')}
+            />
+            <GridTabTrigger
+              value="planning"
+              icon={<TrendingUp />}
+              label="Planificación"
+              isActive={activeTab === 'planning'}
+              onClick={() => setActiveTab('planning')}
+            />
+          </TabsListGrid>
 
-          <TabsContent value="list">
+          <TabsContent value="activos">
             <Card>
               <CardHeader>
-                <CardTitle>Registros de Apareamiento</CardTitle>
+                <CardTitle>Apareamientos Activos</CardTitle>
               </CardHeader>
               <CardContent>
                 <BreedingRecordsList 
-                  records={breedingRecords} 
+                  records={activeRecords} 
                   animalNames={animalNames}
                   onRecordClick={handleRecordClick}
+                  emptyMessage="No hay apareamientos activos en este momento."
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="historial">
+            <Card>
+              <CardHeader>
+                <CardTitle>Historial de Apareamientos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BreedingRecordsList 
+                  records={completedRecords} 
+                  animalNames={animalNames}
+                  onRecordClick={handleRecordClick}
+                  emptyMessage="No hay apareamientos completados en el historial."
                 />
               </CardContent>
             </Card>

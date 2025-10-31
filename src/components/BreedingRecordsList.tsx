@@ -12,12 +12,14 @@ interface BreedingRecordsListProps {
   records: BreedingRecord[];
   animalNames: Record<string, string>;
   onRecordClick?: (record: BreedingRecord) => void;
+  emptyMessage?: string;
 }
 
 const BreedingRecordsList: React.FC<BreedingRecordsListProps> = ({ 
   records, 
-  animalNames, 
-  onRecordClick
+  animalNames,
+  onRecordClick,
+  emptyMessage = "No hay registros de apareamiento disponibles."
 }) => {
   const getStatusLabel = (status: BreedingRecord['status']) => {
     const labels = {
@@ -52,19 +54,13 @@ const BreedingRecordsList: React.FC<BreedingRecordsListProps> = ({
     return labels[method];
   };
 
-  if (records.length === 0) {
+  if (!records || records.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-8">
-          <Heart className="w-12 h-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No hay registros de apareamiento</h3>
-          <p className="text-gray-500 text-center">
-            Comienza agregando el primer registro de apareamiento.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="text-center py-8 text-muted-foreground">
+        {emptyMessage}
+      </div>
     );
-  };
+  }
 
   return (
     <div className="space-y-4">
