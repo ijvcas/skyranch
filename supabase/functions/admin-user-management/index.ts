@@ -1,9 +1,17 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Schema validation for input security
+const AdminActionSchema = z.object({
+  action: z.enum(['force_password_update']),
+  email: z.string().email().max(255),
+  newPassword: z.string().min(12).max(128),
+});
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -73,7 +81,26 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { action, email, newPassword } = await req.json();
+    // Parse and validate request data with Zod
+    let requestData;
+    try {
+      const rawData = await req.json();
+      requestData = AdminActionSchema.parse(rawData);
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        console.error('Validation error:', validationError.errors);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Validation error',
+            details: validationError.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw validationError;
+    }
+
+    const { action, email, newPassword } = requestData;
 
     console.log(`Admin ${user.email} performing action: ${action} for user: ${email}`);
 

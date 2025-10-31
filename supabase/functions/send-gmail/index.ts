@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,18 +11,24 @@ const corsHeaders = {
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-interface GmailRequest {
-  to: string;
-  subject: string;
-  html: string;
-  accessToken?: string;
-  senderName?: string;
-  organizationName?: string;
-  metadata?: {
-    tags?: Array<{ name: string; value: string }>;
-    headers?: Record<string, string>;
-  };
-}
+// Schema validation for input security
+const GmailRequestSchema = z.object({
+  to: z.string().email().max(255),
+  subject: z.string().min(1).max(998),
+  html: z.string().max(10 * 1024 * 1024), // 10MB limit
+  accessToken: z.string().optional(),
+  senderName: z.string().max(100).optional(),
+  organizationName: z.string().max(100).optional(),
+  metadata: z.object({
+    tags: z.array(z.object({
+      name: z.string(),
+      value: z.string()
+    })).optional(),
+    headers: z.record(z.string()).optional()
+  }).optional()
+});
+
+type GmailRequest = z.infer<typeof GmailRequestSchema>;
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -98,11 +105,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`✅ [GMAIL SKYRANCH] User has ${userRole.role} role - permission granted`);
     
+    // Parse and validate request data with Zod
     let requestData: GmailRequest;
     try {
-      requestData = await req.json();
+      const rawData = await req.json();
+      requestData = GmailRequestSchema.parse(rawData);
     } catch (parseError) {
-      console.error('❌ [GMAIL SKYRANCH] Failed to parse request JSON:', parseError);
+      console.error('❌ [GMAIL SKYRANCH] Request validation failed:', parseError);
+      
+      if (parseError instanceof z.ZodError) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'validation_error',
+          message: 'Invalid request data',
+          details: parseError.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+        }), {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+      
       return new Response(JSON.stringify({
         success: false,
         error: 'invalid_json',

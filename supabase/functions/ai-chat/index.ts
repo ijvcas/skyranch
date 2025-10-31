@@ -1,11 +1,17 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Schema validation for input security
+const ChatRequestSchema = z.object({
+  message: z.string().min(1).max(50000), // 50K character limit
+});
 
 serve(async (req) => {
   console.log('🤖 AI Chat - Simple ChatGPT-like assistant');
@@ -15,25 +21,49 @@ serve(async (req) => {
   }
 
   try {
-    // Parse request
+    // Parse and validate request
     let message: string;
     let file: File | null = null;
 
     const contentType = req.headers.get('content-type') || '';
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
-      message = formData.get('message') as string;
+      const rawMessage = formData.get('message') as string;
       file = formData.get('file') as File;
+      
+      // Validate message with Zod
+      try {
+        const validated = ChatRequestSchema.parse({ message: rawMessage });
+        message = validated.message;
+      } catch (validationError) {
+        if (validationError instanceof z.ZodError) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Validation error',
+              details: validationError.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw validationError;
+      }
     } else {
-      const body = await req.json();
-      message = body.message;
-    }
-    
-    if (!message) {
-      return new Response(
-        JSON.stringify({ error: 'Message is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      try {
+        const body = await req.json();
+        const validated = ChatRequestSchema.parse(body);
+        message = validated.message;
+      } catch (validationError) {
+        if (validationError instanceof z.ZodError) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Validation error',
+              details: validationError.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw validationError;
+      }
     }
 
     // Initialize Supabase

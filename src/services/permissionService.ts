@@ -1,8 +1,32 @@
+/**
+ * Permission Service
+ * 
+ * SECURITY NOTE: Client-side permission management for UI/UX
+ * 
+ * ⚠️ IMPORTANT: This service is for USER INTERFACE control ONLY
+ * - Determines what buttons/links/pages to show users
+ * - Provides convenient permission checking for components
+ * - Caches role/permission data to avoid repeated database queries
+ * 
+ * 🔒 SECURITY ENFORCEMENT is at the server level:
+ * - Row Level Security (RLS) policies on all database tables
+ * - Edge functions verify user authentication and roles independently
+ * - Database functions use SECURITY DEFINER with proper scoping
+ * 
+ * Client-side checks CANNOT be trusted for security because:
+ * - JavaScript can be modified in browser DevTools
+ * - localStorage can be manually edited
+ * - API calls can be crafted outside the UI
+ * 
+ * Even if an attacker bypasses these client checks, the database RLS policies
+ * will block unauthorized operations at the data layer.
+ */
+
 import { supabase } from '@/integrations/supabase/client';
 import { getCachedUserRole, setCachedUserRole, getCachedPermission, setCachedPermission } from './permissionCache';
 import type { User } from '@supabase/supabase-js';
 
-export type Permission = 
+export type Permission =
   | 'animals_view' | 'animals_edit' | 'animals_delete' | 'animals_create' | 'animals_declare_death' | 'animals_declare_sale'
   | 'lots_manage' | 'health_records' | 'breeding_records' | 'calendar_manage'
   | 'cadastral_view' | 'cadastral_edit' | 'cadastral_create' | 'cadastral_delete'

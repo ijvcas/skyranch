@@ -7,6 +7,29 @@ import { UserRole, Permission, getCurrentUserRole } from '@/services/permissionS
 import { ROLE_PERMISSIONS } from '@/services/permissionService';
 import { permissionCache } from '@/services/permissionCache';
 
+/**
+ * SECURITY NOTE: Client-side authentication context
+ * 
+ * This context provides authentication state and convenience methods for the UI/UX layer.
+ * 
+ * ⚠️ CRITICAL SECURITY BOUNDARY:
+ * - Client-side permission checks are for USER EXPERIENCE ONLY
+ * - They control what UI elements are shown/hidden
+ * - They DO NOT provide any actual security
+ * 
+ * 🔒 ACTUAL SECURITY ENFORCEMENT happens at:
+ * 1. Database level: Row Level Security (RLS) policies check auth.uid()
+ * 2. Edge functions: Independent role verification before operations
+ * 3. RPC functions: SECURITY DEFINER with proper user scoping
+ * 
+ * An attacker can modify client state (localStorage, React context) to appear as admin,
+ * but they CANNOT bypass RLS policies or edge function authentication. All database
+ * operations will still be blocked at the server level.
+ * 
+ * Example: Even if userRole is manipulated to "admin" in this context, the database
+ * query SELECT * FROM app_users will still only return the user's own record due to RLS.
+ */
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
