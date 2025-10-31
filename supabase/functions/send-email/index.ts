@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -8,6 +9,15 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Zod schema for runtime validation
+const EmailRequestSchema = z.object({
+  to: z.string().email().max(255),
+  subject: z.string().min(1).max(200),
+  html: z.string().min(1).max(100000),
+  senderName: z.string().max(100).optional(),
+  organizationName: z.string().max(100).optional()
+});
 
 interface EmailRequest {
   to: string;
@@ -26,19 +36,20 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log('📧 Email function called');
     
-    const { to, subject, html, senderName, organizationName }: EmailRequest = await req.json();
-    
-    // Validate required fields
-    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const MAX_EMAIL_LENGTH = 255;
-    const MAX_SUBJECT_LENGTH = 200;
-    const MAX_HTML_LENGTH = 100000;
-    
-    if (!to || !subject || !html) {
+    // Parse and validate request with Zod
+    let requestData: EmailRequest;
+    try {
+      const rawData = await req.json();
+      requestData = EmailRequestSchema.parse(rawData);
+    } catch (validationError) {
+      console.error('❌ Validation failed:', validationError);
+      const errorMessage = validationError instanceof z.ZodError
+        ? `Validation failed: ${validationError.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`
+        : 'Invalid request data';
       return new Response(
         JSON.stringify({ 
           error: 'validation_error',
-          message: 'Missing required fields: to, subject, or html'
+          message: errorMessage
         }),
         {
           status: 400,
@@ -47,48 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
     
-    // Validate email format and length
-    if (typeof to !== 'string' || to.length > MAX_EMAIL_LENGTH || !EMAIL_REGEX.test(to)) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'validation_error',
-          message: 'Invalid email address format or length'
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
-    
-    // Validate subject length
-    if (typeof subject !== 'string' || subject.trim().length === 0 || subject.length > MAX_SUBJECT_LENGTH) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'validation_error',
-          message: `Subject must be between 1 and ${MAX_SUBJECT_LENGTH} characters`
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
-    
-    // Validate HTML content length
-    if (typeof html !== 'string' || html.trim().length === 0 || html.length > MAX_HTML_LENGTH) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'validation_error',
-          message: `HTML content must be between 1 and ${MAX_HTML_LENGTH} characters`
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
-    
+    const { to, subject, html, senderName, organizationName } = requestData;
     console.log(`📧 Sending email to: ${to}, subject: ${subject}`);
 
     // Use verified skyranch.es domain

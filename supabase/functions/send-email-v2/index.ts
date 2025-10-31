@@ -1,12 +1,28 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Resend } from "npm:resend@2.0.0";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { EmailRequestV2 } from './types.ts';
 import { EmailValidator } from './validator.ts';
 import { PayloadBuilder } from './payloadBuilder.ts';
 import { ResponseBuilder } from './responseBuilder.ts';
 import { EmailErrorHandler } from './errorHandler.ts';
+
+// Zod schema for runtime validation
+const EmailRequestSchema = z.object({
+  to: z.string().email().max(255),
+  subject: z.string().min(1).max(200),
+  html: z.string().min(1).max(100000),
+  senderName: z.string().max(100).optional(),
+  organizationName: z.string().max(100).optional(),
+  metadata: z.object({
+    tags: z.array(z.object({
+      name: z.string(),
+      value: z.string()
+    })).optional(),
+    headers: z.record(z.string()).optional()
+  }).optional()
+});
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -85,10 +101,15 @@ const handler = async (req: Request): Promise<Response> => {
     
     let requestData: EmailRequestV2;
     try {
-      requestData = await req.json();
+      const rawData = await req.json();
+      // Validate with Zod for type safety and security
+      requestData = EmailRequestSchema.parse(rawData);
     } catch (parseError) {
-      console.error('❌ [EMAIL V2] Failed to parse request JSON:', parseError);
-      const errorResponse = EmailErrorHandler.createValidationError('Invalid JSON in request body', parseError);
+      console.error('❌ [EMAIL V2] Failed to parse or validate request:', parseError);
+      const errorMessage = parseError instanceof z.ZodError 
+        ? `Validation failed: ${parseError.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`
+        : 'Invalid JSON in request body';
+      const errorResponse = EmailErrorHandler.createValidationError(errorMessage, parseError);
       return new Response(JSON.stringify(errorResponse), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
