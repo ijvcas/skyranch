@@ -11,13 +11,14 @@ const CREDENTIALS_KEY = 'farmika_biometric_credentials';
 export class BiometricService {
   /**
    * Check if biometric authentication is available on this device
+   * Note: Only available on native platforms (iOS/Android) for security reasons
    */
   static async isAvailable(): Promise<boolean> {
     try {
-      // Check if we're on a native platform or modern web browser
+      // Biometric authentication only supported on native platforms
+      // Web browsers don't have secure credential storage equivalent to native keychain
       if (!Capacitor.isNativePlatform()) {
-        // Check for Web Authentication API (WebAuthn) support
-        return !!(window.PublicKeyCredential);
+        return false;
       }
 
       const result = await NativeBiometric.isAvailable();
@@ -87,13 +88,13 @@ export class BiometricService {
 
   /**
    * Authenticate user with biometrics
+   * Only works on native platforms (iOS/Android)
    */
   static async authenticate(reason: string = 'Iniciar sesión en FARMIKA'): Promise<boolean> {
     try {
       if (!Capacitor.isNativePlatform()) {
-        // Web: Auto-login with saved credentials (no biometric prompt)
-        console.log('🔐 [BiometricService] Web platform - checking saved credentials...');
-        return true;
+        console.error('❌ [BiometricService] Biometric authentication only available on native platforms');
+        return false;
       }
 
       // Native platform implementation
@@ -127,29 +128,26 @@ export class BiometricService {
   }
 
   /**
-   * Save credentials securely
+   * Save credentials securely using native keychain
+   * Only works on native platforms (iOS/Android)
    */
   static async saveCredentials(email: string, password: string): Promise<void> {
     try {
-      console.log('💾 [BiometricService] Saving credentials to storage...');
-      const credentials: StoredCredentials = { email, password };
-      
-      if (Capacitor.isNativePlatform()) {
-        // Native: Use secure keychain
-        console.log('💾 [BiometricService] Calling native setCredentials...');
-        await NativeBiometric.setCredentials({
-          username: email,
-          password: password,
-          server: CREDENTIALS_KEY,
-        });
-        console.log('💾 [BiometricService] Saved to native storage');
-        await new Promise(resolve => setTimeout(resolve, 200));
-      } else {
-        // Web: Use localStorage for auto-login
-        const encoded = btoa(JSON.stringify(credentials));
-        localStorage.setItem(CREDENTIALS_KEY, encoded);
-        console.log('💾 [BiometricService] Saved to localStorage');
+      if (!Capacitor.isNativePlatform()) {
+        throw new Error('Biometric authentication only available on native mobile platforms');
       }
+
+      console.log('💾 [BiometricService] Saving credentials to native secure storage...');
+      
+      // Native: Use secure keychain (iOS Keychain / Android Keystore)
+      console.log('💾 [BiometricService] Calling native setCredentials...');
+      await NativeBiometric.setCredentials({
+        username: email,
+        password: password,
+        server: CREDENTIALS_KEY,
+      });
+      console.log('💾 [BiometricService] Saved to native storage');
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       console.log('✅ [BiometricService] Credentials saved successfully!');
     } catch (error) {
@@ -160,34 +158,27 @@ export class BiometricService {
 
 
   /**
-   * Retrieve stored credentials
+   * Retrieve stored credentials from native keychain
+   * Only works on native platforms (iOS/Android)
    */
   static async getCredentials(): Promise<StoredCredentials | null> {
     try {
-      console.log('🔐 [BiometricService] Getting credentials from storage...');
-      if (Capacitor.isNativePlatform()) {
-        const result = await NativeBiometric.getCredentials({
-          server: CREDENTIALS_KEY,
-        });
-        
-        const credentials = {
-          email: result.username,
-          password: result.password,
-        };
-        console.log('🔐 [BiometricService] Found credentials:', credentials.email ? 'YES' : 'NO');
-        return credentials;
-      } else {
-        // Web fallback
-        const encoded = localStorage.getItem(CREDENTIALS_KEY);
-        if (!encoded) {
-          console.log('🔐 [BiometricService] Found credentials: NO');
-          return null;
-        }
-        
-        const credentials = JSON.parse(atob(encoded));
-        console.log('🔐 [BiometricService] Found credentials:', credentials && credentials.email ? 'YES' : 'NO');
-        return credentials;
+      if (!Capacitor.isNativePlatform()) {
+        console.log('🔐 [BiometricService] Biometric authentication only available on native platforms');
+        return null;
       }
+
+      console.log('🔐 [BiometricService] Getting credentials from native secure storage...');
+      const result = await NativeBiometric.getCredentials({
+        server: CREDENTIALS_KEY,
+      });
+      
+      const credentials = {
+        email: result.username,
+        password: result.password,
+      };
+      console.log('🔐 [BiometricService] Found credentials:', credentials.email ? 'YES' : 'NO');
+      return credentials;
     } catch (error) {
       console.error('Failed to retrieve credentials:', error);
       return null;
@@ -195,7 +186,7 @@ export class BiometricService {
   }
 
   /**
-   * Delete stored credentials
+   * Delete stored credentials from native keychain
    */
   static async deleteCredentials(): Promise<void> {
     try {
@@ -203,9 +194,8 @@ export class BiometricService {
         await NativeBiometric.deleteCredentials({
           server: CREDENTIALS_KEY,
         });
-      } else {
-        localStorage.removeItem(CREDENTIALS_KEY);
       }
+      // No web implementation - credentials not stored on web for security
     } catch (error) {
       console.error('Failed to delete credentials:', error);
     }
