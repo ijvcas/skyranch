@@ -181,32 +181,44 @@ const UserActivityLogs: React.FC = () => {
                 {isOpen && (
                   <div className="mt-3 rounded-md bg-muted/30 p-3">
                     <div className="text-xs text-muted-foreground mb-2">Últimos eventos</div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
+                    <div className="overflow-x-auto -mx-3 px-3">
+                      <table className="w-full text-sm min-w-[600px]">
                         <thead>
                           <tr className="text-left text-xs text-muted-foreground">
-                            <th className="py-2 pr-3">Fecha</th>
-                            <th className="py-2 pr-3">Evento</th>
-                            <th className="py-2 pr-3">Método</th>
-                            <th className="py-2 pr-3">Ruta</th>
-                            <th className="py-2 pr-3">OK</th>
-                            <th className="py-2 pr-3">Código</th>
+                            <th className="py-2 pr-2 min-w-[140px]" title="Fecha">Fecha</th>
+                            <th className="py-2 pr-2 min-w-[100px]" title="Evento">Evento</th>
+                            <th className="py-2 pr-2 min-w-[70px]" title="Método">Método</th>
+                            <th className="py-2 pr-2 min-w-[120px]" title="Ruta">Ruta</th>
+                            <th className="py-2 pr-2 min-w-[50px] text-center" title="OK">OK</th>
+                            <th className="py-2 min-w-[70px]" title="Código">Código</th>
                           </tr>
                         </thead>
                         <tbody>
                           {(recentEvents[u.id] || []).map(ev => (
                             <tr key={ev.id || ev.created_at} className="border-t">
-                              <td className="py-2 pr-3 whitespace-nowrap">{ev.created_at ? formatDateTime(ev.created_at) : ''}</td>
-                              <td className="py-2 pr-3">{ev.event}</td>
-                              <td className="py-2 pr-3">{ev.method || '-'}</td>
-                              <td className="py-2 pr-3">{ev.path || '-'}</td>
-                              <td className="py-2 pr-3">{ev.success === false ? 'No' : 'Sí'}</td>
-                              <td className="py-2 pr-3">{ev.error_code || '-'}</td>
+                              <td className="py-2 pr-2 whitespace-nowrap text-xs" title={ev.created_at ? formatDateTime(ev.created_at) : ''}>
+                                {ev.created_at ? formatDateTime(ev.created_at) : ''}
+                              </td>
+                              <td className="py-2 pr-2 max-w-[100px] truncate" title={ev.event}>
+                                {ev.event}
+                              </td>
+                              <td className="py-2 pr-2 text-xs" title={ev.method || '-'}>
+                                {ev.method || '-'}
+                              </td>
+                              <td className="py-2 pr-2 max-w-[120px] truncate text-xs" title={ev.path || '-'}>
+                                {ev.path || '-'}
+                              </td>
+                              <td className="py-2 pr-2 text-center text-xs">
+                                {ev.success === false ? 'No' : 'Sí'}
+                              </td>
+                              <td className="py-2 text-xs" title={ev.error_code || '-'}>
+                                {ev.error_code || '-'}
+                              </td>
                             </tr>
                           ))}
                           {(!recentEvents[u.id] || recentEvents[u.id].length === 0) && (
                             <tr>
-                              <td className="py-3 text-sm text-muted-foreground" colSpan={6}>Sin eventos recientes</td>
+                              <td className="py-3 text-sm text-muted-foreground text-center" colSpan={6}>Sin eventos recientes</td>
                             </tr>
                           )}
                         </tbody>
