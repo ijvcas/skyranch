@@ -20,6 +20,7 @@ import OfflineIndicator from '@/components/OfflineIndicator';
 import { offlineStorage } from '@/services/offline/offlineStorage';
 import { syncService } from '@/services/offline/syncService';
 import { mobilePushService } from '@/services/mobile/pushNotificationService';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 // OPTIMIZED: Lazy load heavy pages for better initial bundle size
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
@@ -76,6 +77,18 @@ function AppContent() {
       logAppOpenOncePerSession();
     }
   }, [loading, user]);
+
+  // Hide splash screen after app is initialized
+  useEffect(() => {
+    const hideSplash = async () => {
+      if (!loading) {
+        // Ensure minimum splash time for branding
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await SplashScreen.hide();
+      }
+    };
+    hideSplash();
+  }, [loading]);
   
   return (
     <div className="App">
