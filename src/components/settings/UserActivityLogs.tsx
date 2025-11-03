@@ -182,15 +182,27 @@ const UserActivityLogs: React.FC = () => {
                   <div className="mt-3 rounded-md bg-muted/30 p-3">
                     <div className="text-xs text-muted-foreground mb-2">Últimos eventos</div>
                     <div className="overflow-x-auto -mx-3 px-3">
-                      <table className="w-full text-sm min-w-[600px]">
+                      <table className="w-full text-sm">
                         <thead>
                           <tr className="text-left text-xs text-muted-foreground">
-                            <th className="py-2 pr-2 min-w-[140px]" title="Fecha">Fecha</th>
-                            <th className="py-2 pr-2 min-w-[100px]" title="Evento">Evento</th>
-                            <th className="py-2 pr-2 min-w-[70px]" title="Método">Método</th>
-                            <th className="py-2 pr-2 min-w-[120px]" title="Ruta">Ruta</th>
-                            <th className="py-2 pr-2 min-w-[50px] text-center" title="OK">OK</th>
-                            <th className="py-2 min-w-[70px]" title="Código">Código</th>
+                            <th className="py-2 pr-2 whitespace-nowrap" title="Fecha">
+                              <span className="hidden sm:inline">Fecha</span>
+                              <span className="sm:hidden">Fch.</span>
+                            </th>
+                            <th className="py-2 pr-2 whitespace-nowrap" title="Evento">
+                              <span className="hidden sm:inline">Evento</span>
+                              <span className="sm:hidden">Ev.</span>
+                            </th>
+                            <th className="py-2 pr-2 whitespace-nowrap" title="Método">
+                              <span className="hidden sm:inline">Método</span>
+                              <span className="sm:hidden">Mét.</span>
+                            </th>
+                            <th className="py-2 pr-2 whitespace-nowrap" title="Ruta">Ruta</th>
+                            <th className="py-2 pr-2 text-center whitespace-nowrap" title="OK">OK</th>
+                            <th className="py-2 whitespace-nowrap" title="Código">
+                              <span className="hidden sm:inline">Código</span>
+                              <span className="sm:hidden">Cód.</span>
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
