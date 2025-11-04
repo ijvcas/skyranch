@@ -8,6 +8,15 @@ import { checkPermission } from '@/services/permissionService';
 import { useAnimalNames } from '@/hooks/useAnimalNames';
 import { format } from 'date-fns';
 
+const getFilteredNotes = (notes: string | null) => {
+  if (!notes) return '';
+  return notes
+    .replace(/\[Image Transform Data: .*?\]\n?/g, '')
+    .replace(/\[Image Transform Applied: .*?\]\n?/g, '')
+    .replace(/Image Transform Applied: .*?\n?/g, '')
+    .trim();
+};
+
 export const useAnimalEditLogic = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -118,7 +127,7 @@ export const useAnimalEditLogic = () => {
       const fatherDisplay = getNameOnly(animal.fatherId) || animal.fatherId || '';
 
       // Derive a human-friendly note if it came from a breeding record
-      const rawNotes = animal.notes || '';
+      const rawNotes = getFilteredNotes(animal.notes);
       let derivedNotes = rawNotes;
       if (rawNotes.toLowerCase().includes('registro de apareamiento')) {
         const motherName = getDisplayName(animal.motherId) || motherDisplay || 'madre desconocida';

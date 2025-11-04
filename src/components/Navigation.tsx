@@ -15,6 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import NotificationBell from './NotificationBell';
 import { useFarmBranding } from '@/hooks/useFarmBranding';
+import { hapticService } from '@/services/mobile/hapticService';
 
 const Navigation = () => {
   const { branding, isLoading } = useFarmBranding();
@@ -56,6 +57,7 @@ const Navigation = () => {
               <NavLink
                 key={item.to}
                 to={item.to}
+                onClick={() => hapticService.light()}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap h-10',
@@ -73,6 +75,7 @@ const Navigation = () => {
             {/* Add Animal Button */}
             <NavLink
               to="/animals/new"
+              onClick={() => hapticService.medium()}
               className="flex items-center px-4 py-2 ml-4 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-md text-sm font-medium transition-colors whitespace-nowrap h-10"
             >
               <PlusCircle className="w-4 h-4 mr-2 flex-shrink-0" />

@@ -27,7 +27,7 @@ import { useAIChatDialog } from '@/contexts/AIChatContext';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useFarmProfile } from '@/hooks/useFarmProfile';
 import NotificationBell from './NotificationBell';
-
+import { hapticService } from '@/services/mobile/hapticService';
 
 const HeaderWithDropdown = () => {
   const navigate = useNavigate();
@@ -53,6 +53,7 @@ const HeaderWithDropdown = () => {
 
   const handleSignOut = async () => {
     try {
+      hapticService.heavy();
       setIsMenuOpen(false);
       await signOut();
       navigate('/login');
@@ -62,6 +63,7 @@ const HeaderWithDropdown = () => {
   };
 
   const handleNavigation = () => {
+    hapticService.light();
     setIsMenuOpen(false);
   };
 
