@@ -16,6 +16,7 @@ const AnimalEdit = () => {
     updateMutation,
     handleInputChange,
     handleImageChange,
+    handleLocationChange,
     handleSubmit,
     navigate
   } = useAnimalEditLogic();
@@ -70,6 +71,7 @@ const AnimalEdit = () => {
         updateMutation={updateMutation}
         onInputChange={handleInputChange}
         onImageChange={handleImageChange}
+        onLocationChange={handleLocationChange}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
       />

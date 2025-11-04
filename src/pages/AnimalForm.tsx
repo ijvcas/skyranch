@@ -32,6 +32,7 @@ const AnimalForm = () => {
     healthStatus: 'healthy',
     notes: '',
     image: null as string | null,
+    location: null as any,
     // Pedigree data
     motherId: '',
     fatherId: '',
@@ -94,6 +95,10 @@ const AnimalForm = () => {
     setFormData(prev => ({ ...prev, image: imageUrl }));
   };
 
+  const handleLocationChange = (location: any) => {
+    setFormData(prev => ({ ...prev, location }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPermissionError(null);
@@ -151,7 +156,8 @@ const AnimalForm = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <BasicInformationForm 
               formData={formData} 
-              onInputChange={handleInputChange} 
+              onInputChange={handleInputChange}
+              onLocationChange={handleLocationChange}
             />
             
             <HealthStatusForm 

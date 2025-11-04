@@ -27,6 +27,7 @@ export const useAnimalEditLogic = () => {
     healthStatus: 'healthy',
     notes: '',
     image: null as string | null,
+    location: null as any,
     lifecycleStatus: 'active',
     dateOfDeath: '',
     causeOfDeath: '',
@@ -144,6 +145,7 @@ export const useAnimalEditLogic = () => {
         healthStatus: animal.healthStatus || 'healthy',
         notes: derivedNotes,
         image: animal.image || null,
+        location: (animal as any).location || null,
         lifecycleStatus: animal.lifecycleStatus || 'active',
         dateOfDeath: animal.dateOfDeath || '',
         causeOfDeath: animal.causeOfDeath || '',
@@ -273,6 +275,10 @@ export const useAnimalEditLogic = () => {
     setFormData(prev => ({ ...prev, image: imageUrl }));
   };
 
+  const handleLocationChange = (location: any) => {
+    setFormData(prev => ({ ...prev, location }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPermissionError(null);
@@ -300,6 +306,7 @@ export const useAnimalEditLogic = () => {
     updateMutation,
     handleInputChange,
     handleImageChange,
+    handleLocationChange,
     handleSubmit,
     navigate
   };

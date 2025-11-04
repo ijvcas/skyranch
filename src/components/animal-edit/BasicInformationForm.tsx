@@ -4,14 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import LocationCapture from '@/components/location/LocationCapture';
+import type { LocationCoordinates } from '@/services/mobile/locationService';
 
 interface BasicInformationFormProps {
   formData: any;
   onInputChange: (field: string, value: string) => void;
+  onLocationChange?: (location: LocationCoordinates | null) => void;
   disabled?: boolean;
 }
 
-const BasicInformationForm = ({ formData, onInputChange, disabled = false }: BasicInformationFormProps) => {
+const BasicInformationForm = ({ formData, onInputChange, onLocationChange, disabled = false }: BasicInformationFormProps) => {
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -169,6 +172,16 @@ const BasicInformationForm = ({ formData, onInputChange, disabled = false }: Bas
             spellCheck="false"
           />
         </div>
+
+        {onLocationChange && (
+          <div>
+            <Label>Ubicación GPS</Label>
+            <LocationCapture
+              onLocationCaptured={onLocationChange}
+              currentLocation={formData.location}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

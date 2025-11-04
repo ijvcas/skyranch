@@ -123,6 +123,24 @@ const formatBirthDate = (birthDate: string) => {
             <label className="text-sm font-medium text-gray-600">Color</label>
             <p className="text-gray-900">{animal.color}</p>
           </div>
+          {(animal as any).location && (
+            <div>
+              <label className="text-sm font-medium text-gray-600">Ubicación GPS</label>
+              <p className="text-gray-900">
+                {(animal as any).location.latitude.toFixed(6)}, {(animal as any).location.longitude.toFixed(6)}
+              </p>
+              <button
+                onClick={() => {
+                  const lat = (animal as any).location.latitude;
+                  const lng = (animal as any).location.longitude;
+                  window.open(`https://maps.apple.com/?ll=${lat},${lng}`, '_blank');
+                }}
+                className="text-sm text-primary hover:underline"
+              >
+                Ver en Mapas
+              </button>
+            </div>
+          )}
         </div>
 
 {finalNotes && (

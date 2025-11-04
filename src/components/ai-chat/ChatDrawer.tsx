@@ -2,11 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Trash2, Paperclip, FileIcon, Copy, Check, Download, X } from 'lucide-react';
+import { Send, Loader2, Trash2, Paperclip, FileIcon, Copy, Check, Download, X, Camera } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { RightSheet, RightSheetHeader, RightSheetContent, RightSheetFooter } from '@/components/ui/right-sheet';
+import { cameraService } from '@/services/mobile/cameraService';
+import { actionSheetService } from '@/services/mobile/actionSheetService';
 
 interface ChatDrawerProps {
   open: boolean;
@@ -251,6 +253,46 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     fileInputRef.current?.click();
   };
 
+  const handleCameraClick = async () => {
+    if (!cameraService.isAvailable()) {
+      toast.error('Cámara solo disponible en app móvil');
+      return;
+    }
+
+    try {
+      await actionSheetService.showPhotoSourceOptions(
+        async () => {
+          const photoDataUrl = await cameraService.takePicture();
+          if (photoDataUrl) {
+            const file = await dataURLtoFile(photoDataUrl, 'captured-photo.jpg');
+            setSelectedFile(file);
+          }
+        },
+        async () => {
+          const photoDataUrl = await cameraService.selectFromGallery();
+          if (photoDataUrl) {
+            const file = await dataURLtoFile(photoDataUrl, 'gallery-photo.jpg');
+            setSelectedFile(file);
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Camera error:', error);
+    }
+  };
+
+  const dataURLtoFile = async (dataUrl: string, filename: string): Promise<File> => {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
   const handleClearHistory = () => {
     if (confirm('¿Estás seguro de que quieres borrar todo el historial de chat?')) {
       clearHistory();
@@ -299,8 +341,8 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                   ayudarte con tareas técnicas, creativas y mucho más.
                 </p>
                 <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
-                  <Paperclip className="h-3 w-3" />
-                  Adjunta archivos o imágenes para análisis con IA
+                  <Camera className="h-3 w-3" />
+                  Toma fotos para identificar razas de animales o especies de plantas
                 </p>
               </div>
             )}
@@ -436,7 +478,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                     handleSubmit(e as any);
                   }
                 }}
-                placeholder="Escribe tu pregunta... (Shift+Enter para nueva línea)"
+                placeholder="Escribe tu pregunta o toma una foto..."
                 disabled={isLoading}
                 className="flex-1 min-h-[60px] max-h-[200px] resize-y"
                 rows={2}
@@ -447,6 +489,19 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                   fontSize: '16px'
                 }}
               />
+              
+              {/* Camera button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleCameraClick}
+                disabled={isLoading}
+                title="Tomar foto"
+                className="flex-shrink-0"
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
               
               {/* File upload button */}
               <Button

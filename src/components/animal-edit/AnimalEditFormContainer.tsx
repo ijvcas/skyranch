@@ -13,6 +13,7 @@ interface AnimalEditFormContainerProps {
   updateMutation: any;
   onInputChange: (field: string, value: string) => void;
   onImageChange: (imageUrl: string | null) => void;
+  onLocationChange?: (location: any) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }
@@ -23,6 +24,7 @@ const AnimalEditFormContainer: React.FC<AnimalEditFormContainerProps> = ({
   updateMutation,
   onInputChange,
   onImageChange,
+  onLocationChange,
   onSubmit,
   onCancel
 }) => {
@@ -42,7 +44,8 @@ const AnimalEditFormContainer: React.FC<AnimalEditFormContainerProps> = ({
         <form onSubmit={onSubmit} className="space-y-6">
           <BasicInformationForm 
             formData={formData} 
-            onInputChange={onInputChange} 
+            onInputChange={onInputChange}
+            onLocationChange={onLocationChange}
           />
           
           <HealthStatusForm 
