@@ -59,5 +59,18 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>FARMIKA necesita acceso a tu ubicación para registrar la ubicación de animales y eventos en el campo</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>FARMIKA necesita acceso a tu ubicación para registrar la ubicación de animales y eventos en el campo</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>FARMIKA necesita enviar notificaciones para recordarte eventos importantes sobre tus animales</string>
+	<key>NSContactsUsageDescription</key>
+	<string>FARMIKA necesita acceso a tus contactos para que puedas guardar información de veterinarios y compradores</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>FARMIKA necesita acceso a tu calendario para sincronizar eventos de tu granja</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>FARMIKA necesita acceso a recordatorios para crear recordatorios de eventos importantes</string>
+
 </dict>
 </plist>

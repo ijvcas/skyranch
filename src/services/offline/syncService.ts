@@ -4,12 +4,34 @@ import { toast } from 'sonner';
 
 class SyncService {
   private isSyncing = false;
+  private isPaused = false;
   private syncListeners: Array<(status: SyncStatus) => void> = [];
+
+  pauseSync(): void {
+    this.isPaused = true;
+    console.log('⏸️ Sync paused');
+  }
+
+  resumeSync(): void {
+    this.isPaused = false;
+    console.log('▶️ Sync resumed');
+    // Auto-sync pending operations when resumed
+    this.syncPendingOperations();
+  }
+
+  isPausedState(): boolean {
+    return this.isPaused;
+  }
 
   async syncPendingOperations(): Promise<SyncResult> {
     if (this.isSyncing) {
       console.log('⏸️ Sync already in progress');
       return { success: false, synced: 0, failed: 0, message: 'Sync in progress' };
+    }
+
+    if (this.isPaused) {
+      console.log('⏸️ Sync is paused');
+      return { success: false, synced: 0, failed: 0, message: 'Sync is paused' };
     }
 
     this.isSyncing = true;

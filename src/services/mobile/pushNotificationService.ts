@@ -1,6 +1,7 @@
 import { PushNotifications, Token, ActionPerformed } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 import { pushTokenService } from './pushTokenService';
+import { supabase } from '@/integrations/supabase/client';
 
 class MobilePushNotificationService {
   private token: string | null = null;
@@ -41,6 +42,8 @@ class MobilePushNotificationService {
     // Listen for push notifications
     await PushNotifications.addListener('pushNotificationReceived', (notification) => {
       console.log('📱 Push notification received:', notification);
+      // Auto-update badge when notification received
+      this.updateBadgeCount();
     });
 
     // Listen for notification actions
@@ -50,9 +53,13 @@ class MobilePushNotificationService {
       if (action.notification.data?.url) {
         window.location.href = action.notification.data.url;
       }
+      // Clear badge when notification tapped
+      this.updateBadgeCount();
     });
 
     console.log('✅ Push notification service initialized');
+    // Set initial badge count
+    await this.updateBadgeCount();
   }
 
   private async saveTokenToDatabase(token: string): Promise<void> {
@@ -67,6 +74,73 @@ class MobilePushNotificationService {
     if (!this.token) return;
     await pushTokenService.removeToken(this.token);
     this.token = null;
+  }
+
+  async setBadgeCount(count: number): Promise<void> {
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    try {
+      await PushNotifications.removeAllDeliveredNotifications();
+      // Note: Capacitor doesn't have direct badge API, badge is updated via notifications
+      console.log('🔴 Badge count set to:', count);
+    } catch (error) {
+      console.error('❌ Error setting badge count:', error);
+    }
+  }
+
+  async clearBadge(): Promise<void> {
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    try {
+      await PushNotifications.removeAllDeliveredNotifications();
+      console.log('🔴 Badge cleared');
+    } catch (error) {
+      console.error('❌ Error clearing badge:', error);
+    }
+  }
+
+  async getBadgeCount(): Promise<number> {
+    if (!Capacitor.isNativePlatform()) {
+      return 0;
+    }
+
+    try {
+      // Calculate badge from unread notifications + upcoming events
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return 0;
+
+      // Get unread notifications count
+      const { count: unreadCount } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.user.id)
+        .eq('is_read', false);
+
+      // Get upcoming events count (next 7 days)
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+      
+      const { count: upcomingCount } = await supabase
+        .from('calendar_events')
+        .select('*', { count: 'exact', head: true })
+        .gte('event_date', new Date().toISOString())
+        .lte('event_date', sevenDaysFromNow.toISOString());
+
+      const totalCount = (unreadCount || 0) + (upcomingCount || 0);
+      return totalCount;
+    } catch (error) {
+      console.error('❌ Error getting badge count:', error);
+      return 0;
+    }
+  }
+
+  async updateBadgeCount(): Promise<void> {
+    const count = await this.getBadgeCount();
+    await this.setBadgeCount(count);
   }
 
   isAvailable(): boolean {
