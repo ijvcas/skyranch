@@ -114,9 +114,9 @@ class MobilePushNotificationService {
       if (!user.user) return 0;
 
       // Get unread notifications count
-      const { count: unreadCount } = await supabase
+      const { data: notifications } = await supabase
         .from('notifications')
-        .select('*', { count: 'exact', head: true })
+        .select('id')
         .eq('user_id', user.user.id)
         .eq('is_read', false);
 
@@ -124,13 +124,13 @@ class MobilePushNotificationService {
       const sevenDaysFromNow = new Date();
       sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
       
-      const { count: upcomingCount } = await supabase
+      const { data: events } = await supabase
         .from('calendar_events')
-        .select('*', { count: 'exact', head: true })
+        .select('id')
         .gte('event_date', new Date().toISOString())
         .lte('event_date', sevenDaysFromNow.toISOString());
 
-      const totalCount = (unreadCount || 0) + (upcomingCount || 0);
+      const totalCount = (notifications?.length || 0) + (events?.length || 0);
       return totalCount;
     } catch (error) {
       console.error('❌ Error getting badge count:', error);
