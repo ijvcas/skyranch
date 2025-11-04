@@ -39,7 +39,9 @@ const config: CapacitorConfig = {
         NSCameraUsageDescription: "FARMIKA necesita acceso a la cámara para tomar fotos de animales",
         NSPhotoLibraryUsageDescription: "FARMIKA necesita acceso a la galería para seleccionar fotos de animales",
         NSPhotoLibraryAddUsageDescription: "FARMIKA necesita permiso para guardar fotos en tu galería",
-        NSFaceIDUsageDescription: "FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta"
+        NSFaceIDUsageDescription: "FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta",
+        NSCalendarsUsageDescription: "FARMIKA necesita acceso al calendario para sincronizar eventos",
+        NSContactsUsageDescription: "FARMIKA necesita acceso a contactos para seleccionar veterinarios"
       },
       android: {
         permissions: [
