@@ -3,6 +3,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Edit, Eye, Trash2 } from 'lucide-react';
+import { actionSheetService } from '@/services/mobile/actionSheetService';
+import { hapticService } from '@/services/mobile/hapticService';
 
 interface AnimalCardActionsProps {
   animalId: string;
@@ -16,6 +18,20 @@ const AnimalCardActions: React.FC<AnimalCardActionsProps> = ({
   onDelete
 }) => {
   const navigate = useNavigate();
+
+  const handleDelete = async () => {
+    // Try native action sheet first
+    if (actionSheetService.isAvailable()) {
+      const confirmed = await actionSheetService.showDeleteConfirmation(animalName, 'animal');
+      if (confirmed) {
+        await hapticService.heavy();
+        onDelete(animalId, animalName);
+      }
+    } else {
+      // Fallback to component's own delete flow
+      onDelete(animalId, animalName);
+    }
+  };
 
   return (
     <div className="flex space-x-1 mt-4">
@@ -40,7 +56,7 @@ const AnimalCardActions: React.FC<AnimalCardActionsProps> = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => onDelete(animalId, animalName)}
+        onClick={handleDelete}
         className="flex-1 text-red-600 hover:text-red-700"
         aria-label={`Eliminar ${animalName}`}
         title={`Eliminar ${animalName}`}

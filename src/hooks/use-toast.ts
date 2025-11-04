@@ -149,6 +149,25 @@ function toast({ ...props }: Toast) {
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
+  // Add haptic feedback based on toast variant
+  if (typeof window !== 'undefined') {
+    import('@/services/mobile/hapticService').then(({ hapticService }) => {
+      const variant = props.variant;
+      if (variant === 'destructive') {
+        hapticService.error();
+      } else if (props.title?.toString().toLowerCase().includes('éxito') || 
+                 props.title?.toString().toLowerCase().includes('correcto')) {
+        hapticService.success();
+      } else if (props.title?.toString().toLowerCase().includes('advertencia')) {
+        hapticService.warning();
+      } else {
+        hapticService.light();
+      }
+    }).catch(() => {
+      // Silently fail if haptics not available
+    });
+  }
+
   dispatch({
     type: "ADD_TOAST",
     toast: {

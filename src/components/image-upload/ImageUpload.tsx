@@ -8,6 +8,7 @@ import ImageSelector from './ImageSelector';
 import ImageGallery from './ImageGallery';
 import { ImageUploadProps } from './types';
 import { cameraService } from '@/services/mobile/cameraService';
+import { actionSheetService } from '@/services/mobile/actionSheetService';
 import { toast } from 'sonner';
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
@@ -110,6 +111,23 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   };
 
+  const handlePhotoOptions = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+
+    // Try to use native action sheet if available
+    if (actionSheetService.isAvailable()) {
+      await actionSheetService.showPhotoSourceOptions(
+        handleTakePhoto,
+        handleSelectFromGallery,
+        handleFileUploadClick
+      );
+    } else {
+      // Fallback to showing buttons (current behavior)
+      // This will be shown by default on web
+    }
+  };
+
   const showCameraOptions = cameraService.isAvailable();
   const isMobile = cameraService.isMobile();
 
@@ -123,37 +141,52 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         />
       ) : showCameraOptions && isMobile ? (
         <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
+          {actionSheetService.isAvailable() ? (
             <Button
               type="button"
               variant="outline"
-              onClick={handleTakePhoto}
+              onClick={handlePhotoOptions}
               disabled={disabled || isTakingPhoto || isSelectingFromGallery}
               className="w-full"
             >
               <Camera className="w-4 h-4 mr-2" />
-              {isTakingPhoto ? 'Abriendo...' : 'Tomar Foto'}
+              Seleccionar Foto
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleSelectFromGallery}
-              disabled={disabled || isTakingPhoto || isSelectingFromGallery}
-              className="w-full"
-            >
-              <ImageIcon className="w-4 h-4 mr-2" />
-              {isSelectingFromGallery ? 'Abriendo...' : 'Galería'}
-            </Button>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleFileUploadClick}
-            disabled={disabled}
-            className="w-full text-sm"
-          >
-            O subir desde archivo
-          </Button>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleTakePhoto}
+                  disabled={disabled || isTakingPhoto || isSelectingFromGallery}
+                  className="w-full"
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  {isTakingPhoto ? 'Abriendo...' : 'Tomar Foto'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSelectFromGallery}
+                  disabled={disabled || isTakingPhoto || isSelectingFromGallery}
+                  className="w-full"
+                >
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  {isSelectingFromGallery ? 'Abriendo...' : 'Galería'}
+                </Button>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleFileUploadClick}
+                disabled={disabled}
+                className="w-full text-sm"
+              >
+                O subir desde archivo
+              </Button>
+            </>
+          )}
         </div>
       ) : (
         <ImageSelector

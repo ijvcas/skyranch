@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Edit, Trash2, Activity } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Activity, Share2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getAnimal } from '@/services/animalService';
 import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
@@ -13,6 +13,8 @@ import AnimalSidebar from '@/components/animal-detail/AnimalSidebar';
 import AnimalHealthRecords from '@/components/animal-detail/AnimalHealthRecords';
 import AnimalHistory from '@/components/animal-detail/AnimalHistory';
 import AnimalDocuments from '@/components/animal-detail/AnimalDocuments';
+import { shareService } from '@/services/mobile/shareService';
+import { toast } from 'sonner';
 
 const AnimalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +26,26 @@ const AnimalDetail = () => {
     queryFn: () => getAnimal(id!),
     enabled: !!id,
   });
+
+  const handleShare = async () => {
+    if (!animal) return;
+    
+    try {
+      await shareService.shareAnimal({
+        name: animal.name,
+        tag: animal.tag,
+        breed: animal.breed,
+        gender: animal.gender
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al compartir';
+      if (!message.includes('copiado al portapapeles')) {
+        toast.error(message);
+      } else {
+        toast.success(message);
+      }
+    }
+  };
 
   if (!id) {
     return (
@@ -78,6 +100,15 @@ const AnimalDetail = () => {
               <p className="text-gray-600">ID: #{animal.tag}</p>
             </div>
             <div className="flex gap-2 mt-4 md:mt-0 justify-center">
+              {shareService.isAvailable() && (
+                <Button
+                  variant="outline"
+                  onClick={handleShare}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Compartir
+                </Button>
+              )}
               <Button
                 onClick={() => navigate(`/animals/${animal.id}/edit`)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
