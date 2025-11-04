@@ -12,6 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCreateFieldReport } from '@/hooks/useFieldReports';
 import { useAnimalNames } from '@/hooks/useAnimalNames';
+import { useWeatherSettings } from '@/hooks/useWeatherSettings';
+import { useFarmWeather } from '@/hooks/useFarmWeather';
+import WeatherWidget from '@/components/weather/WeatherWidget';
 import PregnancyBirthSection from './sections/PregnancyBirthSection';
 import VeterinarySection from './sections/VeterinarySection';
 import HealthObservationsSection from './sections/HealthObservationsSection';
@@ -39,6 +42,8 @@ const FieldReportForm = ({ onSuccess }: FieldReportFormProps) => {
   
   const { mutate: createFieldReport, isPending } = useCreateFieldReport();
   const { animalNamesMap } = useAnimalNames();
+  const { data: weatherSettings } = useWeatherSettings();
+  const { data: weatherData } = useFarmWeather(weatherSettings?.lat, weatherSettings?.lng);
 
   // Convert animalNamesMap to array format for the components
   const animalNames = Object.entries(animalNamesMap || {}).map(([id, name]) => ({
@@ -58,12 +63,16 @@ const FieldReportForm = ({ onSuccess }: FieldReportFormProps) => {
   });
 
   const onSubmit = (data: FieldReportFormData) => {
+    // Capture current weather data
+    const weatherConditions = weatherData?.conditionText || undefined;
+    const temperature = weatherData?.temperatureC || undefined;
+    
     // Ensure all required fields are present
     const reportData = {
       title: data.title,
       report_type: data.report_type,
-      weather_conditions: data.weather_conditions,
-      temperature: data.temperature,
+      weather_conditions: weatherConditions,
+      temperature: temperature,
       location_coordinates: data.location_coordinates,
       notes: data.notes,
       entries,
@@ -134,38 +143,10 @@ const FieldReportForm = ({ onSuccess }: FieldReportFormProps) => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="weather_conditions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Condiciones Climáticas</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej: Soleado, lluvioso, nublado" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="temperature"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Temperatura (°C)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="25" 
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="md:col-span-2">
+              <FormLabel className="mb-2 block">Condiciones Climáticas Actuales</FormLabel>
+              <WeatherWidget />
+            </div>
           </CardContent>
         </Card>
 
