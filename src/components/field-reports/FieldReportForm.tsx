@@ -171,7 +171,7 @@ const FieldReportForm = ({ onSuccess }: FieldReportFormProps) => {
 
         {/* Report Sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="pregnancy">Embarazo</TabsTrigger>
             <TabsTrigger value="veterinary">Veterinario</TabsTrigger>
