@@ -7,6 +7,7 @@ import PermissionsSettings from '@/components/settings/PermissionsSettings';
 import SystemSettings from '@/components/settings/SystemSettings';
 import FarmCustomization from '@/components/settings/FarmCustomization';
 import FactoryReset from '@/components/settings/FactoryReset';
+import MobileSettings from '@/components/settings/MobileSettings';
 import { useAuthPermissions } from '@/hooks/useAuthPermissions';
 import { useIsOwner } from '@/hooks/useIsOwner';
 import { TabsContent } from '@/components/ui/tabs';
@@ -37,6 +38,10 @@ const Settings = () => {
           
           <TabsContent value="system" className="mt-8">
             <SystemSettings />
+          </TabsContent>
+          
+          <TabsContent value="mobile" className="mt-8">
+            <MobileSettings />
           </TabsContent>
         </>
       )}

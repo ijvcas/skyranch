@@ -14,12 +14,15 @@ import AcceptInvitation from '@/pages/AcceptInvitation';
 import Dashboard from '@/pages/Dashboard';
 import { logAppOpenOncePerSession } from '@/utils/connectionLogger';
 import { createOptimizedQueryClient } from '@/utils/queryConfig';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 // AI Chat using drawer component with OpenAI integration
 import ChatDrawer from '@/components/ai-chat/ChatDrawer';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import { offlineStorage } from '@/services/offline/offlineStorage';
 import { syncService } from '@/services/offline/syncService';
 import { mobilePushService } from '@/services/mobile/pushNotificationService';
+import { localNotificationService } from '@/services/mobile/localNotificationService';
 import { SplashScreen } from '@capacitor/splash-screen';
 
 // OPTIMIZED: Lazy load heavy pages for better initial bundle size
@@ -61,15 +64,56 @@ function AppContent() {
       syncService.setupAutoSync();
       console.log('✅ Auto-sync enabled');
 
-      // Initialize push notifications for native platforms
-      if (user) {
+      // Initialize push notifications and local notifications for native platforms
+      if (user && Capacitor.isNativePlatform()) {
         await mobilePushService.initialize();
         console.log('✅ Push notifications initialized');
+        
+        await localNotificationService.initialize();
+        console.log('✅ Local notifications initialized');
       }
     };
 
     initServices();
   }, [user]);
+
+  // App state management - handle foreground/background transitions
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let appStateListener: any;
+
+    const setupAppStateListener = async () => {
+      appStateListener = await CapacitorApp.addListener('appStateChange', async (state) => {
+        if (state.isActive) {
+          // App came to foreground
+          console.log('📱 App resumed to foreground');
+          
+          // Resume sync
+          syncService.resumeSync();
+          
+          // Update badge count
+          await mobilePushService.updateBadgeCount();
+          
+          // TODO: Check if biometric auto-lock should trigger
+        } else {
+          // App went to background
+          console.log('📱 App went to background');
+          
+          // Pause sync to save battery
+          syncService.pauseSync();
+        }
+      });
+    };
+
+    setupAppStateListener();
+
+    return () => {
+      if (appStateListener) {
+        appStateListener.remove();
+      }
+    };
+  }, []);
 
   // Log an "app_open" when a user has an active session (once per tab)
   useEffect(() => {

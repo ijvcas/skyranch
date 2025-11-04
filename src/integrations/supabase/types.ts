@@ -266,6 +266,7 @@ export type Database = {
           id: string
           image_url: string | null
           lifecycle_status: string
+          location: Json | null
           maternal_grandfather_id: string | null
           maternal_grandmother_id: string | null
           maternal_great_grandfather_maternal_id: string | null
@@ -351,6 +352,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           lifecycle_status?: string
+          location?: Json | null
           maternal_grandfather_id?: string | null
           maternal_grandmother_id?: string | null
           maternal_great_grandfather_maternal_id?: string | null
@@ -436,6 +438,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           lifecycle_status?: string
+          location?: Json | null
           maternal_grandfather_id?: string | null
           maternal_grandmother_id?: string | null
           maternal_great_grandfather_maternal_id?: string | null
@@ -1188,6 +1191,7 @@ export type Database = {
           description: string | null
           dosage: string | null
           id: string
+          location: Json | null
           medication: string | null
           next_due_date: string | null
           notes: string | null
@@ -1205,6 +1209,7 @@ export type Database = {
           description?: string | null
           dosage?: string | null
           id?: string
+          location?: Json | null
           medication?: string | null
           next_due_date?: string | null
           notes?: string | null
@@ -1222,6 +1227,7 @@ export type Database = {
           description?: string | null
           dosage?: string | null
           id?: string
+          location?: Json | null
           medication?: string | null
           next_due_date?: string | null
           notes?: string | null
@@ -1234,6 +1240,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "health_records_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "animals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      local_reminders: {
+        Row: {
+          animal_id: string | null
+          body: string | null
+          created_at: string | null
+          id: string
+          is_cancelled: boolean | null
+          notification_id: number
+          related_record_id: string | null
+          reminder_type: string
+          scheduled_date: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          animal_id?: string | null
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          is_cancelled?: boolean | null
+          notification_id: number
+          related_record_id?: string | null
+          reminder_type: string
+          scheduled_date: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          animal_id?: string | null
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          is_cancelled?: boolean | null
+          notification_id?: number
+          related_record_id?: string | null
+          reminder_type?: string
+          scheduled_date?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "local_reminders_animal_id_fkey"
             columns: ["animal_id"]
             isOneToOne: false
             referencedRelation: "animals"

@@ -38,6 +38,9 @@ const CalendarPage = () => {
     try {
       await checkPermission('calendar_manage');
       await createEvent(eventData, selectedUserIds);
+      // Update badge count after event creation
+      const { mobilePushService } = await import('@/services/mobile/pushNotificationService');
+      await mobilePushService.updateBadgeCount();
       closeCreateDialog();
     } catch (error: any) {
       console.error('📅 Error creating event:', error);
@@ -93,6 +96,9 @@ const CalendarPage = () => {
     try {
       await checkPermission('calendar_manage');
       await deleteEvent(eventId);
+      // Update badge count after event deletion
+      const { mobilePushService } = await import('@/services/mobile/pushNotificationService');
+      await mobilePushService.updateBadgeCount();
       closeEditDialog();
       closeDetailDialog();
     } catch (error: any) {

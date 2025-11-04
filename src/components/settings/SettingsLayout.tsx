@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Database, Shield, Settings as SettingsIcon, Palette, AlertTriangle } from 'lucide-react';
+import { Users, Database, Shield, Settings as SettingsIcon, Palette, AlertTriangle, Smartphone } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useIsOwner } from '@/hooks/useIsOwner';
 
@@ -25,7 +24,7 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
         tabs.push('users');
       }
       if (await checkPermission('system_settings')) {
-        tabs.push('backup', 'permissions', 'system');
+        tabs.push('backup', 'permissions', 'system', 'mobile');
       }
       
       // Owner-only tabs
@@ -79,6 +78,12 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
               <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-center">
                 <SettingsIcon className="w-4 h-4" />
                 Sistema
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('mobile') && (
+              <TabsTrigger value="mobile" className="flex items-center gap-2 w-full justify-center">
+                <Smartphone className="w-4 h-4" />
+                Móvil
               </TabsTrigger>
             )}
             {availableTabs.includes('customization') && (
