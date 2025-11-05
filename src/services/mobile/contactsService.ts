@@ -1,5 +1,11 @@
-import { Contacts, PermissionStatus } from '@capacitor-community/contacts';
+import { registerPlugin } from '@capacitor/core';
 import { Capacitor } from '@capacitor/core';
+
+interface ContactPickerPlugin {
+  open(): Promise<{ value: any[] }>;
+}
+
+const ContactPicker = registerPlugin<ContactPickerPlugin>('ContactPicker');
 
 export interface ContactInfo {
   id: string;
@@ -9,22 +15,6 @@ export interface ContactInfo {
 }
 
 class ContactsService {
-  async requestPermissions(): Promise<PermissionStatus> {
-    if (!Capacitor.isNativePlatform()) {
-      return { contacts: 'granted' };
-    }
-
-    return await Contacts.requestPermissions();
-  }
-
-  async checkPermissions(): Promise<PermissionStatus> {
-    if (!Capacitor.isNativePlatform()) {
-      return { contacts: 'granted' };
-    }
-
-    return await Contacts.checkPermissions();
-  }
-
   async pickContact(): Promise<ContactInfo | null> {
     if (!Capacitor.isNativePlatform()) {
       console.log('📞 Contacts only available on native platforms');
@@ -32,45 +22,46 @@ class ContactsService {
     }
 
     try {
-      const permStatus = await this.checkPermissions();
-      if (permStatus.contacts !== 'granted') {
-        const requested = await this.requestPermissions();
-        if (requested.contacts !== 'granted') {
-          console.log('📞 Contacts permission denied');
-          return null;
-        }
-      }
-
-      // Get all contacts and let user pick (simplified approach)
-      const result = await Contacts.getContacts({
-        projection: {
-          name: true,
-          phones: true,
-          emails: true
-        }
-      });
-
-      if (result.contacts.length === 0) {
+      // Use native contact picker - shows iOS/Android system picker
+      const result = await ContactPicker.open();
+      
+      if (!result || !result.value || result.value.length === 0) {
+        console.log('📞 No contact selected');
         return null;
       }
 
-      // For simplicity, return first contact
-      // In production, you'd show a native picker or custom UI
-      const contact = result.contacts[0];
-      return this.formatContact(contact);
+      // Get first selected contact
+      const contact = result.value[0];
+      
+      // Format contact data
+      const formattedContact: ContactInfo = {
+        id: contact.contactId || Date.now().toString(),
+        name: contact.displayName || 'Unknown',
+        phone: contact.phoneNumbers && contact.phoneNumbers.length > 0 
+          ? contact.phoneNumbers[0].number 
+          : undefined,
+        email: contact.emails && contact.emails.length > 0 
+          ? contact.emails[0].address 
+          : undefined
+      };
+
+      // Validate that contact has at least a name and phone
+      if (!formattedContact.name || formattedContact.name === 'Unknown') {
+        console.log('📞 Contact has no name');
+        return null;
+      }
+
+      if (!formattedContact.phone) {
+        console.log('📞 Contact has no phone number');
+        return null;
+      }
+
+      console.log('📞 Contact selected:', formattedContact);
+      return formattedContact;
     } catch (error) {
       console.error('❌ Error picking contact:', error);
       return null;
     }
-  }
-
-  private formatContact(contact: any): ContactInfo {
-    return {
-      id: contact.contactId,
-      name: contact.name?.display || 'Unknown',
-      phone: contact.phones?.[0]?.number,
-      email: contact.emails?.[0]?.address
-    };
   }
 
   dialNumber(phoneNumber: string): void {

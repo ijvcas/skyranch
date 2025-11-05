@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Smartphone, Bell, MapPin, RotateCcw, MessageCircle, Calendar, Contact, Phone, Trash2 } from 'lucide-react';
+import { Smartphone, Bell, MapPin, RotateCcw, MessageCircle, Calendar, Contact, Phone, Trash2, Pencil } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,10 +74,44 @@ const MobileSettings: React.FC = () => {
     }
   };
 
+  const handleChangeVeterinarian = async () => {
+    hapticService.light();
+    const contact = await contactsService.pickContact();
+    if (contact) {
+      setVeterinarian(contact);
+      localStorage.setItem('farmika_veterinarian', JSON.stringify(contact));
+      toast({
+        title: "Veterinario Actualizado",
+        description: `${contact.name} ha sido seleccionado como nuevo veterinario.`,
+      });
+    }
+  };
+
+  const handleRemoveVeterinarian = () => {
+    hapticService.medium();
+    setVeterinarian(null);
+    localStorage.removeItem('farmika_veterinarian');
+    toast({
+      title: "Veterinario Eliminado",
+      description: "Puedes seleccionar uno nuevo cuando lo necesites.",
+    });
+  };
+
   const handleAddEmergencyContact = async () => {
     hapticService.light();
     const contact = await contactsService.pickContact();
     if (contact) {
+      // Check for duplicates
+      const isDuplicate = emergencyContacts.some(c => c.phone === contact.phone);
+      if (isDuplicate) {
+        toast({
+          title: "Contacto Duplicado",
+          description: "Este contacto ya está en tu lista de emergencia.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const newContact: EmergencyContact = {
         id: Date.now().toString(),
         name: contact.name,
@@ -258,6 +292,20 @@ const MobileSettings: React.FC = () => {
                     onClick={() => contactsService.sendMessage(veterinarian.phone!)}
                   >
                     <MessageCircle className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleChangeVeterinarian}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRemoveVeterinarian}
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600" />
                   </Button>
                 </div>
               </div>
