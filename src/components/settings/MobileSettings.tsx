@@ -119,19 +119,27 @@ const MobileSettings: React.FC = () => {
         setCalendarPermissionStatus('granted');
         localStorage.setItem('farmika_calendar_sync', 'true');
         toast({
-          title: "Sincronización Activada",
-          description: "Los eventos de FARMIKA se sincronizarán con tu Calendario iOS.",
+          title: "Calendario Sincronizado",
+          description: "Los eventos se sincronizarán con tu Calendario de iOS.",
         });
+        
+        // Re-check permissions after a short delay to ensure UI is updated
+        setTimeout(() => checkCalendarPermissions(), 500);
       } else {
+        setCalendarPermissionStatus('denied');
         toast({
-          title: "Permisos Requeridos",
-          description: "Necesitas otorgar permisos de calendario en Configuración.",
+          title: "Permisos Denegados",
+          description: "Ve a Configuración → FARMIKA → Calendarios para otorgar permisos.",
           variant: "destructive",
         });
       }
     } else {
       setCalendarSyncEnabled(false);
       localStorage.setItem('farmika_calendar_sync', 'false');
+      toast({
+        title: "Sincronización Desactivada",
+        description: "Los eventos ya no se sincronizarán con tu Calendario.",
+      });
     }
   };
 

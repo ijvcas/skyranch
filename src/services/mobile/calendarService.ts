@@ -1,26 +1,53 @@
 import { Capacitor } from '@capacitor/core';
 
-// Calendar plugin interface - will work when cordova-plugin-calendar is installed
+// Calendar plugin interface - cordova-plugin-calendar uses callback-based API
 interface CalendarPlugin {
-  requestReadWritePermission(): Promise<{ result: boolean }>;
-  checkPermission(): Promise<{ result: string }>;
-  createEvent(options: CalendarEventOptions): Promise<{ result: string }>;
-  modifyEvent(options: CalendarEventOptions & { id: string }): Promise<{ result: boolean }>;
-  deleteEvent(options: { id: string }): Promise<{ result: boolean }>;
+  hasReadWritePermission(
+    successCallback: (granted: boolean) => void,
+    errorCallback: (error: any) => void
+  ): void;
+  
+  requestReadWritePermission(
+    successCallback: (granted: boolean) => void,
+    errorCallback: (error: any) => void
+  ): void;
+  
+  createEvent(
+    title: string,
+    location: string,
+    notes: string,
+    startDate: Date,
+    endDate: Date,
+    successCallback: (message: string) => void,
+    errorCallback: (error: any) => void
+  ): void;
+  
+  modifyEvent(
+    title: string,
+    location: string,
+    notes: string,
+    startDate: Date,
+    endDate: Date,
+    newTitle: string,
+    newLocation: string,
+    newNotes: string,
+    newStartDate: Date,
+    newEndDate: Date,
+    successCallback: (message: string) => void,
+    errorCallback: (error: any) => void
+  ): void;
+  
+  deleteEvent(
+    title: string,
+    location: string,
+    notes: string,
+    startDate: Date,
+    endDate: Date,
+    successCallback: (message: string) => void,
+    errorCallback: (error: any) => void
+  ): void;
 }
 
-interface CalendarEventOptions {
-  title: string;
-  calendarId?: string;
-  location?: string;
-  startDate?: number;
-  endDate?: number;
-  notes?: string;
-  url?: string;
-  recurrence?: string;
-  recurrenceEndDate?: number;
-  allDay?: boolean;
-}
 
 export interface FarmikaCalendarEvent {
   title: string;
@@ -46,21 +73,31 @@ class CalendarService {
       return;
     }
 
-    // Check if window.plugins.calendar exists (from cordova-plugin-calendar)
-    try {
-      const windowWithPlugins = window as any;
-      if (windowWithPlugins.plugins && windowWithPlugins.plugins.calendar) {
-        this.plugin = windowWithPlugins.plugins.calendar;
-        this.isPluginAvailable = true;
-        console.log('📅 Calendar plugin loaded successfully');
-      } else {
-        console.log('📅 Calendar plugin not installed yet - install cordova-plugin-calendar and run npx cap sync');
+    // Try to initialize with retry logic (plugin might not be immediately available)
+    const tryInit = (attempts = 0) => {
+      try {
+        const windowWithPlugins = window as any;
+        if (windowWithPlugins.plugins?.calendar) {
+          this.plugin = windowWithPlugins.plugins.calendar;
+          this.isPluginAvailable = true;
+          console.log('📅 Calendar plugin loaded successfully');
+          return;
+        }
+        
+        // Retry up to 5 times with 500ms delay
+        if (attempts < 5) {
+          setTimeout(() => tryInit(attempts + 1), 500);
+        } else {
+          console.log('📅 Calendar plugin not available after retries - install cordova-plugin-calendar and run npx cap sync');
+          this.isPluginAvailable = false;
+        }
+      } catch (error) {
+        console.log('📅 Calendar plugin initialization error:', error);
         this.isPluginAvailable = false;
       }
-    } catch (error) {
-      console.log('📅 Calendar plugin not available:', error);
-      this.isPluginAvailable = false;
-    }
+    };
+
+    tryInit();
   }
 
   async requestPermissions(): Promise<boolean> {
@@ -69,14 +106,18 @@ class CalendarService {
       return false;
     }
 
-    try {
-      const result = await this.plugin.requestReadWritePermission();
-      console.log('📅 Calendar permission request result:', result);
-      return result.result;
-    } catch (error) {
-      console.error('❌ Error requesting calendar permissions:', error);
-      return false;
-    }
+    return new Promise((resolve) => {
+      this.plugin!.requestReadWritePermission(
+        (granted: boolean) => {
+          console.log('📅 Calendar permission granted:', granted);
+          resolve(granted);
+        },
+        (error: any) => {
+          console.error('❌ Error requesting calendar permissions:', error);
+          resolve(false);
+        }
+      );
+    });
   }
 
   async checkPermissions(): Promise<string> {
@@ -84,13 +125,18 @@ class CalendarService {
       return 'unavailable';
     }
 
-    try {
-      const result = await this.plugin.checkPermission();
-      return result.result; // 'granted', 'denied', 'notDetermined'
-    } catch (error) {
-      console.error('❌ Error checking calendar permissions:', error);
-      return 'error';
-    }
+    return new Promise((resolve) => {
+      this.plugin!.hasReadWritePermission(
+        (granted: boolean) => {
+          console.log('📅 Calendar permission status:', granted);
+          resolve(granted ? 'granted' : 'denied');
+        },
+        (error: any) => {
+          console.error('❌ Error checking calendar permissions:', error);
+          resolve('error');
+        }
+      );
+    });
   }
 
   async createEvent(event: FarmikaCalendarEvent): Promise<string | null> {
@@ -110,60 +156,91 @@ class CalendarService {
         }
       }
 
-      const options: CalendarEventOptions = {
-        title: event.title,
-        location: event.location || '',
-        startDate: event.startDate.getTime(),
-        endDate: event.endDate.getTime(),
-        notes: event.notes || '',
-        allDay: event.allDay || false,
-      };
-
-      const result = await this.plugin.createEvent(options);
-      console.log('📅 Calendar event created:', result.result);
-      return result.result;
+      return new Promise((resolve) => {
+        this.plugin!.createEvent(
+          event.title,
+          event.location || '',
+          event.notes || '',
+          event.startDate,
+          event.endDate,
+          (message: string) => {
+            console.log('📅 Calendar event created:', message);
+            resolve(message);
+          },
+          (error: any) => {
+            console.error('❌ Error creating calendar event:', error);
+            resolve(null);
+          }
+        );
+      });
     } catch (error) {
       console.error('❌ Error creating calendar event:', error);
       return null;
     }
   }
 
-  async updateEvent(eventId: string, event: FarmikaCalendarEvent): Promise<boolean> {
+  async updateEvent(
+    oldEvent: FarmikaCalendarEvent,
+    newEvent: FarmikaCalendarEvent
+  ): Promise<boolean> {
     if (!this.isPluginAvailable || !this.plugin) {
       console.log('📅 Calendar plugin not available, skipping event update');
       return false;
     }
 
     try {
-      const options: CalendarEventOptions & { id: string } = {
-        id: eventId,
-        title: event.title,
-        location: event.location || '',
-        startDate: event.startDate.getTime(),
-        endDate: event.endDate.getTime(),
-        notes: event.notes || '',
-        allDay: event.allDay || false,
-      };
-
-      const result = await this.plugin.modifyEvent(options);
-      console.log('📅 Calendar event updated:', result.result);
-      return result.result;
+      return new Promise((resolve) => {
+        this.plugin!.modifyEvent(
+          oldEvent.title,
+          oldEvent.location || '',
+          oldEvent.notes || '',
+          oldEvent.startDate,
+          oldEvent.endDate,
+          newEvent.title,
+          newEvent.location || '',
+          newEvent.notes || '',
+          newEvent.startDate,
+          newEvent.endDate,
+          (message: string) => {
+            console.log('📅 Calendar event updated:', message);
+            resolve(true);
+          },
+          (error: any) => {
+            console.error('❌ Error updating calendar event:', error);
+            resolve(false);
+          }
+        );
+      });
     } catch (error) {
       console.error('❌ Error updating calendar event:', error);
       return false;
     }
   }
 
-  async deleteEvent(eventId: string): Promise<boolean> {
+  async deleteEvent(event: FarmikaCalendarEvent): Promise<boolean> {
     if (!this.isPluginAvailable || !this.plugin) {
       console.log('📅 Calendar plugin not available, skipping event deletion');
       return false;
     }
 
     try {
-      const result = await this.plugin.deleteEvent({ id: eventId });
-      console.log('📅 Calendar event deleted:', result.result);
-      return result.result;
+      return new Promise((resolve) => {
+        this.plugin!.deleteEvent(
+          event.title,
+          event.location || '',
+          event.notes || '',
+          event.startDate,
+          event.endDate,
+          (message: string) => {
+            console.log('📅 Calendar event deleted:', message);
+            resolve(true);
+          },
+          (error: any) => {
+            console.error('❌ Error deleting calendar event:', error);
+            resolve(false);
+          }
+        );
+      });
     } catch (error) {
       console.error('❌ Error deleting calendar event:', error);
       return false;
