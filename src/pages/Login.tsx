@@ -20,10 +20,6 @@ const Login = () => {
   const { signIn, signInWithBiometric, user, loading } = useAuth();
   const { isAvailable, biometricType, biometricTypeName, isEnabled, refresh } = useBiometric();
   
-  // Force refresh biometric status when Login page mounts
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -34,6 +30,16 @@ const Login = () => {
   const [versionInfo, setVersionInfo] = useState<{ version: string; buildNumber: number; releaseDate?: string } | null>(null);
   const [rememberEmail, setRememberEmail] = useState(false);
   const [enableFaceId, setEnableFaceId] = useState(false);
+  const [hasCredentials, setHasCredentials] = useState(false);
+
+  // Check if credentials exist on mount (separate from isEnabled)
+  useEffect(() => {
+    const checkCredentials = async () => {
+      const exists = await BiometricService.hasStoredCredentials();
+      setHasCredentials(exists);
+    };
+    checkCredentials();
+  }, []);
 
   // Sync checkbox with actual biometric status
   useEffect(() => {
@@ -290,17 +296,17 @@ const Login = () => {
           )}
         </CardHeader>
         <CardContent className="pt-2">
-          {/* Biometric Login Button - Always visible when available */}
+          {/* Biometric Login Button - Only show as active if credentials exist */}
           {isAvailable && (
             <div className="flex justify-center mb-1">
               <button
                 type="button"
                 onClick={handleBiometricLogin}
-                disabled={!isEnabled || isBiometricSubmitting || isSubmitting}
-                title={!isEnabled ? "Activa Face ID primero" : "Iniciar sesión con Face ID"}
+                disabled={!hasCredentials || isBiometricSubmitting || isSubmitting}
+                title={!hasCredentials ? "Activa Face ID primero" : "Iniciar sesión con Face ID"}
                 className={cn(
                   "transition-all",
-                  isEnabled 
+                  hasCredentials 
                     ? "opacity-100 hover:scale-105" 
                     : "opacity-40 cursor-not-allowed"
                 )}

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Capacitor } from '@capacitor/core';
 import { contactsService, ContactInfo } from '@/services/mobile/contactsService';
 import { calendarService } from '@/services/mobile/calendarService';
+import { calendarSyncService } from '@/services/mobile/calendarSyncService';
 import { useToast } from '@/hooks/use-toast';
 import { hapticService } from '@/services/mobile/hapticService';
 import { useFarmBranding } from '@/hooks/useFarmBranding';
@@ -38,6 +39,7 @@ const MobileSettings: React.FC = () => {
   const [calendarPermissionStatus, setCalendarPermissionStatus] = useState<string>('unknown');
   const [calendarName, setCalendarName] = useState('FARMIKA');
   const [defaultReminderTime, setDefaultReminderTime] = useState('1hour');
+  const [isSyncingExisting, setIsSyncingExisting] = useState(false);
   
   // Phone selection dialog state
   const [showPhoneDialog, setShowPhoneDialog] = useState(false);
@@ -295,6 +297,42 @@ const MobileSettings: React.FC = () => {
       title: "Configuración Guardada",
       description: "Las configuraciones del calendario han sido actualizadas.",
     });
+  };
+
+  const handleSyncExistingEvents = async () => {
+    setIsSyncingExisting(true);
+    hapticService.light();
+
+    try {
+      const result = await calendarSyncService.syncAllExistingEvents();
+      
+      if (result.success > 0) {
+        toast({
+          title: "Sincronización Completada",
+          description: `${result.success} eventos sincronizados al Calendario de iOS.`,
+        });
+      } else if (result.failed > 0) {
+        toast({
+          variant: "destructive",
+          title: "Error en Sincronización",
+          description: `No se pudieron sincronizar ${result.failed} eventos.`,
+        });
+      } else {
+        toast({
+          title: "Sin Eventos",
+          description: "No hay eventos para sincronizar.",
+        });
+      }
+    } catch (error) {
+      console.error('Error syncing existing events:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo completar la sincronización.",
+      });
+    } finally {
+      setIsSyncingExisting(false);
+    }
   };
 
   const handlePhoneSelection = (phone: string) => {
@@ -668,6 +706,25 @@ const MobileSettings: React.FC = () => {
 
               <Button onClick={handleSaveCalendarSettings} className="w-full">
                 Guardar Configuración
+              </Button>
+
+              <Button 
+                onClick={handleSyncExistingEvents} 
+                variant="outline" 
+                className="w-full"
+                disabled={isSyncingExisting}
+              >
+                {isSyncingExisting ? (
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Sincronizando...
+                  </div>
+                ) : (
+                  <>
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Sincronizar Eventos Existentes
+                  </>
+                )}
               </Button>
             </div>
           )}

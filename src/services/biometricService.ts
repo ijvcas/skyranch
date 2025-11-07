@@ -225,5 +225,24 @@ export class BiometricService {
       return false;
     }
   }
+
+  /**
+   * Check if credentials are stored (lightweight check without retrieving them)
+   */
+  static async hasStoredCredentials(): Promise<boolean> {
+    try {
+      if (!Capacitor.isNativePlatform()) {
+        return false;
+      }
+
+      const result = await NativeBiometric.getCredentials({
+        server: CREDENTIALS_KEY,
+      });
+      
+      return !!(result?.username && result?.password);
+    } catch {
+      return false;
+    }
+  }
 }
 

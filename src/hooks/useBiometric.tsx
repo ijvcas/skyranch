@@ -1,54 +1,69 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BiometricService } from '@/services/biometricService';
+import { biometricStateManager } from '@/services/biometricStateManager';
 
 export const useBiometric = () => {
   const [isAvailable, setIsAvailable] = useState(false);
   const [biometricType, setBiometricType] = useState<string>('none');
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Subscribe to state manager
+    const unsubscribe = biometricStateManager.subscribe(() => {
+      const status = biometricStateManager.getStatus();
+      setIsAvailable(status.isAvailable);
+      setBiometricType(status.biometricType);
+      setIsEnabled(status.isEnabled);
+      setLoading(status.loading);
+    });
+
+    // Initial check
     checkBiometricStatus();
     
-    // Re-check when page becomes visible (handles tab switching, app returning from background)
+    // ONLY re-check on visibility change with debouncing
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        checkBiometricStatus();
+        // Clear any pending check
+        if (checkTimeoutRef.current) {
+          clearTimeout(checkTimeoutRef.current);
+        }
+        
+        // Debounce visibility checks
+        checkTimeoutRef.current = setTimeout(() => {
+          checkBiometricStatus();
+        }, 500);
       }
     };
     
-    // Re-check when window gains focus (handles navigation, mobile app switching)
-    const handleFocus = () => {
-      checkBiometricStatus();
-    };
-    
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
+      if (checkTimeoutRef.current) {
+        clearTimeout(checkTimeoutRef.current);
+      }
+      unsubscribe();
     };
   }, []);
 
   const checkBiometricStatus = async () => {
     try {
-      console.log('🔄 [useBiometric] Checking biometric status...');
+      console.log('🔄 [useBiometric] Requesting status check...');
       setLoading(true);
-      const available = await BiometricService.isAvailable();
-      setIsAvailable(available);
-
-      if (available) {
-        const type = await BiometricService.getBiometricType();
-        setBiometricType(type);
-        
-        const enabled = await BiometricService.isEnabled();
-        console.log('🔄 [useBiometric] isEnabled:', enabled);
-        setIsEnabled(enabled);
-      }
+      
+      // Use centralized state manager instead of direct checks
+      await biometricStateManager.checkStatus();
+      
+      // Get updated status
+      const status = biometricStateManager.getStatus();
+      setIsAvailable(status.isAvailable);
+      setBiometricType(status.biometricType);
+      setIsEnabled(status.isEnabled);
+      setLoading(status.loading);
     } catch (error) {
       console.error('Failed to check biometric status:', error);
-    } finally {
       setLoading(false);
     }
   };
@@ -74,7 +89,15 @@ export const useBiometric = () => {
     try {
       console.log('🔐 [useBiometric] Enabling biometric...');
       await BiometricService.saveCredentials(email, password);
-      await checkBiometricStatus();
+      
+      // Clear cache and force refresh
+      biometricStateManager.clearCache();
+      await biometricStateManager.forceRefresh();
+      
+      // Update local state
+      const status = biometricStateManager.getStatus();
+      setIsEnabled(status.isEnabled);
+      
       console.log('✅ [useBiometric] Biometric enabled successfully');
       return true;
     } catch (error) {
@@ -86,8 +109,14 @@ export const useBiometric = () => {
   const disableBiometric = async (): Promise<void> => {
     try {
       await BiometricService.deleteCredentials();
-      // Immediately refresh status instead of just setting state
-      await checkBiometricStatus();
+      
+      // Clear cache and force refresh
+      biometricStateManager.clearCache();
+      await biometricStateManager.forceRefresh();
+      
+      // Update local state
+      const status = biometricStateManager.getStatus();
+      setIsEnabled(status.isEnabled);
     } catch (error) {
       console.error('Failed to disable biometric:', error);
       throw error;

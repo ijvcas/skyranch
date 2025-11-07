@@ -24,6 +24,8 @@ import { syncService } from '@/services/offline/syncService';
 import { mobilePushService } from '@/services/mobile/pushNotificationService';
 import { localNotificationService } from '@/services/mobile/localNotificationService';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { calendarSyncService } from '@/services/mobile/calendarSyncService';
+import { biometricStateManager } from '@/services/biometricStateManager';
 
 // OPTIMIZED: Lazy load heavy pages for better initial bundle size
 const AnimalList = lazy(() => import('@/pages/AnimalList'));
@@ -53,25 +55,40 @@ function AppContent() {
   const { user, loading } = useAuth();
   const { chatOpen, setChatOpen } = useAIChatDialog();
 
-  // Initialize mobile services
+  // Initialize mobile services with proper sequencing
   useEffect(() => {
     const initServices = async () => {
-      // Initialize offline storage
+      console.log('🚀 [App] Starting app initialization sequence...');
+      
+      // 1. Initialize offline storage first
       await offlineStorage.initialize();
-      console.log('✅ Offline storage initialized');
+      console.log('✅ [App] Offline storage initialized');
 
-      // Setup auto-sync
+      // 2. Setup auto-sync
       syncService.setupAutoSync();
-      console.log('✅ Auto-sync enabled');
+      console.log('✅ [App] Auto-sync enabled');
 
-      // Initialize push notifications and local notifications for native platforms
+      // 3. Initialize biometric state manager (but don't block on it)
+      if (Capacitor.isNativePlatform()) {
+        biometricStateManager.checkStatus().catch(err => {
+          console.error('⚠️  [App] Biometric check failed (non-blocking):', err);
+        });
+      }
+
+      // 4. Initialize push and local notifications for authenticated users on native
       if (user && Capacitor.isNativePlatform()) {
         await mobilePushService.initialize();
-        console.log('✅ Push notifications initialized');
+        console.log('✅ [App] Push notifications initialized');
         
         await localNotificationService.initialize();
-        console.log('✅ Local notifications initialized');
+        console.log('✅ [App] Local notifications initialized');
+
+        // 5. Start calendar sync AFTER user is authenticated
+        calendarSyncService.startRealtimeSync();
+        console.log('✅ [App] Calendar sync initialized');
       }
+
+      console.log('🎉 [App] App initialization complete');
     };
 
     initServices();
