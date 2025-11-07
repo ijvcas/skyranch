@@ -6,7 +6,14 @@
     "profile": "Perfil",
     "farm": "Fazenda",
     "security": "Segurança",
-    "language": "Idioma"
+    "language": "Idioma",
+    "users": "Usuários",
+    "backup": "Backup",
+    "permissions": "Permissões",
+    "system": "Sistema",
+    "mobile": "Móvel",
+    "customization": "Personalização",
+    "danger": "Zona Perigosa"
   },
   "general": {
     "title": "Configurações Gerais",
@@ -30,7 +37,22 @@
     "cancel": "Cancelar Assinatura",
     "renewalDate": "Data de Renovação",
     "usage": "Uso",
-    "limits": "Limites"
+    "limits": "Limites",
+    "plan": "Plano",
+    "free": "Grátis",
+    "freeDescription": "Plano gratuito básico",
+    "active": "Ativo",
+    "expired": "Expirado",
+    "renewal": "Renovação",
+    "trialEnds": "Teste termina",
+    "autoRenewal": "Renovação automática",
+    "enabled": "Ativada",
+    "disabled": "Desativada",
+    "manage": "Gerenciar Assinatura",
+    "currentUsage": "Uso Atual",
+    "planLimits": "Limites do seu plano",
+    "animals": "Animais",
+    "users": "Usuários"
   },
   "profile": {
     "title": "Perfil",

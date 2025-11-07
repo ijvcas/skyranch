@@ -5,16 +5,27 @@ import { Crown, Calendar, AlertCircle, ExternalLink } from 'lucide-react';
 import { SubscriptionService, type Subscription, TIER_PRICES } from '@/services/subscription';
 import { IAPService } from '@/services/subscription/iapService';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS, ptBR, fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface SubscriptionCardProps {
   subscription: Subscription;
 }
 
 export default function SubscriptionCard({ subscription }: SubscriptionCardProps) {
+  const { t, i18n } = useTranslation('settings');
   const tierName = SubscriptionService.getTierName(subscription.tier);
   const price = TIER_PRICES[subscription.tier].monthly;
   const isActive = SubscriptionService.isSubscriptionActive(subscription);
+  
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'en': return enUS;
+      case 'pt': return ptBR;
+      case 'fr': return fr;
+      default: return es;
+    }
+  };
   
   const handleManageSubscription = async () => {
     await IAPService.manageSubscriptions();
@@ -26,15 +37,15 @@ export default function SubscriptionCard({ subscription }: SubscriptionCardProps
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {subscription.tier !== 'free' && <Crown className="h-5 w-5 text-primary" />}
-            <CardTitle>Plan {tierName}</CardTitle>
+            <CardTitle>{t('subscription.plan')} {tierName}</CardTitle>
           </div>
           <Badge variant={isActive ? "default" : "destructive"}>
-            {isActive ? 'Activo' : 'Expirado'}
+            {isActive ? t('subscription.active') : t('subscription.expired')}
           </Badge>
         </div>
         <CardDescription>
           {subscription.tier === 'free' 
-            ? 'Plan gratuito básico'
+            ? t('subscription.freeDescription')
             : `€${price}/mes`
           }
         </CardDescription>
@@ -46,7 +57,7 @@ export default function SubscriptionCard({ subscription }: SubscriptionCardProps
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  Renovación: {format(new Date(subscription.expires_at), 'dd MMM yyyy', { locale: es })}
+                  {t('subscription.renewal')}: {format(new Date(subscription.expires_at), 'dd MMM yyyy', { locale: getDateLocale() })}
                 </span>
               </div>
             )}
@@ -55,18 +66,18 @@ export default function SubscriptionCard({ subscription }: SubscriptionCardProps
               <div className="flex items-center gap-2 text-sm text-primary">
                 <AlertCircle className="h-4 w-4" />
                 <span>
-                  Prueba termina: {format(new Date(subscription.trial_ends_at), 'dd MMM yyyy', { locale: es })}
+                  {t('subscription.trialEnds')}: {format(new Date(subscription.trial_ends_at), 'dd MMM yyyy', { locale: getDateLocale() })}
                 </span>
               </div>
             )}
 
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Auto-renovación: {subscription.auto_renew_status ? 'Activada' : 'Desactivada'}</span>
+              <span>{t('subscription.autoRenewal')}: {subscription.auto_renew_status ? t('subscription.enabled') : t('subscription.disabled')}</span>
             </div>
 
             <Button onClick={handleManageSubscription} variant="outline" className="w-full">
               <ExternalLink className="mr-2 h-4 w-4" />
-              Gestionar Suscripción
+              {t('subscription.manage')}
             </Button>
           </>
         )}

@@ -6,7 +6,14 @@
     "profile": "Profil",
     "farm": "Ferme",
     "security": "Sécurité",
-    "language": "Langue"
+    "language": "Langue",
+    "users": "Utilisateurs",
+    "backup": "Sauvegarde",
+    "permissions": "Permissions",
+    "system": "Système",
+    "mobile": "Mobile",
+    "customization": "Personnalisation",
+    "danger": "Zone Dangereuse"
   },
   "general": {
     "title": "Paramètres Généraux",
@@ -30,7 +37,22 @@
     "cancel": "Annuler l'Abonnement",
     "renewalDate": "Date de Renouvellement",
     "usage": "Utilisation",
-    "limits": "Limites"
+    "limits": "Limites",
+    "plan": "Plan",
+    "free": "Gratuit",
+    "freeDescription": "Plan gratuit de base",
+    "active": "Actif",
+    "expired": "Expiré",
+    "renewal": "Renouvellement",
+    "trialEnds": "Essai se termine",
+    "autoRenewal": "Renouvellement automatique",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "manage": "Gérer l'Abonnement",
+    "currentUsage": "Utilisation Actuelle",
+    "planLimits": "Limites de votre plan",
+    "animals": "Animaux",
+    "users": "Utilisateurs"
   },
   "profile": {
     "title": "Profil",

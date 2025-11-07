@@ -6,7 +6,14 @@
     "profile": "Perfil",
     "farm": "Finca",
     "security": "Seguridad",
-    "language": "Idioma"
+    "language": "Idioma",
+    "users": "Usuarios",
+    "backup": "Respaldo",
+    "permissions": "Permisos",
+    "system": "Sistema",
+    "mobile": "Móvil",
+    "customization": "Personalización",
+    "danger": "Zona Peligrosa"
   },
   "general": {
     "title": "Configuración General",
@@ -30,7 +37,22 @@
     "cancel": "Cancelar Suscripción",
     "renewalDate": "Fecha de Renovación",
     "usage": "Uso",
-    "limits": "Límites"
+    "limits": "Límites",
+    "plan": "Plan",
+    "free": "Gratis",
+    "freeDescription": "Plan gratuito básico",
+    "active": "Activo",
+    "expired": "Expirado",
+    "renewal": "Renovación",
+    "trialEnds": "Prueba termina",
+    "autoRenewal": "Auto-renovación",
+    "enabled": "Activada",
+    "disabled": "Desactivada",
+    "manage": "Gestionar Suscripción",
+    "currentUsage": "Uso Actual",
+    "planLimits": "Límites de tu plan",
+    "animals": "Animales",
+    "users": "Usuarios"
   },
   "profile": {
     "title": "Perfil",

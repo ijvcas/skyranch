@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Users, PawPrint } from 'lucide-react';
 import { type SubscriptionUsage, TIER_LIMITS, type SubscriptionTier } from '@/services/subscription';
+import { useTranslation } from 'react-i18next';
 
 interface UsageMeterProps {
   usage: SubscriptionUsage;
@@ -9,6 +10,7 @@ interface UsageMeterProps {
 }
 
 export default function UsageMeter({ usage, tier }: UsageMeterProps) {
+  const { t } = useTranslation('settings');
   const limits = TIER_LIMITS[tier];
   
   const animalsPercentage = limits.maxAnimals === Infinity 
@@ -28,8 +30,8 @@ export default function UsageMeter({ usage, tier }: UsageMeterProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Uso Actual</CardTitle>
-        <CardDescription>Límites de tu plan</CardDescription>
+        <CardTitle>{t('subscription.currentUsage')}</CardTitle>
+        <CardDescription>{t('subscription.planLimits')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Animals Usage */}
@@ -37,7 +39,7 @@ export default function UsageMeter({ usage, tier }: UsageMeterProps) {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <PawPrint className="h-4 w-4 text-muted-foreground" />
-              <span>Animales</span>
+              <span>{t('subscription.animals')}</span>
             </div>
             <span className="font-medium">
               {usage.animals_count} / {limits.maxAnimals === Infinity ? '∞' : limits.maxAnimals}
@@ -56,7 +58,7 @@ export default function UsageMeter({ usage, tier }: UsageMeterProps) {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span>Usuarios</span>
+              <span>{t('subscription.users')}</span>
             </div>
             <span className="font-medium">
               {usage.users_count} / {limits.maxUsers === Infinity ? '∞' : limits.maxUsers}

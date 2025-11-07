@@ -70,43 +70,43 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
             {availableTabs.includes('users') && (
               <TabsTrigger value="users" className="flex items-center gap-2 w-full justify-center">
                 <Users className="w-4 h-4" />
-                {t('tabs.general')}
+                {t('tabs.users')}
               </TabsTrigger>
             )}
             {availableTabs.includes('backup') && (
               <TabsTrigger value="backup" className="flex items-center gap-2 w-full justify-center">
                 <Database className="w-4 h-4" />
-                Backup
+                {t('tabs.backup')}
               </TabsTrigger>
             )}
             {availableTabs.includes('permissions') && (
               <TabsTrigger value="permissions" className="flex items-center gap-2 w-full justify-center">
                 <Shield className="w-4 h-4" />
-                {t('tabs.security')}
+                {t('tabs.permissions')}
               </TabsTrigger>
             )}
             {availableTabs.includes('system') && (
               <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-center">
                 <SettingsIcon className="w-4 h-4" />
-                {t('tabs.general')}
+                {t('tabs.system')}
               </TabsTrigger>
             )}
             {availableTabs.includes('mobile') && (
               <TabsTrigger value="mobile" className="flex items-center gap-2 w-full justify-center">
                 <Smartphone className="w-4 h-4" />
-                Mobile
+                {t('tabs.mobile')}
               </TabsTrigger>
             )}
             {availableTabs.includes('customization') && (
               <TabsTrigger value="customization" className="flex items-center gap-2 w-full justify-center">
                 <Palette className="w-4 h-4" />
-                {t('general.theme')}
+                {t('tabs.customization')}
               </TabsTrigger>
             )}
             {availableTabs.includes('danger') && (
               <TabsTrigger value="danger" className="flex items-center gap-2 w-full justify-center">
                 <AlertTriangle className="w-4 h-4" />
-                {t('tabs.security')}
+                {t('tabs.danger')}
               </TabsTrigger>
             )}
           </TabsList>
