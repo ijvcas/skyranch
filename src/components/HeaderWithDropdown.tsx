@@ -29,6 +29,7 @@ import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useFarmProfile } from '@/hooks/useFarmProfile';
 import NotificationBell from './NotificationBell';
 import { hapticService } from '@/services/mobile/hapticService';
+import { useTranslation } from 'react-i18next';
 
 const HeaderWithDropdown = () => {
   const navigate = useNavigate();
@@ -36,21 +37,22 @@ const HeaderWithDropdown = () => {
   const { setChatOpen } = useAIChatDialog();
   const { hasAccess: canAccessSettings } = usePermissionCheck('system_settings');
   const { data: farmProfile } = useFarmProfile();
+  const { t } = useTranslation('common');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const farmName = farmProfile?.farm_name || 'FARMIKA';
   const farmLogo = farmProfile?.logo_url || '/farmika-logo.png';
 
   const navItems = [
-    { to: '/dashboard', icon: Home, label: 'Panel' },
-    { to: '/animals', icon: Users, label: 'Animales' },
-    { to: '/lots', icon: MapPin, label: 'Lotes' },
-    { to: '/breeding', icon: Heart, label: 'Reproducción' },
-    { to: '/calendar', icon: Calendar, label: 'Calendario' },
-    { to: '/finances', icon: DollarSign, label: 'Finanzas' },
-    { to: '/reports', icon: FileText, label: 'Reportes' },
-    { to: '/notifications', icon: Bell, label: 'Notificaciones' },
-    ...(canAccessSettings ? [{ to: '/settings', icon: Settings, label: 'Configuración' }] : []),
+    { to: '/dashboard', icon: Home, label: t('nav.dashboard') },
+    { to: '/animals', icon: Users, label: t('nav.animals') },
+    { to: '/lots', icon: MapPin, label: t('nav.lots') },
+    { to: '/breeding', icon: Heart, label: t('nav.breeding') },
+    { to: '/calendar', icon: Calendar, label: t('nav.calendar') },
+    { to: '/finances', icon: DollarSign, label: t('nav.finances') },
+    { to: '/reports', icon: FileText, label: t('nav.reports') },
+    { to: '/notifications', icon: Bell, label: t('nav.notifications') },
+    ...(canAccessSettings ? [{ to: '/settings', icon: Settings, label: t('nav.settings') }] : []),
   ];
 
   const handleSignOut = async () => {
@@ -143,7 +145,7 @@ const HeaderWithDropdown = () => {
                   className="flex items-center px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 justify-start rounded-lg"
                 >
                   <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
-                  Cerrar Sesión
+                  {t('nav.signOut')}
                 </Button>
               </nav>
             </SheetContent>

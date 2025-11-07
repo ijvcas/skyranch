@@ -12,7 +12,11 @@
     "finances": "Finances",
     "reports": "Reports",
     "calendar": "Calendar",
-    "settings": "Settings"
+    "notifications": "Notifications",
+    "settings": "Settings",
+    "addAnimal": "Add Animal",
+    "signOut": "Sign Out",
+    "loading": "Loading..."
   },
   "actions": {
     "add": "Add",

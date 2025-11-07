@@ -17,20 +17,22 @@ import { cn } from '@/lib/utils';
 import NotificationBell from './NotificationBell';
 import { useFarmBranding } from '@/hooks/useFarmBranding';
 import { hapticService } from '@/services/mobile/hapticService';
+import { useTranslation } from 'react-i18next';
 
 const Navigation = () => {
   const { branding, isLoading } = useFarmBranding();
+  const { t } = useTranslation('common');
   
   const navItems = [
-    { to: '/dashboard', icon: Home, label: 'Panel' },
-    { to: '/animals', icon: Users, label: 'Animales' },
-    { to: '/lots', icon: MapPin, label: 'Lotes' },
-    { to: '/breeding', icon: Heart, label: 'Reproducción' },
-    { to: '/calendar', icon: Calendar, label: 'Calendario' },
-    { to: '/finances', icon: DollarSign, label: 'Finanzas' },
-    { to: '/reports', icon: FileText, label: 'Reportes' },
-    { to: '/notifications', icon: Bell, label: 'Notificaciones' },
-    { to: '/settings', icon: Settings, label: 'Configuración' },
+    { to: '/dashboard', icon: Home, label: t('nav.dashboard') },
+    { to: '/animals', icon: Users, label: t('nav.animals') },
+    { to: '/lots', icon: MapPin, label: t('nav.lots') },
+    { to: '/breeding', icon: Heart, label: t('nav.breeding') },
+    { to: '/calendar', icon: Calendar, label: t('nav.calendar') },
+    { to: '/finances', icon: DollarSign, label: t('nav.finances') },
+    { to: '/reports', icon: FileText, label: t('nav.reports') },
+    { to: '/notifications', icon: Bell, label: t('nav.notifications') },
+    { to: '/settings', icon: Settings, label: t('nav.settings') },
   ];
 
   return (
@@ -49,7 +51,7 @@ const Navigation = () => {
               />
             )}
             <span className="ml-4 text-xl font-bold text-gray-900 whitespace-nowrap leading-none">
-              {isLoading ? 'Cargando...' : branding.farm_name}
+              {isLoading ? t('nav.loading') : branding.farm_name}
             </span>
           </div>
 
@@ -81,7 +83,7 @@ const Navigation = () => {
               className="flex items-center px-4 py-2 ml-4 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-md text-sm font-medium transition-colors whitespace-nowrap h-10"
             >
               <PlusCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-              Agregar Animal
+              {t('nav.addAnimal')}
             </NavLink>
 
             {/* Notification Bell */}

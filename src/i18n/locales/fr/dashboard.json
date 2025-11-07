@@ -1,0 +1,42 @@
+{
+  "greeting": {
+    "morning": "Bonjour",
+    "afternoon": "Bon après-midi",
+    "evening": "Bonsoir"
+  },
+  "welcome": {
+    "title": "Bienvenue à SKYRANCH!",
+    "noAnimals": "Aucun animal trouvé. Pour commencer à gérer votre ferme, ajoutez vos premiers animaux.",
+    "addAnimals": "Ajouter des Animaux",
+    "noAnimalsHeader": "Aucun animal trouvé. Si vous devriez voir des animaux, utilisez le bouton \"Forcer l'Actualisation\"."
+  },
+  "actions": {
+    "refresh": "Actualiser",
+    "forceRefresh": "Forcer l'Actualisation"
+  },
+  "messages": {
+    "dataUpdated": "Données mises à jour",
+    "dataUpdatedDesc": "Toutes les données du système ont été rechargées.",
+    "updateError": "Erreur de mise à jour",
+    "updateErrorDesc": "Un problème est survenu lors du rechargement des données. Veuillez réessayer.",
+    "signOutSuccess": "Déconnecté",
+    "signOutSuccessDesc": "Vous vous êtes déconnecté avec succès.",
+    "signOutError": "Erreur de déconnexion."
+  },
+  "loading": {
+    "title": "Chargement de l'application...",
+    "user": "Utilisateur"
+  },
+  "error": {
+    "title": "Problème de connexion",
+    "user": "Utilisateur",
+    "description": "Il y a un problème temporaire avec la connexion à la base de données. Cela peut être un problème de réseau ou de configuration qui se résoudra automatiquement.",
+    "retry": "Réessayer la Connexion",
+    "reload": "Recharger la Page Entière",
+    "signOut": "Se Déconnecter et Réessayer"
+  },
+  "seo": {
+    "title": "SKYRANCH Dashboard — Gestion de ferme",
+    "description": "Gérez les animaux, les lots et les rotations en temps réel sur SKYRANCH."
+  }
+}

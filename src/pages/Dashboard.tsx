@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getAnimalsLean } from '@/services/animal/animalQueries';
 import { checkPermission } from '@/services/permissionService';
@@ -29,14 +30,15 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation(['dashboard', 'common']);
   const queryClient = useQueryClient();
   const [bannerImage, setBannerImage] = useState<string>('/lovable-uploads/d3c33c19-f7cd-441e-884f-371ed6481179.png');
   const [userName, setUserName] = useState<string>('');
   // SEO metadata
   useEffect(() => {
     applySEO({
-      title: 'SKYRANCH Dashboard — Farm management',
-      description: 'Gestiona animales, lotes y rotaciones en tiempo real en SKYRANCH.',
+      title: t('dashboard:seo.title'),
+      description: t('dashboard:seo.description'),
       canonical: window.location.href
     });
     
@@ -107,14 +109,14 @@ const Dashboard = () => {
       console.log('✅ Force refresh completed');
       
       toast({
-        title: "Datos actualizados",
-        description: "Se han recargado todos los datos del sistema.",
+        title: t('dashboard:messages.dataUpdated'),
+        description: t('dashboard:messages.dataUpdatedDesc'),
       });
     } catch (error) {
       console.error('❌ Force refresh failed:', error);
       toast({
-        title: "Error al actualizar",
-        description: "Hubo un problema al recargar los datos. Intenta de nuevo.",
+        title: t('dashboard:messages.updateError'),
+        description: t('dashboard:messages.updateErrorDesc'),
         variant: "destructive"
       });
     }
@@ -128,14 +130,14 @@ const Dashboard = () => {
     try {
       await signOut();
       toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente.",
+        title: t('dashboard:messages.signOutSuccess'),
+        description: t('dashboard:messages.signOutSuccessDesc'),
       });
       navigate('/login');
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Error al cerrar sesión.",
+        title: t('common:common.error'),
+        description: t('dashboard:messages.signOutError'),
         variant: "destructive"
       });
     }
@@ -195,9 +197,9 @@ const Dashboard = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">¡Bienvenido a SKYRANCH!</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('dashboard:welcome.title')}</h3>
                     <p className="text-gray-600 mb-4">
-                      No se encontraron animales. Para empezar a gestionar tu granja, agrega tus primeros animales.
+                      {t('dashboard:welcome.noAnimals')}
                     </p>
                   </div>
                   <button 
@@ -207,7 +209,7 @@ const Dashboard = () => {
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    Agregar Animales
+                    {t('dashboard:welcome.addAnimals')}
                   </button>
                 </div>
               </CardContent>

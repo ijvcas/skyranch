@@ -12,7 +12,11 @@
     "finances": "Finanzas",
     "reports": "Reportes",
     "calendar": "Calendario",
-    "settings": "Configuración"
+    "notifications": "Notificaciones",
+    "settings": "Configuración",
+    "addAnimal": "Agregar Animal",
+    "signOut": "Cerrar Sesión",
+    "loading": "Cargando..."
   },
   "actions": {
     "add": "Añadir",

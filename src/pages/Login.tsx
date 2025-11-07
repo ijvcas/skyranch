@@ -13,12 +13,14 @@ import { useBiometric } from '@/hooks/useBiometric';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { BiometricService } from '@/services/biometricService';
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn, signInWithBiometric, user, loading } = useAuth();
   const { isAvailable, biometricType, biometricTypeName, isEnabled, refresh } = useBiometric();
+  const { t } = useTranslation('auth');
   
   const [formData, setFormData] = useState({
     email: '',
@@ -87,8 +89,8 @@ const Login = () => {
     if (!isAvailable || !isEnabled) {
       toast({
         variant: "destructive",
-        title: "No disponible",
-        description: "Face ID no está activado.",
+        title: t('biometric.notAvailable'),
+        description: t('biometric.notAvailableDesc'),
       });
       return;
     }
@@ -105,8 +107,8 @@ const Login = () => {
         console.error('❌ Biometric authentication failed or was cancelled');
         toast({
           variant: "destructive",
-          title: "Autenticación cancelada",
-          description: "Debes completar la autenticación biométrica para continuar",
+          title: t('biometric.cancelled'),
+          description: t('biometric.cancelledDesc'),
         });
         setIsBiometricSubmitting(false);
         return; // STOP HERE - don't proceed to get credentials
@@ -126,7 +128,7 @@ const Login = () => {
       if (error) {
         toast({
           variant: "destructive",
-          title: "Error de inicio de sesión",
+          title: t('messages.loginError'),
           description: error.message,
         });
         setIsBiometricSubmitting(false);
@@ -134,8 +136,8 @@ const Login = () => {
       }
 
       toast({
-        title: "¡Bienvenido!",
-        description: "Has iniciado sesión correctamente.",
+        title: t('messages.welcome'),
+        description: t('messages.loginSuccess'),
       });
 
       navigate('/dashboard');
@@ -143,8 +145,8 @@ const Login = () => {
       console.error('❌ Biometric login error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "No se pudo completar la autenticación biométrica",
+        title: t('biometric.error'),
+        description: t('biometric.errorDesc'),
       });
     } finally {
       setIsBiometricSubmitting(false);
@@ -156,8 +158,8 @@ const Login = () => {
     
     if (!formData.email || !formData.password) {
       toast({
-        title: "Campos requeridos",
-        description: "Por favor ingresa tu email y contraseña.",
+        title: t('messages.fieldsRequired'),
+        description: t('messages.fieldsRequiredDesc'),
         variant: "destructive"
       });
       return;
@@ -177,18 +179,18 @@ const Login = () => {
           email: formData.email
         });
         
-        let errorMessage = "Ocurrió un error inesperado. Intenta de nuevo.";
+        let errorMessage = t('messages.unexpectedError');
         
         if (error.message === 'Invalid login credentials') {
-          errorMessage = "Email o contraseña incorrectos. Verifica tus credenciales.";
+          errorMessage = t('messages.invalidCredentials');
         } else if (error.message?.includes('Email not confirmed')) {
-          errorMessage = "Por favor confirma tu email antes de iniciar sesión.";
+          errorMessage = t('messages.emailNotConfirmed');
         } else if (error.message?.includes('network')) {
-          errorMessage = "Error de conexión. Verifica tu internet.";
+          errorMessage = t('messages.networkError');
         }
         
         toast({
-          title: "Error de inicio de sesión",
+          title: t('messages.loginError'),
           description: errorMessage,
           variant: "destructive",
           duration: 6000
@@ -209,8 +211,8 @@ const Login = () => {
             await BiometricService.saveCredentials(formData.email, formData.password);
             await refresh();
             toast({
-              title: "¡Credenciales guardadas!",
-              description: "Ahora puedes usar auto-login con el ícono de Face ID",
+              title: t('biometric.saved'),
+              description: t('biometric.savedDesc'),
             });
           } catch (error) {
             console.error('Error saving credentials:', error);
@@ -218,16 +220,16 @@ const Login = () => {
         }
 
         toast({
-          title: "¡Bienvenido!",
-          description: "Has iniciado sesión correctamente.",
+          title: t('messages.welcome'),
+          description: t('messages.loginSuccess'),
         });
         // Navigation will happen automatically via useEffect when user state updates
       }
     } catch (error) {
       console.error('❌ Unexpected login error:', error);
       toast({
-        title: "Error",
-        description: "Error inesperado. Por favor intenta de nuevo.",
+        title: t('biometric.error'),
+        description: t('messages.unexpectedError'),
         variant: "destructive"
       });
     } finally {
@@ -247,15 +249,15 @@ const Login = () => {
         await BiometricService.deleteCredentials();
         await refresh();
         toast({
-          title: "Face ID desactivado",
-          description: "Ya no podrás usar Face ID para iniciar sesión",
+          title: t('biometric.disabled'),
+          description: t('biometric.disabledDesc'),
         });
       } catch (error) {
         console.error('Error disabling Face ID:', error);
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "No se pudo desactivar Face ID",
+          title: t('biometric.error'),
+          description: t('biometric.disableError'),
         });
       }
     }
@@ -268,7 +270,7 @@ const Login = () => {
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando...</p>
+          <p className="text-gray-600">{t('login.loading')}</p>
         </div>
       </div>
     );
@@ -286,9 +288,9 @@ const Login = () => {
             />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900 mb-1">
-            FARMIKA
+            {t('login.title')}
           </CardTitle>
-          <p className="text-sm text-gray-600">Gestión de Finca</p>
+          <p className="text-sm text-gray-600">{t('login.subtitle')}</p>
           {versionInfo && (
             <div className="text-xs text-gray-500 mt-2">
               <p>v{versionInfo.version} • Build #{versionInfo.buildNumber}</p>
@@ -303,7 +305,7 @@ const Login = () => {
                 type="button"
                 onClick={handleBiometricLogin}
                 disabled={!hasCredentials || isBiometricSubmitting || isSubmitting}
-                title={!hasCredentials ? "Activa Face ID primero" : "Iniciar sesión con Face ID"}
+                title={!hasCredentials ? t('biometric.activateFaceId') : t('biometric.loginWithFaceId')}
                 className={cn(
                   "transition-all",
                   hasCredentials 
@@ -328,13 +330,13 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email">Correo Electrónico</Label>
+              <Label htmlFor="email">{t('login.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="tu@correo.com"
+                placeholder={t('login.emailPlaceholder')}
                 required
                 className="h-11"
                 disabled={isSubmitting}
@@ -343,14 +345,14 @@ const Login = () => {
             </div>
             
             <div className="space-y-1.5">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">{t('login.password')}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  placeholder="Tu contraseña"
+                  placeholder={t('login.passwordPlaceholder')}
                   required
                   className="h-11 pr-12"
                   disabled={isSubmitting}
@@ -360,7 +362,7 @@ const Login = () => {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                   disabled={isSubmitting}
                 >
                   {showPassword ? (
@@ -384,7 +386,7 @@ const Login = () => {
                 htmlFor="remember-email" 
                 className="text-sm font-medium cursor-pointer select-none"
               >
-                Recordar mi correo electrónico
+                {t('login.rememberEmail')}
               </Label>
             </div>
 
@@ -401,7 +403,7 @@ const Login = () => {
                   htmlFor="enable-faceid" 
                   className="text-sm font-medium cursor-pointer select-none"
                 >
-                  {isEnabled ? 'Recordar credenciales para auto-login' : 'Recordar credenciales'}
+                  {isEnabled ? t('login.enableFaceId') : t('login.enableFaceIdAlt')}
                 </Label>
               </div>
             )}
@@ -415,10 +417,10 @@ const Login = () => {
               {isSubmitting ? (
                 <div className="flex items-center">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Iniciando sesión...
+                  {t('login.submitting')}
                 </div>
               ) : (
-                "Iniciar Sesión"
+                t('login.submit')
               )}
             </Button>
           </form>
@@ -431,20 +433,20 @@ const Login = () => {
               className="text-gray-600 hover:text-green-600 text-sm"
               disabled={isSubmitting}
             >
-              ¿Olvidaste tu contraseña?
+              {t('login.forgotPassword')}
             </Button>
           </div>
 
           <div className="mt-2 text-center">
             <p className="text-base text-gray-600">
-              ¿No tienes cuenta?{' '}
+              {t('login.noAccount')}{' '}
               <Button 
                 variant="link" 
                 className="p-0 text-green-600 text-base font-semibold"
                 onClick={() => navigate('/register')}
                 disabled={isSubmitting}
               >
-                Registrarse
+                {t('login.register')}
               </Button>
             </p>
           </div>

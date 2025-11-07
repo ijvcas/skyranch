@@ -1,0 +1,42 @@
+{
+  "greeting": {
+    "morning": "Bom dia",
+    "afternoon": "Boa tarde",
+    "evening": "Boa noite"
+  },
+  "welcome": {
+    "title": "Bem-vindo ao SKYRANCH!",
+    "noAnimals": "Nenhum animal encontrado. Para começar a gerenciar sua fazenda, adicione seus primeiros animais.",
+    "addAnimals": "Adicionar Animais",
+    "noAnimalsHeader": "Nenhum animal encontrado. Se você deveria ver animais, use o botão \"Forçar Atualização\"."
+  },
+  "actions": {
+    "refresh": "Atualizar",
+    "forceRefresh": "Forçar Atualização"
+  },
+  "messages": {
+    "dataUpdated": "Dados atualizados",
+    "dataUpdatedDesc": "Todos os dados do sistema foram recarregados.",
+    "updateError": "Erro ao atualizar",
+    "updateErrorDesc": "Houve um problema ao recarregar os dados. Tente novamente.",
+    "signOutSuccess": "Sessão encerrada",
+    "signOutSuccessDesc": "Você saiu com sucesso.",
+    "signOutError": "Erro ao sair."
+  },
+  "loading": {
+    "title": "Carregando aplicativo...",
+    "user": "Usuário"
+  },
+  "error": {
+    "title": "Problema de conexão",
+    "user": "Usuário",
+    "description": "Há um problema temporário com a conexão ao banco de dados. Isso pode ser um problema de rede ou configuração que será resolvido automaticamente.",
+    "retry": "Tentar Conexão Novamente",
+    "reload": "Recarregar Página Inteira",
+    "signOut": "Sair e Tentar Novamente"
+  },
+  "seo": {
+    "title": "SKYRANCH Dashboard — Gestão de fazenda",
+    "description": "Gerencie animais, lotes e rotações em tempo real no SKYRANCH."
+  }
+}

@@ -9,11 +9,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Users, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { validatePasswordStrength } from '@/utils/passwordPolicy';
+import { useTranslation } from 'react-i18next';
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signUp, user } = useAuth();
+  const { t } = useTranslation('auth');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -34,8 +36,8 @@ const Register = () => {
     
     if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Error",
-        description: "Las contraseñas no coinciden.",
+        title: t('common:common.error'),
+        description: t('messages.passwordMismatch'),
         variant: "destructive"
       });
       return;
@@ -44,8 +46,8 @@ const Register = () => {
     const check = validatePasswordStrength(formData.password, formData.email, formData.fullName);
     if (!check.valid) {
       toast({
-        title: "Contraseña débil",
-        description: `${check.errors[0]} Requisitos: mínimo 6 caracteres e incluye al menos un número.`,
+        title: t('messages.weakPassword'),
+        description: `${check.errors[0]} ${t('messages.weakPasswordDesc')}`,
         variant: "destructive"
       });
       return;
@@ -59,24 +61,24 @@ const Register = () => {
       if (error) {
         console.error('Registration error:', error);
         toast({
-          title: "Error de registro",
+          title: t('messages.registerError'),
           description: error.message === 'User already registered' 
-            ? "Este email ya está registrado. Intenta iniciar sesión."
+            ? t('messages.userExists')
             : error.message,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Registro exitoso",
-          description: "Cuenta creada correctamente. Bienvenido a FARMIKA.",
+          title: t('messages.registerSuccess'),
+          description: t('messages.registerSuccessDesc'),
         });
         navigate('/dashboard');
       }
     } catch (error) {
       console.error('Unexpected error:', error);
       toast({
-        title: "Error",
-        description: "Ocurrió un error inesperado. Intenta de nuevo.",
+        title: t('common:common.error'),
+        description: t('messages.unexpectedError'),
         variant: "destructive"
       });
     } finally {
@@ -107,21 +109,21 @@ const Register = () => {
             />
           </div>
           <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
-            Crear Cuenta en FARMIKA
+            {t('register.title')}
           </CardTitle>
-          <p className="text-sm text-gray-600">Sistema de Gestión Ganadera</p>
+          <p className="text-sm text-gray-600">{t('register.subtitle')}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
             <div>
-              <Label htmlFor="fullName" className="text-base font-medium">Nombre Completo</Label>
+              <Label htmlFor="fullName" className="text-base font-medium">{t('register.fullName')}</Label>
               <Input
                 id="fullName"
                 name="register-fullname"
                 type="text"
                 value={formData.fullName}
                 onChange={(e) => handleInputChange('fullName', e.target.value)}
-                placeholder="Tu nombre completo"
+                placeholder={t('register.fullNamePlaceholder')}
                 required
                 className="mt-2 h-12 text-base"
                 disabled={isLoading}
@@ -132,14 +134,14 @@ const Register = () => {
             </div>
 
             <div>
-              <Label htmlFor="email" className="text-base font-medium">Correo Electrónico</Label>
+              <Label htmlFor="email" className="text-base font-medium">{t('register.email')}</Label>
               <Input
                 id="email"
                 name="register-email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="tu@correo.com"
+                placeholder={t('register.emailPlaceholder')}
                 required
                 className="mt-2 h-12 text-base"
                 disabled={isLoading}
@@ -150,14 +152,14 @@ const Register = () => {
             </div>
             
             <div>
-              <Label htmlFor="password" className="text-base font-medium">Contraseña</Label>
+              <Label htmlFor="password" className="text-base font-medium">{t('register.password')}</Label>
               <Input
                 id="password"
                 name="register-password"
                 type="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                placeholder="Mínimo 6 caracteres, incluye al menos un número"
+                placeholder={t('register.passwordPlaceholder')}
                 required
                 minLength={6}
                 className="mt-2 h-12 text-base"
@@ -169,14 +171,14 @@ const Register = () => {
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword" className="text-base font-medium">Confirmar Contraseña</Label>
+              <Label htmlFor="confirmPassword" className="text-base font-medium">{t('register.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 name="register-confirm-password"
                 type="password"
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                placeholder="Repite tu contraseña"
+                placeholder={t('register.confirmPasswordPlaceholder')}
                 required
                 className="mt-2 h-12 text-base"
                 disabled={isLoading}
@@ -191,20 +193,20 @@ const Register = () => {
               disabled={isLoading}
               className="w-full bg-green-600 hover:bg-green-700 text-white h-12 text-base font-semibold mt-8"
             >
-              {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+              {isLoading ? t('register.submitting') : t('register.submit')}
             </Button>
           </form>
 
           <div className="mt-8 text-center">
             <p className="text-base text-gray-600">
-              ¿Ya tienes cuenta?{' '}
+              {t('register.hasAccount')}{' '}
               <Button 
                 variant="link" 
                 className="p-0 text-green-600 text-base font-semibold"
                 onClick={() => navigate('/login')}
                 disabled={isLoading}
               >
-                Iniciar Sesión
+                {t('register.login')}
               </Button>
             </p>
           </div>

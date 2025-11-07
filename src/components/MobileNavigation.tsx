@@ -16,16 +16,18 @@ import {
 import { cn } from '@/lib/utils';
 import { useTouch } from '@/hooks/use-touch';
 import NotificationBell from './NotificationBell';
+import { useTranslation } from 'react-i18next';
 
 const MobileNavigation = () => {
   const { onTouchStart, onTouchMove, onTouchEnd } = useTouch();
+  const { t } = useTranslation('common');
   
   const navItems = [
-    { to: '/dashboard', icon: Home, label: 'Panel' },
-    { to: '/animals', icon: Users, label: 'Animales' },
-    { to: '/lots', icon: MapPin, label: 'Lotes' },
-    { to: '/breeding', icon: Heart, label: 'Reproducción' },
-    { to: '/finances', icon: DollarSign, label: 'Finanzas' },
+    { to: '/dashboard', icon: Home, label: t('nav.dashboard') },
+    { to: '/animals', icon: Users, label: t('nav.animals') },
+    { to: '/lots', icon: MapPin, label: t('nav.lots') },
+    { to: '/breeding', icon: Heart, label: t('nav.breeding') },
+    { to: '/finances', icon: DollarSign, label: t('nav.finances') },
   ];
 
   // Enhanced touch handler with haptic feedback

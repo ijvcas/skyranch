@@ -1,0 +1,42 @@
+{
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "welcome": {
+    "title": "Welcome to SKYRANCH!",
+    "noAnimals": "No animals found. To start managing your farm, add your first animals.",
+    "addAnimals": "Add Animals",
+    "noAnimalsHeader": "No animals found. If you should see animals, use the \"Force Refresh\" button."
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "forceRefresh": "Force Refresh"
+  },
+  "messages": {
+    "dataUpdated": "Data updated",
+    "dataUpdatedDesc": "All system data has been reloaded.",
+    "updateError": "Update error",
+    "updateErrorDesc": "There was a problem reloading the data. Please try again.",
+    "signOutSuccess": "Signed out",
+    "signOutSuccessDesc": "You have successfully signed out.",
+    "signOutError": "Error signing out."
+  },
+  "loading": {
+    "title": "Loading application...",
+    "user": "User"
+  },
+  "error": {
+    "title": "Connection problem",
+    "user": "User",
+    "description": "There is a temporary problem with the database connection. This may be a network or configuration issue that will resolve automatically.",
+    "retry": "Retry Connection",
+    "reload": "Reload Entire Page",
+    "signOut": "Sign Out and Try Again"
+  },
+  "seo": {
+    "title": "SKYRANCH Dashboard — Farm management",
+    "description": "Manage animals, lots and rotations in real time on SKYRANCH."
+  }
+}
