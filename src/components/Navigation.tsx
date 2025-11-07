@@ -10,7 +10,8 @@ import {
   FileText,
   Heart,
   Bell,
-  MapPin
+  MapPin,
+  DollarSign
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NotificationBell from './NotificationBell';
@@ -26,6 +27,7 @@ const Navigation = () => {
     { to: '/lots', icon: MapPin, label: 'Lotes' },
     { to: '/breeding', icon: Heart, label: 'Reproducción' },
     { to: '/calendar', icon: Calendar, label: 'Calendario' },
+    { to: '/finances', icon: DollarSign, label: 'Finanzas' },
     { to: '/reports', icon: FileText, label: 'Reportes' },
     { to: '/notifications', icon: Bell, label: 'Notificaciones' },
     { to: '/settings', icon: Settings, label: 'Configuración' },

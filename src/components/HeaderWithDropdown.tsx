@@ -12,7 +12,8 @@ import {
   MapPin,
   ChevronDown,
   LogOut,
-  X
+  X,
+  DollarSign
 } from 'lucide-react';
 import {
   Sheet,
@@ -46,6 +47,7 @@ const HeaderWithDropdown = () => {
     { to: '/lots', icon: MapPin, label: 'Lotes' },
     { to: '/breeding', icon: Heart, label: 'Reproducción' },
     { to: '/calendar', icon: Calendar, label: 'Calendario' },
+    { to: '/finances', icon: DollarSign, label: 'Finanzas' },
     { to: '/reports', icon: FileText, label: 'Reportes' },
     { to: '/notifications', icon: Bell, label: 'Notificaciones' },
     ...(canAccessSettings ? [{ to: '/settings', icon: Settings, label: 'Configuración' }] : []),

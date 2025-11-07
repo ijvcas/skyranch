@@ -10,7 +10,8 @@ import {
   FileText,
   Heart,
   Bell,
-  MapPin
+  MapPin,
+  DollarSign
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTouch } from '@/hooks/use-touch';
@@ -24,7 +25,7 @@ const MobileNavigation = () => {
     { to: '/animals', icon: Users, label: 'Animales' },
     { to: '/lots', icon: MapPin, label: 'Lotes' },
     { to: '/breeding', icon: Heart, label: 'Reproducción' },
-    { to: '/calendar', icon: Calendar, label: 'Calendario' },
+    { to: '/finances', icon: DollarSign, label: 'Finanzas' },
   ];
 
   // Enhanced touch handler with haptic feedback
