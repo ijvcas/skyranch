@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Smartphone, Bell, MapPin, RotateCcw, MessageCircle, Calendar, Contact, Phone, Trash2, Pencil } from 'lucide-react';
+import { Smartphone, Bell, MapPin, RotateCcw, MessageCircle, Calendar, Contact, Phone, Trash2, Pencil, PhoneCall } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +18,8 @@ import { useFarmBranding } from '@/hooks/useFarmBranding';
 interface EmergencyContact {
   id: string;
   name: string;
-  phone: string;
+  phone: string; // Primary/selected phone
+  phones?: string[]; // All available phone numbers
   relationship: string;
 }
 
@@ -36,17 +38,48 @@ const MobileSettings: React.FC = () => {
   const [calendarPermissionStatus, setCalendarPermissionStatus] = useState<string>('unknown');
   const [calendarName, setCalendarName] = useState('FARMIKA');
   const [defaultReminderTime, setDefaultReminderTime] = useState('1hour');
+  
+  // Phone selection dialog state
+  const [showPhoneDialog, setShowPhoneDialog] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<ContactInfo | null>(null);
+  const [phoneDialogMode, setPhoneDialogMode] = useState<'vet' | 'emergency' | 'change'>('vet');
+  const [changingContactId, setChangingContactId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isNative) {
-      checkCalendarPermissions();
       loadSavedSettings();
+      checkCalendarPermissions();
+      
+      // Re-verify calendar sync status on load
+      const savedCalendarSync = localStorage.getItem('farmika_calendar_sync');
+      if (savedCalendarSync === 'true') {
+        // Double-check actual permissions match what we think
+        setTimeout(async () => {
+          const actualStatus = await calendarService.checkPermissions();
+          if (actualStatus !== 'granted' && calendarSyncEnabled) {
+            console.log('📅 Calendar sync was enabled but permissions not granted, disabling');
+            setCalendarSyncEnabled(false);
+            localStorage.setItem('farmika_calendar_sync', 'false');
+          }
+        }, 2000);
+      }
     }
   }, [isNative]);
 
   const checkCalendarPermissions = async () => {
     const status = await calendarService.checkPermissions();
+    console.log('📅 Calendar permission check result:', status);
     setCalendarPermissionStatus(status);
+    
+    if (status === 'unavailable') {
+      toast({
+        title: "Plugin no disponible",
+        description: "Ejecuta: npx cap sync ios",
+        variant: "destructive",
+      });
+    }
+    
+    return status;
   };
 
   const loadSavedSettings = () => {
@@ -68,12 +101,19 @@ const MobileSettings: React.FC = () => {
     hapticService.light();
     const contact = await contactsService.pickContact();
     if (contact) {
-      setVeterinarian(contact);
-      localStorage.setItem('farmika_veterinarian', JSON.stringify(contact));
-      toast({
-        title: "Veterinario Seleccionado",
-        description: `${contact.name} ha sido agregado como veterinario.`,
-      });
+      // If contact has multiple phones, show selection dialog
+      if (contact.phones && contact.phones.length > 1) {
+        setSelectedContact(contact);
+        setPhoneDialogMode('vet');
+        setShowPhoneDialog(true);
+      } else {
+        setVeterinarian(contact);
+        localStorage.setItem('farmika_veterinarian', JSON.stringify(contact));
+        toast({
+          title: "Veterinario Seleccionado",
+          description: `${contact.name} ha sido agregado como veterinario.`,
+        });
+      }
     }
   };
 
@@ -81,12 +121,19 @@ const MobileSettings: React.FC = () => {
     hapticService.light();
     const contact = await contactsService.pickContact();
     if (contact) {
-      setVeterinarian(contact);
-      localStorage.setItem('farmika_veterinarian', JSON.stringify(contact));
-      toast({
-        title: "Veterinario Actualizado",
-        description: `${contact.name} ha sido seleccionado como nuevo veterinario.`,
-      });
+      // If contact has multiple phones, show selection dialog
+      if (contact.phones && contact.phones.length > 1) {
+        setSelectedContact(contact);
+        setPhoneDialogMode('vet');
+        setShowPhoneDialog(true);
+      } else {
+        setVeterinarian(contact);
+        localStorage.setItem('farmika_veterinarian', JSON.stringify(contact));
+        toast({
+          title: "Veterinario Actualizado",
+          description: `${contact.name} ha sido seleccionado como nuevo veterinario.`,
+        });
+      }
     }
   };
 
@@ -104,6 +151,14 @@ const MobileSettings: React.FC = () => {
     hapticService.light();
     const contact = await contactsService.pickContact();
     if (contact) {
+      // If contact has multiple phones, show selection dialog
+      if (contact.phones && contact.phones.length > 1) {
+        setSelectedContact(contact);
+        setPhoneDialogMode('emergency');
+        setShowPhoneDialog(true);
+        return;
+      }
+      
       // Check for duplicates
       const isDuplicate = emergencyContacts.some(c => c.phone === contact.phone);
       if (isDuplicate) {
@@ -119,6 +174,7 @@ const MobileSettings: React.FC = () => {
         id: Date.now().toString(),
         name: contact.name,
         phone: contact.phone || '',
+        phones: contact.phones,
         relationship: farmName,
       };
       const updated = [...emergencyContacts, newContact];
@@ -149,8 +205,20 @@ const MobileSettings: React.FC = () => {
   const handleToggleCalendarSync = async (enabled: boolean) => {
     hapticService.medium();
     if (enabled) {
+      // First check if plugin is available
+      if (!calendarService.isAvailable()) {
+        toast({
+          title: "Plugin no disponible",
+          description: "Ejecuta: git pull, npm install, npx cap sync ios",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Request permissions
       const granted = await calendarService.requestPermissions();
+      console.log('📅 Permission request result:', granted);
+      
       if (granted) {
         setCalendarSyncEnabled(true);
         setCalendarPermissionStatus('granted');
@@ -188,6 +256,78 @@ const MobileSettings: React.FC = () => {
       title: "Configuración Guardada",
       description: "Las configuraciones del calendario han sido actualizadas.",
     });
+  };
+
+  const handlePhoneSelection = (phone: string) => {
+    if (!selectedContact) return;
+    
+    if (phoneDialogMode === 'vet' || phoneDialogMode === 'change') {
+      // For veterinarian
+      if (veterinarian && selectedContact.id === veterinarian.id) {
+        const updatedContact = { ...selectedContact, phone };
+        setVeterinarian(updatedContact);
+        localStorage.setItem('farmika_veterinarian', JSON.stringify(updatedContact));
+        toast({
+          title: "Teléfono Actualizado",
+          description: `Ahora usando ${phone}`,
+        });
+      }
+    }
+    
+    if (phoneDialogMode === 'vet' && !veterinarian) {
+      // New veterinarian selection
+      const updatedContact = { ...selectedContact, phone };
+      setVeterinarian(updatedContact);
+      localStorage.setItem('farmika_veterinarian', JSON.stringify(updatedContact));
+      toast({
+        title: "Veterinario Seleccionado",
+        description: `${selectedContact.name} - ${phone}`,
+      });
+    } else if (phoneDialogMode === 'emergency') {
+      const newContact: EmergencyContact = {
+        id: Date.now().toString(),
+        name: selectedContact.name,
+        phone,
+        phones: selectedContact.phones,
+        relationship: farmName,
+      };
+      const updated = [...emergencyContacts, newContact];
+      setEmergencyContacts(updated);
+      localStorage.setItem('farmika_emergency_contacts', JSON.stringify(updated));
+      toast({
+        title: "Contacto Agregado",
+        description: `${selectedContact.name} - ${phone}`,
+      });
+    } else if (phoneDialogMode === 'change' && changingContactId) {
+      const updated = emergencyContacts.map(c => 
+        c.id === changingContactId ? { ...c, phone } : c
+      );
+      setEmergencyContacts(updated);
+      localStorage.setItem('farmika_emergency_contacts', JSON.stringify(updated));
+      toast({
+        title: "Teléfono Actualizado",
+        description: `Ahora usando ${phone}`,
+      });
+    }
+    
+    setShowPhoneDialog(false);
+    setSelectedContact(null);
+    setChangingContactId(null);
+  };
+
+  const handleChangeContactPhone = (contactId: string) => {
+    const contact = emergencyContacts.find(c => c.id === contactId);
+    if (contact && contact.phones && contact.phones.length > 1) {
+      setSelectedContact({
+        id: contact.id,
+        name: contact.name,
+        phone: contact.phone,
+        phones: contact.phones
+      });
+      setPhoneDialogMode('change');
+      setChangingContactId(contactId);
+      setShowPhoneDialog(true);
+    }
   };
 
   if (!isNative) {
@@ -279,7 +419,14 @@ const MobileSettings: React.FC = () => {
               <div className="p-4 border rounded-lg bg-green-50 space-y-3">
                 <div>
                   <p className="font-medium text-lg">{veterinarian.name}</p>
-                  <p className="text-sm text-muted-foreground">{veterinarian.phone}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-muted-foreground">{veterinarian.phone}</p>
+                    {veterinarian.phones && veterinarian.phones.length > 1 && (
+                      <span className="text-xs text-primary">
+                        +{veterinarian.phones.length - 1} más
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <Button
@@ -315,6 +462,21 @@ const MobileSettings: React.FC = () => {
                     <Trash2 className="w-4 h-4 text-red-600" />
                   </Button>
                 </div>
+                {veterinarian.phones && veterinarian.phones.length > 1 && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedContact(veterinarian);
+                      setPhoneDialogMode('change');
+                      setShowPhoneDialog(true);
+                    }}
+                  >
+                    <PhoneCall className="w-4 h-4 mr-2" />
+                    Cambiar Número de Teléfono
+                  </Button>
+                )}
               </div>
             ) : (
               <Button onClick={handlePickVeterinarian} variant="outline" className="w-full">
@@ -342,7 +504,14 @@ const MobileSettings: React.FC = () => {
                 {emergencyContacts.map((contact) => (
                   <div key={contact.id} className="flex items-center gap-3 p-3 border rounded-lg">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{contact.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate">{contact.name}</p>
+                        {contact.phones && contact.phones.length > 1 && (
+                          <span className="text-xs text-primary">
+                            +{contact.phones.length - 1}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">{contact.phone}</p>
                       <Select
                         value={contact.relationship}
@@ -361,6 +530,15 @@ const MobileSettings: React.FC = () => {
                       </Select>
                     </div>
                     <div className="flex gap-1">
+                      {contact.phones && contact.phones.length > 1 && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleChangeContactPhone(contact.id)}
+                        >
+                          <PhoneCall className="w-4 h-4" />
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="ghost"
@@ -464,11 +642,50 @@ const MobileSettings: React.FC = () => {
                 {calendarPermissionStatus === 'denied' && '❌ Permisos Denegados'}
                 {calendarPermissionStatus === 'notDetermined' && '⚠️ Permisos No Solicitados'}
                 {calendarPermissionStatus === 'unavailable' && '📱 Plugin No Disponible'}
+                {calendarPermissionStatus === 'unknown' && '❓ Verificando...'}
               </p>
             </div>
+            {(calendarPermissionStatus === 'denied' || calendarPermissionStatus === 'unavailable') && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => checkCalendarPermissions()}
+              >
+                Reintentar
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Phone Selection Dialog */}
+      <AlertDialog open={showPhoneDialog} onOpenChange={setShowPhoneDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Seleccionar Número de Teléfono</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedContact?.name} tiene múltiples números. Selecciona cuál usar:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 my-4">
+            {selectedContact?.phones?.map((phone, index) => (
+              <Button
+                key={phone}
+                variant={phone === selectedContact.phone ? "default" : "outline"}
+                className="w-full justify-start"
+                onClick={() => handlePhoneSelection(phone)}
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                {phone}
+                {phone === selectedContact.phone && " (Actual)"}
+              </Button>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

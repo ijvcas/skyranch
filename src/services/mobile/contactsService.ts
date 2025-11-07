@@ -4,7 +4,8 @@ import { Capacitor } from '@capacitor/core';
 export interface ContactInfo {
   id: string;
   name: string;
-  phone?: string;
+  phone?: string; // Primary/selected phone
+  phones?: string[]; // All available phone numbers
   email?: string;
 }
 
@@ -43,13 +44,15 @@ class ContactsService {
 
       const contact = result.contact;
       
+      // Extract all phone numbers
+      const allPhones = contact.phones?.map((p: any) => p.number).filter(Boolean) || [];
+      
       // Format the contact data
       const formattedContact: ContactInfo = {
         id: contact.contactId || Date.now().toString(),
         name: contact.name?.display || 'Unknown',
-        phone: contact.phones && contact.phones.length > 0 
-          ? contact.phones[0].number 
-          : undefined,
+        phone: allPhones[0], // Default to first phone
+        phones: allPhones.length > 0 ? allPhones : undefined,
         email: contact.emails && contact.emails.length > 0 
           ? contact.emails[0].address 
           : undefined

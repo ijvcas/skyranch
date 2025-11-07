@@ -70,6 +70,7 @@ class CalendarService {
   private initializePlugin() {
     if (!Capacitor.isNativePlatform()) {
       this.isPluginAvailable = false;
+      console.log('📅 Calendar not available - not on native platform');
       return;
     }
 
@@ -77,22 +78,39 @@ class CalendarService {
     const tryInit = (attempts = 0) => {
       try {
         const windowWithPlugins = window as any;
-        if (windowWithPlugins.plugins?.calendar) {
-          this.plugin = windowWithPlugins.plugins.calendar;
-          this.isPluginAvailable = true;
-          console.log('📅 Calendar plugin loaded successfully');
+        
+        // Check if window.plugins exists at all
+        if (!windowWithPlugins.plugins) {
+          console.log(`📅 Attempt ${attempts + 1}/10: window.plugins not available yet`);
+          if (attempts < 10) {
+            setTimeout(() => tryInit(attempts + 1), 1000);
+            return;
+          }
+          console.error('📅 window.plugins never became available - Cordova bridge may not be initialized');
+          this.isPluginAvailable = false;
           return;
         }
         
-        // Retry up to 5 times with 500ms delay
-        if (attempts < 5) {
-          setTimeout(() => tryInit(attempts + 1), 500);
+        if (windowWithPlugins.plugins.calendar) {
+          this.plugin = windowWithPlugins.plugins.calendar;
+          this.isPluginAvailable = true;
+          console.log('✅ Calendar plugin loaded successfully on attempt', attempts + 1);
+          return;
+        }
+        
+        console.log(`📅 Attempt ${attempts + 1}/10: window.plugins exists but calendar not found`);
+        
+        // Retry up to 10 times with increasing delay
+        if (attempts < 10) {
+          const delay = Math.min(1000 * (attempts + 1), 3000); // Max 3s delay
+          setTimeout(() => tryInit(attempts + 1), delay);
         } else {
-          console.log('📅 Calendar plugin not available after retries - install cordova-plugin-calendar and run npx cap sync');
+          console.error('❌ Calendar plugin not available after 10 retries');
+          console.error('📅 Please ensure cordova-plugin-calendar is installed and run: npx cap sync ios');
           this.isPluginAvailable = false;
         }
       } catch (error) {
-        console.log('📅 Calendar plugin initialization error:', error);
+        console.error('❌ Calendar plugin initialization error:', error);
         this.isPluginAvailable = false;
       }
     };
