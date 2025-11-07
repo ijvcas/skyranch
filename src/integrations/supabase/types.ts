@@ -1837,6 +1837,72 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_usage: {
+        Row: {
+          animals_count: number | null
+          id: string
+          last_updated: string | null
+          user_id: string
+          users_count: number | null
+        }
+        Insert: {
+          animals_count?: number | null
+          id?: string
+          last_updated?: string | null
+          user_id: string
+          users_count?: number | null
+        }
+        Update: {
+          animals_count?: number | null
+          id?: string
+          last_updated?: string | null
+          user_id?: string
+          users_count?: number | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          apple_original_transaction_id: string | null
+          apple_transaction_id: string | null
+          auto_renew_status: boolean | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          status: string
+          tier: string
+          trial_ends_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          apple_original_transaction_id?: string | null
+          apple_transaction_id?: string | null
+          auto_renew_status?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          status: string
+          tier: string
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          apple_original_transaction_id?: string | null
+          apple_transaction_id?: string | null
+          auto_renew_status?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          status?: string
+          tier?: string
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       support_settings: {
         Row: {
           created_at: string

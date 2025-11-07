@@ -8,17 +8,21 @@ import SystemSettings from '@/components/settings/SystemSettings';
 import FarmCustomization from '@/components/settings/FarmCustomization';
 import FactoryReset from '@/components/settings/FactoryReset';
 import MobileSettings from '@/components/settings/MobileSettings';
+import SubscriptionSettings from '@/components/settings/SubscriptionSettings';
 import { useAuthPermissions } from '@/hooks/useAuthPermissions';
 import { useIsOwner } from '@/hooks/useIsOwner';
 import { TabsContent } from '@/components/ui/tabs';
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState('subscription');
   const { hasPermission } = useAuthPermissions();
   const { isOwner } = useIsOwner();
 
   return (
     <SettingsLayout activeTab={activeTab} onTabChange={setActiveTab}>
+      <TabsContent value="subscription" className="mt-8">
+        <SubscriptionSettings />
+      </TabsContent>
 
       {hasPermission('users_manage') && (
         <TabsContent value="users" className="mt-8">
