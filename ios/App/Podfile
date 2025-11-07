@@ -20,7 +20,6 @@ def capacitor_pods
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
   pod 'CapacitorNativeBiometric', :path => '../../node_modules/capacitor-native-biometric'
   pod 'CapacitorCommunityContacts', :path => '../../node_modules/@capacitor-community/contacts'
-  pod 'CordovaPluginsStatic', :path => '../../node_modules/@capacitor/cli/assets/capacitor-cordova-ios-plugins'
 end
 
 target 'App' do
