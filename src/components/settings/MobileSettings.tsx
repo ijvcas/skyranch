@@ -12,6 +12,7 @@ import { contactsService, ContactInfo } from '@/services/mobile/contactsService'
 import { calendarService } from '@/services/mobile/calendarService';
 import { useToast } from '@/hooks/use-toast';
 import { hapticService } from '@/services/mobile/hapticService';
+import { useFarmBranding } from '@/hooks/useFarmBranding';
 
 interface EmergencyContact {
   id: string;
@@ -23,6 +24,8 @@ interface EmergencyContact {
 const MobileSettings: React.FC = () => {
   const isNative = Capacitor.isNativePlatform();
   const { toast } = useToast();
+  const { branding: farmBranding } = useFarmBranding();
+  const farmName = farmBranding?.farm_name || 'SKYRANCH';
   
   // Contacts state
   const [veterinarian, setVeterinarian] = useState<ContactInfo | null>(null);
@@ -116,7 +119,7 @@ const MobileSettings: React.FC = () => {
         id: Date.now().toString(),
         name: contact.name,
         phone: contact.phone || '',
-        relationship: 'Otro',
+        relationship: farmName,
       };
       const updated = [...emergencyContacts, newContact];
       setEmergencyContacts(updated);
@@ -273,15 +276,16 @@ const MobileSettings: React.FC = () => {
           <div className="space-y-3">
             <Label>Veterinario Principal</Label>
             {veterinarian ? (
-              <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
-                <div className="flex-1">
-                  <p className="font-medium">{veterinarian.name}</p>
+              <div className="p-4 border rounded-lg bg-green-50 space-y-3">
+                <div>
+                  <p className="font-medium text-lg">{veterinarian.name}</p>
                   <p className="text-sm text-muted-foreground">{veterinarian.phone}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   <Button
                     size="sm"
                     variant="outline"
+                    className="w-full"
                     onClick={() => contactsService.dialNumber(veterinarian.phone!)}
                   >
                     <Phone className="w-4 h-4" />
@@ -289,6 +293,7 @@ const MobileSettings: React.FC = () => {
                   <Button
                     size="sm"
                     variant="outline"
+                    className="w-full"
                     onClick={() => contactsService.sendMessage(veterinarian.phone!)}
                   >
                     <MessageCircle className="w-4 h-4" />
@@ -296,6 +301,7 @@ const MobileSettings: React.FC = () => {
                   <Button
                     size="sm"
                     variant="outline"
+                    className="w-full"
                     onClick={handleChangeVeterinarian}
                   >
                     <Pencil className="w-4 h-4" />
@@ -303,6 +309,7 @@ const MobileSettings: React.FC = () => {
                   <Button
                     size="sm"
                     variant="outline"
+                    className="w-full"
                     onClick={handleRemoveVeterinarian}
                   >
                     <Trash2 className="w-4 h-4 text-red-600" />
@@ -341,15 +348,15 @@ const MobileSettings: React.FC = () => {
                         value={contact.relationship}
                         onValueChange={(value) => handleUpdateContactRelationship(contact.id, value)}
                       >
-                        <SelectTrigger className="w-full mt-1">
+                        <SelectTrigger className="w-full mt-1 h-7 text-xs">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-background">
                           <SelectItem value="Veterinario">Veterinario</SelectItem>
                           <SelectItem value="Comprador">Comprador</SelectItem>
                           <SelectItem value="Empleado">Empleado</SelectItem>
                           <SelectItem value="Transporte">Transporte</SelectItem>
-                          <SelectItem value="Otro">Otro</SelectItem>
+                          <SelectItem value={farmName}>{farmName}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
