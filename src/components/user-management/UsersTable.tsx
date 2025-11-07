@@ -8,6 +8,7 @@ import { type AppUser } from '@/services/userService';
 import CompleteDeleteDialog from './CompleteDeleteDialog';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTimezone } from '@/hooks/useTimezone';
+import { useTranslation } from 'react-i18next';
 
 interface UsersTableProps {
   users: AppUser[];
@@ -35,6 +36,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   isCompleteDeleting
 }) => {
   const { formatDateInput } = useTimezone();
+  const { t } = useTranslation('users');
   const [completeDeleteDialog, setCompleteDeleteDialog] = useState<{
     isOpen: boolean;
     userId: string;
@@ -56,12 +58,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   });
 
   const getRoleLabel = (role: string) => {
-    const labels = {
-      admin: 'Administrador',
-      manager: 'Gerente',
-      worker: 'Trabajador'
-    } as const;
-    return (labels as any)[role] || role;
+    return t(`roles.${role}`, role);
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -73,7 +70,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
     return (colors as any)[role] || 'bg-gray-100 text-gray-800';
   };
 
-  const formatPhone = (phone: string) => (phone ? phone : 'No registrado');
+  const formatPhone = (phone: string) => (phone ? phone : t('list.registered'));
 
   const handleCompleteDeleteClick = (userId: string, userName: string) => {
     setCompleteDeleteDialog({ isOpen: true, userId, userName });
@@ -88,7 +85,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios del Sistema ({users.length})</CardTitle>
+          <CardTitle>{t('management.systemUsers')} ({users.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Virtualized table container */}
@@ -96,12 +93,12 @@ const UsersTable: React.FC<UsersTableProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[200px]">Usuario</TableHead>
-                  <TableHead className="min-w-[120px]">Teléfono</TableHead>
-                  <TableHead className="min-w-[100px]">Rol</TableHead>
-                  <TableHead className="min-w-[120px]">Estado</TableHead>
-                  <TableHead className="min-w-[120px]">Fecha Registro</TableHead>
-                  <TableHead className="min-w-[120px]">Acciones</TableHead>
+                  <TableHead className="min-w-[200px]">{t('table.user')}</TableHead>
+                  <TableHead className="min-w-[120px]">{t('table.phone')}</TableHead>
+                  <TableHead className="min-w-[100px]">{t('table.role')}</TableHead>
+                  <TableHead className="min-w-[120px]">{t('table.status')}</TableHead>
+                  <TableHead className="min-w-[120px]">{t('table.registrationDate')}</TableHead>
+                  <TableHead className="min-w-[120px]">{t('table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
             </Table>
@@ -146,7 +143,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                                 disabled={currentUser?.id === user.id || isToggling}
                               />
                               <span className="text-sm">
-                                {user.is_active ? 'Activo' : 'Inactivo'}
+                                {user.is_active ? t('list.active') : t('list.inactive')}
                               </span>
                             </div>
                           </TableCell>
@@ -160,7 +157,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                                 variant="ghost"
                                 size="sm"
                                 className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 w-8 h-8 p-0"
-                                title="Editar usuario"
+                                title={t('actions.edit')}
                               >
                                 <Edit className="w-4 h-4" />
                               </Button>
@@ -170,7 +167,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                                 size="sm"
                                 disabled={currentUser?.id === user.id || isDeleting}
                                 className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 w-8 h-8 p-0"
-                                title="Eliminar de la app (puede reaparecer)"
+                                title={t('actions.delete')}
                               >
                                 <UserMinus className="w-4 h-4" />
                               </Button>
@@ -180,7 +177,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
                                 size="sm"
                                 disabled={currentUser?.id === user.id || isCompleteDeleting}
                                 className="text-red-600 hover:text-red-700 hover:bg-red-50 w-8 h-8 p-0"
-                                title="Eliminar completamente (permanente)"
+                                title={t('actions.completeDelete')}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>

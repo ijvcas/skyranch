@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { TrendingUp, Users, Heart, Baby } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 interface Animal {
   id: string;
@@ -46,6 +47,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 };
 
 const AdvancedAnalytics = () => {
+  const { t } = useTranslation('dashboard');
   const { data: animals, isLoading: isLoadingAnimals, error: errorAnimals } = useQuery({
     queryKey: ['animals'],
     queryFn: async () => {
@@ -129,7 +131,7 @@ const AdvancedAnalytics = () => {
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Cargando datos...</p>
+          <p className="mt-2 text-gray-600">{t('analytics.loading')}</p>
         </div>
       </div>
     );
@@ -139,7 +141,7 @@ const AdvancedAnalytics = () => {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
-          <p className="text-red-600">Error al cargar los datos. Por favor, inténtalo de nuevo.</p>
+          <p className="text-red-600">{t('analytics.error')}</p>
         </div>
       </div>
     );
@@ -152,12 +154,12 @@ const AdvancedAnalytics = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-4 h-4 text-gray-500" />
-            Total Animales
+            {t('analytics.totalAnimals')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold">{animals?.length || 0}</div>
-          <p className="text-sm text-gray-500">Animales registrados en el sistema</p>
+          <p className="text-sm text-gray-500">{t('analytics.animalsInSystem')}</p>
         </CardContent>
       </Card>
 
@@ -166,7 +168,7 @@ const AdvancedAnalytics = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-gray-500" />
-            Registros Mensuales
+            {t('analytics.monthlyRegistrations')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -187,7 +189,7 @@ const AdvancedAnalytics = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Heart className="w-4 h-4 text-gray-500" />
-            Distribución de Especies
+            {t('analytics.speciesDistribution')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -218,7 +220,7 @@ const AdvancedAnalytics = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Baby className="w-4 h-4 text-gray-500" />
-            Tendencias de Salud
+            {t('analytics.healthTrends')}
           </CardTitle>
         </CardHeader>
         <CardContent>

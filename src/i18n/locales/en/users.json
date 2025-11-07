@@ -1,0 +1,49 @@
+{
+  "management": {
+    "title": "User Management",
+    "description": "Manage users and their permissions",
+    "inviteByEmail": "Invite by Email",
+    "systemUsers": "System Users"
+  },
+  "list": {
+    "registered": "Not registered",
+    "registeredDate": "Registered",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "manager": "Manager",
+    "worker": "Worker"
+  },
+  "table": {
+    "user": "User",
+    "phone": "Phone",
+    "role": "Role",
+    "status": "Status",
+    "registrationDate": "Registration Date",
+    "actions": "Actions"
+  },
+  "form": {
+    "addNew": "Add New User",
+    "inviteTab": "Invite by Email",
+    "directTab": "Create Directly",
+    "inviteDescription": "Send an email invitation. The user will receive a link to create their own account.",
+    "openInvite": "Open Invitation Form",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "phone": "Phone",
+    "role": "Role",
+    "adding": "Adding...",
+    "addUser": "Add User",
+    "cancel": "Cancel"
+  },
+  "actions": {
+    "edit": "Edit user",
+    "delete": "Remove from app (may reappear)",
+    "completeDelete": "Delete completely (permanent)"
+  },
+  "status": {
+    "title": "User Status"
+  }
+}

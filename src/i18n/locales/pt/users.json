@@ -1,0 +1,49 @@
+{
+  "management": {
+    "title": "Gestão de Usuários",
+    "description": "Gerencie usuários e suas permissões",
+    "inviteByEmail": "Convidar por Email",
+    "systemUsers": "Usuários do Sistema"
+  },
+  "list": {
+    "registered": "Não registrado",
+    "registeredDate": "Registrado",
+    "active": "Ativo",
+    "inactive": "Inativo"
+  },
+  "roles": {
+    "admin": "Administrador",
+    "manager": "Gerente",
+    "worker": "Trabalhador"
+  },
+  "table": {
+    "user": "Usuário",
+    "phone": "Telefone",
+    "role": "Função",
+    "status": "Status",
+    "registrationDate": "Data de Registro",
+    "actions": "Ações"
+  },
+  "form": {
+    "addNew": "Adicionar Novo Usuário",
+    "inviteTab": "Convidar por Email",
+    "directTab": "Criar Diretamente",
+    "inviteDescription": "Envie um convite por email. O usuário receberá um link para criar sua própria conta.",
+    "openInvite": "Abrir Formulário de Convite",
+    "fullName": "Nome Completo",
+    "email": "Endereço de Email",
+    "phone": "Telefone",
+    "role": "Função",
+    "adding": "Adicionando...",
+    "addUser": "Adicionar Usuário",
+    "cancel": "Cancelar"
+  },
+  "actions": {
+    "edit": "Editar usuário",
+    "delete": "Remover do app (pode reaparecer)",
+    "completeDelete": "Excluir completamente (permanente)"
+  },
+  "status": {
+    "title": "Status do Usuário"
+  }
+}

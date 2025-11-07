@@ -1,0 +1,49 @@
+{
+  "management": {
+    "title": "Gestion des Utilisateurs",
+    "description": "Gérer les utilisateurs et leurs permissions",
+    "inviteByEmail": "Inviter par Email",
+    "systemUsers": "Utilisateurs du Système"
+  },
+  "list": {
+    "registered": "Non enregistré",
+    "registeredDate": "Enregistré",
+    "active": "Actif",
+    "inactive": "Inactif"
+  },
+  "roles": {
+    "admin": "Administrateur",
+    "manager": "Gestionnaire",
+    "worker": "Travailleur"
+  },
+  "table": {
+    "user": "Utilisateur",
+    "phone": "Téléphone",
+    "role": "Rôle",
+    "status": "Statut",
+    "registrationDate": "Date d'Inscription",
+    "actions": "Actions"
+  },
+  "form": {
+    "addNew": "Ajouter un Nouvel Utilisateur",
+    "inviteTab": "Inviter par Email",
+    "directTab": "Créer Directement",
+    "inviteDescription": "Envoyez une invitation par email. L'utilisateur recevra un lien pour créer son propre compte.",
+    "openInvite": "Ouvrir le Formulaire d'Invitation",
+    "fullName": "Nom Complet",
+    "email": "Adresse Email",
+    "phone": "Téléphone",
+    "role": "Rôle",
+    "adding": "Ajout en cours...",
+    "addUser": "Ajouter un Utilisateur",
+    "cancel": "Annuler"
+  },
+  "actions": {
+    "edit": "Modifier l'utilisateur",
+    "delete": "Retirer de l'app (peut réapparaître)",
+    "completeDelete": "Supprimer complètement (permanent)"
+  },
+  "status": {
+    "title": "Statut de l'Utilisateur"
+  }
+}

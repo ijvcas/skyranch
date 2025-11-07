@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Save, X, HelpCircle, Mail, Phone, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supportSettingsService } from '@/services/supportSettingsService';
+import { useTranslation } from 'react-i18next';
 
 interface SupportInfoSettingsProps {
   isAdmin: boolean;
@@ -14,6 +15,7 @@ interface SupportInfoSettingsProps {
 
 const SupportInfoSettings = ({ isAdmin }: SupportInfoSettingsProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation('dashboard');
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -87,7 +89,7 @@ const SupportInfoSettings = ({ isAdmin }: SupportInfoSettingsProps) => {
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <HelpCircle className="w-5 h-5 text-orange-600" />
-          Información de Soporte Técnico
+          {t('support.title')}
           {isAdmin && (
             <Button
               variant="ghost"
@@ -149,7 +151,7 @@ const SupportInfoSettings = ({ isAdmin }: SupportInfoSettingsProps) => {
               <span>{supportInfo.phone}</span>
             </div>
             <div className="text-sm">
-              <strong>Horario:</strong> {supportInfo.hours}
+              <strong>{t('support.schedule')}:</strong> {supportInfo.hours}
             </div>
             <Button 
               variant="outline" 
@@ -157,7 +159,7 @@ const SupportInfoSettings = ({ isAdmin }: SupportInfoSettingsProps) => {
               className="w-full"
               onClick={() => window.open(`mailto:${supportInfo.email}`, '_blank')}
             >
-              Contactar Soporte
+              {t('support.contactSupport')}
             </Button>
           </>
         )}

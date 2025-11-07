@@ -8,6 +8,7 @@ import { ChevronDown, ChevronRight, Edit, UserMinus, Trash2, Phone, Mail, Calend
 import { type AppUser } from '@/services/userService';
 import CompleteDeleteDialog from './CompleteDeleteDialog';
 import { useTimezone } from '@/hooks/useTimezone';
+import { useTranslation } from 'react-i18next';
 
 interface ExpandableUsersListProps {
   users: AppUser[];
@@ -34,6 +35,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
 }) => {
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   const { formatDateInput } = useTimezone();
+  const { t } = useTranslation('users');
   const [completeDeleteDialog, setCompleteDeleteDialog] = useState<{
     isOpen: boolean;
     userId: string;
@@ -55,12 +57,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
   };
 
   const getRoleLabel = (role: string) => {
-    const labels = {
-      admin: 'Administrador',
-      manager: 'Gerente',
-      worker: 'Trabajador'
-    };
-    return labels[role as keyof typeof labels] || role;
+    return t(`roles.${role}`, role);
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -73,7 +70,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
   };
 
   const formatPhone = (phone: string) => {
-    if (!phone) return 'No registrado';
+    if (!phone) return t('list.registered');
     return phone;
   };
 
@@ -98,7 +95,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios del Sistema ({users.length})</CardTitle>
+          <CardTitle>{t('management.systemUsers')} ({users.length})</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {users.map((user) => {
@@ -140,7 +137,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
                       <div className="flex items-center gap-2 text-sm">
                         <Calendar className="w-4 h-4 text-gray-400" />
                         <span className="text-gray-600">
-                          Registrado: {formatDateInput(new Date(user.created_at).toISOString().split('T')[0])}
+                          {t('list.registeredDate')}: {formatDateInput(new Date(user.created_at).toISOString().split('T')[0])}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -153,7 +150,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
                         <div className="flex items-center gap-1">
                           <div className={`w-2 h-2 rounded-full ${user.is_active ? 'bg-green-500' : 'bg-gray-400'}`} />
                           <span className="text-xs text-gray-600">
-                            {user.is_active ? 'Activo' : 'Inactivo'}
+                            {user.is_active ? t('list.active') : t('list.inactive')}
                           </span>
                         </div>
                       </div>
@@ -161,7 +158,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
 
                     {/* Status Toggle */}
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium">Estado del Usuario</span>
+                      <span className="text-sm font-medium">{t('status.title')}</span>
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={user.is_active}
@@ -169,7 +166,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
                           disabled={currentUser?.id === user.id || isToggling}
                         />
                         <span className="text-sm">
-                          {user.is_active ? 'Activo' : 'Inactivo'}
+                          {user.is_active ? t('list.active') : t('list.inactive')}
                         </span>
                       </div>
                     </div>
@@ -180,7 +177,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
                         variant="ghost"
                         size="sm"
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 w-8 h-8 p-0"
-                        title="Editar usuario"
+                        title={t('actions.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -190,7 +187,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
                         size="sm"
                         disabled={currentUser?.id === user.id || isDeleting}
                         className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 w-8 h-8 p-0"
-                        title="Eliminar de la app (puede reaparecer)"
+                        title={t('actions.delete')}
                       >
                         <UserMinus className="w-4 h-4" />
                       </Button>
@@ -200,7 +197,7 @@ const ExpandableUsersList: React.FC<ExpandableUsersListProps> = ({
                         size="sm"
                         disabled={currentUser?.id === user.id || isCompleteDeleting}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50 w-8 h-8 p-0"
-                        title="Eliminar completamente (permanente)"
+                        title={t('actions.completeDelete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

@@ -4,11 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { startOfWeek, endOfWeek, isWithinInterval, format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS, pt, fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 const DashboardWeeklyEvents = () => {
   const navigate = useNavigate();
   const { events } = useCalendarEvents();
+  const { t, i18n } = useTranslation('dashboard');
+  
+  const getDateLocale = () => {
+    switch (i18n.language) {
+      case 'en': return enUS;
+      case 'pt': return pt;
+      case 'fr': return fr;
+      default: return es;
+    }
+  };
 
   // Filter events for current week
   const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -50,10 +61,10 @@ const DashboardWeeklyEvents = () => {
             </div>
             <div>
               <CardTitle className="text-lg md:text-2xl font-semibold">
-                Eventos de esta semana
+                {t('events.title')}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                {format(currentWeekStart, 'd MMM', { locale: es })} - {format(currentWeekEnd, 'd MMM', { locale: es })}
+                {format(currentWeekStart, 'd MMM', { locale: getDateLocale() })} - {format(currentWeekEnd, 'd MMM', { locale: getDateLocale() })}
               </p>
             </div>
           </div>
@@ -62,12 +73,12 @@ const DashboardWeeklyEvents = () => {
       <CardContent className="pt-0 p-4 md:p-6">
         {weeklyEvents.length === 0 ? (
           <div className="text-center py-6">
-            <p className="text-muted-foreground mb-4">No hay eventos programados para esta semana</p>
+            <p className="text-muted-foreground mb-4">{t('events.noEvents')}</p>
             <button
               onClick={handleViewAllEvents}
               className="text-primary hover:text-primary/80 font-medium transition-colors"
             >
-              Ver calendario completo
+              {t('events.viewCalendar')}
             </button>
           </div>
         ) : (
@@ -86,7 +97,7 @@ const DashboardWeeklyEvents = () => {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {format(parseISO(event.eventDate), 'dd/MM HH:mm', { locale: es })}
+                      {format(parseISO(event.eventDate), 'dd/MM HH:mm', { locale: getDateLocale() })}
                     </div>
                     {event.location && (
                       <div className="flex items-center gap-1">
@@ -102,7 +113,7 @@ const DashboardWeeklyEvents = () => {
               onClick={handleViewAllEvents}
               className="w-full mt-4 text-primary hover:text-primary/80 font-medium text-sm transition-colors text-center"
             >
-              Ver todos los eventos ({events.length})
+              {t('events.viewAll')} ({events.length})
             </button>
           </div>
         )}

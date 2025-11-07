@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardStatsProps {
   totalAnimals: number;
@@ -10,6 +11,7 @@ interface DashboardStatsProps {
 
 const DashboardStats = ({ totalAnimals, speciesCounts }: DashboardStatsProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('dashboard');
 
   const handleTotalAnimalsClick = () => {
     navigate('/animals');
@@ -20,16 +22,7 @@ const DashboardStats = ({ totalAnimals, speciesCounts }: DashboardStatsProps) =>
   };
 
   const getSpeciesDisplayName = (species: string) => {
-    const speciesMap = {
-      'bovino': 'Bovinos',
-      'ovino': 'Ovinos', 
-      'equino': 'Equinos',
-      'caprino': 'Caprinos',
-      'porcino': 'Porcinos',
-      'aviar': 'Aves',
-      'canino': 'Caninos'
-    };
-    return speciesMap[species as keyof typeof speciesMap] || species.charAt(0).toUpperCase() + species.slice(1);
+    return t(`stats.species.${species}`, species.charAt(0).toUpperCase() + species.slice(1));
   };
 
   const getSpeciesColor = (species: string) => {
@@ -54,14 +47,14 @@ const DashboardStats = ({ totalAnimals, speciesCounts }: DashboardStatsProps) =>
       >
         <CardHeader className="pb-2 p-3 md:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-blue-700 uppercase tracking-wide">
-            Total Animales
+            {t('stats.totalAnimals')}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0 p-3 md:p-6">
           <div className="text-xl md:text-3xl font-bold text-blue-900 mb-1">
             {totalAnimals.toLocaleString()}
           </div>
-          <p className="text-xs md:text-sm text-blue-600">animales registrados</p>
+          <p className="text-xs md:text-sm text-blue-600">{t('stats.animalsRegistered')}</p>
         </CardContent>
       </Card>
 
@@ -84,7 +77,7 @@ const DashboardStats = ({ totalAnimals, speciesCounts }: DashboardStatsProps) =>
               {count}
             </div>
             <p className="text-xs md:text-sm text-white opacity-80">
-              {count === 1 ? 'animal' : 'animales'}
+              {count === 1 ? t('stats.animal') : t('stats.animals')}
             </p>
           </CardContent>
         </Card>

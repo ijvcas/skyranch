@@ -11,6 +11,8 @@ import breedingES from './locales/es/breeding.json';
 import healthES from './locales/es/health.json';
 import reportsES from './locales/es/reports.json';
 import settingsES from './locales/es/settings.json';
+import authES from './locales/es/auth.json';
+import dashboardES from './locales/es/dashboard.json';
 
 import commonEN from './locales/en/common.json';
 import animalsEN from './locales/en/animals.json';
@@ -19,6 +21,8 @@ import breedingEN from './locales/en/breeding.json';
 import healthEN from './locales/en/health.json';
 import reportsEN from './locales/en/reports.json';
 import settingsEN from './locales/en/settings.json';
+import authEN from './locales/en/auth.json';
+import dashboardEN from './locales/en/dashboard.json';
 
 import commonPT from './locales/pt/common.json';
 import animalsPT from './locales/pt/animals.json';
@@ -27,6 +31,8 @@ import breedingPT from './locales/pt/breeding.json';
 import healthPT from './locales/pt/health.json';
 import reportsPT from './locales/pt/reports.json';
 import settingsPT from './locales/pt/settings.json';
+import authPT from './locales/pt/auth.json';
+import dashboardPT from './locales/pt/dashboard.json';
 
 import commonFR from './locales/fr/common.json';
 import animalsFR from './locales/fr/animals.json';
@@ -35,6 +41,8 @@ import breedingFR from './locales/fr/breeding.json';
 import healthFR from './locales/fr/health.json';
 import reportsFR from './locales/fr/reports.json';
 import settingsFR from './locales/fr/settings.json';
+import authFR from './locales/fr/auth.json';
+import dashboardFR from './locales/fr/dashboard.json';
 
 const resources = {
   es: {
@@ -44,7 +52,9 @@ const resources = {
     breeding: breedingES,
     health: healthES,
     reports: reportsES,
-    settings: settingsES
+    settings: settingsES,
+    auth: authES,
+    dashboard: dashboardES
   },
   en: {
     common: commonEN,
@@ -53,7 +63,9 @@ const resources = {
     breeding: breedingEN,
     health: healthEN,
     reports: reportsEN,
-    settings: settingsEN
+    settings: settingsEN,
+    auth: authEN,
+    dashboard: dashboardEN
   },
   pt: {
     common: commonPT,
@@ -62,7 +74,9 @@ const resources = {
     breeding: breedingPT,
     health: healthPT,
     reports: reportsPT,
-    settings: settingsPT
+    settings: settingsPT,
+    auth: authPT,
+    dashboard: dashboardPT
   },
   fr: {
     common: commonFR,
@@ -71,7 +85,9 @@ const resources = {
     breeding: breedingFR,
     health: healthFR,
     reports: reportsFR,
-    settings: settingsFR
+    settings: settingsFR,
+    auth: authFR,
+    dashboard: dashboardFR
   }
 };
 
@@ -84,7 +100,7 @@ i18n
     fallbackLng: 'es',
     supportedLngs: ['es', 'en', 'pt', 'fr'],
     defaultNS: 'common',
-    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings'],
+    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard'],
     interpolation: {
       escapeValue: false
     },

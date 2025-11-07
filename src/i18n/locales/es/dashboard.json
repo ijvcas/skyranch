@@ -38,5 +38,43 @@
   "seo": {
     "title": "SKYRANCH Dashboard — Farm management",
     "description": "Gestiona animales, lotes y rotaciones en tiempo real en SKYRANCH."
+  },
+  "stats": {
+    "totalAnimals": "Total Animales",
+    "animalsRegistered": "animales registrados",
+    "animal": "animal",
+    "animals": "animales",
+    "species": {
+      "bovino": "Bovinos",
+      "ovino": "Ovinos",
+      "equino": "Equinos",
+      "caprino": "Caprinos",
+      "porcino": "Porcinos",
+      "aviar": "Aves",
+      "canino": "Caninos"
+    }
+  },
+  "events": {
+    "title": "Eventos de esta semana",
+    "noEvents": "No hay eventos programados para esta semana",
+    "viewCalendar": "Ver calendario completo",
+    "viewAll": "Ver todos los eventos"
+  },
+  "support": {
+    "title": "Información de Soporte Técnico",
+    "schedule": "Horario",
+    "contactSupport": "Contactar Soporte"
+  },
+  "fieldReport": {
+    "button": "Reporte de Campo"
+  },
+  "analytics": {
+    "loading": "Cargando datos...",
+    "error": "Error al cargar los datos. Por favor, inténtalo de nuevo.",
+    "totalAnimals": "Total Animales",
+    "animalsInSystem": "Animales registrados en el sistema",
+    "monthlyRegistrations": "Registros Mensuales",
+    "speciesDistribution": "Distribución de Especies",
+    "healthTrends": "Tendencias de Salud"
   }
 }

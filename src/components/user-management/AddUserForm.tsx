@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type AppUser } from '@/services/userService';
 import NotificationPreferencesForm from '../user-edit/NotificationPreferencesForm';
+import { useTranslation } from 'react-i18next';
 
 interface AddUserFormProps {
   newUser: {
@@ -36,6 +37,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   onCancel,
   isLoading
 }) => {
+  const { t } = useTranslation('users');
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   
   const handleNotificationPreferenceChange = (field: string, value: boolean) => {
@@ -52,21 +54,21 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Agregar Nuevo Usuario</CardTitle>
+          <CardTitle>{t('form.addNew')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="invite" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="invite">Invitar por Email</TabsTrigger>
-              <TabsTrigger value="direct">Crear Directamente</TabsTrigger>
+              <TabsTrigger value="invite">{t('form.inviteTab')}</TabsTrigger>
+              <TabsTrigger value="direct">{t('form.directTab')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="invite" className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Envía una invitación por correo electrónico. El usuario recibirá un enlace para crear su propia cuenta.
+                {t('form.inviteDescription')}
               </p>
               <Button onClick={() => setInviteDialogOpen(true)} className="w-full">
-                Abrir Formulario de Invitación
+                {t('form.openInvite')}
               </Button>
             </TabsContent>
             
@@ -76,7 +78,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Nombre Completo</Label>
+                <Label htmlFor="name">{t('form.fullName')}</Label>
                 <Input
                   id="name"
                   value={newUser.name}
@@ -86,7 +88,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="email">Correo Electrónico</Label>
+                <Label htmlFor="email">{t('form.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -99,7 +101,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="phone">Teléfono</Label>
+                <Label htmlFor="phone">{t('form.phone')}</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -109,15 +111,15 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 />
               </div>
               <div>
-                <Label htmlFor="role">Rol</Label>
+                <Label htmlFor="role">{t('form.role')}</Label>
                 <Select value={newUser.role} onValueChange={(value) => onUserChange({...newUser, role: value as AppUser['role']})}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="worker">Trabajador</SelectItem>
-                    <SelectItem value="manager">Gerente</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="worker">{t('roles.worker')}</SelectItem>
+                    <SelectItem value="manager">{t('roles.manager')}</SelectItem>
+                    <SelectItem value="admin">{t('roles.admin')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -134,10 +136,10 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
           <div className="flex gap-3">
             <Button type="submit" disabled={isLoading} className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white">
-              {isLoading ? 'Agregando...' : 'Agregar Usuario'}
+              {isLoading ? t('form.adding') : t('form.addUser')}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancelar
+              {t('form.cancel')}
             </Button>
           </div>
         </form>

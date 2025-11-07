@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { HelpCircle, Mail, Phone } from 'lucide-react';
 import { supportSettingsService } from '@/services/supportSettingsService';
+import { useTranslation } from 'react-i18next';
 
 const DashboardSupportInfo = () => {
+  const { t } = useTranslation('dashboard');
   const [supportInfo, setSupportInfo] = useState({
     email: 'soporte@farmika.app',
     phone: '+34636391352',
@@ -40,7 +42,7 @@ const DashboardSupportInfo = () => {
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <HelpCircle className="w-5 h-5 text-orange-600" />
-          Información de Soporte Técnico
+          {t('support.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -53,7 +55,7 @@ const DashboardSupportInfo = () => {
           <span>{supportInfo.phone}</span>
         </div>
         <div className="text-sm">
-          <strong>Horario:</strong> {supportInfo.hours}
+          <strong>{t('support.schedule')}:</strong> {supportInfo.hours}
         </div>
         <Button 
           variant="outline" 
@@ -61,7 +63,7 @@ const DashboardSupportInfo = () => {
           className="w-full"
           onClick={handleContactSupport}
         >
-          Contactar Soporte
+          {t('support.contactSupport')}
         </Button>
       </CardContent>
     </Card>
