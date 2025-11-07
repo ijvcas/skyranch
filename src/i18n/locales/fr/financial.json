@@ -1,0 +1,129 @@
+{
+  "title": "Finances",
+  "subtitle": "Gestion financière de la ferme",
+  "tabs": {
+    "overview": "Aperçu",
+    "transactions": "Transactions",
+    "categories": "Catégories",
+    "budgets": "Budgets",
+    "reports": "Rapports"
+  },
+  "transaction": {
+    "add": "Nouvelle Transaction",
+    "addIncome": "Nouveau Revenu",
+    "addExpense": "Nouvelle Dépense",
+    "edit": "Modifier la Transaction",
+    "type": "Type",
+    "category": "Catégorie",
+    "amount": "Montant",
+    "date": "Date",
+    "paymentMethod": "Méthode de Paiement",
+    "description": "Description",
+    "tags": "Tags",
+    "receipt": "Reçu",
+    "uploadReceipt": "Télécharger le Reçu",
+    "viewReceipt": "Voir le Reçu",
+    "deleteReceipt": "Supprimer le Reçu"
+  },
+  "types": {
+    "income": "Revenu",
+    "expense": "Dépense"
+  },
+  "categories": {
+    "feed": "Alimentation",
+    "veterinary": "Vétérinaire",
+    "equipment": "Équipement",
+    "labor": "Main-d'œuvre",
+    "land": "Terre",
+    "utilities": "Services",
+    "transport": "Transport",
+    "breeding": "Reproduction",
+    "sale": "Vente d'animaux",
+    "other_income": "Autres revenus",
+    "other_expense": "Autres dépenses",
+    "addCategory": "Nouvelle Catégorie",
+    "editCategory": "Modifier la Catégorie",
+    "categoryName": "Nom de la Catégorie",
+    "categoryIcon": "Icône",
+    "categoryColor": "Couleur"
+  },
+  "paymentMethods": {
+    "cash": "Espèces",
+    "bank_transfer": "Virement",
+    "card": "Carte",
+    "check": "Chèque",
+    "other": "Autre"
+  },
+  "metrics": {
+    "totalRevenue": "Revenus Totaux",
+    "totalExpenses": "Dépenses Totales",
+    "netIncome": "Revenu Net",
+    "netProfit": "Bénéfice Net",
+    "netLoss": "Perte Nette",
+    "savingsRate": "Taux d'Épargne",
+    "profitMargin": "Marge Bénéficiaire",
+    "monthlyAverage": "Moyenne Mensuelle",
+    "yearlyTotal": "Total Annuel"
+  },
+  "dashboard": {
+    "title": "Tableau de Bord Financier",
+    "recentTransactions": "Transactions Récentes",
+    "monthlyTrends": "Tendances Mensuelles",
+    "categoryBreakdown": "Répartition par Catégorie",
+    "budgetProgress": "Progrès du Budget"
+  },
+  "budget": {
+    "title": "Budgets",
+    "add": "Nouveau Budget",
+    "edit": "Modifier le Budget",
+    "category": "Catégorie",
+    "amount": "Montant",
+    "period": "Période",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "spent": "Dépensé",
+    "remaining": "Restant",
+    "progress": "Progrès",
+    "exceeded": "Dépassé",
+    "onTrack": "Sur la Bonne Voie",
+    "nearLimit": "Près de la Limite"
+  },
+  "report": {
+    "title": "Rapports Financiers",
+    "monthly": "Rapport Mensuel",
+    "yearly": "Rapport Annuel",
+    "custom": "Rapport Personnalisé",
+    "dateRange": "Plage de Dates",
+    "generate": "Générer le Rapport",
+    "export": "Exporter",
+    "exportCSV": "Exporter en CSV",
+    "exportPDF": "Exporter en PDF",
+    "incomeVsExpenses": "Revenus vs Dépenses",
+    "categoryAnalysis": "Analyse par Catégorie",
+    "yearOverYear": "Année après Année"
+  },
+  "filters": {
+    "all": "Toutes",
+    "income": "Revenus",
+    "expenses": "Dépenses",
+    "dateRange": "Plage de Dates",
+    "category": "Catégorie",
+    "paymentMethod": "Méthode de Paiement",
+    "tags": "Tags",
+    "applyFilters": "Appliquer les Filtres",
+    "clearFilters": "Effacer les Filtres"
+  },
+  "messages": {
+    "transactionAdded": "Transaction ajoutée avec succès",
+    "transactionUpdated": "Transaction mise à jour avec succès",
+    "transactionDeleted": "Transaction supprimée avec succès",
+    "receiptUploaded": "Reçu téléchargé avec succès",
+    "receiptDeleted": "Reçu supprimé avec succès",
+    "budgetAdded": "Budget créé avec succès",
+    "budgetUpdated": "Budget mis à jour avec succès",
+    "budgetDeleted": "Budget supprimé avec succès",
+    "exportSuccess": "Exportation réussie",
+    "exportError": "Erreur d'exportation",
+    "limitReached": "Limite de transactions atteinte. Mettez à niveau votre forfait pour continuer."
+  }
+}

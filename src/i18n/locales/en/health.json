@@ -1,0 +1,32 @@
+{
+  "title": "Health",
+  "addRecord": "New Record",
+  "editRecord": "Edit Record",
+  "fields": {
+    "animal": "Animal",
+    "type": "Type",
+    "title": "Title",
+    "date": "Date",
+    "medication": "Medication",
+    "dosage": "Dosage",
+    "veterinarian": "Veterinarian",
+    "cost": "Cost",
+    "nextDueDate": "Next Due Date",
+    "description": "Description",
+    "notes": "Notes"
+  },
+  "types": {
+    "vaccination": "Vaccination",
+    "treatment": "Treatment",
+    "checkup": "Checkup",
+    "surgery": "Surgery",
+    "deworming": "Deworming",
+    "other": "Other"
+  },
+  "messages": {
+    "added": "Health record added",
+    "updated": "Record updated",
+    "deleted": "Record deleted",
+    "dueReminder": "Reminder: Treatment due"
+  }
+}

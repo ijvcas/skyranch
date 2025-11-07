@@ -1,0 +1,31 @@
+{
+  "title": "Reports",
+  "subtitle": "Farm analytics and statistics",
+  "dashboard": {
+    "overview": "Overview",
+    "animalStats": "Animal Statistics",
+    "financialSummary": "Financial Summary",
+    "healthMetrics": "Health Metrics",
+    "breedingPerformance": "Breeding Performance"
+  },
+  "types": {
+    "inventory": "Inventory",
+    "financial": "Financial",
+    "health": "Health",
+    "breeding": "Breeding",
+    "production": "Production"
+  },
+  "period": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "custom": "Custom"
+  },
+  "actions": {
+    "generate": "Generate Report",
+    "export": "Export",
+    "print": "Print",
+    "share": "Share"
+  }
+}

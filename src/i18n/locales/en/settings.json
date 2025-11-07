@@ -1,0 +1,47 @@
+{
+  "title": "Settings",
+  "tabs": {
+    "general": "General",
+    "subscription": "Subscription",
+    "profile": "Profile",
+    "farm": "Farm",
+    "security": "Security",
+    "language": "Language"
+  },
+  "general": {
+    "title": "General Settings",
+    "farmName": "Farm Name",
+    "farmLogo": "Farm Logo",
+    "location": "Location",
+    "theme": "Theme",
+    "notifications": "Notifications"
+  },
+  "language": {
+    "title": "Language",
+    "select": "Select Language",
+    "current": "Current Language",
+    "available": "Available Languages"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade Plan",
+    "downgrade": "Downgrade",
+    "cancel": "Cancel Subscription",
+    "renewalDate": "Renewal Date",
+    "usage": "Usage",
+    "limits": "Limits"
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "changePassword": "Change Password"
+  },
+  "messages": {
+    "saved": "Settings saved",
+    "error": "Error saving",
+    "languageChanged": "Language changed successfully"
+  }
+}

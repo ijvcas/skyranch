@@ -1,0 +1,47 @@
+{
+  "title": "Configurações",
+  "tabs": {
+    "general": "Geral",
+    "subscription": "Assinatura",
+    "profile": "Perfil",
+    "farm": "Fazenda",
+    "security": "Segurança",
+    "language": "Idioma"
+  },
+  "general": {
+    "title": "Configurações Gerais",
+    "farmName": "Nome da Fazenda",
+    "farmLogo": "Logo da Fazenda",
+    "location": "Localização",
+    "theme": "Tema",
+    "notifications": "Notificações"
+  },
+  "language": {
+    "title": "Idioma",
+    "select": "Selecionar Idioma",
+    "current": "Idioma Atual",
+    "available": "Idiomas Disponíveis"
+  },
+  "subscription": {
+    "title": "Assinatura",
+    "currentPlan": "Plano Atual",
+    "upgrade": "Atualizar Plano",
+    "downgrade": "Rebaixar Plano",
+    "cancel": "Cancelar Assinatura",
+    "renewalDate": "Data de Renovação",
+    "usage": "Uso",
+    "limits": "Limites"
+  },
+  "profile": {
+    "title": "Perfil",
+    "name": "Nome",
+    "email": "Email",
+    "phone": "Telefone",
+    "changePassword": "Alterar Senha"
+  },
+  "messages": {
+    "saved": "Configurações salvas",
+    "error": "Erro ao salvar",
+    "languageChanged": "Idioma alterado com sucesso"
+  }
+}

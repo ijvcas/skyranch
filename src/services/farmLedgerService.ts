@@ -11,6 +11,10 @@ export interface FarmLedgerEntry {
   user_id: string;
   metadata?: any;
   created_at: string;
+  category?: string;
+  payment_method?: string;
+  receipt_url?: string;
+  tags?: string[];
 }
 
 export interface LedgerSummary {
@@ -179,6 +183,29 @@ export const getMonthlyRevenue = async (year: number): Promise<Array<{ month: nu
     console.error('Error getting monthly revenue:', error);
     return [];
   }
+};
+
+// Get category breakdown
+export const getCategoryBreakdown = async (dateRange?: { start: string; end: string }) => {
+  const entries = await getLedgerEntries(dateRange);
+  
+  const breakdown: Record<string, { income: number; expenses: number; count: number }> = {};
+  
+  entries.forEach(entry => {
+    const category = entry.category || 'other';
+    if (!breakdown[category]) {
+      breakdown[category] = { income: 0, expenses: 0, count: 0 };
+    }
+    
+    if (entry.transaction_type === 'income' || entry.transaction_type === 'sale') {
+      breakdown[category].income += entry.amount;
+    } else if (entry.transaction_type === 'expense') {
+      breakdown[category].expenses += Math.abs(entry.amount);
+    }
+    breakdown[category].count++;
+  });
+  
+  return breakdown;
 };
 
 // Get sales analytics

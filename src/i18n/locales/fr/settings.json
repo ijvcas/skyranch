@@ -1,0 +1,47 @@
+{
+  "title": "Paramètres",
+  "tabs": {
+    "general": "Général",
+    "subscription": "Abonnement",
+    "profile": "Profil",
+    "farm": "Ferme",
+    "security": "Sécurité",
+    "language": "Langue"
+  },
+  "general": {
+    "title": "Paramètres Généraux",
+    "farmName": "Nom de la Ferme",
+    "farmLogo": "Logo de la Ferme",
+    "location": "Localisation",
+    "theme": "Thème",
+    "notifications": "Notifications"
+  },
+  "language": {
+    "title": "Langue",
+    "select": "Sélectionner la Langue",
+    "current": "Langue Actuelle",
+    "available": "Langues Disponibles"
+  },
+  "subscription": {
+    "title": "Abonnement",
+    "currentPlan": "Plan Actuel",
+    "upgrade": "Mettre à Niveau",
+    "downgrade": "Rétrograder",
+    "cancel": "Annuler l'Abonnement",
+    "renewalDate": "Date de Renouvellement",
+    "usage": "Utilisation",
+    "limits": "Limites"
+  },
+  "profile": {
+    "title": "Profil",
+    "name": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "changePassword": "Changer le Mot de Passe"
+  },
+  "messages": {
+    "saved": "Paramètres enregistrés",
+    "error": "Erreur lors de l'enregistrement",
+    "languageChanged": "Langue modifiée avec succès"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "title": "Animales",
+  "addAnimal": "Añadir Animal",
+  "editAnimal": "Editar Animal",
+  "deleteAnimal": "Eliminar Animal",
+  "animalDetails": "Detalles del Animal",
+  "fields": {
+    "name": "Nombre",
+    "tag": "Arete",
+    "species": "Especie",
+    "breed": "Raza",
+    "gender": "Sexo",
+    "birthDate": "Fecha de Nacimiento",
+    "weight": "Peso",
+    "color": "Color",
+    "healthStatus": "Estado de Salud",
+    "location": "Ubicación",
+    "notes": "Notas",
+    "mother": "Madre",
+    "father": "Padre"
+  },
+  "species": {
+    "cattle": "Bovino",
+    "sheep": "Ovino",
+    "goat": "Caprino",
+    "pig": "Porcino",
+    "horse": "Equino",
+    "chicken": "Avícola",
+    "other": "Otro"
+  },
+  "gender": {
+    "male": "Macho",
+    "female": "Hembra"
+  },
+  "healthStatus": {
+    "healthy": "Sano",
+    "sick": "Enfermo",
+    "treatment": "En Tratamiento",
+    "quarantine": "Cuarentena"
+  },
+  "lifecycle": {
+    "active": "Activo",
+    "sold": "Vendido",
+    "deceased": "Fallecido"
+  },
+  "stats": {
+    "total": "Total de Animales",
+    "bySpecies": "Por Especie",
+    "recentlyAdded": "Agregados Recientemente"
+  },
+  "messages": {
+    "added": "Animal agregado exitosamente",
+    "updated": "Animal actualizado exitosamente",
+    "deleted": "Animal eliminado exitosamente",
+    "limitReached": "Límite de animales alcanzado. Actualiza tu plan."
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "title": "Finanzas",
+  "subtitle": "Gestión financiera de la finca",
+  "tabs": {
+    "overview": "Resumen",
+    "transactions": "Transacciones",
+    "categories": "Categorías",
+    "budgets": "Presupuestos",
+    "reports": "Reportes"
+  },
+  "transaction": {
+    "add": "Nueva Transacción",
+    "addIncome": "Nuevo Ingreso",
+    "addExpense": "Nuevo Gasto",
+    "edit": "Editar Transacción",
+    "type": "Tipo",
+    "category": "Categoría",
+    "amount": "Monto",
+    "date": "Fecha",
+    "paymentMethod": "Método de Pago",
+    "description": "Descripción",
+    "tags": "Etiquetas",
+    "receipt": "Recibo",
+    "uploadReceipt": "Subir Recibo",
+    "viewReceipt": "Ver Recibo",
+    "deleteReceipt": "Eliminar Recibo"
+  },
+  "types": {
+    "income": "Ingreso",
+    "expense": "Gasto"
+  },
+  "categories": {
+    "feed": "Alimentación",
+    "veterinary": "Veterinario",
+    "equipment": "Equipo",
+    "labor": "Mano de obra",
+    "land": "Tierra",
+    "utilities": "Servicios",
+    "transport": "Transporte",
+    "breeding": "Reproducción",
+    "sale": "Venta de animales",
+    "other_income": "Otros ingresos",
+    "other_expense": "Otros gastos",
+    "addCategory": "Nueva Categoría",
+    "editCategory": "Editar Categoría",
+    "categoryName": "Nombre de Categoría",
+    "categoryIcon": "Ícono",
+    "categoryColor": "Color"
+  },
+  "paymentMethods": {
+    "cash": "Efectivo",
+    "bank_transfer": "Transferencia",
+    "card": "Tarjeta",
+    "check": "Cheque",
+    "other": "Otro"
+  },
+  "metrics": {
+    "totalRevenue": "Ingresos Totales",
+    "totalExpenses": "Gastos Totales",
+    "netIncome": "Ganancia Neta",
+    "netProfit": "Beneficio Neto",
+    "netLoss": "Pérdida Neta",
+    "savingsRate": "Tasa de Ahorro",
+    "profitMargin": "Margen de Ganancia",
+    "monthlyAverage": "Promedio Mensual",
+    "yearlyTotal": "Total Anual"
+  },
+  "dashboard": {
+    "title": "Panel Financiero",
+    "recentTransactions": "Transacciones Recientes",
+    "monthlyTrends": "Tendencias Mensuales",
+    "categoryBreakdown": "Desglose por Categoría",
+    "budgetProgress": "Progreso de Presupuesto"
+  },
+  "budget": {
+    "title": "Presupuestos",
+    "add": "Nuevo Presupuesto",
+    "edit": "Editar Presupuesto",
+    "category": "Categoría",
+    "amount": "Monto",
+    "period": "Período",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "spent": "Gastado",
+    "remaining": "Restante",
+    "progress": "Progreso",
+    "exceeded": "Excedido",
+    "onTrack": "En Meta",
+    "nearLimit": "Cerca del Límite"
+  },
+  "report": {
+    "title": "Reportes Financieros",
+    "monthly": "Reporte Mensual",
+    "yearly": "Reporte Anual",
+    "custom": "Reporte Personalizado",
+    "dateRange": "Rango de Fechas",
+    "generate": "Generar Reporte",
+    "export": "Exportar",
+    "exportCSV": "Exportar a CSV",
+    "exportPDF": "Exportar a PDF",
+    "incomeVsExpenses": "Ingresos vs Gastos",
+    "categoryAnalysis": "Análisis por Categoría",
+    "yearOverYear": "Año tras Año"
+  },
+  "filters": {
+    "all": "Todas",
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "dateRange": "Rango de Fechas",
+    "category": "Categoría",
+    "paymentMethod": "Método de Pago",
+    "tags": "Etiquetas",
+    "applyFilters": "Aplicar Filtros",
+    "clearFilters": "Limpiar Filtros"
+  },
+  "messages": {
+    "transactionAdded": "Transacción agregada exitosamente",
+    "transactionUpdated": "Transacción actualizada exitosamente",
+    "transactionDeleted": "Transacción eliminada exitosamente",
+    "receiptUploaded": "Recibo subido exitosamente",
+    "receiptDeleted": "Recibo eliminado exitosamente",
+    "budgetAdded": "Presupuesto creado exitosamente",
+    "budgetUpdated": "Presupuesto actualizado exitosamente",
+    "budgetDeleted": "Presupuesto eliminado exitosamente",
+    "exportSuccess": "Exportación exitosa",
+    "exportError": "Error al exportar",
+    "limitReached": "Límite de transacciones alcanzado. Actualiza tu plan para continuar."
+  }
+}

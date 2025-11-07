@@ -1,0 +1,31 @@
+{
+  "title": "Relatórios",
+  "subtitle": "Análises e estatísticas da fazenda",
+  "dashboard": {
+    "overview": "Visão Geral",
+    "animalStats": "Estatísticas de Animais",
+    "financialSummary": "Resumo Financeiro",
+    "healthMetrics": "Métricas de Saúde",
+    "breedingPerformance": "Desempenho Reprodutivo"
+  },
+  "types": {
+    "inventory": "Inventário",
+    "financial": "Financeiro",
+    "health": "Saúde",
+    "breeding": "Reprodução",
+    "production": "Produção"
+  },
+  "period": {
+    "daily": "Diário",
+    "weekly": "Semanal",
+    "monthly": "Mensal",
+    "yearly": "Anual",
+    "custom": "Personalizado"
+  },
+  "actions": {
+    "generate": "Gerar Relatório",
+    "export": "Exportar",
+    "print": "Imprimir",
+    "share": "Compartilhar"
+  }
+}

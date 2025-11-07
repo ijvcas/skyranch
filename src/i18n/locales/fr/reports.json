@@ -1,0 +1,31 @@
+{
+  "title": "Rapports",
+  "subtitle": "Analyses et statistiques de la ferme",
+  "dashboard": {
+    "overview": "Aperçu",
+    "animalStats": "Statistiques des Animaux",
+    "financialSummary": "Résumé Financier",
+    "healthMetrics": "Métriques de Santé",
+    "breedingPerformance": "Performance de Reproduction"
+  },
+  "types": {
+    "inventory": "Inventaire",
+    "financial": "Financier",
+    "health": "Santé",
+    "breeding": "Reproduction",
+    "production": "Production"
+  },
+  "period": {
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "custom": "Personnalisé"
+  },
+  "actions": {
+    "generate": "Générer le Rapport",
+    "export": "Exporter",
+    "print": "Imprimer",
+    "share": "Partager"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "title": "Reproducción",
+  "addRecord": "Nuevo Registro",
+  "editRecord": "Editar Registro",
+  "fields": {
+    "mother": "Madre",
+    "father": "Padre",
+    "breedingDate": "Fecha de Monta",
+    "method": "Método",
+    "status": "Estado",
+    "expectedDueDate": "Fecha Estimada de Parto",
+    "actualBirthDate": "Fecha Real de Parto",
+    "pregnancyConfirmed": "Embarazo Confirmado",
+    "confirmationDate": "Fecha de Confirmación",
+    "offspringCount": "Número de Crías",
+    "veterinarian": "Veterinario",
+    "cost": "Costo",
+    "notes": "Notas"
+  },
+  "methods": {
+    "natural": "Natural",
+    "artificial": "Inseminación Artificial",
+    "embryo": "Transferencia de Embriones"
+  },
+  "status": {
+    "planned": "Planificada",
+    "completed": "Completada",
+    "confirmed": "Confirmada",
+    "failed": "Fallida",
+    "aborted": "Abortada"
+  },
+  "messages": {
+    "added": "Registro agregado exitosamente",
+    "updated": "Registro actualizado exitosamente",
+    "deleted": "Registro eliminado exitosamente"
+  }
+}

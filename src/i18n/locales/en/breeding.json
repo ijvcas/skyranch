@@ -1,0 +1,37 @@
+{
+  "title": "Breeding",
+  "addRecord": "New Record",
+  "editRecord": "Edit Record",
+  "fields": {
+    "mother": "Mother",
+    "father": "Father",
+    "breedingDate": "Breeding Date",
+    "method": "Method",
+    "status": "Status",
+    "expectedDueDate": "Expected Due Date",
+    "actualBirthDate": "Actual Birth Date",
+    "pregnancyConfirmed": "Pregnancy Confirmed",
+    "confirmationDate": "Confirmation Date",
+    "offspringCount": "Offspring Count",
+    "veterinarian": "Veterinarian",
+    "cost": "Cost",
+    "notes": "Notes"
+  },
+  "methods": {
+    "natural": "Natural",
+    "artificial": "Artificial Insemination",
+    "embryo": "Embryo Transfer"
+  },
+  "status": {
+    "planned": "Planned",
+    "completed": "Completed",
+    "confirmed": "Confirmed",
+    "failed": "Failed",
+    "aborted": "Aborted"
+  },
+  "messages": {
+    "added": "Record added successfully",
+    "updated": "Record updated successfully",
+    "deleted": "Record deleted successfully"
+  }
+}

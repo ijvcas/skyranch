@@ -1,0 +1,57 @@
+{
+  "title": "Animals",
+  "addAnimal": "Add Animal",
+  "editAnimal": "Edit Animal",
+  "deleteAnimal": "Delete Animal",
+  "animalDetails": "Animal Details",
+  "fields": {
+    "name": "Name",
+    "tag": "Tag",
+    "species": "Species",
+    "breed": "Breed",
+    "gender": "Gender",
+    "birthDate": "Birth Date",
+    "weight": "Weight",
+    "color": "Color",
+    "healthStatus": "Health Status",
+    "location": "Location",
+    "notes": "Notes",
+    "mother": "Mother",
+    "father": "Father"
+  },
+  "species": {
+    "cattle": "Cattle",
+    "sheep": "Sheep",
+    "goat": "Goat",
+    "pig": "Pig",
+    "horse": "Horse",
+    "chicken": "Poultry",
+    "other": "Other"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female"
+  },
+  "healthStatus": {
+    "healthy": "Healthy",
+    "sick": "Sick",
+    "treatment": "In Treatment",
+    "quarantine": "Quarantine"
+  },
+  "lifecycle": {
+    "active": "Active",
+    "sold": "Sold",
+    "deceased": "Deceased"
+  },
+  "stats": {
+    "total": "Total Animals",
+    "bySpecies": "By Species",
+    "recentlyAdded": "Recently Added"
+  },
+  "messages": {
+    "added": "Animal added successfully",
+    "updated": "Animal updated successfully",
+    "deleted": "Animal deleted successfully",
+    "limitReached": "Animal limit reached. Upgrade your plan."
+  }
+}

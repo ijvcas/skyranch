@@ -1,0 +1,129 @@
+{
+  "title": "Finances",
+  "subtitle": "Farm financial management",
+  "tabs": {
+    "overview": "Overview",
+    "transactions": "Transactions",
+    "categories": "Categories",
+    "budgets": "Budgets",
+    "reports": "Reports"
+  },
+  "transaction": {
+    "add": "New Transaction",
+    "addIncome": "New Income",
+    "addExpense": "New Expense",
+    "edit": "Edit Transaction",
+    "type": "Type",
+    "category": "Category",
+    "amount": "Amount",
+    "date": "Date",
+    "paymentMethod": "Payment Method",
+    "description": "Description",
+    "tags": "Tags",
+    "receipt": "Receipt",
+    "uploadReceipt": "Upload Receipt",
+    "viewReceipt": "View Receipt",
+    "deleteReceipt": "Delete Receipt"
+  },
+  "types": {
+    "income": "Income",
+    "expense": "Expense"
+  },
+  "categories": {
+    "feed": "Feed",
+    "veterinary": "Veterinary",
+    "equipment": "Equipment",
+    "labor": "Labor",
+    "land": "Land",
+    "utilities": "Utilities",
+    "transport": "Transport",
+    "breeding": "Breeding",
+    "sale": "Animal Sales",
+    "other_income": "Other Income",
+    "other_expense": "Other Expenses",
+    "addCategory": "New Category",
+    "editCategory": "Edit Category",
+    "categoryName": "Category Name",
+    "categoryIcon": "Icon",
+    "categoryColor": "Color"
+  },
+  "paymentMethods": {
+    "cash": "Cash",
+    "bank_transfer": "Bank Transfer",
+    "card": "Card",
+    "check": "Check",
+    "other": "Other"
+  },
+  "metrics": {
+    "totalRevenue": "Total Revenue",
+    "totalExpenses": "Total Expenses",
+    "netIncome": "Net Income",
+    "netProfit": "Net Profit",
+    "netLoss": "Net Loss",
+    "savingsRate": "Savings Rate",
+    "profitMargin": "Profit Margin",
+    "monthlyAverage": "Monthly Average",
+    "yearlyTotal": "Yearly Total"
+  },
+  "dashboard": {
+    "title": "Financial Dashboard",
+    "recentTransactions": "Recent Transactions",
+    "monthlyTrends": "Monthly Trends",
+    "categoryBreakdown": "Category Breakdown",
+    "budgetProgress": "Budget Progress"
+  },
+  "budget": {
+    "title": "Budgets",
+    "add": "New Budget",
+    "edit": "Edit Budget",
+    "category": "Category",
+    "amount": "Amount",
+    "period": "Period",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "progress": "Progress",
+    "exceeded": "Exceeded",
+    "onTrack": "On Track",
+    "nearLimit": "Near Limit"
+  },
+  "report": {
+    "title": "Financial Reports",
+    "monthly": "Monthly Report",
+    "yearly": "Yearly Report",
+    "custom": "Custom Report",
+    "dateRange": "Date Range",
+    "generate": "Generate Report",
+    "export": "Export",
+    "exportCSV": "Export to CSV",
+    "exportPDF": "Export to PDF",
+    "incomeVsExpenses": "Income vs Expenses",
+    "categoryAnalysis": "Category Analysis",
+    "yearOverYear": "Year over Year"
+  },
+  "filters": {
+    "all": "All",
+    "income": "Income",
+    "expenses": "Expenses",
+    "dateRange": "Date Range",
+    "category": "Category",
+    "paymentMethod": "Payment Method",
+    "tags": "Tags",
+    "applyFilters": "Apply Filters",
+    "clearFilters": "Clear Filters"
+  },
+  "messages": {
+    "transactionAdded": "Transaction added successfully",
+    "transactionUpdated": "Transaction updated successfully",
+    "transactionDeleted": "Transaction deleted successfully",
+    "receiptUploaded": "Receipt uploaded successfully",
+    "receiptDeleted": "Receipt deleted successfully",
+    "budgetAdded": "Budget created successfully",
+    "budgetUpdated": "Budget updated successfully",
+    "budgetDeleted": "Budget deleted successfully",
+    "exportSuccess": "Export successful",
+    "exportError": "Export error",
+    "limitReached": "Transaction limit reached. Upgrade your plan to continue."
+  }
+}

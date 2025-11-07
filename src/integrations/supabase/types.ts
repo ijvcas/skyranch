@@ -495,6 +495,7 @@ export type Database = {
           is_active: boolean
           name: string
           phone: string | null
+          preferred_language: string | null
           role: string
         }
         Insert: {
@@ -505,6 +506,7 @@ export type Database = {
           is_active?: boolean
           name: string
           phone?: string | null
+          preferred_language?: string | null
           role: string
         }
         Update: {
@@ -515,6 +517,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           phone?: string | null
+          preferred_language?: string | null
           role?: string
         }
         Relationships: []
@@ -941,6 +944,42 @@ export type Database = {
           },
         ]
       }
+      expense_categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          icon: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          type: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       factory_reset_logs: {
         Row: {
           backup_created: boolean | null
@@ -985,36 +1024,48 @@ export type Database = {
       farm_ledger: {
         Row: {
           amount: number
+          category: string | null
           created_at: string
           description: string
           id: string
           metadata: Json | null
+          payment_method: string | null
+          receipt_url: string | null
           reference_id: string | null
           reference_type: string | null
+          tags: string[] | null
           transaction_date: string
           transaction_type: string
           user_id: string
         }
         Insert: {
           amount: number
+          category?: string | null
           created_at?: string
           description: string
           id?: string
           metadata?: Json | null
+          payment_method?: string | null
+          receipt_url?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          tags?: string[] | null
           transaction_date: string
           transaction_type: string
           user_id: string
         }
         Update: {
           amount?: number
+          category?: string | null
           created_at?: string
           description?: string
           id?: string
           metadata?: Json | null
+          payment_method?: string | null
+          receipt_url?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          tags?: string[] | null
           transaction_date?: string
           transaction_type?: string
           user_id?: string
@@ -1179,6 +1230,42 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weather_conditions?: string | null
+        }
+        Relationships: []
+      }
+      financial_budgets: {
+        Row: {
+          budget_amount: number
+          category: string
+          created_at: string | null
+          id: string
+          month: number | null
+          period_type: string
+          updated_at: string | null
+          user_id: string
+          year: number
+        }
+        Insert: {
+          budget_amount: number
+          category: string
+          created_at?: string | null
+          id?: string
+          month?: number | null
+          period_type: string
+          updated_at?: string | null
+          user_id: string
+          year: number
+        }
+        Update: {
+          budget_amount?: number
+          category?: string
+          created_at?: string | null
+          id?: string
+          month?: number | null
+          period_type?: string
+          updated_at?: string | null
+          user_id?: string
+          year?: number
         }
         Relationships: []
       }

@@ -1,0 +1,31 @@
+{
+  "title": "Reportes",
+  "subtitle": "Análisis y estadísticas de la finca",
+  "dashboard": {
+    "overview": "Resumen General",
+    "animalStats": "Estadísticas de Animales",
+    "financialSummary": "Resumen Financiero",
+    "healthMetrics": "Métricas de Salud",
+    "breedingPerformance": "Rendimiento Reproductivo"
+  },
+  "types": {
+    "inventory": "Inventario",
+    "financial": "Financiero",
+    "health": "Sanidad",
+    "breeding": "Reproducción",
+    "production": "Producción"
+  },
+  "period": {
+    "daily": "Diario",
+    "weekly": "Semanal",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "custom": "Personalizado"
+  },
+  "actions": {
+    "generate": "Generar Reporte",
+    "export": "Exportar",
+    "print": "Imprimir",
+    "share": "Compartir"
+  }
+}

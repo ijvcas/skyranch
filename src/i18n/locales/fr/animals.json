@@ -1,0 +1,57 @@
+{
+  "title": "Animaux",
+  "addAnimal": "Ajouter un Animal",
+  "editAnimal": "Modifier l'Animal",
+  "deleteAnimal": "Supprimer l'Animal",
+  "animalDetails": "Détails de l'Animal",
+  "fields": {
+    "name": "Nom",
+    "tag": "Étiquette",
+    "species": "Espèce",
+    "breed": "Race",
+    "gender": "Sexe",
+    "birthDate": "Date de Naissance",
+    "weight": "Poids",
+    "color": "Couleur",
+    "healthStatus": "État de Santé",
+    "location": "Localisation",
+    "notes": "Notes",
+    "mother": "Mère",
+    "father": "Père"
+  },
+  "species": {
+    "cattle": "Bovin",
+    "sheep": "Ovin",
+    "goat": "Caprin",
+    "pig": "Porcin",
+    "horse": "Équin",
+    "chicken": "Volaille",
+    "other": "Autre"
+  },
+  "gender": {
+    "male": "Mâle",
+    "female": "Femelle"
+  },
+  "healthStatus": {
+    "healthy": "En Bonne Santé",
+    "sick": "Malade",
+    "treatment": "En Traitement",
+    "quarantine": "Quarantaine"
+  },
+  "lifecycle": {
+    "active": "Actif",
+    "sold": "Vendu",
+    "deceased": "Décédé"
+  },
+  "stats": {
+    "total": "Total des Animaux",
+    "bySpecies": "Par Espèce",
+    "recentlyAdded": "Ajoutés Récemment"
+  },
+  "messages": {
+    "added": "Animal ajouté avec succès",
+    "updated": "Animal mis à jour avec succès",
+    "deleted": "Animal supprimé avec succès",
+    "limitReached": "Limite d'animaux atteinte. Mettez à niveau votre forfait."
+  }
+}

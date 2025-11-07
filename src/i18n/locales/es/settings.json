@@ -1,0 +1,47 @@
+{
+  "title": "Configuración",
+  "tabs": {
+    "general": "General",
+    "subscription": "Suscripción",
+    "profile": "Perfil",
+    "farm": "Finca",
+    "security": "Seguridad",
+    "language": "Idioma"
+  },
+  "general": {
+    "title": "Configuración General",
+    "farmName": "Nombre de la Finca",
+    "farmLogo": "Logo de la Finca",
+    "location": "Ubicación",
+    "theme": "Tema",
+    "notifications": "Notificaciones"
+  },
+  "language": {
+    "title": "Idioma",
+    "select": "Seleccionar Idioma",
+    "current": "Idioma Actual",
+    "available": "Idiomas Disponibles"
+  },
+  "subscription": {
+    "title": "Suscripción",
+    "currentPlan": "Plan Actual",
+    "upgrade": "Actualizar Plan",
+    "downgrade": "Cambiar a Plan Inferior",
+    "cancel": "Cancelar Suscripción",
+    "renewalDate": "Fecha de Renovación",
+    "usage": "Uso",
+    "limits": "Límites"
+  },
+  "profile": {
+    "title": "Perfil",
+    "name": "Nombre",
+    "email": "Email",
+    "phone": "Teléfono",
+    "changePassword": "Cambiar Contraseña"
+  },
+  "messages": {
+    "saved": "Configuración guardada",
+    "error": "Error al guardar",
+    "languageChanged": "Idioma cambiado exitosamente"
+  }
+}

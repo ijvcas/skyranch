@@ -1,0 +1,32 @@
+{
+  "title": "Sanidad",
+  "addRecord": "Nuevo Registro",
+  "editRecord": "Editar Registro",
+  "fields": {
+    "animal": "Animal",
+    "type": "Tipo",
+    "title": "Título",
+    "date": "Fecha",
+    "medication": "Medicamento",
+    "dosage": "Dosis",
+    "veterinarian": "Veterinario",
+    "cost": "Costo",
+    "nextDueDate": "Próxima Fecha",
+    "description": "Descripción",
+    "notes": "Notas"
+  },
+  "types": {
+    "vaccination": "Vacunación",
+    "treatment": "Tratamiento",
+    "checkup": "Revisión",
+    "surgery": "Cirugía",
+    "deworming": "Desparasitación",
+    "other": "Otro"
+  },
+  "messages": {
+    "added": "Registro de salud agregado",
+    "updated": "Registro actualizado",
+    "deleted": "Registro eliminado",
+    "dueReminder": "Recordatorio: Tratamiento vencido"
+  }
+}
