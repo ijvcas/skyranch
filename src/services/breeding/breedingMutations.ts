@@ -169,6 +169,31 @@ export const createBreedingRecord = async (
 
   const recordId = data.id;
 
+  // Auto-create financial entry if cost exists
+  if (recordData.cost && recordData.cost > 0) {
+    try {
+      await supabase.from('farm_ledger').insert({
+        transaction_type: 'expense',
+        reference_id: recordId,
+        reference_type: 'breeding_record',
+        amount: -Math.abs(recordData.cost),
+        description: `Reproducción: ${recordData.breedingMethod}`,
+        transaction_date: recordData.breedingDate,
+        user_id: user.id,
+        category: 'Reproducción',
+        payment_method: 'cash',
+        metadata: { 
+          mother_id: recordData.motherId, 
+          father_id: recordData.fatherId,
+          veterinarian: recordData.veterinarian 
+        }
+      });
+    } catch (ledgerError) {
+      console.error('Error creating ledger entry:', ledgerError);
+      // Don't fail the breeding record creation
+    }
+  }
+
   // Auto-create offspring animals if birth date is provided and offspring count > 0 on creation
   if (recordData.actualBirthDate && (recordData.offspringCount || 0) > 0) {
     try {

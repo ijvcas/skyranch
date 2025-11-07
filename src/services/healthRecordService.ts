@@ -58,7 +58,7 @@ export const addHealthRecord = async (record: Omit<HealthRecord, 'id' | 'userId'
     return false;
   }
 
-  const { error } = await supabase
+  const { data: healthRecordData, error } = await supabase
     .from('health_records')
     .insert({
       animal_id: record.animalId,
@@ -73,35 +73,33 @@ export const addHealthRecord = async (record: Omit<HealthRecord, 'id' | 'userId'
       date_administered: record.dateAdministered,
       next_due_date: record.nextDueDate || null,
       notes: record.notes || null
-    });
+    })
+    .select()
+    .single();
 
   if (error) {
     console.error('Error adding health record:', error);
     return false;
   }
 
-  // If there's a cost, create a farm ledger entry
-  if (record.cost && record.cost > 0) {
-    const { error: ledgerError } = await supabase
-      .from('farm_ledger')
-      .insert({
-        user_id: user.id,
+  // Auto-create financial entry if cost exists
+  if (record.cost && record.cost > 0 && healthRecordData) {
+    try {
+      await supabase.from('farm_ledger').insert({
         transaction_type: 'expense',
-        amount: record.cost,
-        transaction_date: record.dateAdministered,
-        description: `Gasto Veterinario: ${record.title}`,
+        reference_id: healthRecordData.id,
         reference_type: 'health_record',
-        metadata: {
-          record_type: record.recordType,
-          veterinarian: record.veterinarian,
-          medication: record.medication,
-          animal_id: record.animalId
-        }
+        amount: -Math.abs(record.cost),
+        description: `${record.recordType}: ${record.title}`,
+        transaction_date: record.dateAdministered,
+        user_id: user.id,
+        category: 'Veterinario',
+        payment_method: 'cash',
+        metadata: { animal_id: record.animalId, veterinarian: record.veterinarian }
       });
-
-    if (ledgerError) {
+    } catch (ledgerError) {
       console.error('Error creating ledger entry:', ledgerError);
-      // Don't fail the health record creation if ledger entry fails
+      // Don't fail the health record creation
     }
   }
 
