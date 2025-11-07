@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import deviceLanguageDetector from './deviceLanguageDetector';
 
 // Import translation files
 import commonES from './locales/es/common.json';
@@ -75,6 +76,7 @@ const resources = {
 };
 
 i18n
+  .use(deviceLanguageDetector)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
@@ -87,8 +89,9 @@ i18n
       escapeValue: false
     },
     detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage']
+      order: ['querystring', 'localStorage', 'deviceLanguage', 'navigator'],
+      caches: ['localStorage'],
+      lookupQuerystring: 'lng'
     }
   });
 

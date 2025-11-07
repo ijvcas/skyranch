@@ -1,0 +1,22 @@
+/* Camera */
+"NSCameraUsageDescription" = "FARMIKA necesita acceso a la cámara para tomar fotos de animales";
+
+/* Photo Library */
+"NSPhotoLibraryUsageDescription" = "FARMIKA necesita acceso a la galería para seleccionar fotos de animales";
+"NSPhotoLibraryAddUsageDescription" = "FARMIKA necesita permiso para guardar fotos en tu galería";
+
+/* Biometrics */
+"NSFaceIDUsageDescription" = "FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta";
+
+/* Location */
+"NSLocationWhenInUseUsageDescription" = "FARMIKA necesita acceso a tu ubicación para registrar la ubicación de animales y eventos";
+
+/* Contacts */
+"NSContactsUsageDescription" = "FARMIKA necesita acceso a tus contactos para guardar información de veterinarios y compradores";
+
+/* Calendar */
+"NSCalendarsUsageDescription" = "FARMIKA necesita acceso a tu calendario para sincronizar eventos de tu granja";
+
+/* App Name */
+"CFBundleDisplayName" = "FARMIKA";
+"CFBundleName" = "FARMIKA";

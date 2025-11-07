@@ -17,7 +17,13 @@ export const useLanguage = () => {
 
   const changeLanguage = async (lang: Language) => {
     try {
+      console.log('🔄 Changing language to:', lang);
+      
+      // Change language in i18next
       await i18n.changeLanguage(lang);
+      
+      // Persist to localStorage (for web)
+      localStorage.setItem('i18nextLng', lang);
       
       // Update user preference in database
       const { data: { user } } = await supabase.auth.getUser();
@@ -33,7 +39,7 @@ export const useLanguage = () => {
         description: LANGUAGES[lang].name
       });
     } catch (error) {
-      console.error('Error changing language:', error);
+      console.error('❌ Error changing language:', error);
       toast({
         title: t('common:error'),
         description: t('settings:messages.error'),

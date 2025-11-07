@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Database, Shield, Settings as SettingsIcon, Palette, AlertTriangle, Smartphone, Crown } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useIsOwner } from '@/hooks/useIsOwner';
+import { useTranslation } from 'react-i18next';
 
 interface SettingsLayoutProps {
   activeTab: string;
@@ -13,6 +14,7 @@ interface SettingsLayoutProps {
 const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProps) => {
   const { checkPermission } = usePermissions();
   const { isOwner } = useIsOwner();
+  const { t } = useTranslation('settings');
   const [availableTabs, setAvailableTabs] = useState<string[]>([]);
 
   useEffect(() => {
@@ -52,9 +54,9 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <SettingsIcon className="w-6 h-6" />
-            Configuración del Sistema
+            {t('title')}
           </h1>
-          <p className="text-gray-500">Administración completa del sistema y configuraciones</p>
+          <p className="text-muted-foreground">{t('general.title')}</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
@@ -62,13 +64,13 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
             {availableTabs.includes('subscription') && (
               <TabsTrigger value="subscription" className="flex items-center gap-2 w-full justify-center">
                 <Crown className="w-4 h-4" />
-                Suscripción
+                {t('tabs.subscription')}
               </TabsTrigger>
             )}
             {availableTabs.includes('users') && (
               <TabsTrigger value="users" className="flex items-center gap-2 w-full justify-center">
                 <Users className="w-4 h-4" />
-                Usuarios
+                {t('tabs.general')}
               </TabsTrigger>
             )}
             {availableTabs.includes('backup') && (
@@ -80,31 +82,31 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
             {availableTabs.includes('permissions') && (
               <TabsTrigger value="permissions" className="flex items-center gap-2 w-full justify-center">
                 <Shield className="w-4 h-4" />
-                Permisos
+                {t('tabs.security')}
               </TabsTrigger>
             )}
             {availableTabs.includes('system') && (
               <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-center">
                 <SettingsIcon className="w-4 h-4" />
-                Sistema
+                {t('tabs.general')}
               </TabsTrigger>
             )}
             {availableTabs.includes('mobile') && (
               <TabsTrigger value="mobile" className="flex items-center gap-2 w-full justify-center">
                 <Smartphone className="w-4 h-4" />
-                Móvil
+                Mobile
               </TabsTrigger>
             )}
             {availableTabs.includes('customization') && (
               <TabsTrigger value="customization" className="flex items-center gap-2 w-full justify-center">
                 <Palette className="w-4 h-4" />
-                Personalización
+                {t('general.theme')}
               </TabsTrigger>
             )}
             {availableTabs.includes('danger') && (
               <TabsTrigger value="danger" className="flex items-center gap-2 w-full justify-center">
                 <AlertTriangle className="w-4 h-4" />
-                Zona de Peligro
+                {t('tabs.security')}
               </TabsTrigger>
             )}
           </TabsList>
