@@ -63,8 +63,31 @@ const MobileSettings: React.FC = () => {
           }
         }, 2000);
       }
+
+      // Listen for app resume to re-check permissions
+      const handleVisibilityChange = async () => {
+        if (document.visibilityState === 'visible') {
+          console.log('📅 App resumed, re-checking calendar permissions');
+          const status = await calendarService.checkPermissions();
+          setCalendarPermissionStatus(status);
+          
+          // Update sync state if permissions changed
+          if (status !== 'granted' && calendarSyncEnabled) {
+            setCalendarSyncEnabled(false);
+            localStorage.setItem('farmika_calendar_sync', 'false');
+          } else if (status === 'granted' && localStorage.getItem('farmika_calendar_sync') === 'true') {
+            setCalendarSyncEnabled(true);
+          }
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      };
     }
-  }, [isNative]);
+  }, [isNative, calendarSyncEnabled]);
 
   const checkCalendarPermissions = async () => {
     const status = await calendarService.checkPermissions();
@@ -228,8 +251,8 @@ const MobileSettings: React.FC = () => {
           description: "Los eventos se sincronizarán con tu Calendario de iOS.",
         });
         
-        // Re-check permissions after a short delay to ensure UI is updated
-        setTimeout(() => checkCalendarPermissions(), 500);
+        // Re-check permissions after a longer delay to ensure iOS updates
+        setTimeout(() => checkCalendarPermissions(), 1500);
       } else {
         setCalendarPermissionStatus('denied');
         toast({
@@ -649,7 +672,13 @@ const MobileSettings: React.FC = () => {
               <Button 
                 size="sm" 
                 variant="outline"
-                onClick={() => checkCalendarPermissions()}
+                onClick={async () => {
+                  const status = await checkCalendarPermissions();
+                  // If permissions are now granted, update the toggle state
+                  if (status === 'granted' && localStorage.getItem('farmika_calendar_sync') === 'true') {
+                    setCalendarSyncEnabled(true);
+                  }
+                }}
               >
                 Reintentar
               </Button>

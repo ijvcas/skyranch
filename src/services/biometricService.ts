@@ -91,6 +91,7 @@ export class BiometricService {
    * Only works on native platforms (iOS/Android)
    */
   static async authenticate(reason: string = 'Iniciar sesión en FARMIKA'): Promise<boolean> {
+    const startTime = Date.now();
     try {
       if (!Capacitor.isNativePlatform()) {
         console.error('❌ [BiometricService] Biometric authentication only available on native platforms');
@@ -98,8 +99,10 @@ export class BiometricService {
       }
 
       // Native platform implementation
-      console.log('🔐 [BiometricService] Starting native authentication...');
+      console.log('🔐 [BiometricService] Starting native authentication at', new Date().toISOString());
+      console.log('🔐 [BiometricService] Reason:', reason);
 
+      const authStart = Date.now();
       const authPromise = NativeBiometric.verifyIdentity({
         reason,
         title: 'Autenticación',
@@ -112,16 +115,20 @@ export class BiometricService {
       });
 
       await Promise.race([authPromise, timeoutPromise]);
+      const authDuration = Date.now() - authStart;
+      const totalDuration = Date.now() - startTime;
       console.log('✅ [BiometricService] Native authentication successful');
+      console.log('⏱️  [BiometricService] Auth took:', authDuration, 'ms | Total:', totalDuration, 'ms');
 
       return true;
     } catch (error: any) {
+      const totalDuration = Date.now() - startTime;
       if (error.code === 10 || error.code === 13) {
-        console.log('❌ [BiometricService] User cancelled biometric authentication');
+        console.log('❌ [BiometricService] User cancelled biometric authentication after', totalDuration, 'ms');
       } else if (error.message === 'Authentication timeout') {
-        console.error('❌ [BiometricService] Authentication timeout');
+        console.error('❌ [BiometricService] Authentication timeout after', totalDuration, 'ms');
       } else {
-        console.error('❌ [BiometricService] Biometric authentication failed:', error);
+        console.error('❌ [BiometricService] Biometric authentication failed after', totalDuration, 'ms:', error);
       }
       return false;
     }

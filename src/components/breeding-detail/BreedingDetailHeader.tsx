@@ -67,19 +67,27 @@ const BreedingDetailHeader: React.FC<BreedingDetailHeaderProps> = ({
         </div>
         <div className="flex space-x-2">
           {onEdit && (
-            <Button onClick={onEditClick} className="flex items-center space-x-2">
+            <Button 
+              onClick={onEditClick} 
+              size="sm"
+              variant="outline"
+              className="p-2"
+              aria-label="Editar"
+              title="Editar"
+            >
               <Edit className="w-4 h-4" />
-              <span>Editar</span>
             </Button>
           )}
           {onDelete && (
             <Button 
-              variant="destructive" 
+              variant="destructive"
+              size="sm"
               onClick={() => onDelete(record.id)}
-              className="flex items-center space-x-2"
+              className="p-2"
+              aria-label="Eliminar"
+              title="Eliminar"
             >
               <Trash2 className="w-4 h-4" />
-              <span>Eliminar</span>
             </Button>
           )}
         </div>
