@@ -579,65 +579,74 @@ const MobileSettings: React.FC = () => {
             ) : (
               <div className="space-y-2">
                 {emergencyContacts.map((contact) => (
-                  <div key={contact.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium truncate">{contact.name}</p>
-                        {contact.phones && contact.phones.length > 1 && (
-                          <span className="text-xs text-primary">
-                            +{contact.phones.length - 1}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{contact.phone}</p>
-                      <Select
-                        value={contact.relationship}
-                        onValueChange={(value) => handleUpdateContactRelationship(contact.id, value)}
-                      >
-                        <SelectTrigger className="w-full mt-1 h-7 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background">
-                          <SelectItem value="Veterinario">Veterinario</SelectItem>
-                          <SelectItem value="Comprador">Comprador</SelectItem>
-                          <SelectItem value="Empleado">Empleado</SelectItem>
-                          <SelectItem value="Transporte">Transporte</SelectItem>
-                          <SelectItem value={farmName}>{farmName}</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  <div key={contact.id} className="flex flex-col items-center gap-2 p-3 border rounded-lg bg-card">
+                    {/* Name with phone count indicator */}
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{contact.name}</p>
+                      {contact.phones && contact.phones.length > 1 && (
+                        <span className="text-xs text-primary">
+                          +{contact.phones.length - 1}
+                        </span>
+                      )}
                     </div>
+                    
+                    {/* Full phone number */}
+                    <p className="text-xs text-muted-foreground">{contact.phone}</p>
+                    
+                    {/* Action buttons */}
                     <div className="flex gap-1">
                       {contact.phones && contact.phones.length > 1 && (
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handleChangeContactPhone(contact.id)}
+                          className="h-7 w-7 p-0"
                         >
-                          <PhoneCall className="w-4 h-4" />
+                          <PhoneCall className="w-3 h-3" />
                         </Button>
                       )}
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => contactsService.dialNumber(contact.phone)}
+                        className="h-7 w-7 p-0"
                       >
-                        <Phone className="w-4 h-4" />
+                        <Phone className="w-3 h-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => contactsService.sendMessage(contact.phone)}
+                        className="h-7 w-7 p-0"
                       >
-                        <MessageCircle className="w-4 h-4" />
+                        <MessageCircle className="w-3 h-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => handleRemoveContact(contact.id)}
+                        className="h-7 w-7 p-0"
                       >
-                        <Trash2 className="w-4 h-4 text-red-600" />
+                        <Trash2 className="w-3 h-3 text-destructive" />
                       </Button>
                     </div>
+                    
+                    {/* Relationship selector */}
+                    <Select
+                      value={contact.relationship}
+                      onValueChange={(value) => handleUpdateContactRelationship(contact.id, value)}
+                    >
+                      <SelectTrigger className="w-full h-6 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background">
+                        <SelectItem value="Veterinario">Veterinario</SelectItem>
+                        <SelectItem value="Comprador">Comprador</SelectItem>
+                        <SelectItem value="Empleado">Empleado</SelectItem>
+                        <SelectItem value="Transporte">Transporte</SelectItem>
+                        <SelectItem value={farmName}>{farmName}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 ))}
               </div>
