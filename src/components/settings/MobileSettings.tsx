@@ -238,7 +238,23 @@ const MobileSettings: React.FC = () => {
         return;
       }
       
-      // Request permissions
+      // CHECK FIRST if permissions are already granted
+      const currentStatus = await calendarService.checkPermissions();
+      console.log('📅 Current permission status before toggle:', currentStatus);
+      
+      if (currentStatus === 'granted') {
+        // Permission already granted! Just enable sync
+        setCalendarSyncEnabled(true);
+        setCalendarPermissionStatus('granted');
+        localStorage.setItem('farmika_calendar_sync', 'true');
+        toast({
+          title: "Calendario Sincronizado",
+          description: "Los eventos se sincronizarán con tu Calendario de iOS.",
+        });
+        return;
+      }
+      
+      // If not granted, request permissions
       const granted = await calendarService.requestPermissions();
       console.log('📅 Permission request result:', granted);
       
@@ -251,7 +267,7 @@ const MobileSettings: React.FC = () => {
           description: "Los eventos se sincronizarán con tu Calendario de iOS.",
         });
         
-        // Re-check permissions after a longer delay to ensure iOS updates
+        // Re-check permissions after a delay to ensure iOS updates
         setTimeout(() => checkCalendarPermissions(), 1500);
       } else {
         setCalendarPermissionStatus('denied');
