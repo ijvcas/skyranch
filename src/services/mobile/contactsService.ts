@@ -1,11 +1,5 @@
-import { registerPlugin } from '@capacitor/core';
+import { Contacts } from '@capacitor-community/contacts';
 import { Capacitor } from '@capacitor/core';
-
-interface ContactPickerPlugin {
-  open(): Promise<{ value: any[] }>;
-}
-
-const ContactPicker = registerPlugin<ContactPickerPlugin>('ContactPicker');
 
 export interface ContactInfo {
   id: string;
@@ -22,30 +16,46 @@ class ContactsService {
     }
 
     try {
-      // Use native contact picker - shows iOS/Android system picker
-      const result = await ContactPicker.open();
+      // Check/request permissions first
+      const permission = await Contacts.checkPermissions();
       
-      if (!result || !result.value || result.value.length === 0) {
+      if (permission.contacts !== 'granted') {
+        const request = await Contacts.requestPermissions();
+        if (request.contacts !== 'granted') {
+          console.log('📞 Contact permissions denied');
+          return null;
+        }
+      }
+
+      // Pick a single contact using native iOS picker
+      const result = await Contacts.pickContact({
+        projection: {
+          name: true,
+          phones: true,
+          emails: true
+        }
+      });
+
+      if (!result || !result.contact) {
         console.log('📞 No contact selected');
         return null;
       }
 
-      // Get first selected contact
-      const contact = result.value[0];
+      const contact = result.contact;
       
-      // Format contact data
+      // Format the contact data
       const formattedContact: ContactInfo = {
         id: contact.contactId || Date.now().toString(),
-        name: contact.displayName || 'Unknown',
-        phone: contact.phoneNumbers && contact.phoneNumbers.length > 0 
-          ? contact.phoneNumbers[0].number 
+        name: contact.name?.display || 'Unknown',
+        phone: contact.phones && contact.phones.length > 0 
+          ? contact.phones[0].number 
           : undefined,
         email: contact.emails && contact.emails.length > 0 
           ? contact.emails[0].address 
           : undefined
       };
 
-      // Validate that contact has at least a name and phone
+      // Validate contact has required fields
       if (!formattedContact.name || formattedContact.name === 'Unknown') {
         console.log('📞 Contact has no name');
         return null;
