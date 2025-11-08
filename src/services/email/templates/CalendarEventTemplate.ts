@@ -39,8 +39,7 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
   }
 
   private buildEventContent(data: CalendarEventData, eventDate: string, actionText: string): string {
-    const googleCalendarUrl = this.generateGoogleCalendarLink(data);
-    const outlookCalendarUrl = this.generateOutlookCalendarLink(data);
+    const icsContent = this.generateICSFile(data);
     
     return `
       <!-- Event Notification Badge -->
@@ -108,15 +107,11 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
           📲 Agregar al Calendario:
         </p>
         <div style="margin-bottom: 16px;">
-          <a href="${googleCalendarUrl}" 
+          <a href="${icsContent}" 
+             download="event.ics"
              style="display: inline-block; background-color: currentColor; color: white; text-decoration: none; 
                     padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; margin: 0 4px 8px 4px;">
-             📱 Google Calendar
-          </a>
-          <a href="${outlookCalendarUrl}" 
-             style="display: inline-block; background-color: currentColor; color: white; text-decoration: none; 
-                    padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; margin: 0 4px 8px 4px;">
-             📧 Outlook
+             📅 Descargar Evento (.ics)
           </a>
         </div>
         <a href="https://id-preview--d956216c-86a1-4ff3-9df4-bdfbbabf459a.lovable.app/calendar" 
@@ -128,46 +123,37 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     `;
   }
 
-  private generateGoogleCalendarLink(data: CalendarEventData): string {
+  private generateICSFile(data: CalendarEventData): string {
     const event = data.event;
     const startDate = new Date(event.eventDate);
     const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
     
-    const formatDateGoogle = (date: Date) => {
+    const formatDateICS = (date: Date) => {
       return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     };
 
-    const params = new URLSearchParams({
-      action: 'TEMPLATE',
-      text: event.title,
-      dates: `${formatDateGoogle(startDate)}/${formatDateGoogle(endDate)}`,
-      details: event.description || '',
-      location: event.location || ''
-    });
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//SkyRanch//Calendar Event//ES',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `DTSTART:${formatDateICS(startDate)}`,
+      `DTEND:${formatDateICS(endDate)}`,
+      `DTSTAMP:${formatDateICS(new Date())}`,
+      `UID:${Date.now()}@skyranch.es`,
+      `SUMMARY:${event.title}`,
+      event.description ? `DESCRIPTION:${event.description.replace(/\n/g, '\\n')}` : '',
+      event.location ? `LOCATION:${event.location}` : '',
+      'STATUS:CONFIRMED',
+      'SEQUENCE:0',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].filter(line => line).join('\r\n');
 
-    return `https://calendar.google.com/calendar/render?${params.toString()}`;
-  }
-
-  private generateOutlookCalendarLink(data: CalendarEventData): string {
-    const event = data.event;
-    const startDate = new Date(event.eventDate);
-    const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
-    
-    const formatDateOutlook = (date: Date) => {
-      return date.toISOString();
-    };
-
-    const params = new URLSearchParams({
-      path: '/calendar/action/compose',
-      rru: 'addevent',
-      subject: event.title,
-      startdt: formatDateOutlook(startDate),
-      enddt: formatDateOutlook(endDate),
-      body: event.description || '',
-      location: event.location || ''
-    });
-
-    return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`;
+    // Create data URL for the ICS file
+    return `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
   }
 
   private formatEventDateTime(eventDate: string, endDate?: string, allDay?: boolean): string {
