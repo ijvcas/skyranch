@@ -16,6 +16,12 @@ const FarmCustomization = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  // Sync colors when branding changes
+  React.useEffect(() => {
+    setPrimaryColor(branding.theme_primary_color);
+    setSecondaryColor(branding.theme_secondary_color);
+  }, [branding.theme_primary_color, branding.theme_secondary_color]);
+
   const handleSave = async () => {
     setIsSaving(true);
     

@@ -9,7 +9,7 @@ import { Save, X, Info, HelpCircle, Mail, Phone } from 'lucide-react';
 import { Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
-import { deploymentVersionService } from '@/services/deploymentVersionService';
+import { App } from '@capacitor/app';
 import { format } from 'date-fns';
 
 interface AppInfoFormProps {
@@ -31,17 +31,23 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
     description: 'Sistema de gestión ganadera completo'
   });
 
-  // Load version info from deployment service
+  // Load version info from native app
   useEffect(() => {
-    const versionInfo = deploymentVersionService.getCurrentVersion();
-    if (versionInfo) {
-      setAppInfo(prev => ({
-        ...prev,
-        version: `v${versionInfo.version}`,
-        build: `Build ${versionInfo.buildNumber}`,
-        lastUpdate: format(new Date(versionInfo.lastDeploymentTime), 'MMM d, yyyy')
-      }));
-    }
+    const loadVersion = async () => {
+      try {
+        const info = await App.getInfo();
+        setAppInfo(prev => ({
+          ...prev,
+          version: `v${info.version}`,
+          build: `Build ${info.build}`,
+          lastUpdate: format(new Date(), 'MMM d, yyyy')
+        }));
+      } catch (error) {
+        console.error('Failed to load app version:', error);
+      }
+    };
+    
+    loadVersion();
   }, []);
   
   const [supportInfo, setSupportInfo] = useState({
