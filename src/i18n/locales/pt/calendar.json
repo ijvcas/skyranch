@@ -75,5 +75,9 @@
     "cancel": "Cancelar",
     "edit": "Editar",
     "viewAll": "Ver todos os eventos"
+  },
+  "eventsList": {
+    "viewByDate": "Visualização por Data",
+    "eventsHistory": "Histórico de Eventos"
   }
 }

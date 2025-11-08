@@ -13,6 +13,7 @@ import { type FarmProfileFormData } from '@/services/farmProfileService';
 import { Loader2, MapPin, Building2, Check } from 'lucide-react';
 import { suggestPlaces, getPlaceDetails, type PlacePrediction } from '@/services/placesService';
 import ImageUpload from '@/components/ImageUpload';
+import { useTranslation } from 'react-i18next';
 
 const farmProfileSchema = z.object({
   farm_name: z.string().min(1, 'El nombre de la finca es requerido'),
@@ -23,6 +24,7 @@ const farmProfileSchema = z.object({
 
 const FarmProfileSettings = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { 
     data: farmProfile, 
     isLoading, 
@@ -69,18 +71,12 @@ const FarmProfileSettings = () => {
   const onSubmit = async (data: FarmProfileFormData) => {
     try {
       console.log('🔄 Form submission started with data:', data);
-      console.log('🔄 Current form values:', {
-        farm_name: watch('farm_name'),
-        location_name: watch('location_name'), 
-        location_coordinates: watch('location_coordinates')
-      });
       
       if (farmProfile) {
         console.log('🔄 Updating existing farm profile:', farmProfile.id);
         const result = await updateFarmProfile({ id: farmProfile.id, data });
         console.log('✅ Update result:', result);
         
-        // Sync weather settings after successful update if coordinates are available
         if (data.location_coordinates) {
           console.log('🌍 Syncing weather settings with coordinates:', data.location_coordinates);
           try {
@@ -89,20 +85,17 @@ const FarmProfileSettings = () => {
           } catch (error) {
             console.warn('❌ Failed to sync weather settings:', error);
           }
-        } else {
-          console.warn('⚠️ No coordinates available for weather sync');
         }
         
         toast({
-          title: 'Perfil actualizado',
-          description: 'El perfil de la finca se ha actualizado correctamente.',
+          title: t('settings:farmProfile.profileUpdated'),
+          description: t('settings:farmProfile.profileUpdatedDesc'),
         });
       } else {
         console.log('🔄 Creating new farm profile');
         const newProfile = await createFarmProfile(data);
         console.log('✅ Creation result:', newProfile);
         
-        // Sync weather settings after creation if coordinates are available
         if (data.location_coordinates) {
           console.log('🌍 Syncing weather settings for new profile');
           try {
@@ -114,15 +107,15 @@ const FarmProfileSettings = () => {
         }
         
         toast({
-          title: 'Perfil creado',
-          description: 'El perfil de la finca se ha creado correctamente.',
+          title: t('settings:farmProfile.profileCreated'),
+          description: t('settings:farmProfile.profileCreatedDesc'),
         });
       }
     } catch (error) {
       console.error('❌ Error saving farm profile:', error);
       toast({
-        title: 'Error',
-        description: 'Error al guardar el perfil de la finca.',
+        title: t('common:error'),
+        description: t('settings:messages.error'),
         variant: 'destructive',
       });
     }
@@ -131,7 +124,6 @@ const FarmProfileSettings = () => {
   const handleLogoChange = async (imageUrl: string | null) => {
     if (!imageUrl || !farmProfile) return;
 
-    // Convert data URL to file
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
@@ -139,14 +131,14 @@ const FarmProfileSettings = () => {
       
       await uploadLogo({ id: farmProfile.id, file });
       toast({
-        title: 'Logo actualizado',
-        description: 'El logo de la finca se ha actualizado correctamente.',
+        title: t('settings:farmProfile.logoUpdated'),
+        description: t('settings:farmProfile.logoUpdatedDesc'),
       });
     } catch (error) {
       console.error('Error uploading logo:', error);
       toast({
-        title: 'Error',
-        description: 'Error al subir el logo.',
+        title: t('common:error'),
+        description: t('settings:messages.error'),
         variant: 'destructive',
       });
     }
@@ -184,21 +176,21 @@ const FarmProfileSettings = () => {
         setLocationValidated(true);
         
         toast({
-          title: 'Ubicación validada',
-          description: `${result.display_name} seleccionada correctamente. Guarda el perfil para activar el clima en tiempo real.`,
+          title: t('settings:farmProfile.locationValidated'),
+          description: `${result.display_name}`,
         });
       } else {
         toast({
-          title: 'Error',
-          description: 'No se pudo obtener los detalles de la ubicación.',
+          title: t('common:error'),
+          description: t('settings:messages.error'),
           variant: 'destructive',
         });
       }
     } catch (error) {
       console.error('Error validating location:', error);
       toast({
-        title: 'Error',
-        description: 'Error al validar la ubicación.',
+        title: t('common:error'),
+        description: t('settings:messages.error'),
         variant: 'destructive',
       });
     } finally {
@@ -222,17 +214,17 @@ const FarmProfileSettings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="w-5 h-5" />
-            Perfil de la Finca
+            {t('settings:farmProfile.title')}
           </CardTitle>
           <CardDescription>
-            Configura la información básica de tu finca, incluyendo logo y ubicación.
+            {t('settings:farmProfile.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Farm Name */}
             <div>
-              <Label htmlFor="farm_name">Nombre de la Finca *</Label>
+              <Label htmlFor="farm_name">{t('settings:farmProfile.farmName')} *</Label>
               <Input
                 id="farm_name"
                 {...register('farm_name')}
@@ -245,13 +237,13 @@ const FarmProfileSettings = () => {
 
             {/* Location with Google Maps */}
             <div className="relative">
-              <Label htmlFor="location_name">Ubicación</Label>
+              <Label htmlFor="location_name">{t('settings:farmProfile.location')}</Label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Input
                     id="location_name"
                     {...register('location_name')}
-                    placeholder="Buscar ubicación..."
+                    placeholder={t('settings:farmProfile.searchLocation')}
                     onChange={(e) => {
                       handleLocationSearch(e.target.value);
                       setLocationValidated(false);
@@ -285,13 +277,13 @@ const FarmProfileSettings = () => {
               {locationValidated && (
                 <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
                   <Check className="w-3 h-3" />
-                  Ubicación validada con Google Places
+                  {t('settings:farmProfile.locationValidated')}
                 </p>
               )}
               {validatingLocation && (
                 <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
                   <Loader2 className="w-3 h-3 animate-spin" />
-                  Validando ubicación...
+                  {t('settings:farmProfile.validatingLocation')}
                 </p>
               )}
             </div>
@@ -302,33 +294,29 @@ const FarmProfileSettings = () => {
               className="w-full"
             >
               {(isCreating || isUpdating) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {farmProfile ? 'Actualizar Perfil' : 'Crear Perfil'}
+              {farmProfile ? t('settings:farmProfile.updateProfile') : t('settings:farmProfile.createProfile')}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      {/* Logo and Picture Upload */}
+      {/* Logo Upload */}
       {farmProfile && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Logo Upload */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Logo de la Finca</CardTitle>
-              <CardDescription>
-                Sube el logo de tu finca (recomendado: formato cuadrado, PNG/JPG)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ImageUpload
-                currentImage={farmProfile.logo_url || null}
-                onImageChange={handleLogoChange}
-                disabled={isUploadingLogo}
-              />
-            </CardContent>
-          </Card>
-
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('settings:farmProfile.logo')}</CardTitle>
+            <CardDescription>
+              {t('settings:farmProfile.logoDescription')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ImageUpload
+              currentImage={farmProfile.logo_url || null}
+              onImageChange={handleLogoChange}
+              disabled={isUploadingLogo}
+            />
+          </CardContent>
+        </Card>
       )}
     </div>
   );

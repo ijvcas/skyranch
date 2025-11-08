@@ -9,7 +9,9 @@ import FarmCustomization from '@/components/settings/FarmCustomization';
 import FactoryReset from '@/components/settings/FactoryReset';
 import MobileSettings from '@/components/settings/MobileSettings';
 import SubscriptionSettings from '@/components/settings/SubscriptionSettings';
-import { LanguageSelector } from '@/components/settings/LanguageSelector';
+import FarmProfileSettings from '@/components/settings/FarmProfileSettings';
+import RegionalSettings from '@/components/settings/RegionalSettings';
+import AppInfoForm from '@/components/AppInfoForm';
 import { useAuthPermissions } from '@/hooks/useAuthPermissions';
 import { useIsOwner } from '@/hooks/useIsOwner';
 import { TabsContent } from '@/components/ui/tabs';
@@ -22,9 +24,14 @@ const Settings = () => {
   return (
     <SettingsLayout activeTab={activeTab} onTabChange={setActiveTab}>
       <TabsContent value="subscription" className="mt-8">
+        <SubscriptionSettings />
+      </TabsContent>
+
+      <TabsContent value="farm" className="mt-8">
         <div className="space-y-6">
-          <SubscriptionSettings />
-          <LanguageSelector />
+          <FarmProfileSettings />
+          <RegionalSettings />
+          <AppInfoForm isAdmin={isOwner} />
         </div>
       </TabsContent>
 

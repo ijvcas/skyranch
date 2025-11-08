@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Save, X, Info, HelpCircle, Mail, Phone } from 'lucide-react';
 import { Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface AppInfoFormProps {
   isAdmin: boolean;
@@ -15,6 +16,7 @@ interface AppInfoFormProps {
 
 const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   console.log('AppInfoForm - isAdmin:', isAdmin); // Debug log
   
@@ -42,8 +44,8 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
     setAppInfo(tempAppInfo);
     setIsEditingApp(false);
     toast({
-      title: "Información actualizada",
-      description: "La información de la aplicación ha sido actualizada.",
+      title: t('settings:farmProfile.infoUpdated'),
+      description: t('settings:farmProfile.infoUpdatedDesc'),
     });
   };
 
@@ -51,8 +53,8 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
     setSupportInfo(tempSupportInfo);
     setIsEditingSupport(false);
     toast({
-      title: "Información actualizada",
-      description: "La información de soporte técnico ha sido actualizada.",
+      title: t('settings:farmProfile.infoUpdated'),
+      description: t('settings:farmProfile.infoUpdatedDesc'),
     });
   };
 
@@ -73,15 +75,15 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Info className="w-5 h-5 text-blue-600" />
-            Información de la Aplicación
+            {t('settings:farmProfile.appInfo')}
             {isAdmin && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsEditingApp(!isEditingApp)}
                 className="ml-auto bg-blue-50 hover:bg-blue-100"
-                title="Editar información de la aplicación"
-                aria-label={isEditingApp ? 'Cerrar edición de la aplicación' : 'Editar información de la aplicación'}
+                title={t('settings:farmProfile.edit')}
+                aria-label={isEditingApp ? t('settings:farmProfile.closeEdit') : t('settings:farmProfile.edit')}
               >
                 {isEditingApp ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
               </Button>
@@ -92,7 +94,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
           {isEditingApp ? (
             <div className="space-y-3">
               <div>
-                <Label htmlFor="app-version">Versión</Label>
+                <Label htmlFor="app-version">{t('settings:farmProfile.version')}</Label>
                 <Input
                   id="app-version"
                   value={tempAppInfo.version}
@@ -100,7 +102,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="app-update">Última Actualización</Label>
+                <Label htmlFor="app-update">{t('settings:farmProfile.lastUpdate')}</Label>
                 <Input
                   id="app-update"
                   value={tempAppInfo.lastUpdate}
@@ -108,7 +110,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="app-build">Build</Label>
+                <Label htmlFor="app-build">{t('settings:farmProfile.build')}</Label>
                 <Input
                   id="app-build"
                   value={tempAppInfo.build}
@@ -116,7 +118,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="app-admin">Administrador Principal</Label>
+                <Label htmlFor="app-admin">{t('settings:farmProfile.admin')}</Label>
                 <Input
                   id="app-admin"
                   value={tempAppInfo.admin}
@@ -124,7 +126,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="app-description">Descripción</Label>
+                <Label htmlFor="app-description">{t('settings:farmProfile.description')}</Label>
                 <Textarea
                   id="app-description"
                   value={tempAppInfo.description}
@@ -135,29 +137,29 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleSaveApp}>
                   <Save className="w-4 h-4 mr-1" />
-                  Guardar
+                  {t('common:save')}
                 </Button>
                 <Button size="sm" variant="outline" onClick={handleCancelAppEdit}>
-                  Cancelar
+                  {t('common:cancel')}
                 </Button>
               </div>
             </div>
           ) : (
             <>
               <div className="text-sm">
-                <strong>Versión:</strong> {appInfo.version}
+                <strong>{t('settings:farmProfile.version')}:</strong> {appInfo.version}
               </div>
               <div className="text-sm">
-                <strong>Última actualización:</strong> {appInfo.lastUpdate}
+                <strong>{t('settings:farmProfile.lastUpdate')}:</strong> {appInfo.lastUpdate}
               </div>
               <div className="text-sm">
-                <strong>Build:</strong> {appInfo.build}
+                <strong>{t('settings:farmProfile.build')}:</strong> {appInfo.build}
               </div>
               <div className="text-sm">
-                <strong>Administrador Principal:</strong> {appInfo.admin}
+                <strong>{t('settings:farmProfile.admin')}:</strong> {appInfo.admin}
               </div>
               <div className="text-sm">
-                <strong>Descripción:</strong> {appInfo.description}
+                <strong>{t('settings:farmProfile.description')}:</strong> {appInfo.description}
               </div>
             </>
           )}
@@ -169,15 +171,15 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <HelpCircle className="w-5 h-5 text-orange-600" />
-            Soporte Técnico
+            {t('settings:farmProfile.support')}
             {isAdmin && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsEditingSupport(!isEditingSupport)}
                 className="ml-auto bg-orange-50 hover:bg-orange-100"
-                title="Editar información de soporte técnico"
-                aria-label={isEditingSupport ? 'Cerrar edición de soporte técnico' : 'Editar información de soporte técnico'}
+                title={t('settings:farmProfile.edit')}
+                aria-label={isEditingSupport ? t('settings:farmProfile.closeEdit') : t('settings:farmProfile.edit')}
               >
                 {isEditingSupport ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
               </Button>
@@ -188,7 +190,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
           {isEditingSupport ? (
             <div className="space-y-3">
               <div>
-                <Label htmlFor="support-email">Email de Soporte</Label>
+                <Label htmlFor="support-email">{t('settings:farmProfile.supportEmail')}</Label>
                 <Input
                   id="support-email"
                   value={tempSupportInfo.email}
@@ -196,7 +198,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="support-phone">Teléfono de Soporte</Label>
+                <Label htmlFor="support-phone">{t('settings:farmProfile.supportPhone')}</Label>
                 <Input
                   id="support-phone"
                   value={tempSupportInfo.phone}
@@ -204,7 +206,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="support-hours">Horario de Atención</Label>
+                <Label htmlFor="support-hours">{t('settings:farmProfile.supportHours')}</Label>
                 <Input
                   id="support-hours"
                   value={tempSupportInfo.hours}
@@ -214,10 +216,10 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleSaveSupport}>
                   <Save className="w-4 h-4 mr-1" />
-                  Guardar
+                  {t('common:save')}
                 </Button>
                 <Button size="sm" variant="outline" onClick={handleCancelSupportEdit}>
-                  Cancelar
+                  {t('common:cancel')}
                 </Button>
               </div>
             </div>
@@ -232,7 +234,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 <span>{supportInfo.phone}</span>
               </div>
               <div className="text-sm">
-                <strong>Horario:</strong> {supportInfo.hours}
+                <strong>{t('settings:farmProfile.supportHours')}:</strong> {supportInfo.hours}
               </div>
               <Button 
                 variant="outline" 
@@ -240,7 +242,7 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
                 className="w-full"
                 onClick={() => window.open(`mailto:${supportInfo.email}`, '_blank')}
               >
-                Contactar Soporte
+                {t('settings:farmProfile.contactSupport')}
               </Button>
             </>
           )}

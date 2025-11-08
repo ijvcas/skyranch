@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useFarmBranding } from '@/hooks/useFarmBranding';
 import { Loader2, Palette, RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const FarmCustomization = () => {
   const { branding, isLoading, updateBranding } = useFarmBranding();
@@ -13,6 +14,7 @@ const FarmCustomization = () => {
   const [secondaryColor, setSecondaryColor] = useState(branding.theme_secondary_color);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -24,13 +26,13 @@ const FarmCustomization = () => {
 
     if (result.success) {
       toast({
-        title: 'Colores actualizados',
-        description: 'Los cambios se aplicarán inmediatamente',
+        title: t('settings:customization.colorsUpdated'),
+        description: t('settings:customization.colorsUpdatedDesc'),
       });
     } else {
       toast({
-        title: 'Error',
-        description: result.error || 'No se pudieron guardar los cambios',
+        title: t('common:error'),
+        description: result.error || t('settings:messages.error'),
         variant: 'destructive',
       });
     }
@@ -58,16 +60,16 @@ const FarmCustomization = () => {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Palette className="h-5 w-5 text-primary" />
-          <CardTitle>Personalización de Finca</CardTitle>
+          <CardTitle>{t('settings:customization.title')}</CardTitle>
         </div>
         <CardDescription>
-          Personaliza los colores del tema de tu finca. Los cambios se aplicarán inmediatamente en toda la aplicación.
+          {t('settings:customization.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="primaryColor">Color Principal</Label>
+            <Label htmlFor="primaryColor">{t('settings:customization.primaryColor')}</Label>
             <div className="flex gap-2 items-center">
               <Input
                 id="primaryColor"
@@ -84,12 +86,12 @@ const FarmCustomization = () => {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Usado en botones y elementos activos
+              {t('settings:customization.primaryUsage')}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="secondaryColor">Color Secundario</Label>
+            <Label htmlFor="secondaryColor">{t('settings:customization.secondaryColor')}</Label>
             <div className="flex gap-2 items-center">
               <Input
                 id="secondaryColor"
@@ -106,14 +108,14 @@ const FarmCustomization = () => {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Usado en estados hover y acentos
+              {t('settings:customization.secondaryUsage')}
             </p>
           </div>
         </div>
 
         {/* Live Preview */}
         <div className="space-y-2">
-          <Label>Vista Previa</Label>
+          <Label>{t('settings:customization.preview')}</Label>
           <Card 
             className="border-2 transition-colors"
             style={{ 
@@ -123,10 +125,10 @@ const FarmCustomization = () => {
           >
             <CardHeader>
               <CardTitle style={{ color: primaryColor }}>
-                Ejemplo de Tarjeta
+                {t('settings:customization.exampleCard')}
               </CardTitle>
               <CardDescription>
-                Así se verán los colores en tu aplicación
+                {t('settings:customization.exampleDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -137,7 +139,7 @@ const FarmCustomization = () => {
                 }}
                 className="hover:opacity-90"
               >
-                Botón Principal
+                {t('settings:customization.primaryButton')}
               </Button>
               <Button 
                 variant="outline"
@@ -147,7 +149,7 @@ const FarmCustomization = () => {
                 }}
                 className="hover:opacity-90"
               >
-                Botón Secundario
+                {t('settings:customization.secondaryButton')}
               </Button>
             </CardContent>
           </Card>
@@ -156,7 +158,7 @@ const FarmCustomization = () => {
         <div className="flex gap-2">
           <Button onClick={handleSave} disabled={isSaving} className="flex-1">
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Guardar Cambios
+            {t('settings:customization.saveChanges')}
           </Button>
           <Button 
             variant="outline" 
@@ -164,14 +166,13 @@ const FarmCustomization = () => {
             disabled={isSaving}
           >
             <RotateCcw className="mr-2 h-4 w-4" />
-            Restaurar Predeterminados
+            {t('settings:customization.restoreDefaults')}
           </Button>
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-900">
-            <strong>Nota:</strong> Los cambios de color solo son visibles para ti como propietario de la finca. 
-            Todos los usuarios verán los mismos colores que configures aquí.
+            <strong>{t('settings:customization.note')}</strong> {t('settings:customization.noteText')}
           </p>
         </div>
       </CardContent>

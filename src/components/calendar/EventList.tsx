@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CalendarIcon, Bell, MapPin, DollarSign, Edit, Search } from 'lucide-react';
 import { CalendarEvent } from '@/services/calendarService';
+import { useTranslation } from 'react-i18next';
 
 interface EventListProps {
   events: CalendarEvent[];
@@ -13,6 +14,7 @@ interface EventListProps {
 }
 
 const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [showHistory, setShowHistory] = useState(false);
 
@@ -62,27 +64,6 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
     }
   };
 
-  const getEventTypeLabel = (type: string) => {
-    switch (type) {
-      case 'vaccination':
-        return 'Vacunación';
-      case 'checkup':
-        return 'Revisión';
-      case 'breeding':
-        return 'Reproducción';
-      case 'treatment':
-        return 'Tratamiento';
-      case 'feeding':
-        return 'Alimentación';
-      case 'appointment':
-        return 'Cita';
-      case 'reminder':
-        return 'Recordatorio';
-      default:
-        return type;
-    }
-  };
-
   return (
     <div className="space-y-4">
       {/* Search and History Toggle */}
@@ -93,7 +74,7 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
             size="sm"
             onClick={() => setShowHistory(!showHistory)}
           >
-            {showHistory ? "Vista por Fecha" : "Historial de Eventos"}
+            {showHistory ? t('calendar:eventsList.viewByDate') : t('calendar:eventsList.eventsHistory')}
           </Button>
         </div>
         
@@ -101,7 +82,7 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Buscar eventos..."
+              placeholder={t('calendar:list.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -114,7 +95,7 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
       {filteredEvents.length === 0 ? (
         <div className="text-center text-gray-500 py-8">
           <CalendarIcon className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-          <p>{showHistory ? "No se encontraron eventos" : "No hay eventos para esta fecha"}</p>
+          <p>{showHistory ? t('calendar:list.noEvents') : t('calendar:list.noEventsDesc')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -125,16 +106,16 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
                   <h4 className="font-semibold">{event.title}</h4>
                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                     {showHistory && (
-                      <span>{new Date(event.eventDate).toLocaleDateString('es-ES')}</span>
+                      <span>{new Date(event.eventDate).toLocaleDateString()}</span>
                     )}
                     {event.createdByName && (
-                      <span>Creado por: {event.createdByName}</span>
+                      <span>{t('calendar:detail.createdBy')}: {event.createdByName}</span>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Badge className={getEventTypeColor(event.eventType)}>
-                    {getEventTypeLabel(event.eventType)}
+                    {t(`calendar:eventTypes.${event.eventType}`)}
                   </Badge>
                   <Button
                     variant="ghost"
