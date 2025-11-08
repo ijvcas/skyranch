@@ -30,7 +30,11 @@ const CalendarHeader = ({
   const { t } = useTranslation('calendar');
   return (
     <div className="mb-6">
-      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="flex items-center space-x-2">
+          <CalendarIcon className="w-8 h-8 text-primary" />
+          <h1 className="text-3xl font-bold text-foreground">{t('title')}</h1>
+        </div>
         <div className="flex gap-2">
           <Dialog open={isDialogOpen} onOpenChange={(open) => open ? onOpenDialog() : onCloseDialog()}>
             <DialogTrigger asChild>

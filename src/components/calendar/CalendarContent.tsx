@@ -55,13 +55,7 @@ const CalendarContent = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Calendar */}
         <Card className="lg:col-span-2 shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center text-lg sm:text-xl">
-              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              {t('title')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-6">
+          <CardContent className="p-3 sm:p-6 pt-6">
             <div className="flex justify-center">
               <EnhancedCalendar
                 mode="single"

@@ -28,7 +28,7 @@ const Finances = () => {
         <div className="flex gap-2">
           <Dialog open={incomeDialogOpen} onOpenChange={setIncomeDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button className="bg-gradient-blue-green hover:opacity-90 text-white border-0 text-sm px-3 py-2">
                 <Plus className="h-4 w-4 mr-2" />
                 {t('financial:transaction.addIncome')}
               </Button>
