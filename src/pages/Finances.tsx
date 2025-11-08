@@ -25,12 +25,12 @@ const Finances = () => {
             <p className="text-muted-foreground">{t('financial:subtitle')}</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex">
           <Dialog open={incomeDialogOpen} onOpenChange={setIncomeDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-blue-green hover:opacity-90 text-white border-0 text-sm px-3 py-2">
-                <Plus className="h-4 w-4 mr-2" />
-                {t('financial:transaction.addIncome')}
+              <Button className="bg-gradient-blue-green hover:opacity-90 text-white border-0 text-xs sm:text-sm px-2 sm:px-3 py-2 h-9">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="truncate">{t('financial:transaction.addIncome')}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -46,9 +46,9 @@ const Finances = () => {
 
           <Dialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                {t('financial:transaction.addExpense')}
+              <Button className="text-xs sm:text-sm px-2 sm:px-3 py-2 h-9">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="truncate">{t('financial:transaction.addExpense')}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

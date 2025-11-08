@@ -24,9 +24,10 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     const eventDate = this.formatEventDateTime(data.event.eventDate, data.event.endDate, data.event.allDay);
     const actionText = this.getActionText(data.eventType);
     const subject = this.getSubject(data.eventType, data.event.title);
+    const calendarLink = this.generateCalendarLink(data);
     
     // Build content HTML for the template renderer
-    const content = this.buildEventContent(data, eventDate, actionText);
+    const content = this.buildEventContent(data, eventDate, actionText, calendarLink);
 
     // Use the parent renderer which fetches farm colors
     return await this.renderer.renderFullTemplate({
@@ -38,7 +39,7 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     });
   }
 
-  private buildEventContent(data: CalendarEventData, eventDate: string, actionText: string): string {
+  private buildEventContent(data: CalendarEventData, eventDate: string, actionText: string, calendarLink: string): string {
     return `
       <!-- Event Notification Badge -->
       <div style="background-color: rgba(var(--primary-rgb, 16, 185, 129), 0.1); padding: 12px; text-align: center; margin-bottom: 24px; border-radius: 8px;">
@@ -117,17 +118,21 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
       ${data.eventType !== 'deleted' ? `
       <!-- Call to Action -->
       <div style="background-color: rgba(var(--primary-rgb, 16, 185, 129), 0.08); border: 1px solid rgba(var(--primary-rgb, 16, 185, 129), 0.2); border-radius: 8px; padding: 24px; text-align: center; margin: 24px 0;">
-        <h3 style="color: currentColor; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">
+        <h3 style="color: currentColor; margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">
           🌟 Accede al Sistema
         </h3>
-        <p style="color: #6b7280; font-size: 13px; margin-bottom: 16px; line-height: 1.5;">
-          Gestiona todos tus eventos ganaderos de manera profesional y eficiente
-        </p>
-        <a href="https://id-preview--d956216c-86a1-4ff3-9df4-bdfbbabf459a.lovable.app/calendar" 
-           style="display: inline-block; background-color: currentColor; color: white; text-decoration: none; 
-                  padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; transition: opacity 0.2s;">
-           📅 Ver Calendario Completo
-        </a>
+        <div style="display: inline-block; margin-bottom: 12px;">
+          <a href="${calendarLink}" 
+             style="display: inline-block; background-color: currentColor; color: white; text-decoration: none; 
+                    padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; margin: 0 8px 8px 0;">
+             📅 Agregar al Calendario
+          </a>
+          <a href="https://id-preview--d956216c-86a1-4ff3-9df4-bdfbbabf459a.lovable.app/calendar" 
+             style="display: inline-block; background-color: #f3f4f6; color: #374151; text-decoration: none; 
+                    padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; margin: 0 0 8px 0;">
+             🌐 Ver Calendario Completo
+          </a>
+        </div>
         <p style="color: #9ca3af; font-size: 10px; margin: 12px 0 0 0; font-style: italic;">
           Tecnología avanzada para el manejo eficiente de ganado
         </p>
@@ -212,5 +217,35 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
       case 'reminder': return `⏰ Recordatorio: ${eventTitle}`;
       default: return `📝 Evento: ${eventTitle}`;
     }
+  }
+
+  private generateCalendarLink(data: CalendarEventData): string {
+    const event = data.event;
+    const startDate = new Date(event.eventDate);
+    const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
+    
+    // Format dates for ICS (YYYYMMDDTHHMMSSZ)
+    const formatDateICS = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//SkyRanch//Calendar Event//ES',
+      'BEGIN:VEVENT',
+      `DTSTART:${formatDateICS(startDate)}`,
+      `DTEND:${formatDateICS(endDate)}`,
+      `SUMMARY:${event.title}`,
+      event.description ? `DESCRIPTION:${event.description.replace(/\n/g, '\\n')}` : '',
+      event.location ? `LOCATION:${event.location}` : '',
+      `UID:${startDate.getTime()}@skyranch.app`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].filter(line => line).join('\r\n');
+
+    // Create data URL for ICS file
+    const dataUrl = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
+    return dataUrl;
   }
 }
