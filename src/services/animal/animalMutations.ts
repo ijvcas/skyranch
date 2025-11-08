@@ -115,10 +115,7 @@ export const addAnimal = async (animal: Omit<Animal, 'id'>): Promise<boolean> =>
   }
 
   // Update usage count after successful animal addition
-  const currentUsage = await SubscriptionService.getUsage();
-  if (currentUsage) {
-    await SubscriptionService.updateUsage(currentUsage.animals_count + 1, undefined);
-  }
+  await SubscriptionService.updateUsage();
 
   console.log('✅ Animal added successfully');
   return true;

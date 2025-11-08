@@ -4,6 +4,7 @@ export type SubscriptionStatus = 'active' | 'expired' | 'cancelled' | 'trial';
 export interface Subscription {
   id: string;
   user_id: string;
+  farm_id?: string;
   tier: SubscriptionTier;
   status: SubscriptionStatus;
   apple_transaction_id?: string;
@@ -18,6 +19,7 @@ export interface Subscription {
 export interface SubscriptionUsage {
   id: string;
   user_id: string;
+  farm_id?: string;
   animals_count: number;
   users_count: number;
   last_updated: string;

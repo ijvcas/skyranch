@@ -1927,6 +1927,7 @@ export type Database = {
       subscription_usage: {
         Row: {
           animals_count: number | null
+          farm_id: string | null
           id: string
           last_updated: string | null
           user_id: string
@@ -1934,6 +1935,7 @@ export type Database = {
         }
         Insert: {
           animals_count?: number | null
+          farm_id?: string | null
           id?: string
           last_updated?: string | null
           user_id: string
@@ -1941,12 +1943,21 @@ export type Database = {
         }
         Update: {
           animals_count?: number | null
+          farm_id?: string | null
           id?: string
           last_updated?: string | null
           user_id?: string
           users_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscription_usage_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farm_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
@@ -1955,6 +1966,7 @@ export type Database = {
           auto_renew_status: boolean | null
           created_at: string | null
           expires_at: string | null
+          farm_id: string | null
           id: string
           status: string
           tier: string
@@ -1968,6 +1980,7 @@ export type Database = {
           auto_renew_status?: boolean | null
           created_at?: string | null
           expires_at?: string | null
+          farm_id?: string | null
           id?: string
           status: string
           tier: string
@@ -1981,6 +1994,7 @@ export type Database = {
           auto_renew_status?: boolean | null
           created_at?: string | null
           expires_at?: string | null
+          farm_id?: string | null
           id?: string
           status?: string
           tier?: string
@@ -1988,7 +2002,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farm_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_settings: {
         Row: {
@@ -2459,6 +2481,7 @@ export type Database = {
         Args: { target_lot_id: string }
         Returns: undefined
       }
+      update_subscription_usage_counts: { Args: never; Returns: undefined }
       upsert_push_token: {
         Args: { p_platform: string; p_token: string; p_user_id: string }
         Returns: undefined

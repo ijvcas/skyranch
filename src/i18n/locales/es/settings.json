@@ -52,7 +52,11 @@
     "currentUsage": "Uso Actual",
     "planLimits": "Límites de tu plan",
     "animals": "Animales",
-    "users": "Usuarios"
+    "users": "Usuarios",
+    "viewPlans": "Ver Planes",
+    "upgradePro": "Actualizar a Pro",
+    "upgradeDescription": "Desbloquea más funciones, usuarios y animales con nuestros planes Pro o Equipo.",
+    "onlyOwnerCanUpgrade": "Solo el propietario de la finca puede actualizar el plan de suscripción."
   },
   "profile": {
     "title": "Perfil",

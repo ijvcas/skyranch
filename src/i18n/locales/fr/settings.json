@@ -52,7 +52,11 @@
     "currentUsage": "Utilisation Actuelle",
     "planLimits": "Limites de votre plan",
     "animals": "Animaux",
-    "users": "Utilisateurs"
+    "users": "Utilisateurs",
+    "viewPlans": "Voir les Plans",
+    "upgradePro": "Passer à Pro",
+    "upgradeDescription": "Débloquez plus de fonctionnalités, d'utilisateurs et d'animaux avec nos plans Pro ou Équipe.",
+    "onlyOwnerCanUpgrade": "Seul le propriétaire de la ferme peut mettre à niveau le plan d'abonnement."
   },
   "profile": {
     "title": "Profil",

@@ -59,10 +59,7 @@ export const addUser = async (userData: Omit<AppUser, 'id' | 'created_at' | 'cre
     }
 
     // Update usage count after successful user addition
-    const currentUsage = await SubscriptionService.getUsage();
-    if (currentUsage) {
-      await SubscriptionService.updateUsage(undefined, currentUsage.users_count + 1);
-    }
+    await SubscriptionService.updateUsage();
 
     console.log('✅ User added successfully:', data);
     return true;

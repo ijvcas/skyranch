@@ -4,16 +4,24 @@ import { TIER_LIMITS, type Subscription, type SubscriptionUsage, type Subscripti
 export class SubscriptionService {
   
   /**
-   * Get current user's subscription
+   * Get current farm's subscription
    */
   static async getSubscription(): Promise<Subscription | null> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
+    // Get farm_id from farm_profiles
+    const { data: farmProfile } = await supabase
+      .from('farm_profiles')
+      .select('id')
+      .single();
+
+    if (!farmProfile) return null;
+
     const { data, error } = await supabase
       .from('subscriptions')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('farm_id', farmProfile.id)
       .single();
 
     if (error) {
@@ -25,16 +33,24 @@ export class SubscriptionService {
   }
 
   /**
-   * Get current user's usage statistics
+   * Get current farm's usage statistics
    */
   static async getUsage(): Promise<SubscriptionUsage | null> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
+    // Get farm_id from farm_profiles
+    const { data: farmProfile } = await supabase
+      .from('farm_profiles')
+      .select('id')
+      .single();
+
+    if (!farmProfile) return null;
+
     const { data, error } = await supabase
       .from('subscription_usage')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('farm_id', farmProfile.id)
       .single();
 
     if (error) {
@@ -46,20 +62,10 @@ export class SubscriptionService {
   }
 
   /**
-   * Update usage counts
+   * Update farm usage counts (called by database triggers)
    */
-  static async updateUsage(animalsCount?: number, usersCount?: number): Promise<boolean> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-
-    const updates: any = { last_updated: new Date().toISOString() };
-    if (animalsCount !== undefined) updates.animals_count = animalsCount;
-    if (usersCount !== undefined) updates.users_count = usersCount;
-
-    const { error } = await supabase
-      .from('subscription_usage')
-      .update(updates)
-      .eq('user_id', user.id);
+  static async updateUsage(): Promise<boolean> {
+    const { error } = await supabase.rpc('update_subscription_usage_counts');
 
     if (error) {
       console.error('Error updating usage:', error);
@@ -122,7 +128,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Check if user has access to a specific feature
+   * Check if farm has access to a specific feature
    */
   static async hasFeatureAccess(feature: string): Promise<boolean> {
     const subscription = await this.getSubscription();
@@ -130,6 +136,21 @@ export class SubscriptionService {
 
     const limits = TIER_LIMITS[subscription.tier];
     return limits.features.includes(feature);
+  }
+
+  /**
+   * Check if current user is farm owner (can upgrade subscription)
+   */
+  static async isOwner(): Promise<boolean> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data: farmProfile } = await supabase
+      .from('farm_profiles')
+      .select('owner_user_id')
+      .single();
+
+    return farmProfile?.owner_user_id === user.id;
   }
 
   /**

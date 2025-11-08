@@ -52,7 +52,11 @@
     "currentUsage": "Current Usage",
     "planLimits": "Your plan limits",
     "animals": "Animals",
-    "users": "Users"
+    "users": "Users",
+    "viewPlans": "View Plans",
+    "upgradePro": "Upgrade to Pro",
+    "upgradeDescription": "Unlock more features, users, and animals with our Pro or Team plans.",
+    "onlyOwnerCanUpgrade": "Only the farm owner can upgrade the subscription plan."
   },
   "profile": {
     "title": "Profile",

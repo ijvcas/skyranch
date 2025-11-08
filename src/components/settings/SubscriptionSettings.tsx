@@ -3,14 +3,16 @@ import { SubscriptionService, type Subscription, type SubscriptionUsage } from '
 import SubscriptionCard from '@/components/subscription/SubscriptionCard';
 import UsageMeter from '@/components/subscription/UsageMeter';
 import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
+import { Crown, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function SubscriptionSettings() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [usage, setUsage] = useState<SubscriptionUsage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation('settings');
 
@@ -21,12 +23,14 @@ export default function SubscriptionSettings() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [sub, use] = await Promise.all([
+      const [sub, use, owner] = await Promise.all([
         SubscriptionService.getSubscription(),
-        SubscriptionService.getUsage()
+        SubscriptionService.getUsage(),
+        SubscriptionService.isOwner()
       ]);
       setSubscription(sub);
       setUsage(use);
+      setIsOwner(owner);
     } catch (error) {
       console.error('Error loading subscription data:', error);
     } finally {
@@ -58,16 +62,35 @@ export default function SubscriptionSettings() {
       </div>
 
       {subscription.tier === 'free' && (
-        <div className="bg-accent/50 border border-primary/20 rounded-lg p-6 text-center">
-          <Sparkles className="h-8 w-8 text-primary mx-auto mb-3" />
-          <h3 className="font-semibold text-lg mb-2">{t('subscription.upgrade')}</h3>
-          <p className="text-muted-foreground mb-4">
-            {t('subscription.limits')}
-          </p>
-          <Button onClick={() => navigate('/pricing')} size="lg">
-            {t('subscription.upgrade')}
-          </Button>
-        </div>
+        <>
+          {!isOwner && (
+            <Alert>
+              <Lock className="w-4 h-4" />
+              <AlertDescription>
+                {t('subscription.onlyOwnerCanUpgrade')}
+              </AlertDescription>
+            </Alert>
+          )}
+          <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg border border-primary/20 p-6">
+            <div className="flex items-start gap-4">
+              <Crown className="w-8 h-8 text-primary mt-1 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-2">{t('subscription.upgradePro')}</h3>
+                <p className="text-muted-foreground mb-4">
+                  {t('subscription.upgradeDescription')}
+                </p>
+                <Button 
+                  onClick={() => navigate('/pricing')} 
+                  disabled={!isOwner}
+                  className="gap-2"
+                >
+                  <Crown className="w-4 h-4" />
+                  {t('subscription.viewPlans')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

@@ -52,7 +52,11 @@
     "currentUsage": "Uso Atual",
     "planLimits": "Limites do seu plano",
     "animals": "Animais",
-    "users": "Usuários"
+    "users": "Usuários",
+    "viewPlans": "Ver Planos",
+    "upgradePro": "Atualizar para Pro",
+    "upgradeDescription": "Desbloqueie mais recursos, usuários e animais com nossos planos Pro ou Equipe.",
+    "onlyOwnerCanUpgrade": "Apenas o proprietário da fazenda pode atualizar o plano de assinatura."
   },
   "profile": {
     "title": "Perfil",
