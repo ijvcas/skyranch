@@ -17,19 +17,20 @@ const Finances = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <DollarSign className="h-8 w-8 text-primary" />
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
+        <div className="flex items-center gap-2">
+          <DollarSign className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-3xl font-bold">{t('financial:title')}</h1>
-            <p className="text-muted-foreground">{t('financial:subtitle')}</p>
+            <h1 className="text-xl sm:text-2xl font-bold">{t('financial:title')}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">{t('financial:subtitle')}</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex">
+        
+        <div className="grid grid-cols-2 gap-2 w-full max-w-md">
           <Dialog open={incomeDialogOpen} onOpenChange={setIncomeDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-blue-green hover:opacity-90 text-white border-0 text-xs sm:text-sm px-2 sm:px-3 py-2 h-9">
-                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <Button className="bg-gradient-blue-green hover:opacity-90 text-white border-0 text-xs px-3 py-2 h-9 w-full">
+                <Plus className="h-3 w-3 mr-1" />
                 <span className="truncate">{t('financial:transaction.addIncome')}</span>
               </Button>
             </DialogTrigger>
@@ -46,8 +47,8 @@ const Finances = () => {
 
           <Dialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="text-xs sm:text-sm px-2 sm:px-3 py-2 h-9">
-                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <Button className="bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs px-3 py-2 h-9 w-full">
+                <Plus className="h-3 w-3 mr-1" />
                 <span className="truncate">{t('financial:transaction.addExpense')}</span>
               </Button>
             </DialogTrigger>
