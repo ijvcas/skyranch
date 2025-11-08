@@ -42,57 +42,59 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     
     return `
       <!-- Event Notification Badge -->
-      <div style="background-color: currentColor; padding: 16px; text-align: center; margin-bottom: 32px; border-radius: 8px;">
-        <p style="margin: 0; font-size: 13px; font-weight: 700; color: white; letter-spacing: 0.5px; text-transform: uppercase;">
-          🔔 NOTIFICACIÓN DE EVENTO
-        </p>
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="display: inline-block; background-color: #10b981; padding: 12px 24px; border-radius: 6px;">
+          <p style="margin: 0; font-size: 13px; font-weight: 700; color: white; letter-spacing: 0.5px; text-transform: uppercase;">
+            🔔 NOTIFICACIÓN DE EVENTO
+          </p>
+        </div>
       </div>
 
       <!-- Main Message -->
-      <p style="color: #374151; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">
+      <p style="color: #10b981; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">
         Estimado/a ${data.userName || 'Usuario'},
       </p>
       <p style="color: #6b7280; font-size: 14px; margin: 0 0 8px 0; line-height: 1.6;">
-        Te informamos que el evento <strong>"${data.event.title}"</strong> ${actionText.toLowerCase()}.
+        Te informamos que el evento <strong style="color: #10b981;">"${data.event.title}"</strong> ${actionText.toLowerCase()} correctamente en el sistema de gestión ganadera SkyRanch.
       </p>
 
       <!-- Event Details -->
-      <div style="background-color: #f9fafb; border-left: 4px solid currentColor; padding: 20px; margin: 24px 0; border-radius: 4px;">
-        <h3 style="margin: 0 0 4px 0; font-size: 18px; color: #111827; font-weight: 700;">
-          📅 ${data.event.title}
+      <div style="background-color: #f9fafb; padding: 24px; margin: 24px 0; border-radius: 8px; text-align: center;">
+        <h3 style="margin: 0 0 16px 0; font-size: 24px; color: #10b981; font-weight: 700;">
+          ${data.event.title}
         </h3>
-        <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 13px;">
+        <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 14px;">
           ${actionText}
         </p>
         
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; margin-top: 16px;">
+        <div style="padding-top: 16px; margin-top: 16px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; width: 100px; vertical-align: top;">📅 Fecha:</td>
-              <td style="color: #111827; font-weight: 600; font-size: 13px; padding: 8px 0;">${eventDate}</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; width: 120px; vertical-align: top;">📅 Fecha:</td>
+              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0;">${eventDate}</td>
             </tr>
             ${data.event.eventType ? `
             <tr>
-              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">🏷️ Tipo:</td>
-              <td style="color: #111827; font-size: 13px; padding: 8px 0;">${this.getEventTypeLabel(data.event.eventType)}</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">🏷️ Tipo:</td>
+              <td style="color: #374151; font-size: 13px; padding: 8px 0;">${this.getEventTypeLabel(data.event.eventType)}</td>
             </tr>
             ` : ''}
             ${data.event.description ? `
             <tr>
-              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📄 Detalles:</td>
-              <td style="color: #111827; font-size: 13px; padding: 8px 0; line-height: 1.5;">${data.event.description}</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📄 Detalles:</td>
+              <td style="color: #374151; font-size: 13px; padding: 8px 0; line-height: 1.5;">${data.event.description}</td>
             </tr>
             ` : ''}
             ${data.event.location ? `
             <tr>
-              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📍 Ubicación:</td>
-              <td style="color: #111827; font-size: 13px; padding: 8px 0;">${data.event.location}</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📍 Ubicación:</td>
+              <td style="color: #374151; font-size: 13px; padding: 8px 0;">${data.event.location}</td>
             </tr>
             ` : ''}
             ${data.event.veterinarian ? `
             <tr>
-              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">👨‍⚕️ Veterinario:</td>
-              <td style="color: #111827; font-size: 13px; padding: 8px 0;">${data.event.veterinarian}</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">👨‍⚕️ Veterinario:</td>
+              <td style="color: #374151; font-size: 13px; padding: 8px 0;">${data.event.veterinarian}</td>
             </tr>
             ` : ''}  
           </table>
