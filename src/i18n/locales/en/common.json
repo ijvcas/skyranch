@@ -46,7 +46,8 @@
     "forceRefresh": "Force Refresh",
     "viewMore": "View more",
     "saving": "Saving...",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "restore": "Restore"
   },
   "common": {
     "loading": "Loading...",

@@ -46,7 +46,8 @@
     "forceRefresh": "Forcer l'actualisation",
     "viewMore": "Voir plus",
     "saving": "Enregistrement...",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "restore": "Restaurer"
   },
   "messages": {
     "success": "Opération réussie",

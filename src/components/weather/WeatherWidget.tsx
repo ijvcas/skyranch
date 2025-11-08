@@ -4,6 +4,7 @@ import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind } from "lucide
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useGoogleWeatherAPI } from "@/hooks/useGoogleWeatherAPI";
 import { useTranslation } from 'react-i18next';
+import { detectWeatherCondition } from '@/utils/weatherTranslation';
 
 function pickIcon(text?: string | null) {
   const t = (text || "").toLowerCase();
@@ -75,7 +76,10 @@ const WeatherWidget: React.FC = () => {
     if (settingsLoading || isLoading) return t('loading');
     if (!weatherSettings?.location_query) return t('noLocation');
     if (!weather?.conditionText) return t('connecting');
-    return weather.conditionText;
+    
+    // Translate weather condition to app language
+    const conditionKey = detectWeatherCondition(weather.conditionText);
+    return t(`weatherConditions:${conditionKey}`);
   };
 
   return (

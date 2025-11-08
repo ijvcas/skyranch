@@ -5,6 +5,7 @@ import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from 'react-i18next';
+import { detectWeatherCondition } from '@/utils/weatherTranslation';
 
 const pickIcon = (text?: string | null) => {
   const t = (text || "").toLowerCase();
@@ -36,6 +37,12 @@ const WeatherBadge: React.FC = () => {
   }
 
   const Icon = pickIcon(wx?.conditionText);
+  
+  const getTranslatedCondition = () => {
+    if (!wx?.conditionText) return null;
+    const conditionKey = detectWeatherCondition(wx.conditionText);
+    return t(`weatherConditions:${conditionKey}`);
+  };
 
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg bg-white shadow-sm border min-w-[220px]">
@@ -53,7 +60,7 @@ const WeatherBadge: React.FC = () => {
           ) : wx && wx.temperatureC != null ? (
             <>
               {Math.round(wx.temperatureC)}°C
-              {wx.conditionText ? <span className="text-gray-500 ml-1">· {wx.conditionText}</span> : null}
+              {wx.conditionText ? <span className="text-gray-500 ml-1">· {getTranslatedCondition()}</span> : null}
             </>
           ) : (
             <span className="text-gray-400">{t('noData')}</span>

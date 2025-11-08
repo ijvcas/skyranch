@@ -164,9 +164,12 @@ const FarmCustomization = () => {
             variant="outline" 
             onClick={handleRestoreDefaults}
             disabled={isSaving}
+            className="md:flex-none"
           >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            {t('settings:customization.restoreDefaults')}
+            <RotateCcw className="h-4 w-4" />
+            <span className="hidden md:inline md:ml-2">
+              {t('settings:customization.restoreDefaults')}
+            </span>
           </Button>
         </div>
 

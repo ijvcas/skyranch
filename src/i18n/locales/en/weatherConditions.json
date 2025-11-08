@@ -1,0 +1,20 @@
+{
+  "clear": "Clear",
+  "sunny": "Sunny",
+  "partly_cloudy": "Partly cloudy",
+  "cloudy": "Cloudy",
+  "overcast": "Overcast",
+  "mist": "Mist",
+  "fog": "Fog",
+  "light_rain": "Light rain",
+  "rain": "Rain",
+  "heavy_rain": "Heavy rain",
+  "drizzle": "Drizzle",
+  "thunderstorm": "Thunderstorm",
+  "snow": "Snow",
+  "light_snow": "Light snow",
+  "heavy_snow": "Heavy snow",
+  "sleet": "Sleet",
+  "wind": "Windy",
+  "hail": "Hail"
+}

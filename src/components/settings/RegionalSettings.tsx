@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 const RegionalSettings = () => {
   const { timezone, setTimezone, dateFormat, setDateFormat, currency, setCurrency } = useTimezone();
   const { language, changeLanguage } = useLanguage();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['settings', 'common']);
 
   const timezones = [
     { value: 'Europe/Madrid', label: 'Madrid (UTC+1)' },

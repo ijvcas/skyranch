@@ -1,0 +1,20 @@
+{
+  "clear": "Despejado",
+  "sunny": "Soleado",
+  "partly_cloudy": "Parcialmente nublado",
+  "cloudy": "Nublado",
+  "overcast": "Cubierto",
+  "mist": "Neblina",
+  "fog": "Niebla",
+  "light_rain": "Lluvia ligera",
+  "rain": "Lluvia",
+  "heavy_rain": "Lluvia intensa",
+  "drizzle": "Llovizna",
+  "thunderstorm": "Tormenta",
+  "snow": "Nieve",
+  "light_snow": "Nieve ligera",
+  "heavy_snow": "Nevada intensa",
+  "sleet": "Aguanieve",
+  "wind": "Ventoso",
+  "hail": "Granizo"
+}
