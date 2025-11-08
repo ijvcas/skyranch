@@ -22,8 +22,10 @@ import { getPolygonDataForLots, syncAllLotAreasWithPolygons } from '@/services/l
 import { applySEO } from '@/utils/seo';
 import { syncCadastralParcelsToLots } from '@/services/cadastralLotSyncService';
 import { CacheCleanupService } from '@/services/cacheCleanupService';
+import { useTranslation } from 'react-i18next';
 
 const Lots = () => {
+  const { t } = useTranslation(['lots', 'common']);
   const { lots, loadLots, deleteLot, isLoading, setSelectedLot } = useLotStore();
   const [activeTab, setActiveTab] = useState('map');
   const [selectedLot, setSelectedLotState] = useState<Lot | null>(null);
@@ -107,7 +109,7 @@ const Lots = () => {
     if (lotToDelete) {
       const success = await deleteLot(lotToDelete);
       if (success) {
-        toast.success('Lote eliminado correctamente');
+        toast.success(t('lots:messages.deleted'));
         setShowDeleteDialog(false);
         setLotToDelete(null);
         
@@ -117,7 +119,7 @@ const Lots = () => {
           setActiveTab('map');
         }
       } else {
-        toast.error('Error al eliminar el lote');
+        toast.error(t('lots:messages.deleteError'));
       }
     }
   };
@@ -139,15 +141,15 @@ const Lots = () => {
     <div className="page-with-logo">
       <div className="container mx-auto pb-6 px-2 md:px-4">
         <div className="flex items-center justify-center mb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-center">Mapas</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-center">{t('lots:title')}</h1>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 flex flex-col sm:flex-row w-full sm:w-auto">
             
-            <TabsTrigger value="map" className="w-full sm:w-auto">Potreros</TabsTrigger>
-            <TabsTrigger value="cadastral" className="w-full sm:w-auto">Mapa Catastral</TabsTrigger>
-            {selectedLot && <TabsTrigger value="detail" className="w-full sm:w-auto">Detalle</TabsTrigger>}
+            <TabsTrigger value="map" className="w-full sm:w-auto">{t('lots:tabs.pastures')}</TabsTrigger>
+            <TabsTrigger value="cadastral" className="w-full sm:w-auto">{t('lots:tabs.cadastral')}</TabsTrigger>
+            {selectedLot && <TabsTrigger value="detail" className="w-full sm:w-auto">{t('common:actions.view')}</TabsTrigger>}
           </TabsList>
           
           
@@ -155,7 +157,7 @@ const Lots = () => {
             <div className="flex justify-center mb-4">
               <Button variant="gradient" onClick={handleCreateLot}>
                 <Plus className="w-4 h-4" />
-                Nuevo Potrero
+                {t('lots:newLot')}
               </Button>
             </div>
             <LotMapView 
@@ -193,7 +195,7 @@ const Lots = () => {
         <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Crear Nuevo Lote Manual</DialogTitle>
+              <DialogTitle>{t('lots:form.manualCreation')}</DialogTitle>
             </DialogHeader>
             <div className="max-h-[70vh] overflow-y-auto">
               <LotForm onClose={handleFormClose} />
@@ -204,24 +206,24 @@ const Lots = () => {
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Confirmar Eliminación</DialogTitle>
+              <DialogTitle>{t('lots:deleteLot')}</DialogTitle>
             </DialogHeader>
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Advertencia</AlertTitle>
+              <AlertTitle>{t('common:confirmations.warning')}</AlertTitle>
               <AlertDescription>
-                ¿Estás seguro de que deseas eliminar este lote? Esta acción no se puede deshacer.
+                {t('lots:messages.confirmDelete')}
               </AlertDescription>
             </Alert>
             <div className="flex justify-end gap-2 mt-4">
               <DialogClose asChild>
-                <Button variant="outline">Cancelar</Button>
+                <Button variant="outline">{t('common:actions.cancel')}</Button>
               </DialogClose>
               <Button 
                 variant="destructive" 
                 onClick={confirmDeleteLot}
               >
-                Eliminar
+                {t('common:actions.delete')}
               </Button>
             </div>
           </DialogContent>

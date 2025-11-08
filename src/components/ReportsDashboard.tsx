@@ -10,10 +10,12 @@ import { getLedgerSummary, getSalesAnalytics } from '@/services/farmLedgerServic
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { formatNumber } from '@/utils/financialFormatters';
 import FarmLedger from '@/components/financial/FarmLedger';
+import { useTranslation } from 'react-i18next';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 const ReportsDashboard: React.FC = () => {
+  const { t } = useTranslation(['reports', 'common']);
   const [activeReport, setActiveReport] = useState<'animal' | 'health' | 'sales'>('animal');
 
   const { data: animalSummary, isLoading: isLoadingAnimal, error: errorAnimal } = useQuery({
@@ -88,10 +90,10 @@ const ReportsDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Reportes y Análisis</h2>
+        <h2 className="text-2xl font-bold">{t('reports:title')}</h2>
         <Button variant="outline">
           <Download className="w-4 h-4 mr-2" />
-          Exportar
+          {t('common:actions.export')}
         </Button>
       </div>
 
@@ -99,7 +101,7 @@ const ReportsDashboard: React.FC = () => {
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <p className="text-sm text-destructive">
-              Error al cargar los reportes. Por favor, intenta recargar la página.
+              {t('reports:messages.loadError')}
             </p>
           </CardContent>
         </Card>
@@ -107,9 +109,9 @@ const ReportsDashboard: React.FC = () => {
 
       <Tabs value={activeReport} onValueChange={(value) => setActiveReport(value as any)}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="animal">Animales</TabsTrigger>
-          <TabsTrigger value="health">Salud</TabsTrigger>
-          <TabsTrigger value="sales">Finanzas</TabsTrigger>
+          <TabsTrigger value="animal">{t('reports:tabs.animals')}</TabsTrigger>
+          <TabsTrigger value="health">{t('reports:tabs.health')}</TabsTrigger>
+          <TabsTrigger value="sales">{t('reports:tabs.finance')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="animal" className="space-y-6">
@@ -129,7 +131,7 @@ const ReportsDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total de Animales</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('reports:stats.totalAnimals')}</CardTitle>
                     <Activity className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -139,28 +141,28 @@ const ReportsDashboard: React.FC = () => {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Edad Promedio</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('reports:stats.averageAge')}</CardTitle>
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{animalSummary.averageAge} años</div>
+                    <div className="text-2xl font-bold">{animalSummary.averageAge} {t('reports:stats.years')}</div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Nacimientos Recientes</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('reports:stats.recentBirths')}</CardTitle>
                     <Heart className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{animalSummary.recentBirths}</div>
-                    <p className="text-xs text-muted-foreground">Últimos 30 días</p>
+                    <p className="text-xs text-muted-foreground">{t('reports:stats.last30Days')}</p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Especies</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('reports:stats.species')}</CardTitle>
                     <BarChart3 className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -172,7 +174,7 @@ const ReportsDashboard: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Distribución por Especies</CardTitle>
+                    <CardTitle>{t('reports:charts.speciesDistribution')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
@@ -199,7 +201,7 @@ const ReportsDashboard: React.FC = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Estado de Salud</CardTitle>
+                    <CardTitle>{t('reports:charts.healthStatus')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
@@ -235,7 +237,7 @@ const ReportsDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Registros</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('reports:stats.totalRecords')}</CardTitle>
                     <FileText className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -245,18 +247,18 @@ const ReportsDashboard: React.FC = () => {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Vacunas Próximas</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('reports:stats.upcomingVaccinations')}</CardTitle>
                     <Activity className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{healthReport.upcomingVaccinations}</div>
-                    <p className="text-xs text-muted-foreground">Próximos 30 días</p>
+                    <p className="text-xs text-muted-foreground">{t('reports:stats.next30Days')}</p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Costo Total</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('reports:stats.totalCost')}</CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -266,7 +268,7 @@ const ReportsDashboard: React.FC = () => {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Costo Promedio</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('reports:stats.averageCost')}</CardTitle>
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -278,7 +280,7 @@ const ReportsDashboard: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Tipos de Registros</CardTitle>
+                    <CardTitle>{t('reports:charts.recordTypes')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
@@ -295,7 +297,7 @@ const ReportsDashboard: React.FC = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Costos por Mes</CardTitle>
+                    <CardTitle>{t('reports:charts.costsByMonth')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
@@ -303,7 +305,7 @@ const ReportsDashboard: React.FC = () => {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="month" />
                         <YAxis />
-                        <Tooltip formatter={(value) => [`$${value}`, 'Costo']} />
+                        <Tooltip formatter={(value) => [`$${value}`, t('common:cost')]} />
                         <Bar dataKey="cost" fill="#ffc658" />
                       </BarChart>
                     </ResponsiveContainer>
@@ -329,19 +331,19 @@ const ReportsDashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('reports:stats.totalSales')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{salesAnalytics.totalSales}</div>
                   <p className="text-xs text-muted-foreground">
-                    Ingresos: {formatNumber(salesAnalytics.totalRevenue)} €
+                    {t('reports:stats.revenue')}: {formatNumber(salesAnalytics.totalRevenue)} €
                   </p>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Precio Promedio</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('reports:stats.averagePrice')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{formatNumber(salesAnalytics.averageSalePrice)} €</div>
@@ -350,7 +352,7 @@ const ReportsDashboard: React.FC = () => {
               
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pagos Pendientes</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('reports:stats.pendingPayments')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{formatNumber(salesAnalytics.outstandingPayments)} €</div>
@@ -359,7 +361,7 @@ const ReportsDashboard: React.FC = () => {
               
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Ventas Este Mes</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('reports:stats.salesThisMonth')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
@@ -376,7 +378,7 @@ const ReportsDashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Ventas por Especie</CardTitle>
+                  <CardTitle>{t('reports:charts.salesBySpecies')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -405,7 +407,7 @@ const ReportsDashboard: React.FC = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Ventas Mensuales</CardTitle>
+                  <CardTitle>{t('reports:charts.monthlySales')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                 <ResponsiveContainer width="100%" height={300}>

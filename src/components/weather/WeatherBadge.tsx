@@ -4,6 +4,7 @@ import { MapPin, Cloud, Sun, CloudRain, CloudSun } from "lucide-react";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from 'react-i18next';
 
 const pickIcon = (text?: string | null) => {
   const t = (text || "").toLowerCase();
@@ -14,6 +15,7 @@ const pickIcon = (text?: string | null) => {
 };
 
 const WeatherBadge: React.FC = () => {
+  const { t } = useTranslation('weather');
   const { data: settings, isLoading: locLoading } = useWeatherSettings();
   const { data: wx, isLoading: wxLoading } = useFarmWeather(settings?.lat, settings?.lng);
 
@@ -47,14 +49,14 @@ const WeatherBadge: React.FC = () => {
         </div>
         <div className="text-base font-medium text-gray-900">
           {wxLoading ? (
-            <span className="text-gray-400">Cargando clima…</span>
+            <span className="text-gray-400">{t('loadingShort')}</span>
           ) : wx && wx.temperatureC != null ? (
             <>
               {Math.round(wx.temperatureC)}°C
               {wx.conditionText ? <span className="text-gray-500 ml-1">· {wx.conditionText}</span> : null}
             </>
           ) : (
-            <span className="text-gray-400">Sin datos de clima</span>
+            <span className="text-gray-400">{t('noData')}</span>
           )}
         </div>
       </div>

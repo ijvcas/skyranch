@@ -19,10 +19,11 @@
     "loading": "Cargando..."
   },
   "actions": {
-    "add": "Añadir",
+    "add": "Agregar",
     "edit": "Editar",
     "delete": "Eliminar",
     "save": "Guardar",
+    "saveChanges": "Guardar Cambios",
     "cancel": "Cancelar",
     "close": "Cerrar",
     "search": "Buscar",
@@ -38,7 +39,41 @@
     "confirm": "Confirmar",
     "submit": "Enviar",
     "reset": "Restablecer",
-    "clear": "Limpiar"
+    "clear": "Limpiar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "refresh": "Actualizar",
+    "viewMore": "Ver más",
+    "saving": "Guardando...",
+    "loading": "Cargando..."
+  },
+  "messages": {
+    "success": "Operación exitosa",
+    "error": "Ocurrió un error",
+    "failed": "No se pudo completar la operación",
+    "saved": "Guardado correctamente",
+    "deleted": "Eliminado correctamente",
+    "created": "Creado correctamente",
+    "updated": "Actualizado correctamente",
+    "loadError": "Error al cargar",
+    "saveError": "Error al guardar",
+    "deleteError": "Error al eliminar"
+  },
+  "confirmations": {
+    "delete": "¿Estás seguro de que deseas eliminar?",
+    "deleteItem": "¿Estás seguro de que deseas eliminar {{item}}?",
+    "unsavedChanges": "Tienes cambios sin guardar. ¿Deseas continuar?",
+    "irreversible": "Esta acción no se puede deshacer.",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar?",
+    "warning": "Advertencia"
+  },
+  "search": {
+    "byName": "Buscar por nombre...",
+    "byNameOrTag": "Buscar por nombre o etiqueta...",
+    "byId": "Buscar por ID...",
+    "byBreed": "Buscar por raza...",
+    "placeholder": "Buscar...",
+    "noResults": "No se encontraron resultados"
   },
   "common": {
     "loading": "Cargando...",

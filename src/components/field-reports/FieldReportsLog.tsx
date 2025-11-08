@@ -9,8 +9,10 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import FieldReportDetailDialog from './FieldReportDetailDialog';
 import { FieldReport } from '@/services/fieldReportService';
+import { useTranslation } from 'react-i18next';
 
 const FieldReportsLog = () => {
+  const { t } = useTranslation(['reports', 'common']);
   const { data: reports, isLoading, error } = useFieldReports();
   const [selectedReport, setSelectedReport] = useState<FieldReport | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
@@ -31,11 +33,11 @@ const FieldReportsLog = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <FileText className="w-5 h-5 mr-2" />
-            Reportes de Campo
+            {t('reports:fieldReports')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4">Cargando reportes...</div>
+          <div className="text-center py-4">{t('common:common.loading')}</div>
         </CardContent>
       </Card>
     );

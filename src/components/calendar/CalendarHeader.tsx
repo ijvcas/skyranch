@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Plus } from 'lucide-react';
 import EventForm from './EventForm';
+import { useTranslation } from 'react-i18next';
 
 interface CalendarHeaderProps {
   selectedDate: Date | undefined;
@@ -26,24 +27,25 @@ const CalendarHeader = ({
   onOpenDialog,
   onCloseDialog
 }: CalendarHeaderProps) => {
+  const { t } = useTranslation('calendar');
   return (
     <div className="mb-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <div className="flex items-center space-x-2">
           <CalendarIcon className="w-8 h-8 text-green-600" />
-          <h1 className="text-3xl font-bold text-gray-800">Calendario de Eventos</h1>
+          <h1 className="text-3xl font-bold text-gray-800">{t('title')}</h1>
         </div>
         <div className="flex gap-2">
           <Dialog open={isDialogOpen} onOpenChange={(open) => open ? onOpenDialog() : onCloseDialog()}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-blue-green hover:opacity-90 text-white border-0">
                 <Plus className="w-4 h-4 mr-2" />
-                Nuevo Evento
+                {t('newEvent')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Crear Nuevo Evento</DialogTitle>
+                <DialogTitle>{t('newEvent')}</DialogTitle>
               </DialogHeader>
               <EventForm
                 selectedDate={selectedDate}

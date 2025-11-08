@@ -9,6 +9,7 @@ import BreedingPregnancyCard from '@/components/breeding-detail/BreedingPregnanc
 import BreedingDatesCard from '@/components/breeding-detail/BreedingDatesCard';
 import BreedingAdditionalCard from '@/components/breeding-detail/BreedingAdditionalCard';
 import BreedingNotesCard from '@/components/breeding-detail/BreedingNotesCard';
+import { useTranslation } from 'react-i18next';
 
 interface BreedingDetailProps {
   record: BreedingRecord;
@@ -25,6 +26,7 @@ const BreedingDetail: React.FC<BreedingDetailProps> = ({
   onDelete,
   onBack
 }) => {
+  const { t } = useTranslation('breeding');
   const [showEditForm, setShowEditForm] = useState(false);
 
   const handleEditFormSuccess = () => {
@@ -66,7 +68,7 @@ const BreedingDetail: React.FC<BreedingDetailProps> = ({
       <Dialog open={showEditForm} onOpenChange={setShowEditForm}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar Registro de Apareamiento</DialogTitle>
+            <DialogTitle>{t('editRecord')}</DialogTitle>
           </DialogHeader>
           <BreedingEditForm 
             record={record}

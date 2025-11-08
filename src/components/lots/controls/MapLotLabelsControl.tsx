@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ChevronDown, ChevronUp, Minimize2, MapPin, Layers, Building, Leaf, Move } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface MapLotLabelsControlProps {
   showLabels: boolean;
@@ -27,6 +28,7 @@ const MapLotLabelsControl = ({
   showPastureLots,
   onTogglePastureLots
 }: MapLotLabelsControlProps) => {
+  const { t } = useTranslation('lots');
   // Load saved states from localStorage
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const saved = localStorage.getItem('etiquetas-collapsed');
@@ -106,7 +108,7 @@ const MapLotLabelsControl = ({
           className="bg-white/95 shadow-lg text-xs px-2 py-1"
         >
           <Layers className="w-3 h-3 mr-1" />
-          Etiquetas
+          {t('map.toggleLabels')}
         </Button>
       </div>
     );
@@ -126,7 +128,7 @@ const MapLotLabelsControl = ({
           >
             <Move className="w-3 h-3 mr-1 text-gray-400" />
             <Layers className="w-4 h-4 mr-1" />
-            Etiquetas
+            {t('map.toggleLabels')}
           </div>
           <div className="flex items-center space-x-1">
             <Button
@@ -154,7 +156,7 @@ const MapLotLabelsControl = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1">
               <Building className="w-3 h-3 text-gray-500" />
-              <Label htmlFor="show-property-lots" className="text-xs">Lotes de Propiedad</Label>
+              <Label htmlFor="show-property-lots" className="text-xs">{t('map.togglePropertyLots')}</Label>
             </div>
             <Switch 
               id="show-property-lots" 
@@ -166,7 +168,7 @@ const MapLotLabelsControl = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1">
               <Leaf className="w-3 h-3 text-green-600" />
-              <Label htmlFor="show-pasture-lots" className="text-xs">Lotes de Pastoreo</Label>
+              <Label htmlFor="show-pasture-lots" className="text-xs">{t('map.togglePastureLots')}</Label>
             </div>
             <Switch 
               id="show-pasture-lots" 
@@ -178,7 +180,7 @@ const MapLotLabelsControl = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1">
               <MapPin className="w-3 h-3 text-blue-600" />
-              <Label htmlFor="show-property-name" className="text-xs">Nombre SkyRanch</Label>
+              <Label htmlFor="show-property-name" className="text-xs">{t('map.togglePropertyName')}</Label>
             </div>
             <Switch 
               id="show-property-name" 

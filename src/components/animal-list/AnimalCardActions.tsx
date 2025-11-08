@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Edit, Eye, Trash2 } from 'lucide-react';
 import { actionSheetService } from '@/services/mobile/actionSheetService';
 import { hapticService } from '@/services/mobile/hapticService';
+import { useTranslation } from 'react-i18next';
 
 interface AnimalCardActionsProps {
   animalId: string;
@@ -17,6 +18,7 @@ const AnimalCardActions: React.FC<AnimalCardActionsProps> = ({
   animalName,
   onDelete
 }) => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
 
   const handleDelete = async () => {
@@ -42,7 +44,7 @@ const AnimalCardActions: React.FC<AnimalCardActionsProps> = ({
         className="flex-1"
       >
         <Eye className="w-4 h-4 mr-1" />
-        Ver
+        {t('actions.view')}
       </Button>
       <Button
         variant="outline"
@@ -51,15 +53,15 @@ const AnimalCardActions: React.FC<AnimalCardActionsProps> = ({
         className="flex-1"
       >
         <Edit className="w-4 h-4 mr-1" />
-        Editar
+        {t('actions.edit')}
       </Button>
       <Button
         variant="outline"
         size="sm"
         onClick={handleDelete}
         className="flex-1 text-red-600 hover:text-red-700"
-        aria-label={`Eliminar ${animalName}`}
-        title={`Eliminar ${animalName}`}
+        aria-label={`${t('actions.delete')} ${animalName}`}
+        title={`${t('actions.delete')} ${animalName}`}
       >
         <Trash2 className="w-4 h-4" />
       </Button>

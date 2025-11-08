@@ -23,6 +23,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
+    "saveChanges": "Save Changes",
     "cancel": "Cancel",
     "close": "Close",
     "search": "Search",
@@ -38,7 +39,13 @@
     "confirm": "Confirm",
     "submit": "Submit",
     "reset": "Reset",
-    "clear": "Clear"
+    "clear": "Clear",
+    "create": "Create",
+    "update": "Update",
+    "refresh": "Refresh",
+    "viewMore": "View more",
+    "saving": "Saving...",
+    "loading": "Loading..."
   },
   "common": {
     "loading": "Loading...",
@@ -65,6 +72,34 @@
     "no": "No",
     "optional": "Optional",
     "required": "Required"
+  },
+  "messages": {
+    "success": "Operation successful",
+    "error": "An error occurred",
+    "failed": "Could not complete operation",
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "created": "Created successfully",
+    "updated": "Updated successfully",
+    "loadError": "Error loading",
+    "saveError": "Error saving",
+    "deleteError": "Error deleting"
+  },
+  "confirmations": {
+    "delete": "Are you sure you want to delete?",
+    "deleteItem": "Are you sure you want to delete {{item}}?",
+    "unsavedChanges": "You have unsaved changes. Do you want to continue?",
+    "irreversible": "This action cannot be undone.",
+    "confirmDelete": "Are you sure you want to delete?",
+    "warning": "Warning"
+  },
+  "search": {
+    "byName": "Search by name...",
+    "byNameOrTag": "Search by name or tag...",
+    "byId": "Search by ID...",
+    "byBreed": "Search by breed...",
+    "placeholder": "Search...",
+    "noResults": "No results found"
   },
   "validation": {
     "required": "This field is required",

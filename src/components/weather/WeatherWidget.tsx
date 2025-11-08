@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind } from "lucide-react";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useGoogleWeatherAPI } from "@/hooks/useGoogleWeatherAPI";
+import { useTranslation } from 'react-i18next';
 
 function pickIcon(text?: string | null) {
   const t = (text || "").toLowerCase();
@@ -49,6 +50,7 @@ function pickIconColor(text?: string | null) {
 }
 
 const WeatherWidget: React.FC = () => {
+  const { t } = useTranslation('weather');
   const { data: weatherSettings, isLoading: settingsLoading } = useWeatherSettings();
   console.log("🌤️ [WeatherWidget] Weather settings:", weatherSettings);
   console.log("🌤️ [WeatherWidget] Settings loading:", settingsLoading);
@@ -66,13 +68,13 @@ const WeatherWidget: React.FC = () => {
   const tempValue = weather?.temperatureC;
   
   const formatLocation = () => {
-    return weatherSettings?.display_name || "Ubicación";
+    return weatherSettings?.display_name || t('location');
   };
 
   const getWeatherCondition = () => {
-    if (settingsLoading || isLoading) return "Cargando clima...";
-    if (!weatherSettings?.location_query) return "Sin ubicación";
-    if (!weather?.conditionText) return "Conectando...";
+    if (settingsLoading || isLoading) return t('loading');
+    if (!weatherSettings?.location_query) return t('noLocation');
+    if (!weather?.conditionText) return t('connecting');
     return weather.conditionText;
   };
 

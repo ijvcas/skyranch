@@ -23,6 +23,7 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "save": "Enregistrer",
+    "saveChanges": "Enregistrer les Modifications",
     "cancel": "Annuler",
     "close": "Fermer",
     "search": "Rechercher",
@@ -38,7 +39,41 @@
     "confirm": "Confirmer",
     "submit": "Envoyer",
     "reset": "Réinitialiser",
-    "clear": "Effacer"
+    "clear": "Effacer",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "refresh": "Actualiser",
+    "viewMore": "Voir plus",
+    "saving": "Enregistrement...",
+    "loading": "Chargement..."
+  },
+  "messages": {
+    "success": "Opération réussie",
+    "error": "Une erreur s'est produite",
+    "failed": "Impossible de terminer l'opération",
+    "saved": "Enregistré avec succès",
+    "deleted": "Supprimé avec succès",
+    "created": "Créé avec succès",
+    "updated": "Mis à jour avec succès",
+    "loadError": "Erreur de chargement",
+    "saveError": "Erreur d'enregistrement",
+    "deleteError": "Erreur de suppression"
+  },
+  "confirmations": {
+    "delete": "Êtes-vous sûr de vouloir supprimer ?",
+    "deleteItem": "Êtes-vous sûr de vouloir supprimer {{item}} ?",
+    "unsavedChanges": "Vous avez des modifications non enregistrées. Voulez-vous continuer ?",
+    "irreversible": "Cette action ne peut pas être annulée.",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ?",
+    "warning": "Avertissement"
+  },
+  "search": {
+    "byName": "Rechercher par nom...",
+    "byNameOrTag": "Rechercher par nom ou étiquette...",
+    "byId": "Rechercher par ID...",
+    "byBreed": "Rechercher par race...",
+    "placeholder": "Rechercher...",
+    "noResults": "Aucun résultat trouvé"
   },
   "common": {
     "loading": "Chargement...",
