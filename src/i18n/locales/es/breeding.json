@@ -1,7 +1,12 @@
 {
   "title": "Reproducción",
+  "management": "Gestión de Apareamientos",
   "addRecord": "Nuevo Registro",
   "editRecord": "Editar Registro",
+  "deleteRecord": "Eliminar Registro",
+  "viewDetails": "Ver Detalles",
+  "breedingManagement": "Gestión de Apareamientos",
+  "editBreeding": "Editar Registro de Apareamiento",
   "fields": {
     "mother": "Madre",
     "father": "Padre",
@@ -15,23 +20,54 @@
     "offspringCount": "Número de Crías",
     "veterinarian": "Veterinario",
     "cost": "Costo",
-    "notes": "Notas"
+    "notes": "Notas",
+    "gestationDuration": "Duración de la Gestación"
   },
   "methods": {
     "natural": "Natural",
     "artificial": "Inseminación Artificial",
-    "embryo": "Transferencia de Embriones"
+    "embryo": "Transferencia de Embriones",
+    "inseminacion_artificial": "Inseminación Artificial",
+    "monta_natural": "Monta Natural"
   },
   "status": {
     "planned": "Planificada",
     "completed": "Completada",
     "confirmed": "Confirmada",
+    "pregnant": "Embarazada",
     "failed": "Fallida",
-    "aborted": "Abortada"
+    "aborted": "Abortada",
+    "en_progreso": "En Progreso",
+    "confirmada": "Confirmada",
+    "finalizada": "Finalizada"
+  },
+  "calendar": {
+    "title": "Calendario de Reproducción",
+    "breedingEvent": "Apareamiento",
+    "expectedBirth": "Parto Esperado",
+    "actualBirth": "Parto Real",
+    "legend": "Leyenda",
+    "eventsForDate": "Eventos para"
+  },
+  "stats": {
+    "total": "Total de Registros",
+    "active": "Activos",
+    "completed": "Completados",
+    "successRate": "Tasa de Éxito"
   },
   "messages": {
     "added": "Registro agregado exitosamente",
     "updated": "Registro actualizado exitosamente",
-    "deleted": "Registro eliminado exitosamente"
+    "deleted": "Registro eliminado exitosamente",
+    "loadError": "Error al cargar los registros",
+    "confirmDelete": "¿Está seguro que desea eliminar este registro?"
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "view": "Ver",
+    "back": "Volver"
   }
 }

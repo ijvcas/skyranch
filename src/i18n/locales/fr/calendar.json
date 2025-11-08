@@ -1,0 +1,79 @@
+{
+  "title": "Calendrier d'Événements",
+  "newEvent": "Nouvel Événement",
+  "editEvent": "Modifier l'Événement",
+  "eventDetails": "Détails de l'Événement",
+  "form": {
+    "title": "Titre",
+    "titlePlaceholder": "Nom de l'événement",
+    "date": "Date",
+    "type": "Type d'Événement",
+    "description": "Description",
+    "descriptionPlaceholder": "Détails de l'événement...",
+    "animals": "Animaux (Optionnel)",
+    "animalsPlaceholder": "Sélectionner des animaux...",
+    "users": "Notifier",
+    "usersPlaceholder": "Sélectionner des utilisateurs...",
+    "allDay": "Toute la journée",
+    "startTime": "Heure de début",
+    "endTime": "Heure de fin",
+    "reminder": "Rappel",
+    "notes": "Notes"
+  },
+  "eventTypes": {
+    "vaccination": "Vaccination",
+    "checkup": "Visite",
+    "breeding": "Reproduction",
+    "treatment": "Traitement",
+    "feeding": "Alimentation",
+    "appointment": "Rendez-vous",
+    "reminder": "Rappel",
+    "other": "Autre"
+  },
+  "reminders": {
+    "none": "Pas de rappel",
+    "15min": "15 minutes avant",
+    "30min": "30 minutes avant",
+    "1hour": "1 heure avant",
+    "2hours": "2 heures avant",
+    "1day": "1 jour avant",
+    "2days": "2 jours avant",
+    "1week": "1 semaine avant"
+  },
+  "list": {
+    "noEvents": "Aucun événement",
+    "noEventsDesc": "Aucun événement trouvé pour cette date",
+    "search": "Rechercher des événements...",
+    "history": "Historique",
+    "upcoming": "À venir",
+    "past": "Passés",
+    "filter": "Filtrer"
+  },
+  "upcoming": {
+    "title": "Événements à Venir",
+    "viewDetails": "Cliquer pour voir les détails",
+    "noUpcoming": "Aucun événement à venir"
+  },
+  "detail": {
+    "eventFor": "Événement pour",
+    "createdBy": "Créé par",
+    "notifyingUsers": "Notification à {{count}} utilisateurs"
+  },
+  "messages": {
+    "created": "Événement créé avec succès",
+    "updated": "Événement mis à jour avec succès",
+    "deleted": "Événement supprimé avec succès",
+    "createError": "Erreur lors de la création de l'événement",
+    "updateError": "Erreur lors de la mise à jour de l'événement",
+    "deleteError": "Erreur lors de la suppression de l'événement",
+    "loadError": "Erreur lors du chargement de l'événement"
+  },
+  "actions": {
+    "create": "Créer un Événement",
+    "save": "Enregistrer les Modifications",
+    "delete": "Supprimer l'Événement",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "viewAll": "Voir tous les événements"
+  }
+}

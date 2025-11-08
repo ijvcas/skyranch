@@ -1,0 +1,79 @@
+{
+  "title": "Calendario de Eventos",
+  "newEvent": "Nuevo Evento",
+  "editEvent": "Editar Evento",
+  "eventDetails": "Detalles del Evento",
+  "form": {
+    "title": "Título",
+    "titlePlaceholder": "Nombre del evento",
+    "date": "Fecha",
+    "type": "Tipo de Evento",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Detalles del evento...",
+    "animals": "Animales (Opcional)",
+    "animalsPlaceholder": "Seleccionar animales...",
+    "users": "Notificar a",
+    "usersPlaceholder": "Seleccionar usuarios...",
+    "allDay": "Todo el día",
+    "startTime": "Hora de inicio",
+    "endTime": "Hora de fin",
+    "reminder": "Recordatorio",
+    "notes": "Notas"
+  },
+  "eventTypes": {
+    "vaccination": "Vacunación",
+    "checkup": "Revisión",
+    "breeding": "Apareamiento",
+    "treatment": "Tratamiento",
+    "feeding": "Alimentación",
+    "appointment": "Cita",
+    "reminder": "Recordatorio",
+    "other": "Otro"
+  },
+  "reminders": {
+    "none": "Sin recordatorio",
+    "15min": "15 minutos antes",
+    "30min": "30 minutos antes",
+    "1hour": "1 hora antes",
+    "2hours": "2 horas antes",
+    "1day": "1 día antes",
+    "2days": "2 días antes",
+    "1week": "1 semana antes"
+  },
+  "list": {
+    "noEvents": "No hay eventos",
+    "noEventsDesc": "No se encontraron eventos para esta fecha",
+    "search": "Buscar eventos...",
+    "history": "Historial",
+    "upcoming": "Próximos",
+    "past": "Pasados",
+    "filter": "Filtrar"
+  },
+  "upcoming": {
+    "title": "Próximos Eventos",
+    "viewDetails": "Click para ver detalles",
+    "noUpcoming": "No hay eventos próximos"
+  },
+  "detail": {
+    "eventFor": "Evento para",
+    "createdBy": "Creado por",
+    "notifyingUsers": "Notificando a {{count}} usuarios"
+  },
+  "messages": {
+    "created": "Evento creado exitosamente",
+    "updated": "Evento actualizado exitosamente",
+    "deleted": "Evento eliminado exitosamente",
+    "createError": "Error al crear el evento",
+    "updateError": "Error al actualizar el evento",
+    "deleteError": "Error al eliminar el evento",
+    "loadError": "Error al cargar el evento"
+  },
+  "actions": {
+    "create": "Crear Evento",
+    "save": "Guardar Cambios",
+    "delete": "Eliminar Evento",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "viewAll": "Ver todos los eventos"
+  }
+}

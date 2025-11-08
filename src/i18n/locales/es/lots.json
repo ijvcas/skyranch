@@ -1,0 +1,74 @@
+{
+  "title": "Gestión de Lotes",
+  "tabs": {
+    "maps": "Mapas",
+    "pastures": "Potreros",
+    "cadastral": "Mapa Catastral"
+  },
+  "newLot": "Nuevo Potrero",
+  "editLot": "Editar Lote",
+  "deleteLot": "Eliminar Lote",
+  "form": {
+    "name": "Nombre del Lote",
+    "namePlaceholder": "Ej: Potrero Norte",
+    "area": "Área (hectáreas)",
+    "areaPlaceholder": "Ej: 10.5",
+    "type": "Tipo de Lote",
+    "status": "Estado",
+    "capacity": "Capacidad",
+    "currentAnimals": "Animales Actuales",
+    "notes": "Notas",
+    "notesPlaceholder": "Información adicional...",
+    "manualCreation": "Crear Nuevo Lote Manual",
+    "drawOnMap": "Dibujar en Mapa"
+  },
+  "types": {
+    "pasture": "Potrero",
+    "barn": "Establo",
+    "crop": "Cultivo",
+    "water": "Cuerpo de Agua",
+    "infrastructure": "Infraestructura",
+    "other": "Otro"
+  },
+  "status": {
+    "available": "Disponible",
+    "occupied": "Ocupado",
+    "maintenance": "Mantenimiento",
+    "rest": "En Descanso"
+  },
+  "map": {
+    "draw": "Dibujar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "toggleLabels": "Mostrar/Ocultar Etiquetas",
+    "togglePropertyLots": "Lotes de Propiedad",
+    "togglePastureLots": "Lotes de Pastoreo",
+    "togglePropertyName": "Nombre de Propiedad",
+    "centerMap": "Centrar Mapa",
+    "searchAddress": "Buscar dirección...",
+    "loading": "Cargando mapa..."
+  },
+  "details": {
+    "totalArea": "Área Total",
+    "utilization": "Utilización",
+    "animalDensity": "Densidad Animal",
+    "lastRotation": "Última Rotación"
+  },
+  "messages": {
+    "created": "Lote creado exitosamente",
+    "updated": "Lote actualizado exitosamente",
+    "deleted": "Lote eliminado exitosamente",
+    "createError": "Error al crear el lote",
+    "updateError": "Error al actualizar el lote",
+    "deleteError": "Error al eliminar el lote",
+    "confirmDelete": "¿Está seguro que desea eliminar este lote?"
+  },
+  "stats": {
+    "totalLots": "Total de Lotes",
+    "totalArea": "Área Total",
+    "averageSize": "Tamaño Promedio",
+    "occupancy": "Ocupación"
+  }
+}

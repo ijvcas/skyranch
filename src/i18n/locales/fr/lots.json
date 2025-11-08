@@ -1,0 +1,74 @@
+{
+  "title": "Gestion des Parcelles",
+  "tabs": {
+    "maps": "Cartes",
+    "pastures": "Pâturages",
+    "cadastral": "Carte Cadastrale"
+  },
+  "newLot": "Nouvelle Parcelle",
+  "editLot": "Modifier la Parcelle",
+  "deleteLot": "Supprimer la Parcelle",
+  "form": {
+    "name": "Nom de la Parcelle",
+    "namePlaceholder": "Ex: Pâturage Nord",
+    "area": "Surface (hectares)",
+    "areaPlaceholder": "Ex: 10.5",
+    "type": "Type de Parcelle",
+    "status": "Statut",
+    "capacity": "Capacité",
+    "currentAnimals": "Animaux Actuels",
+    "notes": "Notes",
+    "notesPlaceholder": "Informations supplémentaires...",
+    "manualCreation": "Créer une Nouvelle Parcelle Manuellement",
+    "drawOnMap": "Dessiner sur la Carte"
+  },
+  "types": {
+    "pasture": "Pâturage",
+    "barn": "Étable",
+    "crop": "Culture",
+    "water": "Plan d'eau",
+    "infrastructure": "Infrastructure",
+    "other": "Autre"
+  },
+  "status": {
+    "available": "Disponible",
+    "occupied": "Occupé",
+    "maintenance": "Maintenance",
+    "rest": "Au Repos"
+  },
+  "map": {
+    "draw": "Dessiner",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "toggleLabels": "Afficher/Masquer les Étiquettes",
+    "togglePropertyLots": "Parcelles de Propriété",
+    "togglePastureLots": "Parcelles de Pâturage",
+    "togglePropertyName": "Nom de la Propriété",
+    "centerMap": "Centrer la Carte",
+    "searchAddress": "Rechercher une adresse...",
+    "loading": "Chargement de la carte..."
+  },
+  "details": {
+    "totalArea": "Surface Totale",
+    "utilization": "Utilisation",
+    "animalDensity": "Densité Animale",
+    "lastRotation": "Dernière Rotation"
+  },
+  "messages": {
+    "created": "Parcelle créée avec succès",
+    "updated": "Parcelle mise à jour avec succès",
+    "deleted": "Parcelle supprimée avec succès",
+    "createError": "Erreur lors de la création de la parcelle",
+    "updateError": "Erreur lors de la mise à jour de la parcelle",
+    "deleteError": "Erreur lors de la suppression de la parcelle",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette parcelle ?"
+  },
+  "stats": {
+    "totalLots": "Total des Parcelles",
+    "totalArea": "Surface Totale",
+    "averageSize": "Taille Moyenne",
+    "occupancy": "Occupation"
+  }
+}

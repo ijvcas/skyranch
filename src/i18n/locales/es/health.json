@@ -2,6 +2,8 @@
   "title": "Sanidad",
   "addRecord": "Nuevo Registro",
   "editRecord": "Editar Registro",
+  "deleteRecord": "Eliminar Registro",
+  "healthRecords": "Registros de Salud",
   "fields": {
     "animal": "Animal",
     "type": "Tipo",
@@ -21,12 +23,31 @@
     "checkup": "Revisión",
     "surgery": "Cirugía",
     "deworming": "Desparasitación",
+    "illness": "Enfermedad",
+    "injury": "Lesión",
+    "medication": "Medicación",
     "other": "Otro"
+  },
+  "stats": {
+    "total": "Total de Registros",
+    "upcoming": "Próximos",
+    "thisMonth": "Este Mes"
+  },
+  "list": {
+    "noRecords": "No hay registros de salud",
+    "startAdding": "Comienza agregando el primer registro médico para este animal"
   },
   "messages": {
     "added": "Registro de salud agregado",
     "updated": "Registro actualizado",
     "deleted": "Registro eliminado",
-    "dueReminder": "Recordatorio: Tratamiento vencido"
+    "dueReminder": "Recordatorio: Tratamiento vencido",
+    "loadError": "Error al cargar registros"
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar"
   }
 }

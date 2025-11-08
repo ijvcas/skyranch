@@ -1,0 +1,74 @@
+{
+  "title": "Gestão de Lotes",
+  "tabs": {
+    "maps": "Mapas",
+    "pastures": "Pastagens",
+    "cadastral": "Mapa Cadastral"
+  },
+  "newLot": "Novo Pasto",
+  "editLot": "Editar Lote",
+  "deleteLot": "Excluir Lote",
+  "form": {
+    "name": "Nome do Lote",
+    "namePlaceholder": "Ex: Pasto Norte",
+    "area": "Área (hectares)",
+    "areaPlaceholder": "Ex: 10.5",
+    "type": "Tipo de Lote",
+    "status": "Status",
+    "capacity": "Capacidade",
+    "currentAnimals": "Animais Atuais",
+    "notes": "Notas",
+    "notesPlaceholder": "Informações adicionais...",
+    "manualCreation": "Criar Novo Lote Manual",
+    "drawOnMap": "Desenhar no Mapa"
+  },
+  "types": {
+    "pasture": "Pastagem",
+    "barn": "Estábulo",
+    "crop": "Cultivo",
+    "water": "Corpo d'água",
+    "infrastructure": "Infraestrutura",
+    "other": "Outro"
+  },
+  "status": {
+    "available": "Disponível",
+    "occupied": "Ocupado",
+    "maintenance": "Manutenção",
+    "rest": "Em Descanso"
+  },
+  "map": {
+    "draw": "Desenhar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "toggleLabels": "Mostrar/Ocultar Etiquetas",
+    "togglePropertyLots": "Lotes de Propriedade",
+    "togglePastureLots": "Lotes de Pastagem",
+    "togglePropertyName": "Nome da Propriedade",
+    "centerMap": "Centralizar Mapa",
+    "searchAddress": "Pesquisar endereço...",
+    "loading": "Carregando mapa..."
+  },
+  "details": {
+    "totalArea": "Área Total",
+    "utilization": "Utilização",
+    "animalDensity": "Densidade Animal",
+    "lastRotation": "Última Rotação"
+  },
+  "messages": {
+    "created": "Lote criado com sucesso",
+    "updated": "Lote atualizado com sucesso",
+    "deleted": "Lote excluído com sucesso",
+    "createError": "Erro ao criar lote",
+    "updateError": "Erro ao atualizar lote",
+    "deleteError": "Erro ao excluir lote",
+    "confirmDelete": "Tem certeza de que deseja excluir este lote?"
+  },
+  "stats": {
+    "totalLots": "Total de Lotes",
+    "totalArea": "Área Total",
+    "averageSize": "Tamanho Médio",
+    "occupancy": "Ocupação"
+  }
+}

@@ -4,6 +4,13 @@
   "editAnimal": "Modifier l'Animal",
   "deleteAnimal": "Supprimer l'Animal",
   "animalDetails": "Détails de l'Animal",
+  "allAnimals": "Tous les Animaux",
+  "animalNotFound": "Animal non trouvé",
+  "registerNew": "Enregistrer un Nouvel Animal",
+  "searchPlaceholder": "Rechercher par nom ou étiquette",
+  "filterBySpecies": "Filtrer par espèce",
+  "addFirstAnimal": "Ajouter le Premier Animal",
+  "noAnimalsFound": "Aucun animal trouvé",
   "fields": {
     "name": "Nom",
     "tag": "Étiquette",
@@ -17,26 +24,36 @@
     "location": "Localisation",
     "notes": "Notes",
     "mother": "Mère",
-    "father": "Père"
+    "father": "Père",
+    "origin": "Origine",
+    "acquisitionDate": "Date d'Acquisition",
+    "acquisitionCost": "Coût d'Acquisition"
   },
   "species": {
-    "cattle": "Bovin",
-    "sheep": "Ovin",
-    "goat": "Caprin",
-    "pig": "Porcin",
-    "horse": "Équin",
-    "chicken": "Volaille",
+    "bovino": "Bovin",
+    "ovino": "Ovin",
+    "caprino": "Caprin",
+    "porcino": "Porcin",
+    "equino": "Équin",
+    "aviar": "Volaille",
+    "canino": "Canin",
     "other": "Autre"
   },
   "gender": {
     "male": "Mâle",
-    "female": "Femelle"
+    "female": "Femelle",
+    "macho": "Mâle",
+    "hembra": "Femelle"
   },
   "healthStatus": {
     "healthy": "En Bonne Santé",
     "sick": "Malade",
     "treatment": "En Traitement",
-    "quarantine": "Quarantaine"
+    "quarantine": "Quarantaine",
+    "sano": "En Bonne Santé",
+    "enfermo": "Malade",
+    "en_tratamiento": "En Traitement",
+    "cuarentena": "Quarantaine"
   },
   "lifecycle": {
     "active": "Actif",
@@ -48,10 +65,36 @@
     "bySpecies": "Par Espèce",
     "recentlyAdded": "Ajoutés Récemment"
   },
+  "actions": {
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "view": "Voir les Détails",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "update": "Mettre à jour",
+    "refresh": "Actualiser"
+  },
+  "tabs": {
+    "basicInfo": "Informations de Base",
+    "health": "Santé",
+    "breeding": "Reproduction",
+    "sales": "Ventes",
+    "documents": "Documents",
+    "pedigree": "Pedigree"
+  },
+  "delete": {
+    "title": "Supprimer l'Animal",
+    "description": "Êtes-vous sûr de vouloir supprimer cet animal ?",
+    "confirm": "Oui, supprimer",
+    "cancel": "Annuler"
+  },
   "messages": {
     "added": "Animal ajouté avec succès",
     "updated": "Animal mis à jour avec succès",
     "deleted": "Animal supprimé avec succès",
-    "limitReached": "Limite d'animaux atteinte. Mettez à niveau votre forfait."
+    "limitReached": "Limite d'animaux atteinte. Améliorez votre plan.",
+    "loadError": "Erreur lors du chargement des animaux",
+    "notFound": "Animal non trouvé",
+    "modifying": "Modifier les informations de"
   }
 }

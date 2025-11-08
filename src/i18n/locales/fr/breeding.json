@@ -1,7 +1,12 @@
 {
   "title": "Reproduction",
+  "management": "Gestion de la Reproduction",
   "addRecord": "Nouveau Enregistrement",
   "editRecord": "Modifier l'Enregistrement",
+  "deleteRecord": "Supprimer l'Enregistrement",
+  "viewDetails": "Voir les Détails",
+  "breedingManagement": "Gestion de la Reproduction",
+  "editBreeding": "Modifier l'Enregistrement de Reproduction",
   "fields": {
     "mother": "Mère",
     "father": "Père",
@@ -15,23 +20,54 @@
     "offspringCount": "Nombre de Descendants",
     "veterinarian": "Vétérinaire",
     "cost": "Coût",
-    "notes": "Notes"
+    "notes": "Notes",
+    "gestationDuration": "Durée de la Gestation"
   },
   "methods": {
     "natural": "Naturelle",
     "artificial": "Insémination Artificielle",
-    "embryo": "Transfert d'Embryons"
+    "embryo": "Transfert d'Embryons",
+    "inseminacion_artificial": "Insémination Artificielle",
+    "monta_natural": "Monte Naturelle"
   },
   "status": {
     "planned": "Planifiée",
     "completed": "Terminée",
     "confirmed": "Confirmée",
+    "pregnant": "Enceinte",
     "failed": "Échouée",
-    "aborted": "Avortée"
+    "aborted": "Avortée",
+    "en_progreso": "En Cours",
+    "confirmada": "Confirmée",
+    "finalizada": "Terminée"
+  },
+  "calendar": {
+    "title": "Calendrier de Reproduction",
+    "breedingEvent": "Reproduction",
+    "expectedBirth": "Naissance Prévue",
+    "actualBirth": "Naissance Réelle",
+    "legend": "Légende",
+    "eventsForDate": "Événements pour"
+  },
+  "stats": {
+    "total": "Total des Enregistrements",
+    "active": "Actifs",
+    "completed": "Terminés",
+    "successRate": "Taux de Réussite"
   },
   "messages": {
     "added": "Enregistrement ajouté avec succès",
     "updated": "Enregistrement mis à jour avec succès",
-    "deleted": "Enregistrement supprimé avec succès"
+    "deleted": "Enregistrement supprimé avec succès",
+    "loadError": "Erreur lors du chargement des enregistrements",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet enregistrement ?"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "view": "Voir",
+    "back": "Retour"
   }
 }

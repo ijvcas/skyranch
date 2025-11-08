@@ -4,6 +4,13 @@
   "editAnimal": "Edit Animal",
   "deleteAnimal": "Delete Animal",
   "animalDetails": "Animal Details",
+  "allAnimals": "All Animals",
+  "animalNotFound": "Animal not found",
+  "registerNew": "Register New Animal",
+  "searchPlaceholder": "Search by name or tag",
+  "filterBySpecies": "Filter by species",
+  "addFirstAnimal": "Add First Animal",
+  "noAnimalsFound": "No animals found",
   "fields": {
     "name": "Name",
     "tag": "Tag",
@@ -17,26 +24,36 @@
     "location": "Location",
     "notes": "Notes",
     "mother": "Mother",
-    "father": "Father"
+    "father": "Father",
+    "origin": "Origin",
+    "acquisitionDate": "Acquisition Date",
+    "acquisitionCost": "Acquisition Cost"
   },
   "species": {
-    "cattle": "Cattle",
-    "sheep": "Sheep",
-    "goat": "Goat",
-    "pig": "Pig",
-    "horse": "Horse",
-    "chicken": "Poultry",
+    "bovino": "Cattle",
+    "ovino": "Sheep",
+    "caprino": "Goat",
+    "porcino": "Pig",
+    "equino": "Horse",
+    "aviar": "Poultry",
+    "canino": "Canine",
     "other": "Other"
   },
   "gender": {
     "male": "Male",
-    "female": "Female"
+    "female": "Female",
+    "macho": "Male",
+    "hembra": "Female"
   },
   "healthStatus": {
     "healthy": "Healthy",
     "sick": "Sick",
     "treatment": "In Treatment",
-    "quarantine": "Quarantine"
+    "quarantine": "Quarantine",
+    "sano": "Healthy",
+    "enfermo": "Sick",
+    "en_tratamiento": "In Treatment",
+    "cuarentena": "Quarantine"
   },
   "lifecycle": {
     "active": "Active",
@@ -48,10 +65,36 @@
     "bySpecies": "By Species",
     "recentlyAdded": "Recently Added"
   },
+  "actions": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View Details",
+    "save": "Save",
+    "cancel": "Cancel",
+    "update": "Update",
+    "refresh": "Refresh"
+  },
+  "tabs": {
+    "basicInfo": "Basic Information",
+    "health": "Health",
+    "breeding": "Breeding",
+    "sales": "Sales",
+    "documents": "Documents",
+    "pedigree": "Pedigree"
+  },
+  "delete": {
+    "title": "Delete Animal",
+    "description": "Are you sure you want to delete this animal?",
+    "confirm": "Yes, delete",
+    "cancel": "Cancel"
+  },
   "messages": {
     "added": "Animal added successfully",
     "updated": "Animal updated successfully",
     "deleted": "Animal deleted successfully",
-    "limitReached": "Animal limit reached. Upgrade your plan."
+    "limitReached": "Animal limit reached. Upgrade your plan.",
+    "loadError": "Error loading animals",
+    "notFound": "Animal not found",
+    "modifying": "Modify information for"
   }
 }

@@ -2,6 +2,8 @@
   "title": "Health",
   "addRecord": "New Record",
   "editRecord": "Edit Record",
+  "deleteRecord": "Delete Record",
+  "healthRecords": "Health Records",
   "fields": {
     "animal": "Animal",
     "type": "Type",
@@ -21,12 +23,31 @@
     "checkup": "Checkup",
     "surgery": "Surgery",
     "deworming": "Deworming",
+    "illness": "Illness",
+    "injury": "Injury",
+    "medication": "Medication",
     "other": "Other"
+  },
+  "stats": {
+    "total": "Total Records",
+    "upcoming": "Upcoming",
+    "thisMonth": "This Month"
+  },
+  "list": {
+    "noRecords": "No health records",
+    "startAdding": "Start by adding the first medical record for this animal"
   },
   "messages": {
     "added": "Health record added",
     "updated": "Record updated",
     "deleted": "Record deleted",
-    "dueReminder": "Reminder: Treatment due"
+    "dueReminder": "Reminder: Treatment due",
+    "loadError": "Error loading records"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }

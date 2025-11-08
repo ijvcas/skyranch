@@ -2,6 +2,8 @@
   "title": "Saúde",
   "addRecord": "Novo Registro",
   "editRecord": "Editar Registro",
+  "deleteRecord": "Excluir Registro",
+  "healthRecords": "Registros de Saúde",
   "fields": {
     "animal": "Animal",
     "type": "Tipo",
@@ -18,15 +20,34 @@
   "types": {
     "vaccination": "Vacinação",
     "treatment": "Tratamento",
-    "checkup": "Exame",
+    "checkup": "Consulta",
     "surgery": "Cirurgia",
     "deworming": "Vermifugação",
+    "illness": "Doença",
+    "injury": "Lesão",
+    "medication": "Medicação",
     "other": "Outro"
+  },
+  "stats": {
+    "total": "Total de Registros",
+    "upcoming": "Próximos",
+    "thisMonth": "Este Mês"
+  },
+  "list": {
+    "noRecords": "Sem registros de saúde",
+    "startAdding": "Comece adicionando o primeiro registro médico para este animal"
   },
   "messages": {
     "added": "Registro de saúde adicionado",
     "updated": "Registro atualizado",
     "deleted": "Registro excluído",
-    "dueReminder": "Lembrete: Tratamento vencido"
+    "dueReminder": "Lembrete: Tratamento devido",
+    "loadError": "Erro ao carregar registros"
+  },
+  "actions": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Excluir"
   }
 }

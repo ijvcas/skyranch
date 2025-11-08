@@ -13,6 +13,9 @@ import reportsES from './locales/es/reports.json';
 import settingsES from './locales/es/settings.json';
 import authES from './locales/es/auth.json';
 import dashboardES from './locales/es/dashboard.json';
+import usersES from './locales/es/users.json';
+import calendarES from './locales/es/calendar.json';
+import lotsES from './locales/es/lots.json';
 
 import commonEN from './locales/en/common.json';
 import animalsEN from './locales/en/animals.json';
@@ -23,6 +26,9 @@ import reportsEN from './locales/en/reports.json';
 import settingsEN from './locales/en/settings.json';
 import authEN from './locales/en/auth.json';
 import dashboardEN from './locales/en/dashboard.json';
+import usersEN from './locales/en/users.json';
+import calendarEN from './locales/en/calendar.json';
+import lotsEN from './locales/en/lots.json';
 
 import commonPT from './locales/pt/common.json';
 import animalsPT from './locales/pt/animals.json';
@@ -33,6 +39,9 @@ import reportsPT from './locales/pt/reports.json';
 import settingsPT from './locales/pt/settings.json';
 import authPT from './locales/pt/auth.json';
 import dashboardPT from './locales/pt/dashboard.json';
+import usersPT from './locales/pt/users.json';
+import calendarPT from './locales/pt/calendar.json';
+import lotsPT from './locales/pt/lots.json';
 
 import commonFR from './locales/fr/common.json';
 import animalsFR from './locales/fr/animals.json';
@@ -43,6 +52,9 @@ import reportsFR from './locales/fr/reports.json';
 import settingsFR from './locales/fr/settings.json';
 import authFR from './locales/fr/auth.json';
 import dashboardFR from './locales/fr/dashboard.json';
+import usersFR from './locales/fr/users.json';
+import calendarFR from './locales/fr/calendar.json';
+import lotsFR from './locales/fr/lots.json';
 
 const resources = {
   es: {
@@ -54,7 +66,10 @@ const resources = {
     reports: reportsES,
     settings: settingsES,
     auth: authES,
-    dashboard: dashboardES
+    dashboard: dashboardES,
+    users: usersES,
+    calendar: calendarES,
+    lots: lotsES
   },
   en: {
     common: commonEN,
@@ -65,7 +80,10 @@ const resources = {
     reports: reportsEN,
     settings: settingsEN,
     auth: authEN,
-    dashboard: dashboardEN
+    dashboard: dashboardEN,
+    users: usersEN,
+    calendar: calendarEN,
+    lots: lotsEN
   },
   pt: {
     common: commonPT,
@@ -76,7 +94,10 @@ const resources = {
     reports: reportsPT,
     settings: settingsPT,
     auth: authPT,
-    dashboard: dashboardPT
+    dashboard: dashboardPT,
+    users: usersPT,
+    calendar: calendarPT,
+    lots: lotsPT
   },
   fr: {
     common: commonFR,
@@ -87,7 +108,10 @@ const resources = {
     reports: reportsFR,
     settings: settingsFR,
     auth: authFR,
-    dashboard: dashboardFR
+    dashboard: dashboardFR,
+    users: usersFR,
+    calendar: calendarFR,
+    lots: lotsFR
   }
 };
 
@@ -100,7 +124,7 @@ i18n
     fallbackLng: 'es',
     supportedLngs: ['es', 'en', 'pt', 'fr'],
     defaultNS: 'common',
-    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard'],
+    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots'],
     interpolation: {
       escapeValue: false
     },

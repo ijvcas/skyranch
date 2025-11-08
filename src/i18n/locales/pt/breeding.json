@@ -1,7 +1,12 @@
 {
   "title": "Reprodução",
+  "management": "Gestão de Reprodução",
   "addRecord": "Novo Registro",
   "editRecord": "Editar Registro",
+  "deleteRecord": "Excluir Registro",
+  "viewDetails": "Ver Detalhes",
+  "breedingManagement": "Gestão de Reprodução",
+  "editBreeding": "Editar Registro de Reprodução",
   "fields": {
     "mother": "Mãe",
     "father": "Pai",
@@ -15,23 +20,54 @@
     "offspringCount": "Número de Crias",
     "veterinarian": "Veterinário",
     "cost": "Custo",
-    "notes": "Notas"
+    "notes": "Notas",
+    "gestationDuration": "Duração da Gestação"
   },
   "methods": {
     "natural": "Natural",
     "artificial": "Inseminação Artificial",
-    "embryo": "Transferência de Embriões"
+    "embryo": "Transferência de Embriões",
+    "inseminacion_artificial": "Inseminação Artificial",
+    "monta_natural": "Cobertura Natural"
   },
   "status": {
     "planned": "Planejada",
     "completed": "Concluída",
     "confirmed": "Confirmada",
+    "pregnant": "Grávida",
     "failed": "Falhada",
-    "aborted": "Abortada"
+    "aborted": "Abortada",
+    "en_progreso": "Em Progresso",
+    "confirmada": "Confirmada",
+    "finalizada": "Finalizada"
+  },
+  "calendar": {
+    "title": "Calendário de Reprodução",
+    "breedingEvent": "Reprodução",
+    "expectedBirth": "Nascimento Esperado",
+    "actualBirth": "Nascimento Real",
+    "legend": "Legenda",
+    "eventsForDate": "Eventos para"
+  },
+  "stats": {
+    "total": "Total de Registros",
+    "active": "Ativos",
+    "completed": "Concluídos",
+    "successRate": "Taxa de Sucesso"
   },
   "messages": {
     "added": "Registro adicionado com sucesso",
     "updated": "Registro atualizado com sucesso",
-    "deleted": "Registro excluído com sucesso"
+    "deleted": "Registro excluído com sucesso",
+    "loadError": "Erro ao carregar registros",
+    "confirmDelete": "Tem certeza de que deseja excluir este registro?"
+  },
+  "actions": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "view": "Ver",
+    "back": "Voltar"
   }
 }

@@ -1,0 +1,74 @@
+{
+  "title": "Lot Management",
+  "tabs": {
+    "maps": "Maps",
+    "pastures": "Pastures",
+    "cadastral": "Cadastral Map"
+  },
+  "newLot": "New Pasture",
+  "editLot": "Edit Lot",
+  "deleteLot": "Delete Lot",
+  "form": {
+    "name": "Lot Name",
+    "namePlaceholder": "E.g: North Pasture",
+    "area": "Area (hectares)",
+    "areaPlaceholder": "E.g: 10.5",
+    "type": "Lot Type",
+    "status": "Status",
+    "capacity": "Capacity",
+    "currentAnimals": "Current Animals",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional information...",
+    "manualCreation": "Create New Manual Lot",
+    "drawOnMap": "Draw on Map"
+  },
+  "types": {
+    "pasture": "Pasture",
+    "barn": "Barn",
+    "crop": "Crop",
+    "water": "Water Body",
+    "infrastructure": "Infrastructure",
+    "other": "Other"
+  },
+  "status": {
+    "available": "Available",
+    "occupied": "Occupied",
+    "maintenance": "Maintenance",
+    "rest": "Resting"
+  },
+  "map": {
+    "draw": "Draw",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "toggleLabels": "Show/Hide Labels",
+    "togglePropertyLots": "Property Lots",
+    "togglePastureLots": "Pasture Lots",
+    "togglePropertyName": "Property Name",
+    "centerMap": "Center Map",
+    "searchAddress": "Search address...",
+    "loading": "Loading map..."
+  },
+  "details": {
+    "totalArea": "Total Area",
+    "utilization": "Utilization",
+    "animalDensity": "Animal Density",
+    "lastRotation": "Last Rotation"
+  },
+  "messages": {
+    "created": "Lot created successfully",
+    "updated": "Lot updated successfully",
+    "deleted": "Lot deleted successfully",
+    "createError": "Error creating lot",
+    "updateError": "Error updating lot",
+    "deleteError": "Error deleting lot",
+    "confirmDelete": "Are you sure you want to delete this lot?"
+  },
+  "stats": {
+    "totalLots": "Total Lots",
+    "totalArea": "Total Area",
+    "averageSize": "Average Size",
+    "occupancy": "Occupancy"
+  }
+}

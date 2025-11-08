@@ -1,0 +1,79 @@
+{
+  "title": "Event Calendar",
+  "newEvent": "New Event",
+  "editEvent": "Edit Event",
+  "eventDetails": "Event Details",
+  "form": {
+    "title": "Title",
+    "titlePlaceholder": "Event name",
+    "date": "Date",
+    "type": "Event Type",
+    "description": "Description",
+    "descriptionPlaceholder": "Event details...",
+    "animals": "Animals (Optional)",
+    "animalsPlaceholder": "Select animals...",
+    "users": "Notify",
+    "usersPlaceholder": "Select users...",
+    "allDay": "All day",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "reminder": "Reminder",
+    "notes": "Notes"
+  },
+  "eventTypes": {
+    "vaccination": "Vaccination",
+    "checkup": "Checkup",
+    "breeding": "Breeding",
+    "treatment": "Treatment",
+    "feeding": "Feeding",
+    "appointment": "Appointment",
+    "reminder": "Reminder",
+    "other": "Other"
+  },
+  "reminders": {
+    "none": "No reminder",
+    "15min": "15 minutes before",
+    "30min": "30 minutes before",
+    "1hour": "1 hour before",
+    "2hours": "2 hours before",
+    "1day": "1 day before",
+    "2days": "2 days before",
+    "1week": "1 week before"
+  },
+  "list": {
+    "noEvents": "No events",
+    "noEventsDesc": "No events found for this date",
+    "search": "Search events...",
+    "history": "History",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "filter": "Filter"
+  },
+  "upcoming": {
+    "title": "Upcoming Events",
+    "viewDetails": "Click to view details",
+    "noUpcoming": "No upcoming events"
+  },
+  "detail": {
+    "eventFor": "Event for",
+    "createdBy": "Created by",
+    "notifyingUsers": "Notifying {{count}} users"
+  },
+  "messages": {
+    "created": "Event created successfully",
+    "updated": "Event updated successfully",
+    "deleted": "Event deleted successfully",
+    "createError": "Error creating event",
+    "updateError": "Error updating event",
+    "deleteError": "Error deleting event",
+    "loadError": "Error loading event"
+  },
+  "actions": {
+    "create": "Create Event",
+    "save": "Save Changes",
+    "delete": "Delete Event",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "viewAll": "View all events"
+  }
+}

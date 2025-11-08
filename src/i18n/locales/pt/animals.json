@@ -4,39 +4,56 @@
   "editAnimal": "Editar Animal",
   "deleteAnimal": "Excluir Animal",
   "animalDetails": "Detalhes do Animal",
+  "allAnimals": "Todos os Animais",
+  "animalNotFound": "Animal não encontrado",
+  "registerNew": "Registrar Novo Animal",
+  "searchPlaceholder": "Pesquisar por nome ou etiqueta",
+  "filterBySpecies": "Filtrar por espécie",
+  "addFirstAnimal": "Adicionar Primeiro Animal",
+  "noAnimalsFound": "Nenhum animal encontrado",
   "fields": {
     "name": "Nome",
-    "tag": "Brinco",
+    "tag": "Etiqueta",
     "species": "Espécie",
     "breed": "Raça",
     "gender": "Sexo",
     "birthDate": "Data de Nascimento",
     "weight": "Peso",
     "color": "Cor",
-    "healthStatus": "Status de Saúde",
+    "healthStatus": "Estado de Saúde",
     "location": "Localização",
     "notes": "Notas",
     "mother": "Mãe",
-    "father": "Pai"
+    "father": "Pai",
+    "origin": "Origem",
+    "acquisitionDate": "Data de Aquisição",
+    "acquisitionCost": "Custo de Aquisição"
   },
   "species": {
-    "cattle": "Bovino",
-    "sheep": "Ovino",
-    "goat": "Caprino",
-    "pig": "Suíno",
-    "horse": "Equino",
-    "chicken": "Avicultura",
+    "bovino": "Bovino",
+    "ovino": "Ovino",
+    "caprino": "Caprino",
+    "porcino": "Suíno",
+    "equino": "Equino",
+    "aviar": "Aves",
+    "canino": "Canino",
     "other": "Outro"
   },
   "gender": {
     "male": "Macho",
-    "female": "Fêmea"
+    "female": "Fêmea",
+    "macho": "Macho",
+    "hembra": "Fêmea"
   },
   "healthStatus": {
     "healthy": "Saudável",
     "sick": "Doente",
     "treatment": "Em Tratamento",
-    "quarantine": "Quarentena"
+    "quarantine": "Quarentena",
+    "sano": "Saudável",
+    "enfermo": "Doente",
+    "en_tratamiento": "Em Tratamento",
+    "cuarentena": "Quarentena"
   },
   "lifecycle": {
     "active": "Ativo",
@@ -48,10 +65,36 @@
     "bySpecies": "Por Espécie",
     "recentlyAdded": "Adicionados Recentemente"
   },
+  "actions": {
+    "edit": "Editar",
+    "delete": "Excluir",
+    "view": "Ver Detalhes",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "update": "Atualizar",
+    "refresh": "Atualizar"
+  },
+  "tabs": {
+    "basicInfo": "Informações Básicas",
+    "health": "Saúde",
+    "breeding": "Reprodução",
+    "sales": "Vendas",
+    "documents": "Documentos",
+    "pedigree": "Pedigree"
+  },
+  "delete": {
+    "title": "Excluir Animal",
+    "description": "Tem certeza de que deseja excluir este animal?",
+    "confirm": "Sim, excluir",
+    "cancel": "Cancelar"
+  },
   "messages": {
     "added": "Animal adicionado com sucesso",
     "updated": "Animal atualizado com sucesso",
     "deleted": "Animal excluído com sucesso",
-    "limitReached": "Limite de animais atingido. Atualize seu plano."
+    "limitReached": "Limite de animais atingido. Atualize seu plano.",
+    "loadError": "Erro ao carregar animais",
+    "notFound": "Animal não encontrado",
+    "modifying": "Modificar informações de"
   }
 }
