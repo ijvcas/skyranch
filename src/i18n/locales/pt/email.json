@@ -1,0 +1,21 @@
+{
+  "header": {
+    "subtitle": "Sistema de Gestão de Gado"
+  },
+  "footer": {
+    "contactTitle": "Contato Profissional",
+    "systemName": "Sistema de Gestão de Gado",
+    "disclaimer": "Esta é uma mensagem automática do sistema {{organizationName}}. Por favor, não responda a este email.",
+    "copyright": "© {{year}} {{organizationName}} - Todos os direitos reservados",
+    "tagline": "🌿 GESTÃO PROFISSIONAL DE GADO 🌿"
+  },
+  "notification": {
+    "greeting": "Prezado/a {{userName}}",
+    "eventCreated": "Informamos que o evento \"{{eventTitle}}\" foi criado com sucesso no sistema de gestão de gado SkyRanch.",
+    "eventUpdated": "O evento \"{{eventTitle}}\" foi atualizado.",
+    "eventDeleted": "O evento \"{{eventTitle}}\" foi cancelado.",
+    "eventReminder": "Lembrete: O evento \"{{eventTitle}}\" está próximo.",
+    "details": "Detalhes",
+    "createdSuccessfully": "Criado com sucesso"
+  }
+}

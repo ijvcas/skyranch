@@ -13,6 +13,7 @@ import UserSelector from '@/components/notifications/UserSelector';
 import DatePickerField from './DatePickerField';
 import EventTypeSelect from './EventTypeSelect';
 import AnimalMultiSelect from './AnimalMultiSelect';
+import { useTranslation } from 'react-i18next';
 
 interface EventFormProps {
   selectedDate: Date | undefined;
@@ -29,6 +30,8 @@ const EventForm = ({
   onSubmit, 
   isSubmitting 
 }: EventFormProps) => {
+  const { t } = useTranslation('calendar');
+  
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
@@ -116,26 +119,26 @@ const EventForm = ({
   };
 
   const reminderOptions = [
-    { value: 0, label: 'Sin recordatorio' },
-    { value: 15, label: '15 minutos antes' },
-    { value: 30, label: '30 minutos antes' },
-    { value: 60, label: '1 hora antes' },
-    { value: 120, label: '2 horas antes' },
-    { value: 1440, label: '1 día antes' },
-    { value: 2880, label: '2 días antes' },
-    { value: 10080, label: '1 semana antes' }
+    { value: 0, label: t('reminders.none') },
+    { value: 15, label: t('reminders.15min') },
+    { value: 30, label: t('reminders.30min') },
+    { value: 60, label: t('reminders.1hour') },
+    { value: 120, label: t('reminders.2hours') },
+    { value: 1440, label: t('reminders.1day') },
+    { value: 2880, label: t('reminders.2days') },
+    { value: 10080, label: t('reminders.1week') }
   ];
 
   return (
     <div className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="title">Título *</Label>
+          <Label htmlFor="title">{t('form.title')} *</Label>
           <Input
             id="title"
             value={newEvent.title}
             onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
-            placeholder="Título del evento"
+            placeholder={t('form.titlePlaceholder')}
             className="w-full"
           />
         </div>
@@ -144,14 +147,14 @@ const EventForm = ({
           <DatePickerField
             value={newEvent.eventDate}
             onChange={(date) => setNewEvent(prev => ({ ...prev, eventDate: date }))}
-            label="Fecha"
+            label={t('form.date')}
             required
           />
 
           <EventTypeSelect
             value={newEvent.eventType}
             onChange={(value) => setNewEvent(prev => ({ ...prev, eventType: value }))}
-            label="Tipo de Evento"
+            label={t('form.type')}
           />
         </div>
 
@@ -165,13 +168,13 @@ const EventForm = ({
               onChange={(e) => setNewEvent(prev => ({ ...prev, allDay: e.target.checked }))}
               className="rounded"
             />
-            <Label htmlFor="allDay">Todo el día</Label>
+            <Label htmlFor="allDay">{t('form.allDay')}</Label>
           </div>
 
           {!newEvent.allDay && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startTime">Hora de inicio</Label>
+                <Label htmlFor="startTime">{t('form.startTime')}</Label>
                 <Input
                   id="startTime"
                   type="time"
@@ -182,7 +185,7 @@ const EventForm = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="endTime">Hora de fin (opcional)</Label>
+                <Label htmlFor="endTime">{t('form.endTime')}</Label>
                 <Input
                   id="endTime"
                   type="time"
@@ -197,13 +200,13 @@ const EventForm = ({
 
         {/* Reminder Settings */}
         <div className="space-y-2">
-          <Label>Recordatorio</Label>
+          <Label>{t('form.reminder')}</Label>
           <Select 
             value={newEvent.reminderMinutes.toString()} 
             onValueChange={(value) => setNewEvent(prev => ({ ...prev, reminderMinutes: parseInt(value) }))}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Seleccionar recordatorio" />
+              <SelectValue placeholder={t('form.reminder')} />
             </SelectTrigger>
             <SelectContent>
               {reminderOptions.map(option => (
@@ -219,52 +222,52 @@ const EventForm = ({
           animals={animals}
           selectedAnimalIds={newEvent.animalIds}
           onChange={(selectedIds) => setNewEvent(prev => ({ ...prev, animalIds: selectedIds }))}
-          label="Animales (Opcional)"
+          label={t('form.animals')}
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="veterinarian">Veterinario</Label>
+            <Label htmlFor="veterinarian">{t('veterinarian')}</Label>
             <Input
               id="veterinarian"
               value={newEvent.veterinarian}
               onChange={(e) => setNewEvent(prev => ({ ...prev, veterinarian: e.target.value }))}
-              placeholder="Nombre del veterinario"
+              placeholder={t('veterinarianPlaceholder')}
               className="w-full"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cost">Costo</Label>
+            <Label htmlFor="cost">{t('cost')}</Label>
             <Input
               id="cost"
               type="number"
               value={newEvent.cost}
               onChange={(e) => setNewEvent(prev => ({ ...prev, cost: e.target.value }))}
-              placeholder="0.00"
+              placeholder={t('costPlaceholder')}
               className="w-full"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="location">Ubicación</Label>
+          <Label htmlFor="location">{t('location')}</Label>
           <Input
             id="location"
             value={newEvent.location}
             onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
-            placeholder="Ubicación del evento"
+            placeholder={t('locationPlaceholder')}
             className="w-full"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Descripción</Label>
+          <Label htmlFor="description">{t('form.description')}</Label>
           <Textarea
             id="description"
             value={newEvent.description}
             onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="Detalles adicionales"
+            placeholder={t('form.descriptionPlaceholder')}
             className="w-full"
           />
         </div>
@@ -280,7 +283,7 @@ const EventForm = ({
         className="w-full"
         disabled={isSubmitting || !newEvent.title || !newEvent.eventDate}
       >
-        {isSubmitting ? 'Creando...' : 'Crear Evento'}
+        {isSubmitting ? t('creating') : t('actions.create')}
       </Button>
     </div>
   );

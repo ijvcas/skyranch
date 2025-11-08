@@ -1,0 +1,21 @@
+{
+  "header": {
+    "subtitle": "Sistema de Gestión Ganadera"
+  },
+  "footer": {
+    "contactTitle": "Contacto Profesional",
+    "systemName": "Sistema de Gestión Ganadera",
+    "disclaimer": "Este es un mensaje automático del sistema {{organizationName}}. Por favor, no respondas a este correo electrónico.",
+    "copyright": "© {{year}} {{organizationName}} - Todos los derechos reservados",
+    "tagline": "🌿 GESTIÓN GANADERA PROFESIONAL 🌿"
+  },
+  "notification": {
+    "greeting": "Estimado/a {{userName}}",
+    "eventCreated": "Te informamos que el evento \"{{eventTitle}}\" se ha creado exitosamente en el sistema de gestión ganadera SkyRanch.",
+    "eventUpdated": "El evento \"{{eventTitle}}\" ha sido actualizado.",
+    "eventDeleted": "El evento \"{{eventTitle}}\" ha sido cancelado.",
+    "eventReminder": "Recordatorio: El evento \"{{eventTitle}}\" está próximo.",
+    "details": "Detalles",
+    "createdSuccessfully": "Creado exitosamente"
+  }
+}

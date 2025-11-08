@@ -1,0 +1,17 @@
+{
+  "title": "AI Assistant - Skyranch",
+  "greeting": "Hello! I'm your AI assistant",
+  "description": "I can help you with any question or topic, analyze images and documents, help with technical and creative tasks, and much more.",
+  "photoHint": "Take photos to identify animal breeds or plant species",
+  "inputPlaceholder": "Write your question or take a photo...",
+  "clearHistory": "Clear history",
+  "copy": "Copy",
+  "copySuccess": "Copied to clipboard",
+  "copyError": "Error copying",
+  "sendMessage": "Send message",
+  "sending": "Sending...",
+  "thinking": "Thinking...",
+  "download": "Downloaded",
+  "downloadError": "Error downloading file",
+  "confirmClear": "Are you sure you want to clear all chat history?"
+}

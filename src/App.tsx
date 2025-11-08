@@ -57,6 +57,17 @@ function AppContent() {
   const { user, loading } = useAuth();
   const { chatOpen, setChatOpen } = useAIChatDialog();
 
+  // Apply cached theme colors immediately on load
+  useEffect(() => {
+    const cached = localStorage.getItem('theme_colors');
+    if (cached) {
+      const { primary, secondary } = JSON.parse(cached);
+      const root = document.documentElement;
+      root.style.setProperty('--primary-color', primary);
+      root.style.setProperty('--secondary-color', secondary);
+    }
+  }, []);
+
   // Initialize mobile services with proper sequencing
   useEffect(() => {
     const initServices = async () => {

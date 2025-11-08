@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { RightSheet, RightSheetHeader, RightSheetContent, RightSheetFooter } from '@/components/ui/right-sheet';
 import { cameraService } from '@/services/mobile/cameraService';
 import { actionSheetService } from '@/services/mobile/actionSheetService';
+import { useTranslation } from 'react-i18next';
 
 interface ChatDrawerProps {
   open: boolean;
@@ -180,6 +181,7 @@ const ImageWithDownload: React.FC<{
 };
 
 const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
+  const { t } = useTranslation('aiAssistant');
   const [input, setInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -235,7 +237,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     if (file) {
       // Check file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('El archivo es demasiado grande. Máximo 5MB.');
+        toast.error(t('aiAssistant:downloadError'));
         return;
       }
       setSelectedFile(file);
@@ -255,7 +257,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
 
   const handleCameraClick = async () => {
     if (!cameraService.isAvailable()) {
-      toast.error('Cámara solo disponible en app móvil');
+      toast.error(t('photoHint'));
       return;
     }
 
@@ -294,7 +296,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
   };
 
   const handleClearHistory = () => {
-    if (confirm('¿Estás seguro de que quieres borrar todo el historial de chat?')) {
+    if (confirm(t('confirmClear'))) {
       clearHistory();
     }
   };
@@ -303,11 +305,11 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedIndex(index);
-      toast.success('Mensaje copiado');
+      toast.success(t('copySuccess'));
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (error) {
       console.error('Copy error:', error);
-      toast.error('Error al copiar');
+      toast.error(t('copyError'));
     }
   };
 
@@ -315,13 +317,13 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
     <RightSheet open={open} onOpenChange={onOpenChange}>
       <RightSheetHeader onClose={() => onOpenChange(false)}>
         <div className="flex items-center justify-between flex-1">
-          <h2 className="text-xl font-semibold">Asistente de IA - Skyranch</h2>
+          <h2 className="text-xl font-semibold">{t('title')}</h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClearHistory}
             disabled={messages.length === 0}
-            title="Borrar historial"
+            title={t('clearHistory')}
             className="mr-2"
           >
             <Trash2 className="h-4 w-4" />
@@ -335,14 +337,13 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
             {messages.length === 0 && (
               <div className="text-center text-muted-foreground py-12">
                 <div className="mb-4 text-4xl">🤖</div>
-                <p className="text-lg font-medium mb-2">¡Hola! Soy tu asistente de IA</p>
+                <p className="text-lg font-medium mb-2">{t('greeting')}</p>
                 <p className="text-sm max-w-sm mx-auto mb-3">
-                  Puedo ayudarte con <strong>cualquier pregunta o tema</strong>, analizar imágenes y documentos, 
-                  ayudarte con tareas técnicas, creativas y mucho más.
+                  {t('description')}
                 </p>
                 <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
                   <Camera className="h-3 w-3" />
-                  Toma fotos para identificar razas de animales o especies de plantas
+                  {t('photoHint')}
                 </p>
               </div>
             )}
@@ -383,7 +384,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                           'sm:opacity-0 sm:group-hover:opacity-100',
                           'max-sm:opacity-60'
                         )}
-                        title="Copiar mensaje"
+                        title={t('copy')}
                       >
                         {copiedIndex === index ? (
                           <Check className="h-3 w-3 text-green-500" />
@@ -478,7 +479,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ open, onOpenChange }) => {
                     handleSubmit(e as any);
                   }
                 }}
-                placeholder="Escribe tu pregunta o toma una foto..."
+                placeholder={t('inputPlaceholder')}
                 disabled={isLoading}
                 className="flex-1 min-h-[60px] max-h-[200px] resize-y"
                 rows={2}

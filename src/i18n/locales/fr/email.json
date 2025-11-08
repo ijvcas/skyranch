@@ -1,0 +1,21 @@
+{
+  "header": {
+    "subtitle": "Système de Gestion du Bétail"
+  },
+  "footer": {
+    "contactTitle": "Contact Professionnel",
+    "systemName": "Système de Gestion du Bétail",
+    "disclaimer": "Ceci est un message automatique du système {{organizationName}}. Veuillez ne pas répondre à cet email.",
+    "copyright": "© {{year}} {{organizationName}} - Tous droits réservés",
+    "tagline": "🌿 GESTION PROFESSIONNELLE DU BÉTAIL 🌿"
+  },
+  "notification": {
+    "greeting": "Cher/Chère {{userName}}",
+    "eventCreated": "Nous vous informons que l'événement \"{{eventTitle}}\" a été créé avec succès dans le système de gestion du bétail SkyRanch.",
+    "eventUpdated": "L'événement \"{{eventTitle}}\" a été mis à jour.",
+    "eventDeleted": "L'événement \"{{eventTitle}}\" a été annulé.",
+    "eventReminder": "Rappel: L'événement \"{{eventTitle}}\" approche.",
+    "details": "Détails",
+    "createdSuccessfully": "Créé avec succès"
+  }
+}

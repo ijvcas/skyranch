@@ -157,7 +157,7 @@ const HeaderWithDropdown = () => {
               variant="ghost"
               onClick={() => setChatOpen(true)}
               className="h-12 w-12 p-1.5 hover:bg-green-50 rounded-lg transition-all"
-              aria-label="Abrir asistente de IA"
+              aria-label={t('aiAssistant:title')}
             >
               <span className="text-3xl leading-none">🤖</span>
             </Button>

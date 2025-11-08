@@ -1,0 +1,17 @@
+{
+  "title": "Asistente de IA - Skyranch",
+  "greeting": "¡Hola! Soy tu asistente de IA",
+  "description": "Puedo ayudarte con cualquier pregunta o tema, analizar imágenes y documentos, ayudarte con tareas técnicas, creativas y mucho más.",
+  "photoHint": "Toma fotos para identificar razas de animales o especies de plantas",
+  "inputPlaceholder": "Escribe tu pregunta o toma una foto...",
+  "clearHistory": "Borrar historial",
+  "copy": "Copiar",
+  "copySuccess": "Copiado al portapapeles",
+  "copyError": "Error al copiar",
+  "sendMessage": "Enviar mensaje",
+  "sending": "Enviando...",
+  "thinking": "Pensando...",
+  "download": "Descargado",
+  "downloadError": "Error al descargar el archivo",
+  "confirmClear": "¿Estás seguro de que quieres borrar todo el historial de chat?"
+}

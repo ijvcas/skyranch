@@ -10,8 +10,10 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Save, MessageSquare } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const AISettings = () => {
+  const { t } = useTranslation('aiAssistant');
   const queryClient = useQueryClient();
   const [settings, setSettings] = useState<any>(null);
 
@@ -96,7 +98,7 @@ const AISettings = () => {
       <CardHeader>
         <div className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5 text-primary" />
-          <CardTitle>Asistente de IA</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
         </div>
         <CardDescription>
           Configura el asistente de IA para ayudar a los usuarios del rancho

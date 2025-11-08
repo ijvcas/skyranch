@@ -66,13 +66,12 @@ export const useFarmBranding = () => {
   };
 
   const applyThemeColors = (primary: string, secondary: string) => {
-    // Convert hex to HSL for CSS custom properties
     const root = document.documentElement;
-    
-    // For simplicity, we'll set the colors directly
-    // In a production app, you'd convert hex to HSL properly
     root.style.setProperty('--primary-color', primary);
     root.style.setProperty('--secondary-color', secondary);
+    
+    // Persist to localStorage for immediate reload
+    localStorage.setItem('theme_colors', JSON.stringify({ primary, secondary }));
   };
 
   const updateBranding = async (newBranding: Partial<FarmBranding>) => {

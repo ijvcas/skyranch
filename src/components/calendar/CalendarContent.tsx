@@ -8,6 +8,8 @@ import { getAnimalNamesMap } from '@/services/animal/animalQueries';
 import EventList from '@/components/calendar/EventList';
 import UpcomingEvents from '@/components/calendar/UpcomingEvents';
 import { CalendarEvent } from '@/services/calendarService';
+import { useTranslation } from 'react-i18next';
+import { format } from 'date-fns';
 
 interface CalendarContentProps {
   selectedDate: Date | undefined;
@@ -24,6 +26,8 @@ const CalendarContent = ({
   onEditEvent,
   onEventClick
 }: CalendarContentProps) => {
+  const { t, i18n } = useTranslation('calendar');
+  
   // OPTIMIZED: Only fetch animal names for display
   const { data: animalNames = {} } = useQuery({
     queryKey: ['animals', 'names-map'],
@@ -43,7 +47,7 @@ const CalendarContent = ({
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center text-lg sm:text-xl">
               <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              Calendario
+              {t('title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-6">
@@ -68,10 +72,13 @@ const CalendarContent = ({
         <Card className="shadow-lg">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm sm:text-base">
-              Eventos - {selectedDate?.toLocaleDateString('es-ES', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric' 
+              {t('eventsFor', { 
+                date: selectedDate ? format(selectedDate, 'EEE, MMM d', { 
+                  locale: i18n.language === 'es' ? require('date-fns/locale/es') : 
+                          i18n.language === 'pt' ? require('date-fns/locale/pt') : 
+                          i18n.language === 'fr' ? require('date-fns/locale/fr') : 
+                          require('date-fns/locale/en-US') 
+                }) : ''
               })}
             </CardTitle>
           </CardHeader>

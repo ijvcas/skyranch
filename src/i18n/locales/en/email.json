@@ -1,0 +1,21 @@
+{
+  "header": {
+    "subtitle": "Livestock Management System"
+  },
+  "footer": {
+    "contactTitle": "Professional Contact",
+    "systemName": "Livestock Management System",
+    "disclaimer": "This is an automated message from the {{organizationName}} system. Please do not reply to this email.",
+    "copyright": "© {{year}} {{organizationName}} - All rights reserved",
+    "tagline": "🌿 PROFESSIONAL LIVESTOCK MANAGEMENT 🌿"
+  },
+  "notification": {
+    "greeting": "Dear {{userName}}",
+    "eventCreated": "We inform you that the event \"{{eventTitle}}\" has been successfully created in the SkyRanch livestock management system.",
+    "eventUpdated": "The event \"{{eventTitle}}\" has been updated.",
+    "eventDeleted": "The event \"{{eventTitle}}\" has been cancelled.",
+    "eventReminder": "Reminder: Event \"{{eventTitle}}\" is coming up.",
+    "details": "Details",
+    "createdSuccessfully": "Successfully created"
+  }
+}
