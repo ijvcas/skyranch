@@ -24,10 +24,9 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     const eventDate = this.formatEventDateTime(data.event.eventDate, data.event.endDate, data.event.allDay);
     const actionText = this.getActionText(data.eventType);
     const subject = this.getSubject(data.eventType, data.event.title);
-    const calendarLink = this.generateCalendarLink(data);
     
     // Build content HTML for the template renderer
-    const content = this.buildEventContent(data, eventDate, actionText, calendarLink);
+    const content = this.buildEventContent(data, eventDate, actionText);
 
     // Use the parent renderer which fetches farm colors
     return await this.renderer.renderFullTemplate({
@@ -39,106 +38,136 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     });
   }
 
-  private buildEventContent(data: CalendarEventData, eventDate: string, actionText: string, calendarLink: string): string {
+  private buildEventContent(data: CalendarEventData, eventDate: string, actionText: string): string {
+    const googleCalendarUrl = this.generateGoogleCalendarLink(data);
+    const outlookCalendarUrl = this.generateOutlookCalendarLink(data);
+    
     return `
       <!-- Event Notification Badge -->
-      <div style="background-color: rgba(var(--primary-rgb, 16, 185, 129), 0.1); padding: 12px; text-align: center; margin-bottom: 24px; border-radius: 8px;">
-        <p style="margin: 0; font-size: 11px; font-weight: 600; color: currentColor; letter-spacing: 0.5px; text-transform: uppercase;">
-          🔔 Notificación de Evento
+      <div style="background-color: currentColor; padding: 16px; text-align: center; margin-bottom: 32px; border-radius: 8px;">
+        <p style="margin: 0; font-size: 13px; font-weight: 700; color: white; letter-spacing: 0.5px; text-transform: uppercase;">
+          🔔 NOTIFICACIÓN DE EVENTO
         </p>
       </div>
 
       <!-- Main Message -->
-      <p style="color: currentColor; font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">
+      <p style="color: #374151; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">
         Estimado/a ${data.userName || 'Usuario'},
       </p>
-      <p style="color: #6b7280; font-size: 14px; margin: 0 0 24px 0; line-height: 1.6;">
-        Te informamos que el evento <strong>"${data.event.title}"</strong> ${actionText.toLowerCase()} 
-        en el sistema de gestión ganadera.
+      <p style="color: #6b7280; font-size: 14px; margin: 0 0 8px 0; line-height: 1.6;">
+        Te informamos que el evento <strong>"${data.event.title}"</strong> ${actionText.toLowerCase()}.
       </p>
 
-      <!-- Event Title Card -->
-      <div style="background-color: #f8fafc; padding: 24px; text-align: center; margin-bottom: 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <h3 style="margin: 0 0 8px 0; font-size: 22px; color: currentColor; font-weight: 700;">
-          ${data.event.title}
+      <!-- Event Details -->
+      <div style="background-color: #f9fafb; border-left: 4px solid currentColor; padding: 20px; margin: 24px 0; border-radius: 4px;">
+        <h3 style="margin: 0 0 4px 0; font-size: 18px; color: #111827; font-weight: 700;">
+          📅 ${data.event.title}
         </h3>
-        <p style="margin: 0; color: #6b7280; font-weight: 500; font-size: 14px;">
+        <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 13px;">
           ${actionText}
         </p>
-      </div>
-
-      <!-- Event Details Table -->
-      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-        <h4 style="margin: 0 0 16px 0; font-size: 14px; font-weight: 600; color: currentColor; padding-bottom: 8px; border-bottom: 2px solid currentColor;">
-          📋 Detalles del Evento
-        </h4>
         
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="color: currentColor; font-weight: 600; font-size: 13px; padding: 10px 0; width: 120px; vertical-align: top;">📝 Título:</td>
-            <td style="color: #374151; font-size: 13px; padding: 10px 0;">${data.event.title}</td>
-          </tr>
-          <tr>
-            <td style="color: currentColor; font-weight: 600; font-size: 13px; padding: 10px 0; vertical-align: top;">📅 Fecha:</td>
-            <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 10px 0;">${eventDate}</td>
-          </tr>
-          ${data.event.eventType ? `
-          <tr>
-            <td style="color: currentColor; font-weight: 600; font-size: 13px; padding: 10px 0; vertical-align: top;">🏷️ Tipo:</td>
-            <td style="color: #374151; font-size: 13px; padding: 10px 0;">${this.getEventTypeLabel(data.event.eventType)}</td>
-          </tr>
-          ` : ''}
-          ${data.event.reminderMinutes !== undefined && data.event.reminderMinutes > 0 ? `
-          <tr>
-            <td style="color: currentColor; font-weight: 600; font-size: 13px; padding: 10px 0; vertical-align: top;">🔔 Recordatorio:</td>
-            <td style="color: #374151; font-size: 13px; padding: 10px 0;">${this.getReminderText(data.event.reminderMinutes)}</td>
-          </tr>
-          ` : ''}
-          ${data.event.description ? `
-          <tr>
-            <td style="color: currentColor; font-weight: 600; font-size: 13px; padding: 10px 0; vertical-align: top;">📄 Descripción:</td>
-            <td style="color: #374151; font-size: 13px; padding: 10px 0; line-height: 1.5;">${data.event.description}</td>
-          </tr>
-          ` : ''}
-          ${data.event.location ? `
-          <tr>
-            <td style="color: currentColor; font-weight: 600; font-size: 13px; padding: 10px 0; vertical-align: top;">📍 Ubicación:</td>
-            <td style="color: #374151; font-size: 13px; padding: 10px 0;">${data.event.location}</td>
-          </tr>
-          ` : ''}
-          ${data.event.veterinarian ? `
-          <tr>
-            <td style="color: currentColor; font-weight: 600; font-size: 13px; padding: 10px 0; vertical-align: top;">👨‍⚕️ Veterinario:</td>
-            <td style="color: #374151; font-size: 13px; padding: 10px 0;">${data.event.veterinarian}</td>
-          </tr>
-          ` : ''}  
-        </table>
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; margin-top: 16px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; width: 100px; vertical-align: top;">📅 Fecha:</td>
+              <td style="color: #111827; font-weight: 600; font-size: 13px; padding: 8px 0;">${eventDate}</td>
+            </tr>
+            ${data.event.eventType ? `
+            <tr>
+              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">🏷️ Tipo:</td>
+              <td style="color: #111827; font-size: 13px; padding: 8px 0;">${this.getEventTypeLabel(data.event.eventType)}</td>
+            </tr>
+            ` : ''}
+            ${data.event.description ? `
+            <tr>
+              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📄 Detalles:</td>
+              <td style="color: #111827; font-size: 13px; padding: 8px 0; line-height: 1.5;">${data.event.description}</td>
+            </tr>
+            ` : ''}
+            ${data.event.location ? `
+            <tr>
+              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📍 Ubicación:</td>
+              <td style="color: #111827; font-size: 13px; padding: 8px 0;">${data.event.location}</td>
+            </tr>
+            ` : ''}
+            ${data.event.veterinarian ? `
+            <tr>
+              <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">👨‍⚕️ Veterinario:</td>
+              <td style="color: #111827; font-size: 13px; padding: 8px 0;">${data.event.veterinarian}</td>
+            </tr>
+            ` : ''}  
+          </table>
+        </div>
       </div>
 
       ${data.eventType !== 'deleted' ? `
       <!-- Call to Action -->
-      <div style="background-color: rgba(var(--primary-rgb, 16, 185, 129), 0.08); border: 1px solid rgba(var(--primary-rgb, 16, 185, 129), 0.2); border-radius: 8px; padding: 24px; text-align: center; margin: 24px 0;">
-        <h3 style="color: currentColor; margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">
-          🌟 Accede al Sistema
-        </h3>
-        <div style="display: inline-block; margin-bottom: 12px;">
-          <a href="${calendarLink}" 
+      <div style="text-align: center; margin: 32px 0;">
+        <p style="color: #374151; font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">
+          📲 Agregar al Calendario:
+        </p>
+        <div style="margin-bottom: 16px;">
+          <a href="${googleCalendarUrl}" 
              style="display: inline-block; background-color: currentColor; color: white; text-decoration: none; 
-                    padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; margin: 0 8px 8px 0;">
-             📅 Agregar al Calendario
+                    padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; margin: 0 4px 8px 4px;">
+             📱 Google Calendar
           </a>
-          <a href="https://id-preview--d956216c-86a1-4ff3-9df4-bdfbbabf459a.lovable.app/calendar" 
-             style="display: inline-block; background-color: #f3f4f6; color: #374151; text-decoration: none; 
-                    padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; margin: 0 0 8px 0;">
-             🌐 Ver Calendario Completo
+          <a href="${outlookCalendarUrl}" 
+             style="display: inline-block; background-color: currentColor; color: white; text-decoration: none; 
+                    padding: 12px 24px; font-weight: 600; font-size: 13px; border-radius: 6px; margin: 0 4px 8px 4px;">
+             📧 Outlook
           </a>
         </div>
-        <p style="color: #9ca3af; font-size: 10px; margin: 12px 0 0 0; font-style: italic;">
-          Tecnología avanzada para el manejo eficiente de ganado
-        </p>
+        <a href="https://id-preview--d956216c-86a1-4ff3-9df4-bdfbbabf459a.lovable.app/calendar" 
+           style="display: inline-block; color: currentColor; text-decoration: none; font-size: 13px; font-weight: 500;">
+           🌐 Ver Calendario Completo →
+        </a>
       </div>
       ` : ''}
     `;
+  }
+
+  private generateGoogleCalendarLink(data: CalendarEventData): string {
+    const event = data.event;
+    const startDate = new Date(event.eventDate);
+    const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
+    
+    const formatDateGoogle = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: event.title,
+      dates: `${formatDateGoogle(startDate)}/${formatDateGoogle(endDate)}`,
+      details: event.description || '',
+      location: event.location || ''
+    });
+
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+  }
+
+  private generateOutlookCalendarLink(data: CalendarEventData): string {
+    const event = data.event;
+    const startDate = new Date(event.eventDate);
+    const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
+    
+    const formatDateOutlook = (date: Date) => {
+      return date.toISOString();
+    };
+
+    const params = new URLSearchParams({
+      path: '/calendar/action/compose',
+      rru: 'addevent',
+      subject: event.title,
+      startdt: formatDateOutlook(startDate),
+      enddt: formatDateOutlook(endDate),
+      body: event.description || '',
+      location: event.location || ''
+    });
+
+    return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`;
   }
 
   private formatEventDateTime(eventDate: string, endDate?: string, allDay?: boolean): string {
@@ -219,33 +248,4 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     }
   }
 
-  private generateCalendarLink(data: CalendarEventData): string {
-    const event = data.event;
-    const startDate = new Date(event.eventDate);
-    const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
-    
-    // Format dates for ICS (YYYYMMDDTHHMMSSZ)
-    const formatDateICS = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-
-    const icsContent = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//SkyRanch//Calendar Event//ES',
-      'BEGIN:VEVENT',
-      `DTSTART:${formatDateICS(startDate)}`,
-      `DTEND:${formatDateICS(endDate)}`,
-      `SUMMARY:${event.title}`,
-      event.description ? `DESCRIPTION:${event.description.replace(/\n/g, '\\n')}` : '',
-      event.location ? `LOCATION:${event.location}` : '',
-      `UID:${startDate.getTime()}@skyranch.app`,
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].filter(line => line).join('\r\n');
-
-    // Create data URL for ICS file
-    const dataUrl = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
-    return dataUrl;
-  }
 }
