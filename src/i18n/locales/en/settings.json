@@ -121,7 +121,7 @@
   },
   "regional": {
     "title": "Regional Settings",
-    "description": "Configure language, timezone, date format, and currency",
+    "description": "Configure language, timezone, date format and currency",
     "timezone": "Timezone",
     "selectTimezone": "Select timezone",
     "dateFormat": "Date Format",
@@ -135,5 +135,101 @@
     "localTime": "Local time:",
     "dateExample": "Date example:",
     "currencyExample": "Currency example:"
+  },
+  "permissions": {
+    "title": "Permission Management",
+    "subtitle": "Configure specific permissions for each user role",
+    "systemRoles": "System Roles",
+    "permissions": {
+      "animals_view": "View Animals",
+      "animals_edit": "Edit Animals",
+      "animals_delete": "Delete Animals",
+      "animals_create": "Create Animals",
+      "lots_manage": "Manage Lots",
+      "health_records": "Health Records",
+      "breeding_records": "Breeding Records",
+      "calendar_manage": "Manage Calendar",
+      "users_manage": "Manage Users",
+      "system_settings": "System Settings"
+    },
+    "permissionDesc": {
+      "animals_view": "Allow viewing animal list and details",
+      "animals_edit": "Allow modifying animal information",
+      "animals_delete": "Allow deleting animals from system",
+      "animals_create": "Allow adding new animals",
+      "lots_manage": "Allow creating, editing and deleting lots",
+      "health_records": "Allow managing medical records",
+      "breeding_records": "Allow managing breeding records",
+      "calendar_manage": "Allow creating and editing calendar events",
+      "users_manage": "Allow creating, editing and deleting users",
+      "system_settings": "Allow accessing advanced settings"
+    },
+    "categories": {
+      "animals": "Animals",
+      "lots": "Lots",
+      "health": "Health",
+      "breeding": "Breeding",
+      "calendar": "Calendar",
+      "users": "Users",
+      "system": "System"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "adminDesc": "Full system access",
+      "manager": "Manager",
+      "managerDesc": "Operations management and supervision",
+      "worker": "Worker",
+      "workerDesc": "Basic day-to-day operations"
+    },
+    "permissionsUpdated": "Permissions Updated",
+    "permissionsUpdatedDesc": "Role permissions have been successfully modified",
+    "activePermissions": "active permissions",
+    "fullAccess": "Full system access"
+  },
+  "backup": {
+    "title": "Comprehensive Backup and Restore System",
+    "selectData": "Select Data for Backup/Restore",
+    "totalRecords": "Total: {count} records",
+    "export": "Export Backup",
+    "import": "Restore from Backup",
+    "selectFile": "Select backup file",
+    "categories": {
+      "users": "Users",
+      "animals": "Animals",
+      "fieldReports": "Field Reports",
+      "lots": "Lots and Terrain",
+      "cadastralData": "Cadastral Data",
+      "healthRecords": "Health Records",
+      "breedingRecords": "Breeding Records",
+      "calendarEvents": "Calendar Events",
+      "notifications": "Notifications",
+      "reports": "Saved Reports"
+    },
+    "descriptions": {
+      "users": "User accounts and settings",
+      "animals": "Animal registry and genealogy",
+      "fieldReports": "Field reports and observations",
+      "lots": "Lots, polygons and animal assignments",
+      "cadastralData": "Cadastral parcels and properties",
+      "healthRecords": "Medical history and treatments",
+      "breedingRecords": "Matings, offspring and descendants",
+      "calendarEvents": "Scheduled events and reminders",
+      "notifications": "System notification history",
+      "reports": "Saved custom reports"
+    },
+    "messages": {
+      "exportComplete": "Backup Completed",
+      "exportSuccess": "Backup exported successfully: {count} records in {filename}",
+      "importComplete": "Restore Completed",
+      "importSuccess": "Successfully restored {count} records from backup",
+      "selectFileFirst": "No File Selected",
+      "selectFileDesc": "Please select a backup file to import",
+      "iCloudSync": "Will sync with iCloud if enabled",
+      "backupSaved": "Backup saved to Documents directory"
+    }
+  },
+  "userActivity": {
+    "title": "User Activity Logs",
+    "description": "View system connection history and user activity"
   }
 }

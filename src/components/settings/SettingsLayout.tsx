@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Database, Shield, Settings as SettingsIcon, Palette, AlertTriangle, Smartphone, Crown } from 'lucide-react';
+import { Users, Database, Shield, Settings as SettingsIcon, Palette, AlertTriangle, Smartphone, Crown, Building2 } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useIsOwner } from '@/hooks/useIsOwner';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,9 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
       
       // Subscription tab is always available to all users
       tabs.push('subscription');
+      
+      // Farm tab is always available to all users
+      tabs.push('farm');
       
       // Check permissions for each tab
       if (await checkPermission('users_manage')) {
@@ -65,6 +68,12 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
               <TabsTrigger value="subscription" className="flex items-center gap-2 w-full justify-center">
                 <Crown className="w-4 h-4" />
                 {t('tabs.subscription')}
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('farm') && (
+              <TabsTrigger value="farm" className="flex items-center gap-2 w-full justify-center">
+                <Building2 className="w-4 h-4" />
+                {t('tabs.farm')}
               </TabsTrigger>
             )}
             {availableTabs.includes('users') && (

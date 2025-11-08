@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { Save, X, Info, HelpCircle, Mail, Phone } from 'lucide-react';
 import { Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { deploymentVersionService } from '@/services/deploymentVersionService';
+import { format } from 'date-fns';
 
 interface AppInfoFormProps {
   isAdmin: boolean;
@@ -17,8 +19,6 @@ interface AppInfoFormProps {
 const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
   const { toast } = useToast();
   const { t } = useTranslation();
-  
-  console.log('AppInfoForm - isAdmin:', isAdmin); // Debug log
   
   const [isEditingApp, setIsEditingApp] = useState(false);
   const [isEditingSupport, setIsEditingSupport] = useState(false);
@@ -30,6 +30,19 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
     admin: 'Juan Casanova H',
     description: 'Sistema de gestión ganadera completo'
   });
+
+  // Load version info from deployment service
+  useEffect(() => {
+    const versionInfo = deploymentVersionService.getCurrentVersion();
+    if (versionInfo) {
+      setAppInfo(prev => ({
+        ...prev,
+        version: `v${versionInfo.version}`,
+        build: `Build ${versionInfo.buildNumber}`,
+        lastUpdate: format(new Date(versionInfo.lastDeploymentTime), 'MMM d, yyyy')
+      }));
+    }
+  }, []);
   
   const [supportInfo, setSupportInfo] = useState({
     email: 'soporte@skyranch.com',
@@ -94,30 +107,6 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
           {isEditingApp ? (
             <div className="space-y-3">
               <div>
-                <Label htmlFor="app-version">{t('settings:farmProfile.version')}</Label>
-                <Input
-                  id="app-version"
-                  value={tempAppInfo.version}
-                  onChange={(e) => setTempAppInfo({...tempAppInfo, version: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="app-update">{t('settings:farmProfile.lastUpdate')}</Label>
-                <Input
-                  id="app-update"
-                  value={tempAppInfo.lastUpdate}
-                  onChange={(e) => setTempAppInfo({...tempAppInfo, lastUpdate: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="app-build">{t('settings:farmProfile.build')}</Label>
-                <Input
-                  id="app-build"
-                  value={tempAppInfo.build}
-                  onChange={(e) => setTempAppInfo({...tempAppInfo, build: e.target.value})}
-                />
-              </div>
-              <div>
                 <Label htmlFor="app-admin">{t('settings:farmProfile.admin')}</Label>
                 <Input
                   id="app-admin"
@@ -146,16 +135,21 @@ const AppInfoForm = ({ isAdmin }: AppInfoFormProps) => {
             </div>
           ) : (
             <>
-              <div className="text-sm">
-                <strong>{t('settings:farmProfile.version')}:</strong> {appInfo.version}
+              <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('settings:farmProfile.version')}</span>
+                  <span className="font-medium">{appInfo.version}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('settings:farmProfile.build')}</span>
+                  <span className="font-medium">{appInfo.build}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t('settings:farmProfile.lastUpdate')}</span>
+                  <span className="font-medium">{appInfo.lastUpdate}</span>
+                </div>
               </div>
-              <div className="text-sm">
-                <strong>{t('settings:farmProfile.lastUpdate')}:</strong> {appInfo.lastUpdate}
-              </div>
-              <div className="text-sm">
-                <strong>{t('settings:farmProfile.build')}:</strong> {appInfo.build}
-              </div>
-              <div className="text-sm">
+              <div className="text-sm pt-2">
                 <strong>{t('settings:farmProfile.admin')}:</strong> {appInfo.admin}
               </div>
               <div className="text-sm">

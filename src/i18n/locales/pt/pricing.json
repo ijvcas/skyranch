@@ -1,0 +1,48 @@
+{
+  "title": "Escolha Seu Plano",
+  "subtitle": "Escale sua operação com as ferramentas que você precisa",
+  "free": {
+    "name": "Grátis",
+    "price": "€0",
+    "perMonth": "/mês",
+    "users": "2 usuários",
+    "animals": "10 animais",
+    "basicRecords": "Registros básicos",
+    "healthTracking": "Acompanhamento de saúde",
+    "reproductionControl": "Controle de reprodução",
+    "salesRegistry": "Registro de vendas",
+    "currentPlan": "Plano Atual",
+    "freePlan": "Plano Grátis"
+  },
+  "pro": {
+    "name": "Pro",
+    "trial": "14 dias grátis",
+    "users": "5 usuários",
+    "animals": "25 animais",
+    "allFree": "Tudo do Grátis +",
+    "calendarSync": "Sincronização de calendário iOS",
+    "aiChat": "Chat AI básico",
+    "autoBackup": "Backup automático",
+    "productionTracking": "Rastreamento de produção",
+    "financialReports": "Relatórios financeiros",
+    "subscribe": "Assinar Pro",
+    "processing": "Processando..."
+  },
+  "team": {
+    "name": "Equipe",
+    "users": "Usuários ilimitados",
+    "animals": "Animais ilimitados",
+    "allPro": "Tudo do Pro +",
+    "advancedAI": "Chat AI avançado",
+    "pedigreeAnalysis": "Análise de pedigree (5 gen)",
+    "inbreedingCalc": "Calculadora de consanguinidade",
+    "customReports": "Relatórios personalizados",
+    "exportCSV": "Exportar CSV/PDF",
+    "prioritySupport": "Suporte prioritário",
+    "subscribe": "Assinar Equipe"
+  },
+  "footer": {
+    "billingInfo": "Todos os planos são cobrados mensalmente. Cancele a qualquer momento.",
+    "appStoreInfo": "As compras são processadas através da App Store da Apple."
+  }
+}

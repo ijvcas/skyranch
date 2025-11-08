@@ -135,5 +135,101 @@
     "localTime": "Heure locale :",
     "dateExample": "Exemple de date :",
     "currencyExample": "Exemple de devise :"
+  },
+  "permissions": {
+    "title": "Gestion des Permissions",
+    "subtitle": "Configurer les permissions spécifiques pour chaque rôle utilisateur",
+    "systemRoles": "Rôles du Système",
+    "permissions": {
+      "animals_view": "Voir les Animaux",
+      "animals_edit": "Modifier les Animaux",
+      "animals_delete": "Supprimer les Animaux",
+      "animals_create": "Créer des Animaux",
+      "lots_manage": "Gérer les Lots",
+      "health_records": "Registres de Santé",
+      "breeding_records": "Registres de Reproduction",
+      "calendar_manage": "Gérer le Calendrier",
+      "users_manage": "Gérer les Utilisateurs",
+      "system_settings": "Paramètres Système"
+    },
+    "permissionDesc": {
+      "animals_view": "Permet de visualiser la liste et les détails des animaux",
+      "animals_edit": "Permet de modifier les informations des animaux",
+      "animals_delete": "Permet de supprimer des animaux du système",
+      "animals_create": "Permet d'ajouter de nouveaux animaux",
+      "lots_manage": "Permet de créer, modifier et supprimer des lots",
+      "health_records": "Permet de gérer les dossiers médicaux",
+      "breeding_records": "Permet de gérer les registres de reproduction",
+      "calendar_manage": "Permet de créer et modifier des événements du calendrier",
+      "users_manage": "Permet de créer, modifier et supprimer des utilisateurs",
+      "system_settings": "Permet d'accéder aux paramètres avancés"
+    },
+    "categories": {
+      "animals": "Animaux",
+      "lots": "Lots",
+      "health": "Santé",
+      "breeding": "Reproduction",
+      "calendar": "Calendrier",
+      "users": "Utilisateurs",
+      "system": "Système"
+    },
+    "roles": {
+      "admin": "Administrateur",
+      "adminDesc": "Accès complet au système",
+      "manager": "Manager",
+      "managerDesc": "Gestion des opérations et supervision",
+      "worker": "Travailleur",
+      "workerDesc": "Opérations de base quotidiennes"
+    },
+    "permissionsUpdated": "Permissions Mises à Jour",
+    "permissionsUpdatedDesc": "Les permissions du rôle ont été modifiées avec succès",
+    "activePermissions": "permissions actives",
+    "fullAccess": "Accès complet au système"
+  },
+  "backup": {
+    "title": "Système de Sauvegarde et Restauration Complet",
+    "selectData": "Sélectionner les Données pour Sauvegarde/Restauration",
+    "totalRecords": "Total : {count} enregistrements",
+    "export": "Exporter la Sauvegarde",
+    "import": "Restaurer depuis la Sauvegarde",
+    "selectFile": "Sélectionner le fichier de sauvegarde",
+    "categories": {
+      "users": "Utilisateurs",
+      "animals": "Animaux",
+      "fieldReports": "Rapports de Terrain",
+      "lots": "Lots et Terrains",
+      "cadastralData": "Données Cadastrales",
+      "healthRecords": "Registres de Santé",
+      "breedingRecords": "Registres de Reproduction",
+      "calendarEvents": "Événements du Calendrier",
+      "notifications": "Notifications",
+      "reports": "Rapports Sauvegardés"
+    },
+    "descriptions": {
+      "users": "Comptes utilisateurs et paramètres",
+      "animals": "Registre des animaux et généalogie",
+      "fieldReports": "Rapports de terrain et observations",
+      "lots": "Lots, polygones et affectations d'animaux",
+      "cadastralData": "Parcelles cadastrales et propriétés",
+      "healthRecords": "Historique médical et traitements",
+      "breedingRecords": "Accouplements, progéniture et descendance",
+      "calendarEvents": "Événements programmés et rappels",
+      "notifications": "Historique des notifications système",
+      "reports": "Rapports personnalisés sauvegardés"
+    },
+    "messages": {
+      "exportComplete": "Sauvegarde Terminée",
+      "exportSuccess": "Sauvegarde exportée avec succès : {count} enregistrements dans {filename}",
+      "importComplete": "Restauration Terminée",
+      "importSuccess": "Restauré avec succès {count} enregistrements depuis la sauvegarde",
+      "selectFileFirst": "Aucun Fichier Sélectionné",
+      "selectFileDesc": "Veuillez sélectionner un fichier de sauvegarde à importer",
+      "iCloudSync": "Se synchronisera avec iCloud si activé",
+      "backupSaved": "Sauvegarde enregistrée dans le répertoire Documents"
+    }
+  },
+  "userActivity": {
+    "title": "Journaux d'Activité des Utilisateurs",
+    "description": "Voir l'historique des connexions système et l'activité des utilisateurs"
   }
 }

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Shield, Eye, Edit, Trash2, Plus, Database, Calendar, FileText, MapPin, Users, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 import RoleCard from './permissions/RoleCard';
 import PermissionsSummaryCard from './permissions/PermissionsSummaryCard';
 
@@ -23,85 +24,26 @@ interface Role {
 
 const PermissionsManager = () => {
   const { toast } = useToast();
+  const { t } = useTranslation('settings');
 
-  const [permissions] = useState<Permission[]>([
-    {
-      id: 'animals_view',
-      name: 'Ver Animales',
-      description: 'Permite visualizar la lista y detalles de animales',
-      category: 'animals',
-      icon: <Eye className="w-4 h-4" />
-    },
-    {
-      id: 'animals_edit',
-      name: 'Editar Animales',
-      description: 'Permite modificar información de animales',
-      category: 'animals',
-      icon: <Edit className="w-4 h-4" />
-    },
-    {
-      id: 'animals_delete',
-      name: 'Eliminar Animales',
-      description: 'Permite eliminar animales del sistema',
-      category: 'animals',
-      icon: <Trash2 className="w-4 h-4" />
-    },
-    {
-      id: 'animals_create',
-      name: 'Crear Animales',
-      description: 'Permite agregar nuevos animales',
-      category: 'animals',
-      icon: <Plus className="w-4 h-4" />
-    },
-    {
-      id: 'lots_manage',
-      name: 'Gestionar Lotes',
-      description: 'Permite crear, editar y eliminar lotes',
-      category: 'lots',
-      icon: <MapPin className="w-4 h-4" />
-    },
-    {
-      id: 'health_records',
-      name: 'Registros de Salud',
-      description: 'Permite gestionar registros médicos',
-      category: 'health',
-      icon: <FileText className="w-4 h-4" />
-    },
-    {
-      id: 'breeding_records',
-      name: 'Registros de Reproducción',
-      description: 'Permite gestionar registros reproductivos',
-      category: 'breeding',
-      icon: <Database className="w-4 h-4" />
-    },
-    {
-      id: 'calendar_manage',
-      name: 'Gestionar Calendario',
-      description: 'Permite crear y editar eventos del calendario',
-      category: 'calendar',
-      icon: <Calendar className="w-4 h-4" />
-    },
-    {
-      id: 'users_manage',
-      name: 'Gestionar Usuarios',
-      description: 'Permite crear, editar y eliminar usuarios',
-      category: 'users',
-      icon: <Users className="w-4 h-4" />
-    },
-    {
-      id: 'system_settings',
-      name: 'Configuración del Sistema',
-      description: 'Permite acceder a configuraciones avanzadas',
-      category: 'system',
-      icon: <Settings className="w-4 h-4" />
-    }
-  ]);
+  const permissions: Permission[] = [
+    { id: 'animals_view', name: t('permissions.permissions.animals_view'), description: t('permissions.permissionDesc.animals_view'), category: 'animals', icon: <Eye className="w-4 h-4" /> },
+    { id: 'animals_edit', name: t('permissions.permissions.animals_edit'), description: t('permissions.permissionDesc.animals_edit'), category: 'animals', icon: <Edit className="w-4 h-4" /> },
+    { id: 'animals_delete', name: t('permissions.permissions.animals_delete'), description: t('permissions.permissionDesc.animals_delete'), category: 'animals', icon: <Trash2 className="w-4 h-4" /> },
+    { id: 'animals_create', name: t('permissions.permissions.animals_create'), description: t('permissions.permissionDesc.animals_create'), category: 'animals', icon: <Plus className="w-4 h-4" /> },
+    { id: 'lots_manage', name: t('permissions.permissions.lots_manage'), description: t('permissions.permissionDesc.lots_manage'), category: 'lots', icon: <MapPin className="w-4 h-4" /> },
+    { id: 'health_records', name: t('permissions.permissions.health_records'), description: t('permissions.permissionDesc.health_records'), category: 'health', icon: <FileText className="w-4 h-4" /> },
+    { id: 'breeding_records', name: t('permissions.permissions.breeding_records'), description: t('permissions.permissionDesc.breeding_records'), category: 'breeding', icon: <Database className="w-4 h-4" /> },
+    { id: 'calendar_manage', name: t('permissions.permissions.calendar_manage'), description: t('permissions.permissionDesc.calendar_manage'), category: 'calendar', icon: <Calendar className="w-4 h-4" /> },
+    { id: 'users_manage', name: t('permissions.permissions.users_manage'), description: t('permissions.permissionDesc.users_manage'), category: 'users', icon: <Users className="w-4 h-4" /> },
+    { id: 'system_settings', name: t('permissions.permissions.system_settings'), description: t('permissions.permissionDesc.system_settings'), category: 'system', icon: <Settings className="w-4 h-4" /> }
+  ];
 
   const [roles, setRoles] = useState<Role[]>([
     {
       id: 'admin',
-      name: 'Administrador',
-      description: 'Acceso completo al sistema',
+      name: t('permissions.roles.admin'),
+      description: t('permissions.roles.adminDesc'),
       color: 'bg-red-100 text-red-800',
       permissions: [
         'animals_view', 'animals_edit', 'animals_delete', 'animals_create',
@@ -111,8 +53,8 @@ const PermissionsManager = () => {
     },
     {
       id: 'manager',
-      name: 'Gerente',
-      description: 'Gestión de operaciones y supervición',
+      name: t('permissions.roles.manager'),
+      description: t('permissions.roles.managerDesc'),
       color: 'bg-blue-100 text-blue-800',
       permissions: [
         'animals_view', 'animals_edit', 'animals_create',
@@ -121,8 +63,8 @@ const PermissionsManager = () => {
     },
     {
       id: 'worker',
-      name: 'Trabajador',
-      description: 'Operaciones básicas del día a día',
+      name: t('permissions.roles.worker'),
+      description: t('permissions.roles.workerDesc'),
       color: 'bg-green-100 text-green-800',
       permissions: [
         'animals_view', 'animals_edit', 'health_records', 'breeding_records'
@@ -145,8 +87,8 @@ const PermissionsManager = () => {
     );
 
     toast({
-      title: "Permisos Actualizados",
-      description: `Los permisos del rol han sido modificados correctamente.`,
+      title: t('permissions.permissionsUpdated'),
+      description: t('permissions.permissionsUpdatedDesc'),
     });
   };
 
@@ -163,16 +105,7 @@ const PermissionsManager = () => {
   };
 
   const getCategoryName = (category: string) => {
-    const names: Record<string, string> = {
-      animals: 'Animales',
-      lots: 'Lotes',
-      health: 'Salud',
-      breeding: 'Reproducción',
-      calendar: 'Calendario',
-      users: 'Usuarios',
-      system: 'Sistema'
-    };
-    return names[category] || category;
+    return t(`permissions.categories.${category}`) || category;
   };
 
   const categorizedPermissions = categorizePermissions();
@@ -181,14 +114,14 @@ const PermissionsManager = () => {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Shield className="w-6 h-6" />
-        <h2 className="text-2xl font-bold">Gestión de Permisos</h2>
+        <h2 className="text-2xl font-bold">{t('permissions.title')}</h2>
       </div>
       
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Roles del Sistema</h3>
-          <p className="text-sm text-gray-600">
-            Configure los permisos específicos para cada rol de usuario
+          <h3 className="text-lg font-semibold">{t('permissions.systemRoles')}</h3>
+          <p className="text-sm text-muted-foreground">
+            {t('permissions.subtitle')}
           </p>
         </div>
         

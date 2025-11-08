@@ -3,16 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from 'react-i18next';
+import { Activity } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import SupportInfoSettings from './SupportInfoSettings';
 import DashboardBannerSettings from './DashboardBannerSettings';
 import TimezoneSettings from '@/components/TimezoneSettings';
-import VersionControlPanel from '@/components/version-management/VersionControlPanel';
-import VersionHistoryPanel from '@/components/version-management/VersionHistoryPanel';
 import FarmProfileSettings from './FarmProfileSettings';
 import UserActivityLogs from './UserActivityLogs';
 
 const SystemSettings = () => {
   const { user } = useAuth();
+  const { t } = useTranslation('settings');
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -27,18 +29,10 @@ const SystemSettings = () => {
 
   return (
     <div className="space-y-6">
-      {/* User Activity Logs */}
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Sistema</h3>
-        {/* User activity under System */}
-        {/* We keep sections modular to avoid bloating this file */}
-        <UserActivityLogs />
-      </div>
-
       {/* Farm Profile Settings */}
       <FarmProfileSettings />
 
-      {/* Support Info Panel at the top */}
+      {/* Support Info Panel */}
       <SupportInfoSettings isAdmin={isAdmin} />
 
       {/* Dashboard Banner Settings */}
@@ -47,14 +41,22 @@ const SystemSettings = () => {
       {/* Timezone Settings */}
       <TimezoneSettings />
 
-      {/* Version Management Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Gestión de Versiones</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <VersionControlPanel />
-          <VersionHistoryPanel />
-        </div>
-      </div>
+      {/* User Activity Logs - Collapsed by default */}
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="user-activity" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              <span className="font-semibold">{t('userActivity.title')}</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="pt-2">
+              <UserActivityLogs />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 

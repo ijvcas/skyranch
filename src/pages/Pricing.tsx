@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Crown } from 'lucide-react';
+import { Check, Crown, ArrowLeft } from 'lucide-react';
 import { SubscriptionService, IAPService, TIER_PRICES, IAP_PRODUCT_IDS, type Subscription } from '@/services/subscription';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Pricing() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useTranslation('pricing');
 
   useEffect(() => {
     loadSubscription();
@@ -54,10 +56,22 @@ export default function Pricing() {
 
   return (
     <div className="container max-w-6xl mx-auto py-12 px-4">
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t('common:back', { defaultValue: 'Back' })}
+        </Button>
+      </div>
+      
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Elige tu Plan</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('title')}</h1>
         <p className="text-xl text-muted-foreground">
-          Escala tu operación con las herramientas que necesitas
+          {t('subtitle')}
         </p>
       </div>
 
@@ -65,39 +79,39 @@ export default function Pricing() {
         {/* Free Plan */}
         <div className="border rounded-lg p-6 space-y-6">
           <div>
-            <h3 className="font-semibold text-xl">Gratis</h3>
-            <p className="text-3xl font-bold mt-2">€0<span className="text-base font-normal text-muted-foreground">/mes</span></p>
+            <h3 className="font-semibold text-xl">{t('free.name')}</h3>
+            <p className="text-3xl font-bold mt-2">{t('free.price')}<span className="text-base font-normal text-muted-foreground">{t('free.perMonth')}</span></p>
           </div>
           
           <ul className="space-y-3 text-sm">
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>2 usuarios</span>
+              <span>{t('free.users')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>10 animales</span>
+              <span>{t('free.animals')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Registros básicos</span>
+              <span>{t('free.basicRecords')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Seguimiento de salud</span>
+              <span>{t('free.healthTracking')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Control de reproducción</span>
+              <span>{t('free.reproductionControl')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Registro de ventas</span>
+              <span>{t('free.salesRegistry')}</span>
             </li>
           </ul>
 
           <Button variant="outline" className="w-full" disabled={currentTier === 'free'}>
-            {currentTier === 'free' ? 'Plan Actual' : 'Plan Gratis'}
+            {currentTier === 'free' ? t('free.currentPlan') : t('free.freePlan')}
           </Button>
         </div>
 
@@ -105,52 +119,52 @@ export default function Pricing() {
         <div className="border-2 border-primary rounded-lg p-6 space-y-6 relative">
           <div className="absolute -top-3 right-4">
             <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium">
-              14 días gratis
+              {t('pro.trial')}
             </span>
           </div>
           
           <div>
             <div className="flex items-center gap-2">
               <Crown className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-xl">Pro</h3>
+              <h3 className="font-semibold text-xl">{t('pro.name')}</h3>
             </div>
             <p className="text-3xl font-bold mt-2">
-              €{TIER_PRICES.pro.monthly}<span className="text-base font-normal text-muted-foreground">/mes</span>
+              €{TIER_PRICES.pro.monthly}<span className="text-base font-normal text-muted-foreground">{t('free.perMonth')}</span>
             </p>
           </div>
           
           <ul className="space-y-3 text-sm">
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span><strong>5 usuarios</strong></span>
+              <span><strong>{t('pro.users')}</strong></span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span><strong>25 animales</strong></span>
+              <span><strong>{t('pro.animals')}</strong></span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Todo de Gratis +</span>
+              <span>{t('pro.allFree')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Sincronización de calendario iOS</span>
+              <span>{t('pro.calendarSync')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Chat AI básico</span>
+              <span>{t('pro.aiChat')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Respaldo automático</span>
+              <span>{t('pro.autoBackup')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Seguimiento de producción</span>
+              <span>{t('pro.productionTracking')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Reportes financieros</span>
+              <span>{t('pro.financialReports')}</span>
             </li>
           </ul>
 
@@ -159,7 +173,7 @@ export default function Pricing() {
             disabled={purchasing || currentTier === 'pro'}
             className="w-full"
           >
-            {currentTier === 'pro' ? 'Plan Actual' : purchasing ? 'Procesando...' : 'Suscribirse a Pro'}
+            {currentTier === 'pro' ? t('free.currentPlan') : purchasing ? t('pro.processing') : t('pro.subscribe')}
           </Button>
         </div>
 
@@ -168,49 +182,49 @@ export default function Pricing() {
           <div>
             <div className="flex items-center gap-2">
               <Crown className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-xl">Equipo</h3>
+              <h3 className="font-semibold text-xl">{t('team.name')}</h3>
             </div>
             <p className="text-3xl font-bold mt-2">
-              €{TIER_PRICES.team.monthly}<span className="text-base font-normal text-muted-foreground">/mes</span>
+              €{TIER_PRICES.team.monthly}<span className="text-base font-normal text-muted-foreground">{t('free.perMonth')}</span>
             </p>
           </div>
           
           <ul className="space-y-3 text-sm">
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span><strong>Usuarios ilimitados</strong></span>
+              <span><strong>{t('team.users')}</strong></span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span><strong>Animales ilimitados</strong></span>
+              <span><strong>{t('team.animals')}</strong></span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Todo de Pro +</span>
+              <span>{t('team.allPro')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Chat AI avanzado</span>
+              <span>{t('team.advancedAI')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Análisis de pedigree (5 gen)</span>
+              <span>{t('team.pedigreeAnalysis')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Calculadora de consanguinidad</span>
+              <span>{t('team.inbreedingCalc')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Reportes personalizados</span>
+              <span>{t('team.customReports')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Exportar CSV/PDF</span>
+              <span>{t('team.exportCSV')}</span>
             </li>
             <li className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary" />
-              <span>Soporte prioritario</span>
+              <span>{t('team.prioritySupport')}</span>
             </li>
           </ul>
 
@@ -220,14 +234,14 @@ export default function Pricing() {
             className="w-full"
             variant="default"
           >
-            {currentTier === 'team' ? 'Plan Actual' : purchasing ? 'Procesando...' : 'Suscribirse a Equipo'}
+            {currentTier === 'team' ? t('free.currentPlan') : purchasing ? t('pro.processing') : t('team.subscribe')}
           </Button>
         </div>
       </div>
 
       <div className="mt-12 text-center text-sm text-muted-foreground">
-        <p>Todos los planes se facturan mensualmente. Cancela en cualquier momento.</p>
-        <p className="mt-2">Las compras se procesan a través de App Store de Apple.</p>
+        <p>{t('footer.billingInfo')}</p>
+        <p className="mt-2">{t('footer.appStoreInfo')}</p>
       </div>
     </div>
   );

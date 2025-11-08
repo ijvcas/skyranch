@@ -135,5 +135,101 @@
     "localTime": "Hora local:",
     "dateExample": "Exemplo de data:",
     "currencyExample": "Exemplo de moeda:"
+  },
+  "permissions": {
+    "title": "Gestão de Permissões",
+    "subtitle": "Configure permissões específicas para cada função de usuário",
+    "systemRoles": "Funções do Sistema",
+    "permissions": {
+      "animals_view": "Ver Animais",
+      "animals_edit": "Editar Animais",
+      "animals_delete": "Eliminar Animais",
+      "animals_create": "Criar Animais",
+      "lots_manage": "Gerenciar Lotes",
+      "health_records": "Registros de Saúde",
+      "breeding_records": "Registros de Reprodução",
+      "calendar_manage": "Gerenciar Calendário",
+      "users_manage": "Gerenciar Usuários",
+      "system_settings": "Configurações do Sistema"
+    },
+    "permissionDesc": {
+      "animals_view": "Permite visualizar a lista e detalhes dos animais",
+      "animals_edit": "Permite modificar informações dos animais",
+      "animals_delete": "Permite eliminar animais do sistema",
+      "animals_create": "Permite adicionar novos animais",
+      "lots_manage": "Permite criar, editar e eliminar lotes",
+      "health_records": "Permite gerenciar registros médicos",
+      "breeding_records": "Permite gerenciar registros reprodutivos",
+      "calendar_manage": "Permite criar e editar eventos do calendário",
+      "users_manage": "Permite criar, editar e eliminar usuários",
+      "system_settings": "Permite acessar configurações avançadas"
+    },
+    "categories": {
+      "animals": "Animais",
+      "lots": "Lotes",
+      "health": "Saúde",
+      "breeding": "Reprodução",
+      "calendar": "Calendário",
+      "users": "Usuários",
+      "system": "Sistema"
+    },
+    "roles": {
+      "admin": "Administrador",
+      "adminDesc": "Acesso completo ao sistema",
+      "manager": "Gerente",
+      "managerDesc": "Gestão de operações e supervisão",
+      "worker": "Trabalhador",
+      "workerDesc": "Operações básicas do dia a dia"
+    },
+    "permissionsUpdated": "Permissões Atualizadas",
+    "permissionsUpdatedDesc": "As permissões da função foram modificadas corretamente",
+    "activePermissions": "permissões ativas",
+    "fullAccess": "Acesso completo ao sistema"
+  },
+  "backup": {
+    "title": "Sistema de Backup e Restauração Completo",
+    "selectData": "Selecionar Dados para Backup/Restauração",
+    "totalRecords": "Total: {count} registros",
+    "export": "Exportar Backup",
+    "import": "Restaurar do Backup",
+    "selectFile": "Selecionar arquivo de backup",
+    "categories": {
+      "users": "Usuários",
+      "animals": "Animais",
+      "fieldReports": "Relatórios de Campo",
+      "lots": "Lotes e Terrenos",
+      "cadastralData": "Dados Cadastrais",
+      "healthRecords": "Registros de Saúde",
+      "breedingRecords": "Registros de Reprodução",
+      "calendarEvents": "Eventos do Calendário",
+      "notifications": "Notificações",
+      "reports": "Relatórios Salvos"
+    },
+    "descriptions": {
+      "users": "Contas de usuário e configurações",
+      "animals": "Registro de animais e genealogia",
+      "fieldReports": "Relatórios de campo e observações",
+      "lots": "Lotes, polígonos e atribuições de animais",
+      "cadastralData": "Parcelas cadastrais e propriedades",
+      "healthRecords": "Histórico médico e tratamentos",
+      "breedingRecords": "Acasalamentos, crias e descendência",
+      "calendarEvents": "Eventos programados e lembretes",
+      "notifications": "Histórico de notificações do sistema",
+      "reports": "Relatórios personalizados salvos"
+    },
+    "messages": {
+      "exportComplete": "Backup Concluído",
+      "exportSuccess": "Backup exportado com sucesso: {count} registros em {filename}",
+      "importComplete": "Restauração Concluída",
+      "importSuccess": "Restaurado com sucesso {count} registros do backup",
+      "selectFileFirst": "Arquivo Não Selecionado",
+      "selectFileDesc": "Por favor selecione um arquivo de backup para importar",
+      "iCloudSync": "Sincronizará com iCloud se estiver habilitado",
+      "backupSaved": "Backup salvo no diretório de Documentos"
+    }
+  },
+  "userActivity": {
+    "title": "Registros de Atividade de Usuários",
+    "description": "Ver histórico de conexões do sistema e atividade de usuários"
   }
 }

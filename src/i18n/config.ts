@@ -19,6 +19,7 @@ import lotsES from './locales/es/lots.json';
 import notificationsES from './locales/es/notifications.json';
 import weatherES from './locales/es/weather.json';
 import weatherConditionsES from './locales/es/weatherConditions.json';
+import pricingES from './locales/es/pricing.json';
 
 import commonEN from './locales/en/common.json';
 import animalsEN from './locales/en/animals.json';
@@ -35,6 +36,7 @@ import lotsEN from './locales/en/lots.json';
 import notificationsEN from './locales/en/notifications.json';
 import weatherEN from './locales/en/weather.json';
 import weatherConditionsEN from './locales/en/weatherConditions.json';
+import pricingEN from './locales/en/pricing.json';
 
 import commonPT from './locales/pt/common.json';
 import animalsPT from './locales/pt/animals.json';
@@ -51,6 +53,7 @@ import lotsPT from './locales/pt/lots.json';
 import notificationsPT from './locales/pt/notifications.json';
 import weatherPT from './locales/pt/weather.json';
 import weatherConditionsPT from './locales/pt/weatherConditions.json';
+import pricingPT from './locales/pt/pricing.json';
 
 import commonFR from './locales/fr/common.json';
 import animalsFR from './locales/fr/animals.json';
@@ -67,6 +70,7 @@ import lotsFR from './locales/fr/lots.json';
 import notificationsFR from './locales/fr/notifications.json';
 import weatherFR from './locales/fr/weather.json';
 import weatherConditionsFR from './locales/fr/weatherConditions.json';
+import pricingFR from './locales/fr/pricing.json';
 
 const resources = {
   es: {
@@ -84,7 +88,8 @@ const resources = {
     lots: lotsES,
     notifications: notificationsES,
     weather: weatherES,
-    weatherConditions: weatherConditionsES
+    weatherConditions: weatherConditionsES,
+    pricing: pricingES
   },
   en: {
     common: commonEN,
@@ -101,7 +106,8 @@ const resources = {
     lots: lotsEN,
     notifications: notificationsEN,
     weather: weatherEN,
-    weatherConditions: weatherConditionsEN
+    weatherConditions: weatherConditionsEN,
+    pricing: pricingEN
   },
   pt: {
     common: commonPT,
@@ -118,7 +124,8 @@ const resources = {
     lots: lotsPT,
     notifications: notificationsPT,
     weather: weatherPT,
-    weatherConditions: weatherConditionsPT
+    weatherConditions: weatherConditionsPT,
+    pricing: pricingPT
   },
   fr: {
     common: commonFR,
@@ -135,7 +142,8 @@ const resources = {
     lots: lotsFR,
     notifications: notificationsFR,
     weather: weatherFR,
-    weatherConditions: weatherConditionsFR
+    weatherConditions: weatherConditionsFR,
+    pricing: pricingFR
   }
 };
 
@@ -148,7 +156,7 @@ i18n
     fallbackLng: 'es',
     supportedLngs: ['es', 'en', 'pt', 'fr'],
     defaultNS: 'common',
-    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots', 'notifications', 'weather', 'weatherConditions'],
+    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots', 'notifications', 'weather', 'weatherConditions', 'pricing'],
     interpolation: {
       escapeValue: false
     },
