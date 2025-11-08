@@ -10,6 +10,7 @@ import UpcomingEvents from '@/components/calendar/UpcomingEvents';
 import { CalendarEvent } from '@/services/calendarService';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
+import { es, pt, fr, enUS } from 'date-fns/locale';
 
 interface CalendarContentProps {
   selectedDate: Date | undefined;
@@ -27,6 +28,16 @@ const CalendarContent = ({
   onEventClick
 }: CalendarContentProps) => {
   const { t, i18n } = useTranslation('calendar');
+  
+  // Date locale mapping
+  const dateLocales = {
+    es,
+    pt,
+    fr,
+    en: enUS
+  };
+  
+  const currentLocale = dateLocales[i18n.language as keyof typeof dateLocales] || enUS;
   
   // OPTIMIZED: Only fetch animal names for display
   const { data: animalNames = {} } = useQuery({
@@ -73,12 +84,7 @@ const CalendarContent = ({
           <CardHeader className="pb-3">
             <CardTitle className="text-sm sm:text-base">
               {t('eventsFor', { 
-                date: selectedDate ? format(selectedDate, 'EEE, MMM d', { 
-                  locale: i18n.language === 'es' ? require('date-fns/locale/es') : 
-                          i18n.language === 'pt' ? require('date-fns/locale/pt') : 
-                          i18n.language === 'fr' ? require('date-fns/locale/fr') : 
-                          require('date-fns/locale/en-US') 
-                }) : ''
+                date: selectedDate ? format(selectedDate, 'EEE, MMM d', { locale: currentLocale }) : ''
               })}
             </CardTitle>
           </CardHeader>
