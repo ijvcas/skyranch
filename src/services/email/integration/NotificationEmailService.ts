@@ -46,7 +46,7 @@ export class NotificationEmailService {
       // Use the provided userName or fallback to email username
       const displayName = userName || to.split('@')[0];
 
-      const emailContent = this.calendarTemplate.render({
+      const emailContent = await this.calendarTemplate.render({
         eventType,
         event: eventDetails,
         userName: displayName,
@@ -109,7 +109,7 @@ export class NotificationEmailService {
       // Use the provided userName or fallback to email username
       const displayName = userName || to.split('@')[0];
 
-      const emailContent = this.testTemplate.render({ 
+      const emailContent = await this.testTemplate.render({ 
         userName: displayName,
         organizationName: "SkyRanch",
         title: "Email de Prueba - SkyRanch",

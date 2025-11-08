@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Users, AlertCircle, Eye, EyeOff, Fingerprint, Scan } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { unifiedVersionManager } from '@/services/version-management';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { useBiometric } from '@/hooks/useBiometric';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -48,16 +49,23 @@ const Login = () => {
     setEnableFaceId(isEnabled);
   }, [isEnabled]);
 
-  // Load version info
+  // Load version info from Capacitor native app
   useEffect(() => {
     const loadVersion = async () => {
       try {
-        const currentVersion = await unifiedVersionManager.getCurrentVersion();
-        if (currentVersion) {
+        if (Capacitor.isNativePlatform()) {
+          const info = await App.getInfo();
           setVersionInfo({
-            version: currentVersion.version,
-            buildNumber: currentVersion.buildNumber,
-            releaseDate: currentVersion.releaseDate
+            version: info.version,
+            buildNumber: parseInt(info.build),
+            releaseDate: undefined
+          });
+        } else {
+          // Web fallback - use package.json version
+          setVersionInfo({
+            version: '1.0.0',
+            buildNumber: 1,
+            releaseDate: undefined
           });
         }
       } catch (error) {

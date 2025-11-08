@@ -18,7 +18,7 @@ export interface CalendarEventData extends BaseTemplateData {
 }
 
 export class CalendarEventTemplate extends BaseEmailTemplate {
-  render(data: CalendarEventData): EmailContent {
+  async render(data: CalendarEventData): Promise<EmailContent> {
     console.log('🎨 [CALENDAR EMAIL TEMPLATE] Rendering clean template with proper time display');
     
     const eventDate = this.formatEventDateTime(data.event.eventDate, data.event.endDate, data.event.allDay);

@@ -7,7 +7,7 @@ export interface TestEmailData extends BaseTemplateData {
 }
 
 export class TestEmailTemplate extends BaseEmailTemplate {
-  render(data: TestEmailData): EmailContent {
+  async render(data: TestEmailData): Promise<EmailContent> {
     const testType = data.testType || 'basic';
     const subject = `Test Email - ${data.organizationName || 'SkyRanch'}`;
 
@@ -79,7 +79,7 @@ export class TestEmailTemplate extends BaseEmailTemplate {
       </div>
     `;
 
-    return super.render({
+    return await super.render({
       ...data,
       title: subject,
       content

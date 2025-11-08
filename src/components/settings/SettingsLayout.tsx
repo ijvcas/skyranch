@@ -32,12 +32,12 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
         tabs.push('users');
       }
       if (await checkPermission('system_settings')) {
-        tabs.push('backup', 'permissions', 'system', 'mobile');
+        tabs.push('backup', 'permissions', 'mobile');
       }
       
       // Owner-only tabs
       if (isOwner) {
-        tabs.push('customization', 'danger');
+        tabs.push('system', 'danger');
       }
       
       setAvailableTabs(tabs);
@@ -97,19 +97,13 @@ const SettingsLayout = ({ activeTab, onTabChange, children }: SettingsLayoutProp
             {availableTabs.includes('system') && (
               <TabsTrigger value="system" className="flex items-center gap-2 w-full justify-center">
                 <SettingsIcon className="w-4 h-4" />
-                {t('tabs.system')}
+                {t('tabs.advanced')}
               </TabsTrigger>
             )}
             {availableTabs.includes('mobile') && (
               <TabsTrigger value="mobile" className="flex items-center gap-2 w-full justify-center">
                 <Smartphone className="w-4 h-4" />
                 {t('tabs.mobile')}
-              </TabsTrigger>
-            )}
-            {availableTabs.includes('customization') && (
-              <TabsTrigger value="customization" className="flex items-center gap-2 w-full justify-center">
-                <Palette className="w-4 h-4" />
-                {t('tabs.customization')}
               </TabsTrigger>
             )}
             {availableTabs.includes('danger') && (

@@ -43,7 +43,7 @@ export interface EmailResult {
 }
 
 export interface EmailTemplate {
-  render(data: any): EmailContent;
+  render(data: any): Promise<EmailContent>;
 }
 
 export interface EmailTransport {

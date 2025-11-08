@@ -17,8 +17,8 @@ export class BaseEmailTemplate implements EmailTemplate {
     this.renderer = new EmailTemplateRenderer();
   }
 
-  render(data: BaseTemplateData): EmailContent {
-    return this.renderer.renderFullTemplate(data);
+  async render(data: BaseTemplateData): Promise<EmailContent> {
+    return await this.renderer.renderFullTemplate(data);
   }
 
   protected htmlToText(html: string): string {
