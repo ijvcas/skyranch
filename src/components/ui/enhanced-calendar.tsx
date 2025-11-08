@@ -3,7 +3,8 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS, pt, fr } from "date-fns/locale";
+import { useTranslation } from 'react-i18next';
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -35,6 +36,7 @@ function EnhancedCalendar({
   events = [],
   ...props
 }: EnhancedCalendarProps) {
+  const { t, i18n } = useTranslation('calendar');
   const [month, setMonth] = useState<Date>(props.month || new Date());
   const [isMonthYearOpen, setIsMonthYearOpen] = useState(false);
   const [yearInput, setYearInput] = useState("");
@@ -42,10 +44,23 @@ function EnhancedCalendar({
   const currentYear = month.getFullYear();
   const currentMonth = month.getMonth();
   
-  const months = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-  ];
+  // Get locale based on current language
+  const getLocale = () => {
+    switch (i18n.language) {
+      case 'es': return es;
+      case 'en': return enUS;
+      case 'pt': return pt;
+      case 'fr': return fr;
+      default: return es;
+    }
+  };
+
+  const locale = getLocale();
+  
+  // Get month names from date-fns locale
+  const months = Array.from({ length: 12 }, (_, i) => 
+    format(new Date(2000, i, 1), 'MMMM', { locale })
+  );
 
   const goToPreviousYear = () => {
     const newDate = new Date(currentYear - 1, currentMonth);
@@ -208,26 +223,26 @@ function EnhancedCalendar({
             variant="ghost"
             className="flex items-center gap-1 font-medium text-sm hover:bg-accent"
           >
-            {format(month, "MMMM yyyy", { locale: es })}
+            {format(month, "MMMM yyyy", { locale })}
             <ChevronDown className="h-3 w-3" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 p-4 !z-[10000] bg-white border shadow-xl" align="center">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="font-medium">Seleccionar fecha</h4>
+              <h4 className="font-medium">{t('form.date')}</h4>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={goToToday}
               >
-                Hoy
+                {t('list.upcoming')}
               </Button>
             </div>
             
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Mes</label>
+                <label className="text-xs font-medium text-muted-foreground">{t('form.date')}</label>
                 <Select value={currentMonth.toString()} onValueChange={handleMonthChange}>
                   <SelectTrigger>
                     <SelectValue />
@@ -243,7 +258,7 @@ function EnhancedCalendar({
               </div>
               
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Año</label>
+                <label className="text-xs font-medium text-muted-foreground">{t('form.date')}</label>
                 <div className="space-y-2">
                   <Select value={currentYear.toString()} onValueChange={handleYearChange}>
                     <SelectTrigger>
@@ -264,7 +279,7 @@ function EnhancedCalendar({
                   <div className="flex gap-1">
                     <Input
                       type="number"
-                      placeholder="Año"
+                      placeholder={t('form.date')}
                       value={yearInput}
                       onChange={(e) => setYearInput(e.target.value)}
                       onKeyPress={handleKeyPress}
@@ -278,7 +293,7 @@ function EnhancedCalendar({
                       disabled={!yearInput}
                       className="px-2"
                     >
-                      Ir
+                      {t('actions.save')}
                     </Button>
                   </div>
                 </div>

@@ -12,6 +12,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { iCloudBackupService } from '@/services/native/iCloudBackupService';
 import BackupFileBrowser from './BackupFileBrowser';
+import { useTranslation } from 'react-i18next';
 import { getAllUsers } from '@/services/userService';
 import { getAllAnimalsForBackup } from '@/services/animal/animalBackupQueries';
 import { getAllFieldReports, importFieldReports } from '@/services/fieldReportBackupService';
@@ -47,6 +48,7 @@ interface BackupData {
 }
 
 const SystemBackupManager: React.FC = () => {
+  const { t } = useTranslation('settings');
   const { toast } = useToast();
   const [importFile, setImportFile] = useState<File | null>(null);
   const [nativeBackupContent, setNativeBackupContent] = useState<string | null>(null);
@@ -142,72 +144,72 @@ const SystemBackupManager: React.FC = () => {
   const backupCategories = [
     { 
       key: 'users', 
-      label: 'Usuarios', 
+      label: t('backup.categories.users'), 
       icon: Users, 
-      description: 'Cuentas de usuario y configuraciones',
+      description: t('backup.descriptions.users'),
       count: users.length
     },
     { 
       key: 'animals', 
-      label: 'Animales', 
+      label: t('backup.categories.animals'), 
       icon: Database, 
-      description: 'Registro de animales y genealogía',
+      description: t('backup.descriptions.animals'),
       count: animals.length
     },
     { 
       key: 'fieldReports', 
-      label: 'Reportes de Campo', 
+      label: t('backup.categories.fieldReports'), 
       icon: Clipboard, 
-      description: 'Reportes de campo y observaciones',
+      description: t('backup.descriptions.fieldReports'),
       count: fieldReports.length
     },
     { 
       key: 'lots', 
-      label: 'Lotes y Terrenos', 
+      label: t('backup.categories.lots'), 
       icon: MapPin, 
-      description: 'Lotes, polígonos y asignaciones de animales',
+      description: t('backup.descriptions.lots'),
       count: lotsData ? (lotsData.lots?.length || 0) + (lotsData.polygons?.length || 0) : 0
     },
     { 
       key: 'cadastralData', 
-      label: 'Datos Catastrales', 
+      label: t('backup.categories.cadastralData'), 
       icon: Shield, 
-      description: 'Parcelas catastrales y propiedades',
+      description: t('backup.descriptions.cadastralData'),
       count: cadastralData ? (cadastralData.parcels?.length || 0) + (cadastralData.properties?.length || 0) : 0
     },
     { 
       key: 'healthRecords', 
-      label: 'Registros de Salud', 
+      label: t('backup.categories.healthRecords'), 
       icon: Heart, 
-      description: 'Historial médico y tratamientos',
+      description: t('backup.descriptions.healthRecords'),
       count: healthRecords.length
     },
     { 
       key: 'breedingRecords', 
-      label: 'Registros de Reproducción', 
+      label: t('backup.categories.breedingRecords'), 
       icon: FileText, 
-      description: 'Apareamientos, crías y descendencia',
+      description: t('backup.descriptions.breedingRecords'),
       count: breedingData ? (breedingData.breedingRecords?.length || 0) + (breedingData.offspring?.length || 0) : 0
     },
     { 
       key: 'calendarEvents', 
-      label: 'Eventos del Calendario', 
+      label: t('backup.categories.calendarEvents'), 
       icon: Calendar, 
-      description: 'Eventos programados y recordatorios',
+      description: t('backup.descriptions.calendarEvents'),
       count: calendarData ? (calendarData.events?.length || 0) + (calendarData.eventNotifications?.length || 0) : 0
     },
     { 
       key: 'notifications', 
-      label: 'Notificaciones', 
+      label: t('backup.categories.notifications'), 
       icon: Bell, 
-      description: 'Historial de notificaciones del sistema',
+      description: t('backup.descriptions.notifications'),
       count: notifications.length
     },
     { 
       key: 'reports', 
-      label: 'Reportes Guardados', 
+      label: t('backup.categories.reports'), 
       icon: BarChart3, 
-      description: 'Reportes personalizados guardados',
+      description: t('backup.descriptions.reports'),
       count: reports.length
     },
   ];
@@ -359,8 +361,8 @@ const SystemBackupManager: React.FC = () => {
           console.log('☁️ iCloud sync:', Capacitor.getPlatform() === 'ios' ? 'Will sync automatically if enabled' : 'Not applicable');
 
           toast({
-            title: "Backup Completado",
-            description: `Backup guardado: ${exportFileName}. ${Capacitor.getPlatform() === 'ios' ? 'Se sincronizará con iCloud si está habilitado.' : ''}`,
+            title: t('backup.messages.exportComplete'),
+            description: `${t('backup.messages.backupSaved')}: ${exportFileName}. ${Capacitor.getPlatform() === 'ios' ? t('backup.messages.iCloudSync') : ''}`,
           });
         } else {
           // Web platform - download as file
@@ -373,15 +375,15 @@ const SystemBackupManager: React.FC = () => {
           document.body.removeChild(linkElement);
 
           toast({
-            title: "Backup Completado",
-            description: `Backup exportado exitosamente: ${totalRecords} registros en ${exportFileName}`,
+            title: t('backup.messages.exportComplete'),
+            description: t('backup.messages.exportSuccess', { count: totalRecords, filename: exportFileName }),
           });
         }
       } catch (error) {
         console.error('Error during export:', error);
         toast({
-          title: "Error en Backup",
-          description: "No se pudo completar el backup",
+          title: t('backup.messages.exportComplete'),
+          description: t('backup.messages.exportSuccess', { count: 0, filename: '' }),
           variant: "destructive"
         });
       } finally {
@@ -395,8 +397,8 @@ const SystemBackupManager: React.FC = () => {
     setNativeBackupFileName(fileName);
     
     toast({
-      title: "Backup seleccionado",
-      description: `${fileName} listo para restaurar`,
+      title: t('backup.messages.selectFileFirst'),
+      description: `${fileName} ${t('backup.messages.selectFileDesc')}`,
     });
   };
 
@@ -406,8 +408,8 @@ const SystemBackupManager: React.FC = () => {
     
     if (!isNative && !importFile) {
       toast({
-        title: "Archivo No Seleccionado",
-        description: "Por favor selecciona un archivo de backup para importar.",
+        title: t('backup.messages.selectFileFirst'),
+        description: t('backup.messages.selectFileDesc'),
         variant: "destructive",
       });
       return;
@@ -415,8 +417,8 @@ const SystemBackupManager: React.FC = () => {
     
     if (isNative && !nativeBackupContent && !importFile) {
       toast({
-        title: "Backup No Seleccionado",
-        description: "Por favor selecciona un backup de iCloud Drive o un archivo local para restaurar.",
+        title: t('backup.messages.selectFileFirst'),
+        description: t('backup.messages.selectFileDesc'),
         variant: "destructive",
       });
       return;
@@ -498,15 +500,15 @@ const SystemBackupManager: React.FC = () => {
         }
 
         toast({
-          title: "Importación Completada",
-          description: `Se han importado ${totalImported} registros exitosamente de todas las categorías seleccionadas.`,
+          title: t('backup.messages.importComplete'),
+          description: t('backup.messages.importSuccess', { count: totalImported }),
         });
 
       } catch (error: any) {
         console.error("Error importing comprehensive backup:", error);
         toast({
-          title: "Error en Importación",
-          description: `Error al importar: ${error.message}`,
+          title: t('backup.messages.importComplete'),
+          description: `${t('backup.messages.selectFileDesc')}: ${error.message}`,
           variant: "destructive",
         });
       } finally {
@@ -530,16 +532,16 @@ const SystemBackupManager: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="w-5 h-5" />
-            Sistema de Backup Integral y Restauración
+            {t('backup.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Data Selection */}
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <Label className="text-base font-medium">Seleccionar Datos para Backup/Restauración</Label>
+              <Label className="text-base font-medium">{t('backup.selectData')}</Label>
               <div className="text-sm text-gray-600">
-                Total: <span className="font-semibold">{getTotalSelectedRecords()}</span> registros
+                {t('backup.totalRecords', { count: getTotalSelectedRecords() })}
               </div>
             </div>
             <div className="grid grid-cols-1 gap-3">
@@ -572,7 +574,7 @@ const SystemBackupManager: React.FC = () => {
           {(isExporting || isImporting) && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>{isExporting ? 'Exportando datos completos...' : 'Importando y restaurando datos...'}</span>
+                <span>{isExporting ? t('backup.export') : t('backup.import')}</span>
                 <span>{progress}%</span>
               </div>
               <Progress value={progress} className="w-full" />
@@ -586,7 +588,7 @@ const SystemBackupManager: React.FC = () => {
                 <Cloud className="w-4 h-4 text-blue-600" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-blue-900">iCloud Drive</p>
-                  <p className="text-xs text-blue-700">Los backups se sincronizan automáticamente si iCloud está habilitado en Ajustes</p>
+                  <p className="text-xs text-blue-700">{t('backup.messages.iCloudSync')}</p>
                 </div>
               </div>
               <BackupFileBrowser onSelectBackup={handleNativeBackupSelected} />
@@ -597,8 +599,8 @@ const SystemBackupManager: React.FC = () => {
           <div className="space-y-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
-                <Label className="text-base font-medium">Exportar Datos Completos</Label>
-                <p className="text-sm text-gray-500">Crear un backup integral de todas las categorías seleccionadas</p>
+                <Label className="text-base font-medium">{t('backup.export')}</Label>
+                <p className="text-sm text-gray-500">{t('backup.selectData')}</p>
               </div>
               <Button
                 onClick={() => {
@@ -614,12 +616,12 @@ const SystemBackupManager: React.FC = () => {
                 {isExporting ? (
                   <>
                     <Download className="w-4 h-4 animate-pulse" />
-                    Exportando...
+                    {t('backup.export')}...
                   </>
                 ) : (
                   <>
                     <Download className="w-4 h-4" />
-                    Exportar Backup Integral
+                    {t('backup.export')}
                   </>
                 )}
               </Button>
@@ -629,17 +631,13 @@ const SystemBackupManager: React.FC = () => {
           {/* Import Section */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-base font-medium">
-                {Capacitor.isNativePlatform() 
-                  ? 'Restaurar desde Archivo Local' 
-                  : 'Restaurar Sistema Completo'}
-              </Label>
+              <Label className="text-base font-medium">{t('backup.import')}</Label>
               <p className="text-sm text-gray-500">
                 {Capacitor.isNativePlatform()
                   ? nativeBackupFileName 
-                    ? `Archivo iCloud seleccionado: ${nativeBackupFileName}` 
-                    : 'Selecciona un archivo local para restaurar (o usa un backup de iCloud arriba)'
-                  : 'Restaurar completamente el sistema desde un archivo de backup integral'}
+                    ? `${nativeBackupFileName}` 
+                    : t('backup.messages.selectFileDesc')
+                  : t('backup.messages.selectFileDesc')}
               </p>
             </div>
             
@@ -661,12 +659,12 @@ const SystemBackupManager: React.FC = () => {
                 {isImporting ? (
                   <>
                     <Upload className="w-4 h-4 animate-pulse" />
-                    Restaurando...
+                    {t('backup.import')}...
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4" />
-                    Restaurar Sistema
+                    {t('backup.import')}
                   </>
                 )}
               </Button>
@@ -676,10 +674,7 @@ const SystemBackupManager: React.FC = () => {
           {/* Enhanced Warning */}
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
-              <strong>Advertencia:</strong> Este sistema de backup integral permite la restauración completa 
-              de todos los datos del sistema, incluyendo reportes de campo, lotes, datos catastrales, y toda 
-              la información operacional. La importación puede sobrescribir información existente. 
-              Se recomienda crear un backup actual antes de restaurar datos externos.
+              <strong>{t('backup.messages.selectFileFirst')}:</strong> {t('backup.messages.selectFileDesc')}
             </p>
           </div>
         </CardContent>
