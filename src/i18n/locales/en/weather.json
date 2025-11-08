@@ -1,0 +1,11 @@
+{
+  "location": "Location",
+  "loading": "Loading weather...",
+  "loadingShort": "Loading weather…",
+  "noLocation": "No location",
+  "connecting": "Connecting...",
+  "noData": "No weather data",
+  "settings": {
+    "title": "Weather Information"
+  }
+}

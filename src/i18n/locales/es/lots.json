@@ -20,7 +20,7 @@
     "notes": "Notas",
     "notesPlaceholder": "Información adicional...",
     "manualCreation": "Crear Nuevo Lote Manual",
-    "drawOnMap": "Dibujar en Mapa"
+    "drawOnMap": "Dibujar en el Mapa"
   },
   "types": {
     "pasture": "Potrero",
@@ -48,7 +48,11 @@
     "togglePropertyName": "Nombre de Propiedad",
     "centerMap": "Centrar Mapa",
     "searchAddress": "Buscar dirección...",
-    "loading": "Cargando mapa..."
+    "loading": "Cargando mapa...",
+    "labels": "Etiquetas",
+    "propertyLots": "Lotes de Propiedad",
+    "pastureLots": "Lotes de Pastoreo",
+    "propertyName": "Nombre SkyRanch"
   },
   "details": {
     "totalArea": "Área Total",

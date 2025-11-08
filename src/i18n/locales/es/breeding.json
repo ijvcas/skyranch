@@ -1,73 +1,81 @@
 {
-  "title": "Reproducción",
+  "title": "Gestión de Apareamientos",
   "management": "Gestión de Apareamientos",
-  "addRecord": "Nuevo Registro",
-  "editRecord": "Editar Registro",
+  "addRecord": "Nuevo Apareamiento",
+  "editRecord": "Editar Registro de Apareamiento",
   "deleteRecord": "Eliminar Registro",
   "viewDetails": "Ver Detalles",
   "breedingManagement": "Gestión de Apareamientos",
   "editBreeding": "Editar Registro de Apareamiento",
+  "registerNew": "Registrar Nuevo Apareamiento",
+  "testNotifications": "Probar Notificaciones",
+  "activeBreedings": "Apareamientos Activos",
+  "breedingHistory": "Historial de Apareamientos",
+  "deleteConfirm": "¿Estás seguro de que quieres eliminar este registro de apareamiento?",
   "fields": {
     "mother": "Madre",
     "father": "Padre",
-    "breedingDate": "Fecha de Monta",
+    "date": "Fecha de Apareamiento",
     "method": "Método",
-    "status": "Estado",
-    "expectedDueDate": "Fecha Estimada de Parto",
-    "actualBirthDate": "Fecha Real de Parto",
+    "expectedDueDate": "Fecha Esperada de Parto",
     "pregnancyConfirmed": "Embarazo Confirmado",
-    "confirmationDate": "Fecha de Confirmación",
-    "offspringCount": "Número de Crías",
-    "veterinarian": "Veterinario",
-    "cost": "Costo",
+    "actualBirthDate": "Fecha Real de Nacimiento",
+    "offspringCount": "Cantidad de Crías",
     "notes": "Notas",
-    "gestationDuration": "Duración de la Gestación"
+    "status": "Estado",
+    "species": "Especie",
+    "breedingInfo": "Información del Apareamiento"
   },
   "methods": {
-    "natural": "Natural",
-    "artificial": "Inseminación Artificial",
-    "embryo": "Transferencia de Embriones",
-    "inseminacion_artificial": "Inseminación Artificial",
-    "monta_natural": "Monta Natural"
+    "natural": "Monta Natural",
+    "artificial_insemination": "Inseminación Artificial",
+    "embryo_transfer": "Transferencia de Embriones"
   },
   "status": {
-    "planned": "Planificada",
-    "completed": "Completada",
-    "confirmed": "Confirmada",
-    "pregnant": "Embarazada",
-    "failed": "Fallida",
-    "aborted": "Abortada",
-    "en_progreso": "En Progreso",
-    "confirmada": "Confirmada",
-    "finalizada": "Finalizada"
+    "planned": "Planeado",
+    "completed": "Completado",
+    "confirmed_pregnant": "Embarazo Confirmado",
+    "not_pregnant": "No Embarazada",
+    "birth_completed": "Parto Completado",
+    "failed": "Fallido"
   },
   "calendar": {
-    "title": "Calendario de Reproducción",
-    "breedingEvent": "Apareamiento",
-    "expectedBirth": "Parto Esperado",
-    "actualBirth": "Parto Real",
-    "legend": "Leyenda",
-    "eventsForDate": "Eventos para"
+    "view": "Vista de Calendario",
+    "dueDate": "Fecha estimada",
+    "breedingDate": "Apareamiento"
   },
   "stats": {
-    "total": "Total de Registros",
     "active": "Activos",
     "completed": "Completados",
-    "successRate": "Tasa de Éxito"
+    "confirmed": "Embarazos Confirmados",
+    "totalOffspring": "Total Crías",
+    "total": "Total de Registros"
   },
   "messages": {
-    "added": "Registro agregado exitosamente",
+    "added": "Registro de apareamiento agregado exitosamente",
     "updated": "Registro actualizado exitosamente",
     "deleted": "Registro eliminado exitosamente",
-    "loadError": "Error al cargar los registros",
-    "confirmDelete": "¿Está seguro que desea eliminar este registro?"
+    "deleteSuccess": "El registro de apareamiento ha sido eliminado exitosamente",
+    "loadError": "Error al cargar los registros de apareamiento",
+    "saveError": "Error al guardar el registro",
+    "deleteError": "No se pudo eliminar el registro de apareamiento"
   },
   "actions": {
     "save": "Guardar",
     "cancel": "Cancelar",
     "edit": "Editar",
     "delete": "Eliminar",
-    "view": "Ver",
-    "back": "Volver"
+    "create": "Crear Registro",
+    "saving": "Guardando..."
+  },
+  "tabs": {
+    "active": "Activos",
+    "history": "Historial",
+    "calendar": "Calendario",
+    "planning": "Planificación"
+  },
+  "empty": {
+    "active": "No hay apareamientos activos en este momento.",
+    "history": "No hay apareamientos completados en el historial."
   }
 }

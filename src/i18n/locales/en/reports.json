@@ -1,6 +1,7 @@
 {
   "title": "Reports",
   "subtitle": "Farm analytics and statistics",
+  "pageTitle": "Reports and Analysis",
   "dashboard": {
     "overview": "Overview",
     "animalStats": "Animal Statistics",
@@ -27,5 +28,67 @@
     "export": "Export",
     "print": "Print",
     "share": "Share"
+  },
+  "tabs": {
+    "finance": "Finance",
+    "fieldReports": "Field Reports",
+    "animals": "Animals",
+    "health": "Health"
+  },
+  "stats": {
+    "totalAnimals": "Total Animals",
+    "averageAge": "Average Age",
+    "ageUnit": "years",
+    "recentBirths": "Recent Births",
+    "last30Days": "Last 30 days",
+    "species": "Species",
+    "totalRecords": "Total Records",
+    "upcomingVaccines": "Upcoming Vaccines",
+    "next30Days": "Next 30 days",
+    "totalCost": "Total Cost",
+    "averageCost": "Average Cost"
+  },
+  "charts": {
+    "speciesDistribution": "Species Distribution",
+    "healthStatus": "Health Status",
+    "recordTypes": "Record Types",
+    "monthlyCosts": "Monthly Costs",
+    "cost": "Cost",
+    "salesBySpecies": "Sales by Species",
+    "monthlySales": "Monthly Sales",
+    "sales": "Sales",
+    "revenue": "Revenue"
+  },
+  "fieldReports": {
+    "title": "Field Reports",
+    "count": "Field Reports ({{count}})",
+    "loading": "Loading reports...",
+    "loadError": "Error loading reports",
+    "noReports": "No field reports registered",
+    "noReportsDesc": "Reports will appear here once created",
+    "createdBy": "Created by",
+    "locationRegistered": "Location registered",
+    "status": {
+      "completed": "Completed",
+      "draft": "Draft",
+      "in_progress": "In Progress"
+    },
+    "type": {
+      "general": "General",
+      "pregnancy": "Pregnancy",
+      "veterinary": "Veterinary",
+      "health": "Health",
+      "infrastructure": "Infrastructure"
+    }
+  },
+  "errors": {
+    "loadFailed": "Error loading reports. Please try reloading the page."
+  },
+  "financial": {
+    "totalSales": "Total Sales",
+    "revenues": "Revenues",
+    "averagePrice": "Average Price",
+    "outstandingPayments": "Outstanding Payments",
+    "salesThisMonth": "Sales This Month"
   }
 }

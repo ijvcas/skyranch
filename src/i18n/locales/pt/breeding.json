@@ -1,73 +1,81 @@
 {
-  "title": "Reprodução",
-  "management": "Gestão de Reprodução",
-  "addRecord": "Novo Registro",
-  "editRecord": "Editar Registro",
+  "title": "Gestão de Acasalamentos",
+  "management": "Gestão de Acasalamentos",
+  "addRecord": "Novo Acasalamento",
+  "editRecord": "Editar Registro de Acasalamento",
   "deleteRecord": "Excluir Registro",
   "viewDetails": "Ver Detalhes",
-  "breedingManagement": "Gestão de Reprodução",
-  "editBreeding": "Editar Registro de Reprodução",
+  "breedingManagement": "Gestão de Acasalamentos",
+  "editBreeding": "Editar Registro de Acasalamento",
+  "registerNew": "Registrar Novo Acasalamento",
+  "testNotifications": "Testar Notificações",
+  "activeBreedings": "Acasalamentos Ativos",
+  "breedingHistory": "Histórico de Acasalamentos",
+  "deleteConfirm": "Tem certeza de que deseja excluir este registro de acasalamento?",
   "fields": {
     "mother": "Mãe",
     "father": "Pai",
-    "breedingDate": "Data de Cobertura",
+    "date": "Data do Acasalamento",
     "method": "Método",
-    "status": "Status",
     "expectedDueDate": "Data Prevista de Parto",
-    "actualBirthDate": "Data Real de Nascimento",
     "pregnancyConfirmed": "Gravidez Confirmada",
-    "confirmationDate": "Data de Confirmação",
-    "offspringCount": "Número de Crias",
-    "veterinarian": "Veterinário",
-    "cost": "Custo",
+    "actualBirthDate": "Data Real de Nascimento",
+    "offspringCount": "Quantidade de Filhotes",
     "notes": "Notas",
-    "gestationDuration": "Duração da Gestação"
+    "status": "Status",
+    "species": "Espécie",
+    "breedingInfo": "Informações do Acasalamento"
   },
   "methods": {
-    "natural": "Natural",
-    "artificial": "Inseminação Artificial",
-    "embryo": "Transferência de Embriões",
-    "inseminacion_artificial": "Inseminação Artificial",
-    "monta_natural": "Cobertura Natural"
+    "natural": "Monta Natural",
+    "artificial_insemination": "Inseminação Artificial",
+    "embryo_transfer": "Transferência de Embriões"
   },
   "status": {
-    "planned": "Planejada",
-    "completed": "Concluída",
-    "confirmed": "Confirmada",
-    "pregnant": "Grávida",
-    "failed": "Falhada",
-    "aborted": "Abortada",
-    "en_progreso": "Em Progresso",
-    "confirmada": "Confirmada",
-    "finalizada": "Finalizada"
+    "planned": "Planejado",
+    "completed": "Completado",
+    "confirmed_pregnant": "Gravidez Confirmada",
+    "not_pregnant": "Não Grávida",
+    "birth_completed": "Parto Completado",
+    "failed": "Falhado"
   },
   "calendar": {
-    "title": "Calendário de Reprodução",
-    "breedingEvent": "Reprodução",
-    "expectedBirth": "Nascimento Esperado",
-    "actualBirth": "Nascimento Real",
-    "legend": "Legenda",
-    "eventsForDate": "Eventos para"
+    "view": "Vista de Calendário",
+    "dueDate": "Data prevista",
+    "breedingDate": "Acasalamento"
   },
   "stats": {
-    "total": "Total de Registros",
     "active": "Ativos",
-    "completed": "Concluídos",
-    "successRate": "Taxa de Sucesso"
+    "completed": "Completados",
+    "confirmed": "Gestações Confirmadas",
+    "totalOffspring": "Total de Filhotes",
+    "total": "Total de Registros"
   },
   "messages": {
-    "added": "Registro adicionado com sucesso",
+    "added": "Registro de acasalamento adicionado com sucesso",
     "updated": "Registro atualizado com sucesso",
     "deleted": "Registro excluído com sucesso",
-    "loadError": "Erro ao carregar registros",
-    "confirmDelete": "Tem certeza de que deseja excluir este registro?"
+    "deleteSuccess": "O registro de acasalamento foi excluído com sucesso",
+    "loadError": "Erro ao carregar registros de acasalamento",
+    "saveError": "Erro ao salvar registro",
+    "deleteError": "Não foi possível excluir o registro de acasalamento"
   },
   "actions": {
     "save": "Salvar",
     "cancel": "Cancelar",
     "edit": "Editar",
     "delete": "Excluir",
-    "view": "Ver",
-    "back": "Voltar"
+    "create": "Criar Registro",
+    "saving": "Salvando..."
+  },
+  "tabs": {
+    "active": "Ativos",
+    "history": "Histórico",
+    "calendar": "Calendário",
+    "planning": "Planejamento"
+  },
+  "empty": {
+    "active": "Nenhum acasalamento ativo no momento.",
+    "history": "Nenhum acasalamento completado no histórico."
   }
 }

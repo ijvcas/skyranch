@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,10 +23,12 @@ export const NotificationFilters = ({
   selectedPriority,
   onPriorityChange
 }: NotificationFiltersProps) => {
+  const { t } = useTranslation('notifications');
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Filtros</CardTitle>
+        <CardTitle className="text-lg">{t('filters.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row gap-4">
@@ -33,7 +36,7 @@ export const NotificationFilters = ({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Buscar notificaciones..."
+                placeholder={t('filters.search')}
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="pl-10"
@@ -43,27 +46,27 @@ export const NotificationFilters = ({
           
           <Select value={selectedType} onValueChange={onTypeChange}>
             <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Tipo" />
+              <SelectValue placeholder={t('filters.type')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los tipos</SelectItem>
-              <SelectItem value="vaccine">Vacunas</SelectItem>
-              <SelectItem value="health">Salud</SelectItem>
-              <SelectItem value="breeding">Reproducción</SelectItem>
-              <SelectItem value="weekly_report">Reportes</SelectItem>
+              <SelectItem value="all">{t('filters.allTypes')}</SelectItem>
+              <SelectItem value="vaccine">{t('types.vaccine')}</SelectItem>
+              <SelectItem value="health">{t('types.health')}</SelectItem>
+              <SelectItem value="breeding">{t('types.breeding')}</SelectItem>
+              <SelectItem value="weekly_report">{t('types.weekly_report')}</SelectItem>
             </SelectContent>
           </Select>
           
           <Select value={selectedPriority} onValueChange={onPriorityChange}>
             <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Prioridad" />
+              <SelectValue placeholder={t('filters.type')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas las prioridades</SelectItem>
-              <SelectItem value="critical">Crítico</SelectItem>
-              <SelectItem value="high">Alto</SelectItem>
-              <SelectItem value="medium">Medio</SelectItem>
-              <SelectItem value="low">Bajo</SelectItem>
+              <SelectItem value="all">{t('filters.allPriorities')}</SelectItem>
+              <SelectItem value="critical">{t('priorities.critical')}</SelectItem>
+              <SelectItem value="high">{t('priorities.high')}</SelectItem>
+              <SelectItem value="medium">{t('priorities.medium')}</SelectItem>
+              <SelectItem value="low">{t('priorities.low')}</SelectItem>
             </SelectContent>
           </Select>
         </div>

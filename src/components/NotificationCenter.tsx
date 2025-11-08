@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNotifications } from '@/hooks/useNotifications';
 import { NotificationFilters } from './notifications/NotificationFilters';
 import { NotificationActions } from './notifications/NotificationActions';
 import { NotificationTabs } from './notifications/NotificationTabs';
 
 const NotificationCenter = () => {
+  const { t } = useTranslation('notifications');
   const { 
     notifications, 
     unreadCount, 
@@ -38,9 +40,9 @@ const NotificationCenter = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Centro de Notificaciones</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
           <p className="text-gray-600">
-            {unreadCount > 0 ? `${unreadCount} notificaciones sin leer` : 'Todas las notificaciones están al día'}
+            {unreadCount > 0 ? t('unreadCount', { count: unreadCount }) : t('allRead')}
           </p>
         </div>
         

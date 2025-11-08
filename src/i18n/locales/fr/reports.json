@@ -1,6 +1,7 @@
 {
   "title": "Rapports",
   "subtitle": "Analyses et statistiques de la ferme",
+  "pageTitle": "Rapports et Analyses",
   "dashboard": {
     "overview": "Aperçu",
     "animalStats": "Statistiques des Animaux",
@@ -27,5 +28,67 @@
     "export": "Exporter",
     "print": "Imprimer",
     "share": "Partager"
+  },
+  "tabs": {
+    "finance": "Finances",
+    "fieldReports": "Rapports de Terrain",
+    "animals": "Animaux",
+    "health": "Santé"
+  },
+  "stats": {
+    "totalAnimals": "Total d'Animaux",
+    "averageAge": "Âge Moyen",
+    "ageUnit": "ans",
+    "recentBirths": "Naissances Récentes",
+    "last30Days": "30 derniers jours",
+    "species": "Espèces",
+    "totalRecords": "Total d'Enregistrements",
+    "upcomingVaccines": "Vaccins à Venir",
+    "next30Days": "30 prochains jours",
+    "totalCost": "Coût Total",
+    "averageCost": "Coût Moyen"
+  },
+  "charts": {
+    "speciesDistribution": "Distribution par Espèces",
+    "healthStatus": "État de Santé",
+    "recordTypes": "Types d'Enregistrements",
+    "monthlyCosts": "Coûts Mensuels",
+    "cost": "Coût",
+    "salesBySpecies": "Ventes par Espèce",
+    "monthlySales": "Ventes Mensuelles",
+    "sales": "Ventes",
+    "revenue": "Revenus"
+  },
+  "fieldReports": {
+    "title": "Rapports de Terrain",
+    "count": "Rapports de Terrain ({{count}})",
+    "loading": "Chargement des rapports...",
+    "loadError": "Erreur lors du chargement des rapports",
+    "noReports": "Aucun rapport de terrain enregistré",
+    "noReportsDesc": "Les rapports apparaîtront ici une fois créés",
+    "createdBy": "Créé par",
+    "locationRegistered": "Localisation enregistrée",
+    "status": {
+      "completed": "Terminé",
+      "draft": "Brouillon",
+      "in_progress": "En Cours"
+    },
+    "type": {
+      "general": "Général",
+      "pregnancy": "Grossesse",
+      "veterinary": "Vétérinaire",
+      "health": "Santé",
+      "infrastructure": "Infrastructure"
+    }
+  },
+  "errors": {
+    "loadFailed": "Erreur lors du chargement des rapports. Veuillez recharger la page."
+  },
+  "financial": {
+    "totalSales": "Ventes Totales",
+    "revenues": "Revenus",
+    "averagePrice": "Prix Moyen",
+    "outstandingPayments": "Paiements en Attente",
+    "salesThisMonth": "Ventes Ce Mois"
   }
 }

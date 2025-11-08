@@ -1,0 +1,34 @@
+{
+  "title": "Notification Center",
+  "backToPanel": "Back to Dashboard",
+  "unreadCount": "{{count}} unread notifications",
+  "allRead": "All notifications are up to date",
+  "actions": {
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all"
+  },
+  "filters": {
+    "title": "Filters",
+    "search": "Search notifications...",
+    "allTypes": "All types",
+    "allPriorities": "All priorities",
+    "type": "Type"
+  },
+  "types": {
+    "vaccine": "Vaccines",
+    "health": "Health",
+    "breeding": "Breeding",
+    "weekly_report": "Reports"
+  },
+  "priorities": {
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "tabs": {
+    "unread": "Unread",
+    "read": "Read",
+    "all": "All"
+  }
+}

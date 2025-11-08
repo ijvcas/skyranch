@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import NotificationCenter from '@/components/NotificationCenter';
 import { mobilePushService } from '@/services/mobile/pushNotificationService';
 
 const Notifications = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('notifications');
 
   // Clear badge when notifications page is opened
   useEffect(() => {
@@ -25,7 +27,7 @@ const Notifications = () => {
             onClick={() => navigate('/dashboard')}
             className="mb-4"
           >
-            ← Volver al Panel
+            ← {t('backToPanel')}
           </Button>
         </div>
 

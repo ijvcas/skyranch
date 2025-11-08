@@ -1,73 +1,81 @@
 {
-  "title": "Breeding",
+  "title": "Breeding Management",
   "management": "Breeding Management",
-  "addRecord": "New Record",
-  "editRecord": "Edit Record",
+  "addRecord": "New Breeding",
+  "editRecord": "Edit Breeding Record",
   "deleteRecord": "Delete Record",
   "viewDetails": "View Details",
   "breedingManagement": "Breeding Management",
   "editBreeding": "Edit Breeding Record",
+  "registerNew": "Register New Breeding",
+  "testNotifications": "Test Notifications",
+  "activeBreedings": "Active Breedings",
+  "breedingHistory": "Breeding History",
+  "deleteConfirm": "Are you sure you want to delete this breeding record?",
   "fields": {
     "mother": "Mother",
     "father": "Father",
-    "breedingDate": "Breeding Date",
+    "date": "Breeding Date",
     "method": "Method",
-    "status": "Status",
     "expectedDueDate": "Expected Due Date",
-    "actualBirthDate": "Actual Birth Date",
     "pregnancyConfirmed": "Pregnancy Confirmed",
-    "confirmationDate": "Confirmation Date",
+    "actualBirthDate": "Actual Birth Date",
     "offspringCount": "Offspring Count",
-    "veterinarian": "Veterinarian",
-    "cost": "Cost",
     "notes": "Notes",
-    "gestationDuration": "Gestation Duration"
+    "status": "Status",
+    "species": "Species",
+    "breedingInfo": "Breeding Information"
   },
   "methods": {
-    "natural": "Natural",
-    "artificial": "Artificial Insemination",
-    "embryo": "Embryo Transfer",
-    "inseminacion_artificial": "Artificial Insemination",
-    "monta_natural": "Natural Mating"
+    "natural": "Natural Mating",
+    "artificial_insemination": "Artificial Insemination",
+    "embryo_transfer": "Embryo Transfer"
   },
   "status": {
     "planned": "Planned",
     "completed": "Completed",
-    "confirmed": "Confirmed",
-    "pregnant": "Pregnant",
-    "failed": "Failed",
-    "aborted": "Aborted",
-    "en_progreso": "In Progress",
-    "confirmada": "Confirmed",
-    "finalizada": "Completed"
+    "confirmed_pregnant": "Confirmed Pregnant",
+    "not_pregnant": "Not Pregnant",
+    "birth_completed": "Birth Completed",
+    "failed": "Failed"
   },
   "calendar": {
-    "title": "Breeding Calendar",
-    "breedingEvent": "Breeding",
-    "expectedBirth": "Expected Birth",
-    "actualBirth": "Actual Birth",
-    "legend": "Legend",
-    "eventsForDate": "Events for"
+    "view": "Calendar View",
+    "dueDate": "Due date",
+    "breedingDate": "Breeding"
   },
   "stats": {
-    "total": "Total Records",
     "active": "Active",
     "completed": "Completed",
-    "successRate": "Success Rate"
+    "confirmed": "Confirmed Pregnancies",
+    "totalOffspring": "Total Offspring",
+    "total": "Total Records"
   },
   "messages": {
-    "added": "Record added successfully",
+    "added": "Breeding record added successfully",
     "updated": "Record updated successfully",
     "deleted": "Record deleted successfully",
-    "loadError": "Error loading records",
-    "confirmDelete": "Are you sure you want to delete this record?"
+    "deleteSuccess": "The breeding record has been successfully deleted",
+    "loadError": "Error loading breeding records",
+    "saveError": "Error saving record",
+    "deleteError": "Could not delete breeding record"
   },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
-    "view": "View",
-    "back": "Back"
+    "create": "Create Record",
+    "saving": "Saving..."
+  },
+  "tabs": {
+    "active": "Active",
+    "history": "History",
+    "calendar": "Calendar",
+    "planning": "Planning"
+  },
+  "empty": {
+    "active": "No active breedings at this time.",
+    "history": "No completed breedings in history."
   }
 }

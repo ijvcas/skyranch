@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Notification } from '@/hooks/useNotifications';
@@ -23,11 +24,13 @@ export const NotificationTabs = ({
   onMarkAsRead,
   onDelete
 }: NotificationTabsProps) => {
+  const { t } = useTranslation('notifications');
+  
   return (
     <Tabs defaultValue="unread" className="space-y-4">
       <TabsList>
         <TabsTrigger value="unread" className="relative">
-          Sin leer
+          {t('tabs.unread')}
           {unreadCount > 0 && (
             <Badge className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
               {unreadCount}
@@ -35,10 +38,10 @@ export const NotificationTabs = ({
           )}
         </TabsTrigger>
         <TabsTrigger value="read">
-          Leídas ({readNotifications.length})
+          {t('tabs.read')} ({readNotifications.length})
         </TabsTrigger>
         <TabsTrigger value="all">
-          Todas ({filteredNotifications.length})
+          {t('tabs.all')} ({filteredNotifications.length})
         </TabsTrigger>
       </TabsList>
 

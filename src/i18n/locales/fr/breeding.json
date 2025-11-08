@@ -1,73 +1,81 @@
 {
-  "title": "Reproduction",
+  "title": "Gestion de la Reproduction",
   "management": "Gestion de la Reproduction",
-  "addRecord": "Nouveau Enregistrement",
-  "editRecord": "Modifier l'Enregistrement",
+  "addRecord": "Nouvel Accouplement",
+  "editRecord": "Modifier l'Enregistrement de Reproduction",
   "deleteRecord": "Supprimer l'Enregistrement",
   "viewDetails": "Voir les Détails",
   "breedingManagement": "Gestion de la Reproduction",
   "editBreeding": "Modifier l'Enregistrement de Reproduction",
+  "registerNew": "Enregistrer un Nouvel Accouplement",
+  "testNotifications": "Tester les Notifications",
+  "activeBreedings": "Accouplements Actifs",
+  "breedingHistory": "Historique des Accouplements",
+  "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet enregistrement de reproduction ?",
   "fields": {
     "mother": "Mère",
     "father": "Père",
-    "breedingDate": "Date de Reproduction",
+    "date": "Date d'Accouplement",
     "method": "Méthode",
-    "status": "Statut",
     "expectedDueDate": "Date Prévue de Mise Bas",
-    "actualBirthDate": "Date Réelle de Naissance",
     "pregnancyConfirmed": "Grossesse Confirmée",
-    "confirmationDate": "Date de Confirmation",
-    "offspringCount": "Nombre de Descendants",
-    "veterinarian": "Vétérinaire",
-    "cost": "Coût",
+    "actualBirthDate": "Date Réelle de Naissance",
+    "offspringCount": "Nombre de Petits",
     "notes": "Notes",
-    "gestationDuration": "Durée de la Gestation"
+    "status": "Statut",
+    "species": "Espèce",
+    "breedingInfo": "Informations sur l'Accouplement"
   },
   "methods": {
-    "natural": "Naturelle",
-    "artificial": "Insémination Artificielle",
-    "embryo": "Transfert d'Embryons",
-    "inseminacion_artificial": "Insémination Artificielle",
-    "monta_natural": "Monte Naturelle"
+    "natural": "Monte Naturelle",
+    "artificial_insemination": "Insémination Artificielle",
+    "embryo_transfer": "Transfert d'Embryon"
   },
   "status": {
-    "planned": "Planifiée",
-    "completed": "Terminée",
-    "confirmed": "Confirmée",
-    "pregnant": "Enceinte",
-    "failed": "Échouée",
-    "aborted": "Avortée",
-    "en_progreso": "En Cours",
-    "confirmada": "Confirmée",
-    "finalizada": "Terminée"
+    "planned": "Planifié",
+    "completed": "Terminé",
+    "confirmed_pregnant": "Grossesse Confirmée",
+    "not_pregnant": "Non Gestante",
+    "birth_completed": "Mise Bas Terminée",
+    "failed": "Échoué"
   },
   "calendar": {
-    "title": "Calendrier de Reproduction",
-    "breedingEvent": "Reproduction",
-    "expectedBirth": "Naissance Prévue",
-    "actualBirth": "Naissance Réelle",
-    "legend": "Légende",
-    "eventsForDate": "Événements pour"
+    "view": "Vue Calendrier",
+    "dueDate": "Date prévue",
+    "breedingDate": "Accouplement"
   },
   "stats": {
-    "total": "Total des Enregistrements",
     "active": "Actifs",
     "completed": "Terminés",
-    "successRate": "Taux de Réussite"
+    "confirmed": "Grossesses Confirmées",
+    "totalOffspring": "Total de Petits",
+    "total": "Total des Enregistrements"
   },
   "messages": {
-    "added": "Enregistrement ajouté avec succès",
+    "added": "Enregistrement de reproduction ajouté avec succès",
     "updated": "Enregistrement mis à jour avec succès",
     "deleted": "Enregistrement supprimé avec succès",
-    "loadError": "Erreur lors du chargement des enregistrements",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet enregistrement ?"
+    "deleteSuccess": "L'enregistrement de reproduction a été supprimé avec succès",
+    "loadError": "Erreur lors du chargement des enregistrements de reproduction",
+    "saveError": "Erreur lors de l'enregistrement",
+    "deleteError": "Impossible de supprimer l'enregistrement de reproduction"
   },
   "actions": {
     "save": "Enregistrer",
     "cancel": "Annuler",
     "edit": "Modifier",
     "delete": "Supprimer",
-    "view": "Voir",
-    "back": "Retour"
+    "create": "Créer un Enregistrement",
+    "saving": "Enregistrement..."
+  },
+  "tabs": {
+    "active": "Actifs",
+    "history": "Historique",
+    "calendar": "Calendrier",
+    "planning": "Planification"
+  },
+  "empty": {
+    "active": "Aucun accouplement actif pour le moment.",
+    "history": "Aucun accouplement terminé dans l'historique."
   }
 }

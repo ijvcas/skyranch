@@ -1,0 +1,11 @@
+{
+  "location": "Localisation",
+  "loading": "Chargement de la météo...",
+  "loadingShort": "Chargement de la météo…",
+  "noLocation": "Pas de localisation",
+  "connecting": "Connexion...",
+  "noData": "Pas de données météo",
+  "settings": {
+    "title": "Informations Météorologiques"
+  }
+}

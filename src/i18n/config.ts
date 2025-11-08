@@ -16,6 +16,8 @@ import dashboardES from './locales/es/dashboard.json';
 import usersES from './locales/es/users.json';
 import calendarES from './locales/es/calendar.json';
 import lotsES from './locales/es/lots.json';
+import notificationsES from './locales/es/notifications.json';
+import weatherES from './locales/es/weather.json';
 
 import commonEN from './locales/en/common.json';
 import animalsEN from './locales/en/animals.json';
@@ -29,6 +31,8 @@ import dashboardEN from './locales/en/dashboard.json';
 import usersEN from './locales/en/users.json';
 import calendarEN from './locales/en/calendar.json';
 import lotsEN from './locales/en/lots.json';
+import notificationsEN from './locales/en/notifications.json';
+import weatherEN from './locales/en/weather.json';
 
 import commonPT from './locales/pt/common.json';
 import animalsPT from './locales/pt/animals.json';
@@ -42,6 +46,8 @@ import dashboardPT from './locales/pt/dashboard.json';
 import usersPT from './locales/pt/users.json';
 import calendarPT from './locales/pt/calendar.json';
 import lotsPT from './locales/pt/lots.json';
+import notificationsPT from './locales/pt/notifications.json';
+import weatherPT from './locales/pt/weather.json';
 
 import commonFR from './locales/fr/common.json';
 import animalsFR from './locales/fr/animals.json';
@@ -55,6 +61,8 @@ import dashboardFR from './locales/fr/dashboard.json';
 import usersFR from './locales/fr/users.json';
 import calendarFR from './locales/fr/calendar.json';
 import lotsFR from './locales/fr/lots.json';
+import notificationsFR from './locales/fr/notifications.json';
+import weatherFR from './locales/fr/weather.json';
 
 const resources = {
   es: {
@@ -69,7 +77,9 @@ const resources = {
     dashboard: dashboardES,
     users: usersES,
     calendar: calendarES,
-    lots: lotsES
+    lots: lotsES,
+    notifications: notificationsES,
+    weather: weatherES
   },
   en: {
     common: commonEN,
@@ -83,7 +93,9 @@ const resources = {
     dashboard: dashboardEN,
     users: usersEN,
     calendar: calendarEN,
-    lots: lotsEN
+    lots: lotsEN,
+    notifications: notificationsEN,
+    weather: weatherEN
   },
   pt: {
     common: commonPT,
@@ -97,7 +109,9 @@ const resources = {
     dashboard: dashboardPT,
     users: usersPT,
     calendar: calendarPT,
-    lots: lotsPT
+    lots: lotsPT,
+    notifications: notificationsPT,
+    weather: weatherPT
   },
   fr: {
     common: commonFR,
@@ -111,7 +125,9 @@ const resources = {
     dashboard: dashboardFR,
     users: usersFR,
     calendar: calendarFR,
-    lots: lotsFR
+    lots: lotsFR,
+    notifications: notificationsFR,
+    weather: weatherFR
   }
 };
 
@@ -124,7 +140,7 @@ i18n
     fallbackLng: 'es',
     supportedLngs: ['es', 'en', 'pt', 'fr'],
     defaultNS: 'common',
-    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots'],
+    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots', 'notifications', 'weather'],
     interpolation: {
       escapeValue: false
     },

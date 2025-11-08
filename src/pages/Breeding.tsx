@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -18,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TabTrigger as GridTabTrigger, TabsListGrid } from '@/components/breeding/BreedingTabsGrid';
 
 const Breeding: React.FC = () => {
+  const { t } = useTranslation('breeding');
   const [showForm, setShowForm] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<BreedingRecord | null>(null);
   const [activeTab, setActiveTab] = useState('activos');
@@ -52,16 +54,16 @@ const Breeding: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['breeding-records'] });
       toast({
-        title: "Registro Eliminado",
-        description: "El registro de apareamiento ha sido eliminado exitosamente.",
+        title: t('messages.deleted'),
+        description: t('messages.deleteSuccess'),
       });
       setSelectedRecord(null);
     },
     onError: (error) => {
       console.error('Error deleting breeding record:', error);
       toast({
-        title: "Error",
-        description: "No se pudo eliminar el registro de apareamiento.",
+        title: t('common:error'),
+        description: t('messages.deleteError'),
         variant: "destructive"
       });
     }
@@ -85,7 +87,7 @@ const Breeding: React.FC = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este registro de apareamiento?')) {
+    if (window.confirm(t('deleteConfirm'))) {
       deleteMutation.mutate(id);
     }
   };
@@ -159,23 +161,23 @@ const Breeding: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center space-x-2">
             <Heart className="w-8 h-8 text-red-500" />
-            <h1 className="text-2xl font-bold">Gestión de Apareamientos</h1>
+            <h1 className="text-2xl font-bold">{t('management')}</h1>
           </div>
           <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
             <Button variant="outline" size="sm" onClick={handleTestNotifications} className="w-full md:w-auto">
               <Bell className="w-4 h-4 mr-2" />
-              Probar Notificaciones
+              {t('testNotifications')}
             </Button>
             <Dialog open={showForm} onOpenChange={setShowForm}>
               <DialogTrigger asChild>
                 <Button size="sm" className="w-full md:w-auto bg-gradient-blue-green hover:opacity-90 text-white border-0">
                   <Plus className="w-4 h-4 mr-2" />
-                  Nuevo Apareamiento
+                  {t('addRecord')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Registrar Nuevo Apareamiento</DialogTitle>
+                  <DialogTitle>{t('registerNew')}</DialogTitle>
                 </DialogHeader>
                 <BreedingForm onSuccess={handleFormSuccess} />
               </DialogContent>
@@ -187,7 +189,7 @@ const Breeding: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3 md:p-6 md:pb-2">
-              <CardTitle className="text-xs md:text-sm font-medium">Activos</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium">{t('stats.active')}</CardTitle>
               <Activity className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
@@ -197,7 +199,7 @@ const Breeding: React.FC = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3 md:p-6 md:pb-2">
-              <CardTitle className="text-xs md:text-sm font-medium">Completados</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium">{t('stats.completed')}</CardTitle>
               <Archive className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
@@ -207,7 +209,7 @@ const Breeding: React.FC = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3 md:p-6 md:pb-2">
-              <CardTitle className="text-xs md:text-sm font-medium leading-tight">Embarazos Confirmados</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium leading-tight">{t('stats.confirmed')}</CardTitle>
               <Heart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
@@ -219,7 +221,7 @@ const Breeding: React.FC = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3 md:p-6 md:pb-2">
-              <CardTitle className="text-xs md:text-sm font-medium">Total Crías</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium">{t('stats.totalOffspring')}</CardTitle>
               <Heart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
@@ -236,28 +238,28 @@ const Breeding: React.FC = () => {
             <GridTabTrigger
               value="activos"
               icon={<Activity />}
-              label="Activos"
+              label={t('tabs.active')}
               isActive={activeTab === 'activos'}
               onClick={() => setActiveTab('activos')}
             />
             <GridTabTrigger
               value="historial"
               icon={<Archive />}
-              label="Historial"
+              label={t('tabs.history')}
               isActive={activeTab === 'historial'}
               onClick={() => setActiveTab('historial')}
             />
             <GridTabTrigger
               value="calendar"
               icon={<Calendar />}
-              label="Calendario"
+              label={t('tabs.calendar')}
               isActive={activeTab === 'calendar'}
               onClick={() => setActiveTab('calendar')}
             />
             <GridTabTrigger
               value="planning"
               icon={<TrendingUp />}
-              label="Planificación"
+              label={t('tabs.planning')}
               isActive={activeTab === 'planning'}
               onClick={() => setActiveTab('planning')}
             />
@@ -266,14 +268,14 @@ const Breeding: React.FC = () => {
           <TabsContent value="activos">
             <Card>
               <CardHeader>
-                <CardTitle>Apareamientos Activos</CardTitle>
+                <CardTitle>{t('activeBreedings')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <BreedingRecordsList 
                   records={activeRecords} 
                   animalNames={animalNames}
                   onRecordClick={handleRecordClick}
-                  emptyMessage="No hay apareamientos activos en este momento."
+                  emptyMessage={t('empty.active')}
                 />
               </CardContent>
             </Card>
@@ -282,14 +284,14 @@ const Breeding: React.FC = () => {
           <TabsContent value="historial">
             <Card>
               <CardHeader>
-                <CardTitle>Historial de Apareamientos</CardTitle>
+                <CardTitle>{t('breedingHistory')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <BreedingRecordsList 
                   records={completedRecords} 
                   animalNames={animalNames}
                   onRecordClick={handleRecordClick}
-                  emptyMessage="No hay apareamientos completados en el historial."
+                  emptyMessage={t('empty.history')}
                 />
               </CardContent>
             </Card>
@@ -300,7 +302,7 @@ const Breeding: React.FC = () => {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Calendar className="w-5 h-5" />
-                  <span>Vista de Calendario</span>
+                  <span>{t('calendar.view')}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>

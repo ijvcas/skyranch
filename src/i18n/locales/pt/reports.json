@@ -1,6 +1,7 @@
 {
   "title": "Relatórios",
   "subtitle": "Análises e estatísticas da fazenda",
+  "pageTitle": "Relatórios e Análises",
   "dashboard": {
     "overview": "Visão Geral",
     "animalStats": "Estatísticas de Animais",
@@ -27,5 +28,67 @@
     "export": "Exportar",
     "print": "Imprimir",
     "share": "Compartilhar"
+  },
+  "tabs": {
+    "finance": "Finanças",
+    "fieldReports": "Relatórios de Campo",
+    "animals": "Animais",
+    "health": "Saúde"
+  },
+  "stats": {
+    "totalAnimals": "Total de Animais",
+    "averageAge": "Idade Média",
+    "ageUnit": "anos",
+    "recentBirths": "Nascimentos Recentes",
+    "last30Days": "Últimos 30 dias",
+    "species": "Espécies",
+    "totalRecords": "Total de Registros",
+    "upcomingVaccines": "Vacinas Próximas",
+    "next30Days": "Próximos 30 dias",
+    "totalCost": "Custo Total",
+    "averageCost": "Custo Médio"
+  },
+  "charts": {
+    "speciesDistribution": "Distribuição por Espécies",
+    "healthStatus": "Estado de Saúde",
+    "recordTypes": "Tipos de Registros",
+    "monthlyCosts": "Custos por Mês",
+    "cost": "Custo",
+    "salesBySpecies": "Vendas por Espécie",
+    "monthlySales": "Vendas Mensais",
+    "sales": "Vendas",
+    "revenue": "Receita"
+  },
+  "fieldReports": {
+    "title": "Relatórios de Campo",
+    "count": "Relatórios de Campo ({{count}})",
+    "loading": "Carregando relatórios...",
+    "loadError": "Erro ao carregar relatórios",
+    "noReports": "Nenhum relatório de campo registrado",
+    "noReportsDesc": "Os relatórios aparecerão aqui após serem criados",
+    "createdBy": "Criado por",
+    "locationRegistered": "Localização registrada",
+    "status": {
+      "completed": "Completado",
+      "draft": "Rascunho",
+      "in_progress": "Em Andamento"
+    },
+    "type": {
+      "general": "Geral",
+      "pregnancy": "Gravidez",
+      "veterinary": "Veterinário",
+      "health": "Saúde",
+      "infrastructure": "Infraestrutura"
+    }
+  },
+  "errors": {
+    "loadFailed": "Erro ao carregar relatórios. Por favor, tente recarregar a página."
+  },
+  "financial": {
+    "totalSales": "Vendas Totais",
+    "revenues": "Receitas",
+    "averagePrice": "Preço Médio",
+    "outstandingPayments": "Pagamentos Pendentes",
+    "salesThisMonth": "Vendas Este Mês"
   }
 }

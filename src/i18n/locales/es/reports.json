@@ -1,11 +1,12 @@
 {
   "title": "Reportes",
   "subtitle": "Análisis y estadísticas de la finca",
+  "pageTitle": "Reportes y Análisis",
   "dashboard": {
-    "overview": "Resumen General",
+    "overview": "Visión General",
     "animalStats": "Estadísticas de Animales",
     "financialSummary": "Resumen Financiero",
-    "healthMetrics": "Métricas de Salud",
+    "healthMetrics": "Métricas de Saúde",
     "breedingPerformance": "Rendimiento Reproductivo"
   },
   "types": {
@@ -27,5 +28,67 @@
     "export": "Exportar",
     "print": "Imprimir",
     "share": "Compartir"
+  },
+  "tabs": {
+    "finance": "Finanzas",
+    "fieldReports": "Reportes de Campo",
+    "animals": "Animales",
+    "health": "Salud"
+  },
+  "stats": {
+    "totalAnimals": "Total de Animales",
+    "averageAge": "Edad Promedio",
+    "ageUnit": "años",
+    "recentBirths": "Nacimientos Recientes",
+    "last30Days": "Últimos 30 días",
+    "species": "Especies",
+    "totalRecords": "Total Registros",
+    "upcomingVaccines": "Vacunas Próximas",
+    "next30Days": "Próximos 30 días",
+    "totalCost": "Costo Total",
+    "averageCost": "Costo Promedio"
+  },
+  "charts": {
+    "speciesDistribution": "Distribución por Especies",
+    "healthStatus": "Estado de Salud",
+    "recordTypes": "Tipos de Registros",
+    "monthlyCosts": "Costos por Mes",
+    "cost": "Costo",
+    "salesBySpecies": "Ventas por Especie",
+    "monthlySales": "Ventas Mensuales",
+    "sales": "Ventas",
+    "revenue": "Ingresos"
+  },
+  "fieldReports": {
+    "title": "Reportes de Campo",
+    "count": "Reportes de Campo ({{count}})",
+    "loading": "Cargando reportes...",
+    "loadError": "Error al cargar los reportes",
+    "noReports": "No hay reportes de campo registrados",
+    "noReportsDesc": "Los reportes aparecerán aquí una vez que se creen",
+    "createdBy": "Creado por",
+    "locationRegistered": "Ubicación registrada",
+    "status": {
+      "completed": "Completado",
+      "draft": "Borrador",
+      "in_progress": "En Progreso"
+    },
+    "type": {
+      "general": "General",
+      "pregnancy": "Embarazo",
+      "veterinary": "Veterinario",
+      "health": "Salud",
+      "infrastructure": "Infraestructura"
+    }
+  },
+  "errors": {
+    "loadFailed": "Error al cargar los reportes. Por favor, intenta recargar la página."
+  },
+  "financial": {
+    "totalSales": "Ventas Totales",
+    "revenues": "Ingresos",
+    "averagePrice": "Precio Promedio",
+    "outstandingPayments": "Pagos Pendientes",
+    "salesThisMonth": "Ventas Este Mes"
   }
 }

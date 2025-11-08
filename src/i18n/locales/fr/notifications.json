@@ -1,0 +1,34 @@
+{
+  "title": "Centre de Notifications",
+  "backToPanel": "Retour au Tableau de Bord",
+  "unreadCount": "{{count}} notifications non lues",
+  "allRead": "Toutes les notifications sont à jour",
+  "actions": {
+    "markAllRead": "Marquer tout comme lu",
+    "clearAll": "Tout effacer"
+  },
+  "filters": {
+    "title": "Filtres",
+    "search": "Rechercher des notifications...",
+    "allTypes": "Tous les types",
+    "allPriorities": "Toutes les priorités",
+    "type": "Type"
+  },
+  "types": {
+    "vaccine": "Vaccins",
+    "health": "Santé",
+    "breeding": "Reproduction",
+    "weekly_report": "Rapports"
+  },
+  "priorities": {
+    "critical": "Critique",
+    "high": "Élevé",
+    "medium": "Moyen",
+    "low": "Bas"
+  },
+  "tabs": {
+    "unread": "Non lues",
+    "read": "Lues",
+    "all": "Toutes"
+  }
+}
