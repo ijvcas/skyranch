@@ -51,7 +51,8 @@
       "caprino": "Goats",
       "porcino": "Pigs",
       "aviar": "Poultry",
-      "canino": "Dogs"
+      "canino": "Dogs",
+      "caninos": "Dogs"
     }
   },
   "events": {

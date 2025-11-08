@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Search, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SearchFilters {
   name: string;
@@ -27,6 +28,7 @@ interface AdvancedSearchProps {
 }
 
 const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, onClear }) => {
+  const { t } = useTranslation(['animals', 'common']);
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
     name: '',
@@ -75,10 +77,10 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, onClear }) =>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Search className="w-5 h-5" />
-                <span>Búsqueda Avanzada</span>
+                <span>{t('animals:search.advancedSearch')}</span>
                 {hasActiveFilters && (
                   <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                    Filtros activos
+                    {t('animals:search.activeFilters')}
                   </span>
                 )}
               </div>
@@ -90,90 +92,90 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, onClear }) =>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="search-name">Nombre</Label>
+                <Label htmlFor="search-name">{t('animals:form.name')}</Label>
                 <Input
                   id="search-name"
-                  placeholder="Buscar por nombre..."
+                  placeholder={t('common:search.byName')}
                   value={filters.name}
                   onChange={(e) => handleFilterChange('name', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="search-tag">ID/Tag</Label>
+                <Label htmlFor="search-tag">{t('animals:search.idTag')}</Label>
                 <Input
                   id="search-tag"
-                  placeholder="Buscar por ID..."
+                  placeholder={t('common:search.byId')}
                   value={filters.tag}
                   onChange={(e) => handleFilterChange('tag', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Especie</Label>
+                <Label>{t('animals:form.species')}</Label>
                 <Select value={filters.species} onValueChange={(value) => handleFilterChange('species', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar especie" />
+                    <SelectValue placeholder={t('animals:search.selectSpecies')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ovino">Ovino</SelectItem>
-                    <SelectItem value="bovino">Bovino</SelectItem>
-                    <SelectItem value="equino">Equino</SelectItem>
-                    <SelectItem value="porcino">Porcino</SelectItem>
-                    <SelectItem value="caprino">Caprino</SelectItem>
+                    <SelectItem value="ovino">{t('animals:species.ovino')}</SelectItem>
+                    <SelectItem value="bovino">{t('animals:species.bovino')}</SelectItem>
+                    <SelectItem value="equino">{t('animals:species.equino')}</SelectItem>
+                    <SelectItem value="porcino">{t('animals:species.porcino')}</SelectItem>
+                    <SelectItem value="caprino">{t('animals:species.caprino')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="search-breed">Raza</Label>
+                <Label htmlFor="search-breed">{t('animals:form.breed')}</Label>
                 <Input
                   id="search-breed"
-                  placeholder="Buscar por raza..."
+                  placeholder={t('common:search.byBreed')}
                   value={filters.breed}
                   onChange={(e) => handleFilterChange('breed', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Estado de Salud</Label>
+                <Label>{t('animals:search.healthStatus')}</Label>
                 <Select value={filters.healthStatus} onValueChange={(value) => handleFilterChange('healthStatus', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Estado de salud" />
+                    <SelectValue placeholder={t('animals:search.healthStatusPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="healthy">Saludable</SelectItem>
-                    <SelectItem value="sick">Enfermo</SelectItem>
-                    <SelectItem value="pregnant">Gestante</SelectItem>
-                    <SelectItem value="treatment">En Tratamiento</SelectItem>
+                    <SelectItem value="healthy">{t('animals:status.healthy')}</SelectItem>
+                    <SelectItem value="sick">{t('animals:status.sick')}</SelectItem>
+                    <SelectItem value="pregnant">{t('animals:status.pregnant')}</SelectItem>
+                    <SelectItem value="treatment">{t('animals:status.treatment')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Género</Label>
+                <Label>{t('animals:form.gender')}</Label>
                 <Select value={filters.gender} onValueChange={(value) => handleFilterChange('gender', value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar género" />
+                    <SelectValue placeholder={t('animals:search.selectGender')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="male">Macho</SelectItem>
-                    <SelectItem value="female">Hembra</SelectItem>
+                    <SelectItem value="male">{t('animals:gender.male')}</SelectItem>
+                    <SelectItem value="female">{t('animals:gender.female')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Edad (años)</Label>
+                <Label>{t('animals:search.ageYears')}</Label>
                 <div className="flex space-x-2">
                   <Input
-                    placeholder="Mín"
+                    placeholder={t('animals:search.min')}
                     value={filters.ageMin}
                     onChange={(e) => handleFilterChange('ageMin', e.target.value)}
                     type="number"
                   />
                   <Input
-                    placeholder="Máx"
+                    placeholder={t('animals:search.max')}
                     value={filters.ageMax}
                     onChange={(e) => handleFilterChange('ageMax', e.target.value)}
                     type="number"
@@ -182,16 +184,16 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, onClear }) =>
               </div>
 
               <div className="space-y-2">
-                <Label>Peso (kg)</Label>
+                <Label>{t('animals:search.weightKg')}</Label>
                 <div className="flex space-x-2">
                   <Input
-                    placeholder="Mín"
+                    placeholder={t('animals:search.min')}
                     value={filters.weightMin}
                     onChange={(e) => handleFilterChange('weightMin', e.target.value)}
                     type="number"
                   />
                   <Input
-                    placeholder="Máx"
+                    placeholder={t('animals:search.max')}
                     value={filters.weightMax}
                     onChange={(e) => handleFilterChange('weightMax', e.target.value)}
                     type="number"
@@ -203,11 +205,11 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch, onClear }) =>
             <div className="flex space-x-2 pt-4 border-t">
               <Button onClick={handleSearch} className="bg-green-600 hover:bg-green-700">
                 <Search className="w-4 h-4 mr-2" />
-                Buscar
+                {t('common:actions.search')}
               </Button>
               <Button variant="outline" onClick={handleClear}>
                 <X className="w-4 h-4 mr-2" />
-                Limpiar Filtros
+                {t('animals:search.clearFilters')}
               </Button>
             </div>
           </CardContent>

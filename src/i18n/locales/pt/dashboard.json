@@ -51,7 +51,8 @@
       "caprino": "Caprinos",
       "porcino": "Suínos",
       "aviar": "Aves",
-      "canino": "Caninos"
+      "canino": "Caninos",
+      "caninos": "Caninos"
     }
   },
   "events": {

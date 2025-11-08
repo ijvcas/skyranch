@@ -16,6 +16,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteAnimal } from '@/services/animalService';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface AnimalDeleteDialogProps {
   animalId: string;
@@ -35,14 +36,15 @@ const AnimalDeleteDialog: React.FC<AnimalDeleteDialogProps> = ({
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(['animals', 'common']);
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteAnimal(animalId),
     onSuccess: (success) => {
       if (success) {
         toast({
-          title: "Animal eliminado",
-          description: `${animalName} ha sido eliminado exitosamente.`,
+          title: t('animals:delete.success'),
+          description: t('animals:delete.successDesc', { name: animalName }),
         });
         
         // Invalidate queries to refresh the data
@@ -55,8 +57,8 @@ const AnimalDeleteDialog: React.FC<AnimalDeleteDialogProps> = ({
         }
       } else {
         toast({
-          title: "Error",
-          description: "No se pudo eliminar el animal. Inténtalo de nuevo.",
+          title: t('common:common.error'),
+          description: t('animals:delete.failed'),
           variant: "destructive",
         });
       }
@@ -64,8 +66,8 @@ const AnimalDeleteDialog: React.FC<AnimalDeleteDialogProps> = ({
     onError: (error) => {
       console.error('Error deleting animal:', error);
       toast({
-        title: "Error",
-        description: "Ocurrió un error al eliminar el animal.",
+        title: t('common:common.error'),
+        description: t('animals:delete.error'),
         variant: "destructive",
       });
     },
@@ -77,16 +79,15 @@ const AnimalDeleteDialog: React.FC<AnimalDeleteDialogProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Trash2 className="w-5 h-5 text-red-600" />
-            Eliminar Animal
+            {t('animals:delete.title')}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            ¿Estás seguro de que quieres eliminar a <strong>{animalName}</strong>? 
-            Esta acción no se puede deshacer y se perderán todos los datos asociados con este animal.
+            {t('animals:delete.confirmMessage', { name: animalName })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleteMutation.isPending}>
-            Cancelar
+            {t('common:actions.cancel')}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => deleteMutation.mutate()}
@@ -96,12 +97,12 @@ const AnimalDeleteDialog: React.FC<AnimalDeleteDialogProps> = ({
             {deleteMutation.isPending ? (
               <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Eliminando...
+                {t('animals:delete.deleting')}
               </div>
             ) : (
               <>
                 <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar
+                {t('common:actions.delete')}
               </>
             )}
           </AlertDialogAction>

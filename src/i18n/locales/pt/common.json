@@ -43,6 +43,7 @@
     "create": "Criar",
     "update": "Atualizar",
     "refresh": "Atualizar",
+    "forceRefresh": "Forçar Atualização",
     "viewMore": "Ver mais",
     "saving": "Salvando...",
     "loading": "Carregando..."
