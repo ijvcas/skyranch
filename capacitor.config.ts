@@ -46,6 +46,16 @@ const config: CapacitorConfig = {
         ]
       }
     },
+    BarcodeScanner: {
+      ios: {
+        // Permissions are localized via Info.plist
+      },
+      android: {
+        permissions: [
+          "android.permission.CAMERA"
+        ]
+      }
+    },
     NativeBiometric: {
       ios: {
         // Permissions are localized via Info.plist and .lproj/InfoPlist.strings files

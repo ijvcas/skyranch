@@ -1,0 +1,56 @@
+{
+  "title": "Inventory",
+  "subtitle": "Track your feed, medicine, and supplies",
+  "addItem": "Add Item",
+  "scan": "Scan",
+  "totalItems": "Total Items",
+  "lowStock": "Low Stock",
+  "categories": "Categories",
+  "adjustStock": "Adjust Stock",
+  "recordUsage": "Record Usage",
+  "recordPurchase": "Record Purchase",
+  "category": {
+    "feed": "Feed",
+    "medicine": "Medicine",
+    "supplement": "Supplements",
+    "equipment": "Equipment",
+    "other": "Other"
+  },
+  "transactionType": {
+    "purchase": "Purchase (Add)",
+    "usage": "Usage (Remove)",
+    "waste": "Waste (Remove)",
+    "adjustment": "Adjustment"
+  },
+  "fields": {
+    "name": "Item Name",
+    "category": "Category",
+    "unit": "Unit",
+    "currentQuantity": "Current Quantity",
+    "minQuantity": "Min Quantity",
+    "maxQuantity": "Max Quantity",
+    "unitCost": "Unit Cost",
+    "barcode": "Barcode",
+    "supplier": "Supplier",
+    "storageLocation": "Storage Location",
+    "expiryDate": "Expiry Date",
+    "notes": "Notes",
+    "quantity": "Quantity",
+    "totalCost": "Total Cost"
+  },
+  "alerts": {
+    "lowStock": "Low Stock Alert",
+    "lowStockMessage": "The following items are running low:",
+    "expiringSoon": "Expiring soon",
+    "outOfStock": "Out of stock"
+  },
+  "messages": {
+    "itemAdded": "Item added successfully",
+    "itemUpdated": "Item updated successfully",
+    "itemDeleted": "Item deleted successfully",
+    "transactionRecorded": "Transaction recorded successfully",
+    "scanSuccess": "Found: {{name}}",
+    "scanNotFound": "No item found with this barcode. Add it?",
+    "scanError": "Failed to scan barcode"
+  }
+}

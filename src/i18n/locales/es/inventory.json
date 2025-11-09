@@ -1,0 +1,56 @@
+{
+  "title": "Inventario",
+  "subtitle": "Rastrea tu alimento, medicinas y suministros",
+  "addItem": "Agregar Artículo",
+  "scan": "Escanear",
+  "totalItems": "Total de Artículos",
+  "lowStock": "Bajo Stock",
+  "categories": "Categorías",
+  "adjustStock": "Ajustar Stock",
+  "recordUsage": "Registrar Uso",
+  "recordPurchase": "Registrar Compra",
+  "category": {
+    "feed": "Alimento",
+    "medicine": "Medicina",
+    "supplement": "Suplementos",
+    "equipment": "Equipo",
+    "other": "Otro"
+  },
+  "transactionType": {
+    "purchase": "Compra (Agregar)",
+    "usage": "Uso (Remover)",
+    "waste": "Desperdicio (Remover)",
+    "adjustment": "Ajuste"
+  },
+  "fields": {
+    "name": "Nombre del Artículo",
+    "category": "Categoría",
+    "unit": "Unidad",
+    "currentQuantity": "Cantidad Actual",
+    "minQuantity": "Cantidad Mínima",
+    "maxQuantity": "Cantidad Máxima",
+    "unitCost": "Costo Unitario",
+    "barcode": "Código de Barras",
+    "supplier": "Proveedor",
+    "storageLocation": "Ubicación de Almacenamiento",
+    "expiryDate": "Fecha de Vencimiento",
+    "notes": "Notas",
+    "quantity": "Cantidad",
+    "totalCost": "Costo Total"
+  },
+  "alerts": {
+    "lowStock": "Alerta de Bajo Stock",
+    "lowStockMessage": "Los siguientes artículos se están agotando:",
+    "expiringSoon": "Vence pronto",
+    "outOfStock": "Sin stock"
+  },
+  "messages": {
+    "itemAdded": "Artículo agregado exitosamente",
+    "itemUpdated": "Artículo actualizado exitosamente",
+    "itemDeleted": "Artículo eliminado exitosamente",
+    "transactionRecorded": "Transacción registrada exitosamente",
+    "scanSuccess": "Encontrado: {{name}}",
+    "scanNotFound": "No se encontró artículo con este código de barras. ¿Agregarlo?",
+    "scanError": "Error al escanear código de barras"
+  }
+}

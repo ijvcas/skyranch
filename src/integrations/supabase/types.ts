@@ -1334,6 +1334,151 @@ export type Database = {
           },
         ]
       }
+      inventory_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          id: string
+          item_id: string
+          triggered_at: string | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          id?: string
+          item_id: string
+          triggered_at?: string | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          id?: string
+          item_id?: string
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_alerts_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_items: {
+        Row: {
+          barcode: string | null
+          category: string
+          created_at: string | null
+          current_quantity: number | null
+          expiry_date: string | null
+          id: string
+          max_quantity: number | null
+          min_quantity: number | null
+          name: string
+          notes: string | null
+          storage_location: string | null
+          supplier: string | null
+          unit: string
+          unit_cost: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          barcode?: string | null
+          category: string
+          created_at?: string | null
+          current_quantity?: number | null
+          expiry_date?: string | null
+          id?: string
+          max_quantity?: number | null
+          min_quantity?: number | null
+          name: string
+          notes?: string | null
+          storage_location?: string | null
+          supplier?: string | null
+          unit: string
+          unit_cost?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          barcode?: string | null
+          category?: string
+          created_at?: string | null
+          current_quantity?: number | null
+          expiry_date?: string | null
+          id?: string
+          max_quantity?: number | null
+          min_quantity?: number | null
+          name?: string
+          notes?: string | null
+          storage_location?: string | null
+          supplier?: string | null
+          unit?: string
+          unit_cost?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inventory_transactions: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          id: string
+          item_id: string
+          notes: string | null
+          quantity: number
+          reference_id: string | null
+          reference_type: string | null
+          total_cost: number | null
+          transaction_type: string
+          unit_cost: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          id?: string
+          item_id: string
+          notes?: string | null
+          quantity: number
+          reference_id?: string | null
+          reference_type?: string | null
+          total_cost?: number | null
+          transaction_type: string
+          unit_cost?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          item_id?: string
+          notes?: string | null
+          quantity?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          total_cost?: number | null
+          transaction_type?: string
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_transactions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       local_reminders: {
         Row: {
           animal_id: string | null
@@ -2039,6 +2184,142 @@ export type Database = {
         }
         Relationships: []
       }
+      task_attachments: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_type: string
+          file_url: string
+          id: string
+          task_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_type: string
+          file_url: string
+          id?: string
+          task_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          task_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_attachments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_comments: {
+        Row: {
+          comment: string
+          created_at: string | null
+          id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string | null
+          id?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string | null
+          id?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          animal_ids: string[] | null
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string
+          id: string
+          lot_id: string | null
+          metadata: Json | null
+          priority: string | null
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
+          recurring: boolean | null
+          status: string | null
+          task_type: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          animal_ids?: string[] | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          lot_id?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          recurring?: boolean | null
+          status?: string | null
+          task_type: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          animal_ids?: string[] | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          lot_id?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          recurring?: boolean | null
+          status?: string | null
+          task_type?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_connection_logs: {
         Row: {
           browser: string | null
@@ -2185,6 +2466,75 @@ export type Database = {
           granted_by?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      weather_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          alert_type: string
+          created_at: string | null
+          id: string
+          message: string
+          severity: string
+          user_id: string
+          weather_data: Json | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          alert_type: string
+          created_at?: string | null
+          id?: string
+          message: string
+          severity: string
+          user_id: string
+          weather_data?: Json | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          alert_type?: string
+          created_at?: string | null
+          id?: string
+          message?: string
+          severity?: string
+          user_id?: string
+          weather_data?: Json | null
+        }
+        Relationships: []
+      }
+      weather_automation_rules: {
+        Row: {
+          action_config: Json | null
+          action_type: string
+          condition: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          rule_type: string
+          threshold: number
+          user_id: string
+        }
+        Insert: {
+          action_config?: Json | null
+          action_type: string
+          condition: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_type: string
+          threshold: number
+          user_id: string
+        }
+        Update: {
+          action_config?: Json | null
+          action_type?: string
+          condition?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_type?: string
+          threshold?: number
           user_id?: string
         }
         Relationships: []

@@ -195,3 +195,16 @@
     z-index: 1;
   }
 }
+
+/* Scanner active state - hides everything except scanner */
+body.scanner-active {
+  background-color: transparent !important;
+}
+
+body.scanner-active * {
+  visibility: hidden;
+}
+
+body.scanner-active .scanner-ui {
+  visibility: visible;
+}

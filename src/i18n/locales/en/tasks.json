@@ -1,0 +1,42 @@
+{
+  "title": "Tasks",
+  "subtitle": "Manage your farm tasks and activities",
+  "new": "New Task",
+  "pending": "Pending",
+  "inProgress": "In Progress",
+  "completed": "Completed",
+  "cancelled": "Cancelled",
+  "all": "All",
+  "create": "Create Task",
+  "edit": "Edit Task",
+  "delete": "Delete Task",
+  "complete": "Complete",
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "type": {
+    "feeding": "Feeding",
+    "health": "Health",
+    "maintenance": "Maintenance",
+    "breeding": "Breeding",
+    "custom": "Custom"
+  },
+  "fields": {
+    "title": "Title",
+    "description": "Description",
+    "type": "Type",
+    "priority": "Priority",
+    "dueDate": "Due Date",
+    "assignedTo": "Assigned To",
+    "notes": "Notes"
+  },
+  "messages": {
+    "created": "Task created successfully",
+    "updated": "Task updated successfully",
+    "deleted": "Task deleted successfully",
+    "completed": "Task completed successfully"
+  }
+}

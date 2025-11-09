@@ -1,0 +1,42 @@
+{
+  "title": "Tareas",
+  "subtitle": "Gestiona las tareas y actividades de tu rancho",
+  "new": "Nueva Tarea",
+  "pending": "Pendiente",
+  "inProgress": "En Progreso",
+  "completed": "Completadas",
+  "cancelled": "Canceladas",
+  "all": "Todas",
+  "create": "Crear Tarea",
+  "edit": "Editar Tarea",
+  "delete": "Eliminar Tarea",
+  "complete": "Completar",
+  "priority": {
+    "low": "Baja",
+    "medium": "Media",
+    "high": "Alta",
+    "urgent": "Urgente"
+  },
+  "type": {
+    "feeding": "Alimentación",
+    "health": "Salud",
+    "maintenance": "Mantenimiento",
+    "breeding": "Reproducción",
+    "custom": "Personalizado"
+  },
+  "fields": {
+    "title": "Título",
+    "description": "Descripción",
+    "type": "Tipo",
+    "priority": "Prioridad",
+    "dueDate": "Fecha de Vencimiento",
+    "assignedTo": "Asignado A",
+    "notes": "Notas"
+  },
+  "messages": {
+    "created": "Tarea creada exitosamente",
+    "updated": "Tarea actualizada exitosamente",
+    "deleted": "Tarea eliminada exitosamente",
+    "completed": "Tarea completada exitosamente"
+  }
+}

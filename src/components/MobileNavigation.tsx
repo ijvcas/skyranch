@@ -11,7 +11,8 @@ import {
   Heart,
   Bell,
   MapPin,
-  DollarSign
+  DollarSign,
+  Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTouch } from '@/hooks/use-touch';
@@ -25,9 +26,9 @@ const MobileNavigation = () => {
   const navItems = [
     { to: '/dashboard', icon: Home, label: t('nav.dashboard') },
     { to: '/animals', icon: Users, label: t('nav.animals') },
-    { to: '/lots', icon: MapPin, label: t('nav.lots') },
-    { to: '/breeding', icon: Heart, label: t('nav.breeding') },
-    { to: '/finances', icon: DollarSign, label: t('nav.finances') },
+    { to: '/tasks', icon: FileText, label: 'Tasks' },
+    { to: '/inventory', icon: Package, label: 'Inventory' },
+    { to: '/calendar', icon: Calendar, label: t('nav.calendar') },
   ];
 
   // Enhanced touch handler with haptic feedback

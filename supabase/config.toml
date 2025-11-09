@@ -54,3 +54,6 @@ verify_jwt = true
 [functions.send-user-invitation]
 verify_jwt = true
 
+[functions.weather-monitor]
+verify_jwt = false
+

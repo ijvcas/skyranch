@@ -42,6 +42,8 @@ const Notifications = lazy(() => import('@/pages/Notifications'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Pricing = lazy(() => import('@/pages/Pricing'));
 const Finances = lazy(() => import('@/pages/Finances'));
+const Tasks = lazy(() => import('@/pages/Tasks'));
+const Inventory = lazy(() => import('@/pages/Inventory'));
 
 // Keep lightweight pages eager-loaded
 import GmailCallback from '@/pages/GmailCallback';
@@ -254,6 +256,16 @@ function AppContent() {
                   <Route path="/health-records" element={
                     <ProtectedRoute>
                       <HealthRecords />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/tasks" element={
+                    <ProtectedRoute>
+                      <Tasks />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/inventory" element={
+                    <ProtectedRoute>
+                      <Inventory />
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />
