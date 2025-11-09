@@ -1,22 +1,22 @@
-/* Camera */
-"NSCameraUsageDescription" = "FARMIKA necesita acceso a la cámara para tomar fotos de animales";
+/* 
+  InfoPlist.strings (Spanish)
+  FARMIKA
+  
+  Localized permission strings for iOS
+*/
 
-/* Photo Library */
-"NSPhotoLibraryUsageDescription" = "FARMIKA necesita acceso a la galería para seleccionar fotos de animales";
-"NSPhotoLibraryAddUsageDescription" = "FARMIKA necesita permiso para guardar fotos en tu galería";
-
-/* Biometrics */
-"NSFaceIDUsageDescription" = "FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta";
-
-/* Location */
-"NSLocationWhenInUseUsageDescription" = "FARMIKA necesita acceso a tu ubicación para registrar la ubicación de animales y eventos";
-
-/* Contacts */
-"NSContactsUsageDescription" = "FARMIKA necesita acceso a tus contactos para guardar información de veterinarios y compradores";
-
-/* Calendar */
-"NSCalendarsUsageDescription" = "FARMIKA necesita acceso a tu calendario para sincronizar eventos de tu granja";
-
-/* App Name */
 "CFBundleDisplayName" = "FARMIKA";
 "CFBundleName" = "FARMIKA";
+
+/* Permission descriptions */
+"NSFaceIDUsageDescription" = "FARMIKA usa Face ID para acceso rápido y seguro a tu cuenta";
+"NSCameraUsageDescription" = "FARMIKA necesita acceso a la cámara para escanear códigos de barras y QR de animales e inventario";
+"NSPhotoLibraryUsageDescription" = "FARMIKA necesita acceso a tus fotos para adjuntar imágenes de animales y reportes de campo";
+"NSPhotoLibraryAddUsageDescription" = "FARMIKA necesita permiso para guardar fotos de animales en tu galería";
+"NSLocationWhenInUseUsageDescription" = "FARMIKA necesita acceso a tu ubicación para registrar la ubicación de animales y eventos en el campo";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "FARMIKA necesita acceso a tu ubicación para registrar reportes de campo con coordenadas GPS";
+"NSUserNotificationsUsageDescription" = "FARMIKA necesita enviar notificaciones para recordarte eventos importantes sobre tus animales";
+"NSContactsUsageDescription" = "FARMIKA necesita acceso a tus contactos para que puedas guardar información de veterinarios y compradores";
+"NSCalendarsUsageDescription" = "FARMIKA necesita acceso a tu calendario para sincronizar eventos de tu granja";
+"NSRemindersUsageDescription" = "FARMIKA necesita acceso a recordatorios para crear recordatorios de eventos importantes";
+"NSLocalNetworkUsageDescription" = "FARMIKA necesita acceso a la red local para sincronizar datos con el servidor de la finca";

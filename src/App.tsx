@@ -172,7 +172,8 @@ function AppContent() {
         <Suspense fallback={<div className="p-6 text-center">Cargando…</div>}>
           <Routes>
                   <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
+                  {/* Public registration disabled - invitation only */}
+                  {/* <Route path="/register" element={<Register />} /> */}
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/accept-invitation/:token" element={<AcceptInvitation />} />

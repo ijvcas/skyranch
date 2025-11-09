@@ -1,22 +1,22 @@
-/* Camera */
-"NSCameraUsageDescription" = "FARMIKA needs camera access to take photos of animals";
+/* 
+  InfoPlist.strings (English)
+  FARMIKA
+  
+  Localized permission strings for iOS
+*/
 
-/* Photo Library */
-"NSPhotoLibraryUsageDescription" = "FARMIKA needs access to your photo library to select animal photos";
-"NSPhotoLibraryAddUsageDescription" = "FARMIKA needs permission to save photos to your library";
-
-/* Biometrics */
-"NSFaceIDUsageDescription" = "FARMIKA uses Face ID for quick and secure access to your account";
-
-/* Location */
-"NSLocationWhenInUseUsageDescription" = "FARMIKA needs location access to record animal and field event locations";
-
-/* Contacts */
-"NSContactsUsageDescription" = "FARMIKA needs access to your contacts to save veterinarian and buyer information";
-
-/* Calendar */
-"NSCalendarsUsageDescription" = "FARMIKA needs calendar access to sync your farm events";
-
-/* App Name */
 "CFBundleDisplayName" = "FARMIKA";
 "CFBundleName" = "FARMIKA";
+
+/* Permission descriptions */
+"NSFaceIDUsageDescription" = "FARMIKA uses Face ID for quick and secure access to your account";
+"NSCameraUsageDescription" = "FARMIKA needs camera access to scan animal and inventory barcodes and QR codes";
+"NSPhotoLibraryUsageDescription" = "FARMIKA needs access to your photos to attach images of animals and field reports";
+"NSPhotoLibraryAddUsageDescription" = "FARMIKA needs permission to save animal photos to your gallery";
+"NSLocationWhenInUseUsageDescription" = "FARMIKA needs access to your location to record the location of animals and field events";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "FARMIKA needs access to your location to record field reports with GPS coordinates";
+"NSUserNotificationsUsageDescription" = "FARMIKA needs to send notifications to remind you of important events about your animals";
+"NSContactsUsageDescription" = "FARMIKA needs access to your contacts so you can save information about veterinarians and buyers";
+"NSCalendarsUsageDescription" = "FARMIKA needs access to your calendar to sync farm events";
+"NSRemindersUsageDescription" = "FARMIKA needs access to reminders to create reminders for important events";
+"NSLocalNetworkUsageDescription" = "FARMIKA needs access to the local network to sync data with the farm server";

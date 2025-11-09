@@ -91,7 +91,7 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
           <Select
             value={formData.role}
             onValueChange={(value: 'admin' | 'manager' | 'worker') => onInputChange('role', value)}
-            disabled={isDisabled || isAdminUser}
+            disabled={isDisabled}
           >
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar rol" />
@@ -102,11 +102,9 @@ const UserEditForm: React.FC<UserEditFormProps> = ({
               <SelectItem value="worker">Trabajador</SelectItem>
             </SelectContent>
           </Select>
-          {isAdminUser && (
-            <p className="text-xs text-gray-500">
-              No se puede cambiar el rol de usuarios administradores principales.
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground">
+            Solo los administradores pueden cambiar roles de usuarios.
+          </p>
         </div>
 
         <div className="flex items-center space-x-2">

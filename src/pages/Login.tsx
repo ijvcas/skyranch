@@ -445,18 +445,10 @@ const Login = () => {
             </Button>
           </div>
 
-          <div className="mt-2 text-center">
-            <p className="text-base text-gray-600">
-              {t('login.noAccount')}{' '}
-              <Button 
-                variant="link" 
-                className="p-0 text-green-600 text-base font-semibold"
-                onClick={() => navigate('/register')}
-                disabled={isSubmitting}
-              >
-                {t('login.register')}
-              </Button>
-            </p>
+          {/* Invitation-only message */}
+          <div className="mt-4 text-center text-sm text-muted-foreground space-y-1">
+            <p className="font-medium">{t('login.invitationOnly')}</p>
+            <p>{t('login.contactAdmin')}</p>
           </div>
         </CardContent>
       </Card>

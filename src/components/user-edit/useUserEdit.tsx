@@ -65,6 +65,35 @@ export const useUserEdit = ({ user, onClose }: UseUserEditProps) => {
     },
   });
 
+  // Role change mutation - calls edge function for secure role updates
+  const changeRoleMutation = useMutation({
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: string }) => {
+      const { data, error } = await supabase.functions.invoke('change-user-role', {
+        body: {
+          targetUserId: userId,
+          newRole: newRole
+        }
+      });
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['app-users'] });
+      toast({
+        title: 'Rol actualizado',
+        description: 'El rol del usuario ha sido actualizado exitosamente',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo actualizar el rol',
+        variant: 'destructive'
+      });
+    }
+  });
+
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
@@ -91,16 +120,24 @@ export const useUserEdit = ({ user, onClose }: UseUserEditProps) => {
       return;
     }
     
-    // Prevent editing super admin users' roles (check if current user is admin)
+    // Check if user is admin
     const { data: currentUserRole } = await supabase.rpc('get_current_app_role');
-    const isAdminUser = user.role === 'admin' && currentUserRole !== 'admin';
+    const isCurrentUserAdmin = currentUserRole === 'admin';
+    const isAdminUser = user.role === 'admin';
     
-    // Include phone in update data
+    // If role changed and current user is admin, use edge function
+    if (isCurrentUserAdmin && formData.role !== user.role) {
+      changeRoleMutation.mutate({
+        userId: user.id,
+        newRole: formData.role
+      });
+    }
+    
+    // Update basic info (not role - that's handled separately)
     const updateData: Partial<AppUser> = {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
-      role: isAdminUser ? user.role : formData.role,
       is_active: formData.is_active
     };
 
@@ -117,6 +154,7 @@ export const useUserEdit = ({ user, onClose }: UseUserEditProps) => {
     handleInputChange,
     handleSubmit,
     updateMutation,
+    changeRoleMutation,
     isAdminUser
   };
 };
