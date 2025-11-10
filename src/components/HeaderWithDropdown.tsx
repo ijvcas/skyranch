@@ -13,7 +13,8 @@ import {
   ChevronDown,
   LogOut,
   X,
-  DollarSign
+  DollarSign,
+  Package
 } from 'lucide-react';
 import {
   Sheet,
@@ -49,6 +50,8 @@ const HeaderWithDropdown = () => {
     { to: '/lots', icon: MapPin, label: t('nav.lots') },
     { to: '/breeding', icon: Heart, label: t('nav.breeding') },
     { to: '/calendar', icon: Calendar, label: t('nav.calendar') },
+    { to: '/tasks', icon: FileText, label: t('nav.activities') },
+    { to: '/inventory', icon: Package, label: t('nav.inventory') },
     { to: '/finances', icon: DollarSign, label: t('nav.finances') },
     { to: '/reports', icon: FileText, label: t('nav.reports') },
     { to: '/notifications', icon: Bell, label: t('nav.notifications') },
