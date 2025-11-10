@@ -22,6 +22,7 @@ import weatherConditionsES from './locales/es/weatherConditions.json';
 import pricingES from './locales/es/pricing.json';
 import aiAssistantES from './locales/es/aiAssistant.json';
 import emailES from './locales/es/email.json';
+import tasksES from './locales/es/tasks.json';
 
 import commonEN from './locales/en/common.json';
 import animalsEN from './locales/en/animals.json';
@@ -41,6 +42,7 @@ import weatherConditionsEN from './locales/en/weatherConditions.json';
 import pricingEN from './locales/en/pricing.json';
 import aiAssistantEN from './locales/en/aiAssistant.json';
 import emailEN from './locales/en/email.json';
+import tasksEN from './locales/en/tasks.json';
 
 import commonPT from './locales/pt/common.json';
 import animalsPT from './locales/pt/animals.json';
@@ -60,6 +62,7 @@ import weatherConditionsPT from './locales/pt/weatherConditions.json';
 import pricingPT from './locales/pt/pricing.json';
 import aiAssistantPT from './locales/pt/aiAssistant.json';
 import emailPT from './locales/pt/email.json';
+import tasksPT from './locales/pt/tasks.json';
 
 import commonFR from './locales/fr/common.json';
 import animalsFR from './locales/fr/animals.json';
@@ -79,6 +82,7 @@ import weatherConditionsFR from './locales/fr/weatherConditions.json';
 import pricingFR from './locales/fr/pricing.json';
 import aiAssistantFR from './locales/fr/aiAssistant.json';
 import emailFR from './locales/fr/email.json';
+import tasksFR from './locales/fr/tasks.json';
 
 const resources = {
   es: {
@@ -99,7 +103,8 @@ const resources = {
     weatherConditions: weatherConditionsES,
     pricing: pricingES,
     aiAssistant: aiAssistantES,
-    email: emailES
+    email: emailES,
+    tasks: tasksES
   },
   en: {
     common: commonEN,
@@ -119,7 +124,8 @@ const resources = {
     weatherConditions: weatherConditionsEN,
     pricing: pricingEN,
     aiAssistant: aiAssistantEN,
-    email: emailEN
+    email: emailEN,
+    tasks: tasksEN
   },
   pt: {
     common: commonPT,
@@ -139,7 +145,8 @@ const resources = {
     weatherConditions: weatherConditionsPT,
     pricing: pricingPT,
     aiAssistant: aiAssistantPT,
-    email: emailPT
+    email: emailPT,
+    tasks: tasksPT
   },
   fr: {
     common: commonFR,
@@ -159,7 +166,8 @@ const resources = {
     weatherConditions: weatherConditionsFR,
     pricing: pricingFR,
     aiAssistant: aiAssistantFR,
-    email: emailFR
+    email: emailFR,
+    tasks: tasksFR
   }
 };
 
@@ -172,7 +180,7 @@ i18n
     fallbackLng: 'es',
     supportedLngs: ['es', 'en', 'pt', 'fr'],
     defaultNS: 'common',
-    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots', 'notifications', 'weather', 'weatherConditions', 'pricing', 'aiAssistant', 'email'],
+    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots', 'notifications', 'weather', 'weatherConditions', 'pricing', 'aiAssistant', 'email', 'tasks'],
     interpolation: {
       escapeValue: false
     },

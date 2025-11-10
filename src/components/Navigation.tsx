@@ -11,7 +11,8 @@ import {
   Heart,
   Bell,
   MapPin,
-  DollarSign
+  DollarSign,
+  Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NotificationBell from './NotificationBell';
@@ -30,7 +31,7 @@ const Navigation = () => {
     { to: '/breeding', icon: Heart, label: t('nav.breeding') },
     { to: '/calendar', icon: Calendar, label: t('nav.calendar') },
     { to: '/tasks', icon: FileText, label: t('nav.activities') },
-    { to: '/inventory', icon: Users, label: t('nav.inventory') },
+    { to: '/inventory', icon: Package, label: t('nav.inventory') },
     { to: '/finances', icon: DollarSign, label: t('nav.finances') },
     { to: '/reports', icon: FileText, label: t('nav.reports') },
     { to: '/notifications', icon: Bell, label: t('nav.notifications') },
