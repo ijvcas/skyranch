@@ -29,7 +29,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ImageUpload } from '@/components/image-upload';
 import { useInventory } from '@/hooks/useInventory';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload, X, FileText } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const inventoryItemSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -45,6 +47,7 @@ const inventoryItemSchema = z.object({
   expiry_date: z.string().optional(),
   notes: z.string().optional(),
   image: z.string().optional(),
+  invoice_url: z.string().optional(),
 });
 
 type InventoryItemFormData = z.infer<typeof inventoryItemSchema>;
@@ -57,7 +60,10 @@ interface InventoryItemDialogProps {
 export default function InventoryItemDialog({ open, onOpenChange }: InventoryItemDialogProps) {
   const { t } = useTranslation('inventory');
   const { createItem } = useInventory();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const [uploadingInvoice, setUploadingInvoice] = useState(false);
 
   const form = useForm<InventoryItemFormData>({
     resolver: zodResolver(inventoryItemSchema),
@@ -75,14 +81,89 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
       expiry_date: '',
       notes: '',
       image: '',
+      invoice_url: '',
     },
   });
+
+  const handleInvoiceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload an image (JPG, PNG) or PDF file',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Please upload a file smaller than 10MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setInvoiceFile(file);
+  };
+
+  const uploadInvoiceToStorage = async (file: File): Promise<string | null> => {
+    try {
+      setUploadingInvoice(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `invoices/${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('financial-receipts')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('financial-receipts')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading invoice:', error);
+      toast({
+        title: 'Upload failed',
+        description: 'Failed to upload invoice. Please try again.',
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setUploadingInvoice(false);
+    }
+  };
+
+  const handleRemoveInvoice = () => {
+    setInvoiceFile(null);
+    form.setValue('invoice_url', '');
+  };
 
   const onSubmit = async (data: InventoryItemFormData) => {
     try {
       setIsSubmitting(true);
-      // Remove image from submission data as it's not in the database schema
-      const { image, ...itemData } = data;
+      
+      // Upload invoice if present
+      let invoiceUrl = data.invoice_url;
+      if (invoiceFile) {
+        const uploadedUrl = await uploadInvoiceToStorage(invoiceFile);
+        if (uploadedUrl) {
+          invoiceUrl = uploadedUrl;
+        }
+      }
+      
+      // Remove image and invoice_url from submission data as they're not in the database schema
+      const { image, invoice_url, ...itemData } = data;
       // Type assertion is safe here because zod validation ensures required fields are present
       await createItem(itemData as Omit<typeof itemData, 'image'> & { 
         name: string; 
@@ -91,6 +172,7 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
         current_quantity: number;
       });
       form.reset();
+      setInvoiceFile(null);
       onOpenChange(false);
     } catch (error) {
       console.error('Error creating inventory item:', error);
@@ -330,6 +412,57 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
                 </FormItem>
               )}
             />
+
+            <FormItem>
+              <FormLabel>{t('fields.invoice', 'Invoice/Receipt')}</FormLabel>
+              <FormControl>
+                <div className="space-y-2">
+                  {invoiceFile ? (
+                    <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                      <span className="flex-1 text-sm truncate">{invoiceFile.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveInvoice}
+                        disabled={isSubmitting}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={handleInvoiceUpload}
+                        disabled={isSubmitting || uploadingInvoice}
+                        className="hidden"
+                        id="invoice-upload"
+                      />
+                      <label htmlFor="invoice-upload" className="flex-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                          disabled={isSubmitting || uploadingInvoice}
+                          asChild
+                        >
+                          <span>
+                            <Upload className="mr-2 h-4 w-4" />
+                            {uploadingInvoice ? t('fields.uploading', 'Uploading...') : t('fields.uploadInvoice', 'Upload Invoice/Receipt')}
+                          </span>
+                        </Button>
+                      </label>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {t('fields.invoiceHelp', 'Upload invoice or receipt (JPG, PNG, or PDF)')}
+                  </p>
+                </div>
+              </FormControl>
+            </FormItem>
 
             <div className="flex justify-end gap-2">
               <Button
