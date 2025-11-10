@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { useCalendarState } from '@/hooks/useCalendarState';
@@ -12,6 +13,7 @@ import PermissionGuard from '@/components/PermissionGuard';
 
 const CalendarPage = () => {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const {
     selectedDate,
@@ -32,6 +34,19 @@ const CalendarPage = () => {
   } = useCalendarState();
 
   const { events, createEvent, updateEvent, deleteEvent, getNotificationUsers, isSubmitting } = useCalendarEvents();
+
+  // Handle event query parameter from dashboard navigation
+  useEffect(() => {
+    const eventId = searchParams.get('event');
+    if (eventId && events.length > 0) {
+      const event = events.find(e => e.id === eventId);
+      if (event) {
+        openDetailDialog(event);
+        // Clear the query parameter
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, events, openDetailDialog, setSearchParams]);
 
   const handleCreateEvent = async (eventData: any, selectedUserIds: string[]) => {
     console.log('📅 Creating event with selected users:', selectedUserIds);

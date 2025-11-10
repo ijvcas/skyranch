@@ -26,13 +26,13 @@ export default function Tasks() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-2 sm:p-6 space-y-4 sm:space-y-6">
       <PageHeader 
         title={t('title')} 
         subtitle={t('subtitle')}
       >
-        <Button variant="gradient" onClick={() => setIsQuickLogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
+        <Button variant="gradient" onClick={() => setIsQuickLogOpen(true)} className="whitespace-nowrap text-sm sm:text-base px-3 sm:px-4">
+          <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
           {t('quickLog')}
         </Button>
       </PageHeader>
