@@ -96,5 +96,14 @@
     "loadError": "Erreur lors du chargement des animaux",
     "notFound": "Animal non trouvé",
     "modifying": "Modifier les informations de"
+  },
+  "nfc": {
+    "scanButton": "Scanner Transpondeur NFC",
+    "notSupported": "NFC non pris en charge sur cet appareil",
+    "scanSuccess": "Transpondeur NFC Scanné",
+    "scanError": "Échec du scan du transpondeur NFC",
+    "writeSuccess": "Transpondeur NFC Écrit",
+    "writeError": "Échec de l'écriture du transpondeur NFC",
+    "noData": "Aucune donnée trouvée sur le transpondeur NFC"
   }
 }

@@ -29,9 +29,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ImageUpload } from '@/components/image-upload';
 import { useInventory } from '@/hooks/useInventory';
-import { Loader2, Upload, X, FileText } from 'lucide-react';
+import { Loader2, Upload, X, FileText, Radio } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNFCScanner } from '@/hooks/useNFCScanner';
 
 const inventoryItemSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -61,9 +62,17 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
   const { t } = useTranslation('inventory');
   const { createItem } = useInventory();
   const { toast } = useToast();
+  const { scanNFC, isScanning: isScanningNFC } = useNFCScanner();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const [uploadingInvoice, setUploadingInvoice] = useState(false);
+
+  const handleNFCScan = async () => {
+    const tagData = await scanNFC();
+    if (tagData) {
+      form.setValue('barcode', tagData);
+    }
+  };
 
   const form = useForm<InventoryItemFormData>({
     resolver: zodResolver(inventoryItemSchema),
@@ -349,7 +358,23 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
                   <FormItem>
                     <FormLabel>{t('fields.barcode')}</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={isSubmitting} />
+                      <div className="flex gap-2">
+                        <Input {...field} disabled={isSubmitting} className="flex-1" />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={handleNFCScan}
+                          disabled={isSubmitting || isScanningNFC}
+                          title={t('nfc.scanButton', 'Scan NFC')}
+                        >
+                          {isScanningNFC ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Radio className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

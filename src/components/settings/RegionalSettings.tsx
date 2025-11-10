@@ -3,13 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTimezone } from '@/hooks/useTimezone';
-import { useLanguage, LANGUAGES, type Language } from '@/hooks/useLanguage';
-import { Clock, Calendar, Euro, Globe } from 'lucide-react';
+import { Clock, Calendar, Euro } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const RegionalSettings = () => {
   const { timezone, setTimezone, dateFormat, setDateFormat, currency, setCurrency } = useTimezone();
-  const { language, changeLanguage } = useLanguage();
   const { t } = useTranslation(['settings', 'common']);
 
   const timezones = [
@@ -40,7 +38,7 @@ const RegionalSettings = () => {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Globe className="w-5 h-5 text-primary" />
+          <Clock className="w-5 h-5 text-primary" />
           <CardTitle>{t('settings:regional.title')}</CardTitle>
         </div>
         <CardDescription>
@@ -48,29 +46,6 @@ const RegionalSettings = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Language */}
-        <div>
-          <Label htmlFor="language" className="flex items-center gap-2">
-            <Globe className="w-4 h-4" />
-            {t('settings:language.title')}
-          </Label>
-          <Select value={language} onValueChange={(value) => changeLanguage(value as Language)}>
-            <SelectTrigger className="mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(LANGUAGES).map(([code, { name, flag }]) => (
-                <SelectItem key={code} value={code}>
-                  <span className="flex items-center gap-2">
-                    <span>{flag}</span>
-                    <span>{name}</span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Timezone */}
         <div>
           <Label htmlFor="timezone" className="flex items-center gap-2">

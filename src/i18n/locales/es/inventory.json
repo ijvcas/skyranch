@@ -52,5 +52,14 @@
     "scanSuccess": "Encontrado: {{name}}",
     "scanNotFound": "No se encontró artículo con este código de barras. ¿Agregarlo?",
     "scanError": "Error al escanear código de barras"
+  },
+  "nfc": {
+    "scanButton": "Escanear NFC",
+    "notSupported": "NFC no compatible en este dispositivo",
+    "scanSuccess": "Etiqueta NFC Escaneada",
+    "scanError": "Error al escanear etiqueta NFC",
+    "writeSuccess": "Etiqueta NFC Escrita",
+    "writeError": "Error al escribir etiqueta NFC",
+    "noData": "No se encontraron datos en la etiqueta NFC"
   }
 }

@@ -29,6 +29,7 @@ import { useAIChatDialog } from '@/contexts/AIChatContext';
 import { usePermissionCheck } from '@/hooks/usePermissions';
 import { useFarmProfile } from '@/hooks/useFarmProfile';
 import NotificationBell from './NotificationBell';
+import LanguageToggle from './LanguageToggle';
 import { hapticService } from '@/services/mobile/hapticService';
 import { useTranslation } from 'react-i18next';
 
@@ -154,7 +155,7 @@ const HeaderWithDropdown = () => {
             </SheetContent>
           </Sheet>
 
-          {/* Right side - AI Assistant and notification bell */}
+          {/* Right side - AI Assistant, Language Toggle and notification bell */}
           <div className="flex items-center space-x-1 h-full pr-4 md:pr-3">
             <Button
               variant="ghost"
@@ -164,6 +165,7 @@ const HeaderWithDropdown = () => {
             >
               <span className="text-3xl leading-none">🤖</span>
             </Button>
+            <LanguageToggle />
             <div className="flex items-center h-full">
               <NotificationBell />
             </div>

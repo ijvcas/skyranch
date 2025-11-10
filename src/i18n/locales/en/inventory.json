@@ -52,5 +52,14 @@
     "scanSuccess": "Found: {{name}}",
     "scanNotFound": "No item found with this barcode. Add it?",
     "scanError": "Failed to scan barcode"
+  },
+  "nfc": {
+    "scanButton": "Scan NFC",
+    "notSupported": "NFC not supported on this device",
+    "scanSuccess": "NFC Tag Scanned",
+    "scanError": "Failed to scan NFC tag",
+    "writeSuccess": "NFC Tag Written",
+    "writeError": "Failed to write NFC tag",
+    "noData": "No data found on NFC tag"
   }
 }

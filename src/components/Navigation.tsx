@@ -16,13 +16,17 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NotificationBell from './NotificationBell';
+import LanguageToggle from './LanguageToggle';
 import { useFarmBranding } from '@/hooks/useFarmBranding';
+import { useAuthPermissions } from '@/hooks/useAuthPermissions';
 import { hapticService } from '@/services/mobile/hapticService';
 import { useTranslation } from 'react-i18next';
 
 const Navigation = () => {
   const { branding, isLoading } = useFarmBranding();
   const { t } = useTranslation('common');
+  
+  const { hasPermission } = useAuthPermissions();
   
   const navItems = [
     { to: '/dashboard', icon: Home, label: t('nav.dashboard') },
@@ -35,7 +39,7 @@ const Navigation = () => {
     { to: '/finances', icon: DollarSign, label: t('nav.finances') },
     { to: '/reports', icon: FileText, label: t('nav.reports') },
     { to: '/notifications', icon: Bell, label: t('nav.notifications') },
-    { to: '/settings', icon: Settings, label: t('nav.settings') },
+    ...(hasPermission('system_settings') ? [{ to: '/settings', icon: Settings, label: t('nav.settings') }] : [])
   ];
 
   return (
@@ -89,8 +93,9 @@ const Navigation = () => {
               {t('nav.addAnimal')}
             </NavLink>
 
-            {/* Notification Bell */}
-            <div className="ml-4 flex-shrink-0 flex items-center h-full">
+            {/* Language Toggle and Notification Bell */}
+            <div className="ml-4 flex-shrink-0 flex items-center gap-2 h-full">
+              <LanguageToggle />
               <NotificationBell />
             </div>
           </div>

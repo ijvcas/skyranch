@@ -3,9 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import LocationCapture from '@/components/location/LocationCapture';
 import type { LocationCoordinates } from '@/services/mobile/locationService';
+import { useNFCScanner } from '@/hooks/useNFCScanner';
+import { Radio, Loader2 } from 'lucide-react';
 
 interface BasicInformationFormProps {
   formData: any;
@@ -15,6 +18,15 @@ interface BasicInformationFormProps {
 }
 
 const BasicInformationForm = ({ formData, onInputChange, onLocationChange, disabled = false }: BasicInformationFormProps) => {
+  const { scanNFC, isScanning } = useNFCScanner();
+
+  const handleNFCScan = async () => {
+    const tagData = await scanNFC();
+    if (tagData) {
+      onInputChange('tag', tagData);
+    }
+  };
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -42,23 +54,39 @@ const BasicInformationForm = ({ formData, onInputChange, onLocationChange, disab
             />
           </div>
           <div>
-            <Label htmlFor="tag">Número de Etiqueta *</Label>
-            <Input
-              id="tag"
-              name={`animal-tag-${Math.random()}`}
-              type="text"
-              value={formData.tag || ''}
-              onChange={(e) => onInputChange('tag', e.target.value)}
-              placeholder="Ej: 001"
-              className="mt-1"
-              disabled={disabled}
-              autoComplete="off"
-              data-lpignore="true"
-              data-1p-ignore="true"
-              data-bitwarden-ignore="true"
-              data-form-type="other"
-              spellCheck="false"
-            />
+            <Label htmlFor="tag">Número de Etiqueta / NFC *</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                id="tag"
+                name={`animal-tag-${Math.random()}`}
+                type="text"
+                value={formData.tag || ''}
+                onChange={(e) => onInputChange('tag', e.target.value)}
+                placeholder="Ej: 001 o escanea transponder"
+                className="flex-1"
+                disabled={disabled}
+                autoComplete="off"
+                data-lpignore="true"
+                data-1p-ignore="true"
+                data-bitwarden-ignore="true"
+                data-form-type="other"
+                spellCheck="false"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleNFCScan}
+                disabled={disabled || isScanning}
+                title="Escanear Transponder NFC"
+              >
+                {isScanning ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Radio className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
 
