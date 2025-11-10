@@ -10,7 +10,7 @@ export class UserService {
   }> {
     const { data: users, error } = await this.supabase
       .from('app_users')
-      .select('id, email')
+      .select('id, email, preferred_language')
       .eq('is_active', true);
 
     return { users, error };

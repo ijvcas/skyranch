@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Notification } from '@/hooks/useNotifications';
 import { NotificationIcon } from './NotificationIcon';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS, pt, fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -15,6 +16,17 @@ interface NotificationItemProps {
 }
 
 export const NotificationItem = ({ notification, onMarkAsRead, onDelete }: NotificationItemProps) => {
+  const { t, i18n } = useTranslation('notifications');
+  
+  const getLocale = () => {
+    switch (i18n.language) {
+      case 'en': return enUS;
+      case 'pt': return pt;
+      case 'fr': return fr;
+      default: return es;
+    }
+  };
+  
   const getPriorityColor = (priority: Notification['priority']) => {
     switch (priority) {
       case 'critical':
@@ -73,7 +85,7 @@ export const NotificationItem = ({ notification, onMarkAsRead, onDelete }: Notif
             
             {notification.animalName && (
               <p className="text-xs text-blue-600 mt-1">
-                Animal: {notification.animalName}
+                {t('detail.animals')}: {notification.animalName}
               </p>
             )}
             
@@ -81,13 +93,13 @@ export const NotificationItem = ({ notification, onMarkAsRead, onDelete }: Notif
               <span className="text-xs text-gray-400">
                 {formatDistanceToNow(new Date(notification.created_at), { 
                   addSuffix: true, 
-                  locale: es 
+                  locale: getLocale() 
                 })}
               </span>
               
               {notification.actionRequired && (
                 <Badge variant="outline" className="text-xs h-5">
-                  Acción requerida
+                  {t('calendar.actionRequired')}
                 </Badge>
               )}
             </div>

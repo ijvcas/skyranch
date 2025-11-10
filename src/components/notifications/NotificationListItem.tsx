@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Notification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS, pt, fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface NotificationListItemProps {
   notification: Notification;
@@ -18,6 +19,17 @@ export const NotificationListItem = ({
   onMarkAsRead, 
   onDelete 
 }: NotificationListItemProps) => {
+  const { t, i18n } = useTranslation('notifications');
+  
+  const getLocale = () => {
+    switch (i18n.language) {
+      case 'en': return enUS;
+      case 'pt': return pt;
+      case 'fr': return fr;
+      default: return es;
+    }
+  };
+  
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'vaccine':
@@ -58,26 +70,13 @@ export const NotificationListItem = ({
     
     return (
       <Badge variant={colors[priority]} className="text-xs">
-        {priority === 'critical' ? 'Crítico' : 
-         priority === 'high' ? 'Alto' :
-         priority === 'medium' ? 'Medio' : 'Bajo'}
+        {t(`priorities.${priority}`)}
       </Badge>
     );
   };
 
   const getTypeLabel = (type: Notification['type']) => {
-    switch (type) {
-      case 'vaccine':
-        return 'Vacuna';
-      case 'health':
-        return 'Salud';
-      case 'breeding':
-        return 'Reproducción';
-      case 'weekly_report':
-        return 'Reporte';
-      default:
-        return 'General';
-    }
+    return t(`types.${type}`);
   };
 
   const handleClick = () => {
@@ -133,7 +132,7 @@ export const NotificationListItem = ({
                 
                 {notification.actionRequired && (
                   <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
-                    Acción requerida
+                    {t('calendar.actionRequired')}
                   </Badge>
                 )}
               </div>
@@ -141,7 +140,7 @@ export const NotificationListItem = ({
               <span className="text-xs text-gray-400">
                 {formatDistanceToNow(new Date(notification.created_at), { 
                   addSuffix: true, 
-                  locale: es 
+                  locale: getLocale() 
                 })}
               </span>
             </div>
@@ -158,7 +157,7 @@ export const NotificationListItem = ({
                 onMarkAsRead(notification.id);
               }}
               className="h-8 w-8 p-0"
-              title="Marcar como leído"
+              title={t('actions.markAllRead')}
             >
               <CheckCircle className="w-4 h-4" />
             </Button>
@@ -172,7 +171,7 @@ export const NotificationListItem = ({
               onDelete(notification.id);
             }}
             className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-            title="Eliminar"
+            title={t('actions.clearAll')}
           >
             <Trash2 className="w-4 h-4" />
           </Button>

@@ -57,3 +57,15 @@ verify_jwt = true
 [functions.weather-monitor]
 verify_jwt = false
 
+[functions.migrate-notification-translations]
+verify_jwt = true
+
+[functions.send-email-v2]
+verify_jwt = true
+
+[functions.daily-pregnancy-notifications]
+verify_jwt = false
+
+[functions.daily-grazing-notifications]
+verify_jwt = false
+

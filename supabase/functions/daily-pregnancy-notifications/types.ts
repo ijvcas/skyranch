@@ -16,6 +16,7 @@ export interface Animal {
 export interface User {
   id: string;
   email: string;
+  preferred_language?: string;
 }
 
 export interface NotificationResult {

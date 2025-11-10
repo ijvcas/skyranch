@@ -18,7 +18,9 @@
     "vaccine": "Vacunas",
     "health": "Salud",
     "breeding": "Reproducción",
-    "weekly_report": "Reportes"
+    "weekly_report": "Reportes",
+    "calendar": "Calendario",
+    "general": "General"
   },
   "priorities": {
     "critical": "Crítico",
