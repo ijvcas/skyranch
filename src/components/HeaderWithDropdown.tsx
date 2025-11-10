@@ -156,19 +156,17 @@ const HeaderWithDropdown = () => {
           </Sheet>
 
           {/* Right side - AI Assistant, Language Toggle and notification bell */}
-          <div className="flex items-center space-x-1 h-full pr-4 md:pr-3">
+          <div className="flex items-center gap-1 h-full pr-2">
             <Button
               variant="ghost"
               onClick={() => setChatOpen(true)}
-              className="h-12 w-12 p-1.5 hover:bg-green-50 rounded-lg transition-all"
+              className="h-10 w-10 p-1 hover:bg-green-50 rounded-lg transition-all"
               aria-label={t('aiAssistant:title')}
             >
-              <span className="text-3xl leading-none">🤖</span>
+              <span className="text-2xl leading-none">🤖</span>
             </Button>
             <LanguageToggle />
-            <div className="flex items-center h-full">
-              <NotificationBell />
-            </div>
+            <NotificationBell />
           </div>
         </div>
       </div>
