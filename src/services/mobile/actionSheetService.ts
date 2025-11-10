@@ -1,5 +1,6 @@
 import { ActionSheet, ActionSheetButtonStyle } from '@capacitor/action-sheet';
 import { Capacitor } from '@capacitor/core';
+import i18n from '@/i18n/config';
 
 export interface ActionSheetButton {
   text: string;
@@ -66,17 +67,20 @@ class ActionSheetService {
   async showConfirmation(
     title: string,
     message: string,
-    confirmText: string = 'Confirmar',
-    cancelText: string = 'Cancelar',
+    confirmText?: string,
+    cancelText?: string,
     destructive: boolean = false
   ): Promise<boolean> {
+    const currentLang = i18n.language;
+    const defaultConfirm = i18n.t('common:confirm', { lng: currentLang });
+    const defaultCancel = i18n.t('common:cancel', { lng: currentLang });
     const buttons: ActionSheetButton[] = [
       {
-        text: confirmText,
+        text: confirmText || defaultConfirm,
         role: destructive ? 'destructive' : undefined
       },
       {
-        text: cancelText,
+        text: cancelText || defaultCancel,
         role: 'cancel'
       }
     ];
@@ -93,32 +97,34 @@ class ActionSheetService {
     onGallery: () => void | Promise<void>,
     onFile?: () => void | Promise<void>
   ): Promise<void> {
+    const currentLang = i18n.language;
+    
     const buttons: ActionSheetButton[] = [
       {
-        text: 'Tomar Foto',
+        text: i18n.t('common:takePhoto', { lng: currentLang }) || 'Take Photo',
         handler: onCamera
       },
       {
-        text: 'Seleccionar de Galería',
+        text: i18n.t('common:chooseFromGallery', { lng: currentLang }) || 'Choose from Gallery',
         handler: onGallery
       }
     ];
 
     if (onFile) {
       buttons.push({
-        text: 'Subir Archivo',
+        text: i18n.t('common:uploadFile', { lng: currentLang }) || 'Upload File',
         handler: onFile
       });
     }
 
     buttons.push({
-      text: 'Cancelar',
+      text: i18n.t('common:cancel', { lng: currentLang }) || 'Cancel',
       role: 'cancel'
     });
 
     await this.showActionSheet(
-      'Seleccionar Foto',
-      'Elige una opción para agregar una foto',
+      i18n.t('common:selectPhoto', { lng: currentLang }) || 'Select Photo',
+      i18n.t('common:choosePhotoOption', { lng: currentLang }) || 'Choose an option to add a photo',
       buttons
     );
   }
@@ -128,13 +134,17 @@ class ActionSheetService {
    */
   async showDeleteConfirmation(
     itemName: string,
-    itemType: string = 'elemento'
+    itemType?: string
   ): Promise<boolean> {
+    const currentLang = i18n.language;
+    const defaultItemType = i18n.t('common:item', { lng: currentLang }) || 'item';
+    const finalItemType = itemType || defaultItemType;
+    
     return await this.showConfirmation(
-      `¿Eliminar ${itemType}?`,
-      `¿Estás seguro de que deseas eliminar "${itemName}"? Esta acción no se puede deshacer.`,
-      'Eliminar',
-      'Cancelar',
+      i18n.t('common:deleteConfirmTitle', { lng: currentLang, itemType: finalItemType }) || `Delete ${finalItemType}?`,
+      i18n.t('common:deleteConfirmMessage', { lng: currentLang, itemName, itemType: finalItemType }) || `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
+      i18n.t('common:delete', { lng: currentLang }) || 'Delete',
+      i18n.t('common:cancel', { lng: currentLang }) || 'Cancel',
       true
     );
   }

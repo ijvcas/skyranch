@@ -4,6 +4,7 @@ import { EmailResult, EventDetails } from '../interfaces/EmailTypes';
 import { CalendarEventTemplate } from '../templates/CalendarEventTemplate';
 import { TestEmailTemplate } from '../templates/TestEmailTemplate';
 import { emailLogger } from '../core/EmailLogger';
+import i18n from '@/i18n/config';
 
 export class NotificationEmailService {
   private calendarTemplate: CalendarEventTemplate;
@@ -18,7 +19,8 @@ export class NotificationEmailService {
     to: string,
     eventType: 'created' | 'updated' | 'deleted' | 'reminder',
     eventDetails: EventDetails,
-    userName?: string
+    userName?: string,
+    userLanguage: string = 'es'
   ): Promise<EmailResult> {
     emailLogger.info('📅 [NOTIFICATION EMAIL] sendEventNotification called', {
       to,
@@ -46,17 +48,21 @@ export class NotificationEmailService {
       // Use the provided userName or fallback to email username
       const displayName = userName || to.split('@')[0];
 
+      // Translate email content using i18n
+      const eventTypeKey = eventType.charAt(0).toUpperCase() + eventType.slice(1);
+      const translatedMessage = i18n.t(`email:notification.event${eventTypeKey}`, { 
+        lng: userLanguage,
+        eventTitle: eventDetails.title 
+      });
+      
       const emailContent = await this.calendarTemplate.render({
         eventType,
         event: eventDetails,
         userName: displayName,
         organizationName: "SkyRanch",
-        title: `${eventType === 'created' ? 'Nuevo evento' : 
-                 eventType === 'updated' ? 'Evento actualizado' : 
-                 eventType === 'deleted' ? 'Evento cancelado' : 'Recordatorio'}: ${eventDetails.title}`,
-        content: `Te informamos que el evento ${eventDetails.title} ${eventType === 'created' ? 'se ha creado' : 
-                 eventType === 'updated' ? 'se ha actualizado' : 
-                 eventType === 'deleted' ? 'se ha cancelado' : 'está programado'} en el sistema.`
+        language: userLanguage,
+        title: translatedMessage,
+        content: i18n.t('email:notification.details', { lng: userLanguage })
       });
 
       console.log('📧 [DEBUG] Email content generated with userName:', {

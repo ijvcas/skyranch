@@ -2,9 +2,11 @@
 import { EmailContent } from '../interfaces/EmailTypes';
 import { BaseEmailTemplate, BaseTemplateData } from './BaseEmailTemplate';
 import { supabase } from '@/integrations/supabase/client';
+import i18n from '@/i18n/config';
 
 export interface CalendarEventData extends BaseTemplateData {
   eventType: 'created' | 'updated' | 'deleted' | 'reminder';
+  language?: string;
   event: {
     title: string;
     description?: string;
@@ -22,6 +24,8 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
   async render(data: CalendarEventData): Promise<EmailContent> {
     console.log('🎨 [CALENDAR EMAIL TEMPLATE] Rendering template with farm branding colors');
     
+    const userLanguage = data.language || 'es';
+    
     // Fetch primary color from database
     const { data: farmProfile } = await supabase
       .from('farm_profiles')
@@ -29,14 +33,14 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
       .single();
     
     const primaryColor = farmProfile?.theme_primary_color || '#10b981';
-    console.log('🎨 [CALENDAR EMAIL] Using primary color:', primaryColor);
+    console.log('🎨 [CALENDAR EMAIL] Using primary color:', primaryColor, 'language:', userLanguage);
     
-    const eventDate = this.formatEventDateTime(data.event.eventDate, data.event.endDate, data.event.allDay);
-    const actionText = this.getActionText(data.eventType);
-    const subject = this.getSubject(data.eventType, data.event.title);
+    const eventDate = this.formatEventDateTime(data.event.eventDate, data.event.endDate, data.event.allDay, userLanguage);
+    const actionText = this.getActionText(data.eventType, userLanguage);
+    const subject = this.getSubject(data.eventType, data.event.title, userLanguage);
     
     // Build content HTML for the template renderer with dynamic color
-    const content = this.buildEventContent(data, eventDate, actionText, primaryColor);
+    const content = this.buildEventContent(data, eventDate, actionText, primaryColor, userLanguage);
 
     // Use the parent renderer which fetches farm colors
     return await this.renderer.renderFullTemplate({
@@ -48,24 +52,29 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     });
   }
 
-  private buildEventContent(data: CalendarEventData, eventDate: string, actionText: string, primaryColor: string): string {
+  private buildEventContent(data: CalendarEventData, eventDate: string, actionText: string, primaryColor: string, language: string): string {
+    const greeting = i18n.t('email:notification.greeting', { lng: language, userName: data.userName || 'Usuario' });
+    const notificationBadge = i18n.t('email:header.subtitle', { lng: language });
     
     return `
       <!-- Event Notification Badge -->
       <div style="text-align: center; margin-bottom: 32px;">
         <div style="display: inline-block; background-color: ${primaryColor}; padding: 12px 24px; border-radius: 6px;">
           <p style="margin: 0; font-size: 13px; font-weight: 700; color: white; letter-spacing: 0.5px; text-transform: uppercase;">
-            🔔 NOTIFICACIÓN DE EVENTO
+            🔔 ${notificationBadge.toUpperCase()}
           </p>
         </div>
       </div>
 
       <!-- Main Message -->
       <p style="color: ${primaryColor}; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">
-        Estimado/a ${data.userName || 'Usuario'},
+        ${greeting}
       </p>
       <p style="color: #6b7280; font-size: 14px; margin: 0 0 8px 0; line-height: 1.6;">
-        Te informamos que el evento <strong style="color: ${primaryColor};">"${data.event.title}"</strong> ${actionText.toLowerCase()} correctamente en el sistema de gestión ganadera SkyRanch.
+        ${i18n.t(`email:notification.event${data.eventType.charAt(0).toUpperCase() + data.eventType.slice(1)}`, { 
+          lng: language, 
+          eventTitle: data.event.title 
+        })}
       </p>
 
       <!-- Event Details -->
@@ -217,33 +226,49 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     return `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
   }
 
-  private formatEventDateTime(eventDate: string, endDate?: string, allDay?: boolean): string {
+  private formatEventDateTime(eventDate: string, endDate?: string, allDay?: boolean, language: string = 'es'): string {
     const startDate = new Date(eventDate);
+    const localeMap: Record<string, string> = { es: 'es-ES', en: 'en-US', pt: 'pt-PT', fr: 'fr-FR' };
+    const locale = localeMap[language] || 'es-ES';
+    
+    const allDayText: Record<string, string> = {
+      es: 'Todo el día',
+      en: 'All day',
+      pt: 'O dia todo',
+      fr: 'Toute la journée'
+    };
+    
+    const atText: Record<string, string> = {
+      es: 'a las',
+      en: 'at',
+      pt: 'às',
+      fr: 'à'
+    };
     
     if (allDay) {
-      return startDate.toLocaleDateString('es-ES', {
+      return startDate.toLocaleDateString(locale, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
-      }) + ' (Todo el día)';
+      }) + ` (${allDayText[language] || allDayText.es})`;
     }
 
-    let dateTimeString = startDate.toLocaleDateString('es-ES', {
+    let dateTimeString = startDate.toLocaleDateString(locale, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
 
-    dateTimeString += ' a las ' + startDate.toLocaleTimeString('es-ES', {
+    dateTimeString += ` ${atText[language] || atText.es} ` + startDate.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit'
     });
 
     if (endDate) {
       const endDateTime = new Date(endDate);
-      dateTimeString += ' - ' + endDateTime.toLocaleTimeString('es-ES', {
+      dateTimeString += ' - ' + endDateTime.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit'
       });
@@ -275,24 +300,23 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
     return eventTypeMap[eventType] || eventType;
   }
 
-  private getActionText(eventType: string): string {
-    switch (eventType) {
-      case 'created': return 'Se ha creado exitosamente';
-      case 'updated': return 'Se ha actualizado correctamente';
-      case 'deleted': return 'Se ha cancelado';
-      case 'reminder': return 'Recordatorio importante';
-      default: return 'Se ha modificado';
-    }
+  private getActionText(eventType: string, language: string = 'es'): string {
+    const eventTypeKey = eventType.charAt(0).toUpperCase() + eventType.slice(1);
+    return i18n.t(`email:notification.event${eventTypeKey}`, { lng: language, eventTitle: '' }).replace('""', '').trim();
   }
 
-  private getSubject(eventType: string, eventTitle: string): string {
-    switch (eventType) {
-      case 'created': return `✨ Nuevo evento: ${eventTitle}`;
-      case 'updated': return `🔄 Evento actualizado: ${eventTitle}`;
-      case 'deleted': return `❌ Evento cancelado: ${eventTitle}`;
-      case 'reminder': return `⏰ Recordatorio: ${eventTitle}`;
-      default: return `📝 Evento: ${eventTitle}`;
-    }
+  private getSubject(eventType: string, eventTitle: string, language: string = 'es'): string {
+    const eventTypeKey = eventType.charAt(0).toUpperCase() + eventType.slice(1);
+    const baseText = i18n.t(`email:notification.event${eventTypeKey}`, { lng: language, eventTitle });
+    
+    const emoji: Record<string, string> = {
+      created: '✨',
+      updated: '🔄',
+      deleted: '❌',
+      reminder: '⏰'
+    };
+    
+    return `${emoji[eventType] || '📝'} ${baseText}`;
   }
 
 }

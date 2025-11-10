@@ -23,17 +23,26 @@ export const useLanguage = () => {
   // Sync with iOS Settings on app launch and when returning from Settings
   useEffect(() => {
     const syncWithiOSSettings = async () => {
-      if (!Capacitor.isNativePlatform()) return;
+      if (!Capacitor.isNativePlatform()) {
+        console.log('🌐 [LANGUAGE SYNC] Not native platform, skipping iOS sync');
+        return;
+      }
       
       try {
+        console.log('🔍 [LANGUAGE SYNC] Reading from iOS Settings...');
         // Read from iOS Settings via Capacitor Preferences
         const { value } = await Preferences.get({ key: 'app_language' });
+        console.log('📱 [LANGUAGE SYNC] iOS Settings value:', value, 'Current language:', i18n.language);
+        
         if (value && value !== i18n.language) {
-          console.log('🔄 Syncing language from iOS Settings:', value);
+          console.log('🔄 [LANGUAGE SYNC] Syncing language from iOS Settings:', value, '→', i18n.language);
           await i18n.changeLanguage(value);
+          console.log('✅ [LANGUAGE SYNC] Language changed successfully to:', value);
+        } else {
+          console.log('✓ [LANGUAGE SYNC] Language already in sync');
         }
       } catch (error) {
-        console.error('Error syncing with iOS Settings:', error);
+        console.error('❌ [LANGUAGE SYNC] Error syncing with iOS Settings:', error);
       }
     };
 
@@ -44,18 +53,24 @@ export const useLanguage = () => {
       let listenerHandle: any;
       
       const setupListener = async () => {
+        console.log('👂 [LANGUAGE SYNC] Setting up app state listener...');
         listenerHandle = await App.addListener('appStateChange', async ({ isActive }) => {
+          console.log('📲 [LANGUAGE SYNC] App state changed:', { isActive, isSyncing });
           if (isActive && !isSyncing) {
+            console.log('🔄 [LANGUAGE SYNC] App became active, syncing language...');
             setIsSyncing(true);
             await syncWithiOSSettings();
             setIsSyncing(false);
+            console.log('✅ [LANGUAGE SYNC] Sync completed');
           }
         });
+        console.log('✅ [LANGUAGE SYNC] App state listener registered');
       };
       
       setupListener();
 
       return () => {
+        console.log('🧹 [LANGUAGE SYNC] Cleaning up app state listener');
         if (listenerHandle) {
           listenerHandle.remove();
         }
@@ -65,32 +80,44 @@ export const useLanguage = () => {
 
   const changeLanguage = async (lang: Language) => {
     try {
-      console.log('🔄 Changing language to:', lang);
+      console.log('🔄 [LANGUAGE CHANGE] Starting language change to:', lang);
       
       // Change language in i18next
       await i18n.changeLanguage(lang);
+      console.log('✅ [LANGUAGE CHANGE] i18next language changed');
       
       // Persist to localStorage (for web) and Capacitor Preferences (syncs with iOS Settings)
       localStorage.setItem('i18nextLng', lang);
+      console.log('💾 [LANGUAGE CHANGE] Saved to localStorage');
+      
       if (Capacitor.isNativePlatform()) {
         await Preferences.set({ key: 'app_language', value: lang });
+        console.log('📱 [LANGUAGE CHANGE] Saved to iOS Settings via Preferences');
       }
       
       // Update user preference in database
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase
+        const { error } = await supabase
           .from('app_users')
           .update({ preferred_language: lang })
           .eq('id', user.id);
+        
+        if (error) {
+          console.error('❌ [LANGUAGE CHANGE] Error updating database:', error);
+        } else {
+          console.log('✅ [LANGUAGE CHANGE] Database updated with preferred language');
+        }
       }
       
       toast({
         title: t('settings:messages.languageChanged'),
         description: LANGUAGES[lang].name
       });
+      
+      console.log('✅ [LANGUAGE CHANGE] Language change complete');
     } catch (error) {
-      console.error('❌ Error changing language:', error);
+      console.error('❌ [LANGUAGE CHANGE] Error changing language:', error);
       toast({
         title: t('common:error'),
         description: t('settings:messages.error'),

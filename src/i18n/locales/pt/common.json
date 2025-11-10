@@ -101,7 +101,18 @@
     "yes": "Sim",
     "no": "Não",
     "optional": "Opcional",
-    "required": "Obrigatório"
+    "required": "Obrigatório",
+    "takePhoto": "Tirar Foto",
+    "chooseFromGallery": "Escolher da Galeria",
+    "uploadFile": "Enviar Arquivo",
+    "selectPhoto": "Selecionar Foto",
+    "choosePhotoOption": "Escolha uma opção para adicionar uma foto",
+    "item": "item",
+    "deleteConfirmTitle": "Excluir {{itemType}}?",
+    "deleteConfirmMessage": "Tem certeza de que deseja excluir \"{{itemName}}\"? Esta ação não pode ser desfeita.",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "delete": "Excluir"
   },
   "validation": {
     "required": "Este campo é obrigatório",

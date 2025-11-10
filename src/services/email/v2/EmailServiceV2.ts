@@ -13,7 +13,7 @@ export class EmailServiceV2 {
       // First try to get from app_users table
       const { data: appUser, error: appUserError } = await supabase
         .from('app_users')
-        .select('name')
+        .select('name, preferred_language')
         .eq('email', email)
         .single();
 
@@ -65,18 +65,26 @@ export class EmailServiceV2 {
       let result: EmailResult;
 
       if (eventDetails) {
-        // This is a calendar event email - fetch the user's full name
+        // This is a calendar event email - fetch the user's full name and language
         emailLogger.debug('📅 [EMAIL SERVICE V2] Sending calendar event email', { eventDetails });
         
-        const userName = await this.getUserFullName(to);
+        // Fetch user info including language preference
+        const { data: appUser } = await supabase
+          .from('app_users')
+          .select('name, preferred_language')
+          .eq('email', to)
+          .single();
+        
+        const userName = appUser?.name || to.split('@')[0];
+        const userLanguage = appUser?.preferred_language || 'es';
         
         // Determine event type from subject
         let eventType: 'created' | 'updated' | 'deleted' | 'reminder' = 'reminder';
-        if (subject.includes('actualizado')) {
+        if (subject.includes('actualizado') || subject.includes('updated') || subject.includes('atualizado') || subject.includes('mis à jour')) {
           eventType = 'updated';
-        } else if (subject.includes('creado') || subject.includes('Nuevo')) {
+        } else if (subject.includes('creado') || subject.includes('created') || subject.includes('criado') || subject.includes('créé') || subject.includes('Nuevo') || subject.includes('New')) {
           eventType = 'created';
-        } else if (subject.includes('cancelado')) {
+        } else if (subject.includes('cancelado') || subject.includes('cancelled') || subject.includes('annulé')) {
           eventType = 'deleted';
         }
 
@@ -84,6 +92,7 @@ export class EmailServiceV2 {
           to,
           eventType,
           userName,
+          userLanguage,
           eventDetails
         });
 
@@ -91,7 +100,8 @@ export class EmailServiceV2 {
           to,
           eventType,
           eventDetails,
-          userName
+          userName,
+          userLanguage
         );
 
         emailLogger.debug('📅 [EMAIL SERVICE V2] notificationEmailService.sendEventNotification result', result);

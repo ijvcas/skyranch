@@ -73,7 +73,18 @@
     "yes": "Yes",
     "no": "No",
     "optional": "Optional",
-    "required": "Required"
+    "required": "Required",
+    "takePhoto": "Take Photo",
+    "chooseFromGallery": "Choose from Gallery",
+    "uploadFile": "Upload File",
+    "selectPhoto": "Select Photo",
+    "choosePhotoOption": "Choose an option to add a photo",
+    "item": "item",
+    "deleteConfirmTitle": "Delete {{itemType}}?",
+    "deleteConfirmMessage": "Are you sure you want to delete \"{{itemName}}\"? This action cannot be undone.",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete"
   },
   "messages": {
     "success": "Operation successful",
