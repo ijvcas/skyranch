@@ -10,7 +10,7 @@
 
 /* Permission descriptions */
 "NSFaceIDUsageDescription" = "FARMIKA uses Face ID for quick and secure access to your account";
-"NSCameraUsageDescription" = "FARMIKA needs camera access to scan animal and inventory barcodes and QR codes";
+"NSCameraUsageDescription" = "FARMIKA needs camera access to scan barcodes for inventory management and animal tracking";
 "NSPhotoLibraryUsageDescription" = "FARMIKA needs access to your photos to attach images of animals and field reports";
 "NSPhotoLibraryAddUsageDescription" = "FARMIKA needs permission to save animal photos to your gallery";
 "NSLocationWhenInUseUsageDescription" = "FARMIKA needs access to your location to record the location of animals and field events";

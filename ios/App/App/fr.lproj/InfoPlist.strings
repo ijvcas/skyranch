@@ -1,5 +1,5 @@
 /* Camera */
-"NSCameraUsageDescription" = "FARMIKA a besoin d'accéder à la caméra pour prendre des photos d'animaux";
+"NSCameraUsageDescription" = "FARMIKA a besoin d'accéder à la caméra pour scanner des codes-barres pour la gestion des stocks et le suivi des animaux";
 
 /* Photo Library */
 "NSPhotoLibraryUsageDescription" = "FARMIKA a besoin d'accéder à votre photothèque pour sélectionner des photos d'animaux";

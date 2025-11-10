@@ -50,6 +50,11 @@ const config: CapacitorConfig = {
       ios: {
         // Permissions are localized via Info.plist and .lproj/InfoPlist.strings files
       }
+    },
+    BarcodeScanning: {
+      ios: {
+        // Permissions are localized via Info.plist and .lproj/InfoPlist.strings files
+      }
     }
   }
 };

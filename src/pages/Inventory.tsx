@@ -1,15 +1,42 @@
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useInventory } from '@/hooks/useInventory';
+import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
+import { ScanLine } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Inventory() {
   const { t } = useTranslation('inventory');
   const { items, isLoading } = useInventory();
+  const { scanBarcode, isScanning } = useBarcodeScanner();
+  const { toast } = useToast();
 
   const lowStockItems = items.filter(
     item => item.min_quantity && item.current_quantity < item.min_quantity
   );
+
+  const handleScan = async () => {
+    const barcode = await scanBarcode();
+    
+    if (barcode) {
+      const foundItem = items.find(item => item.barcode === barcode);
+      
+      if (foundItem) {
+        toast({
+          title: t('messages.scanSuccess', { name: foundItem.name }),
+          description: `${foundItem.current_quantity} ${foundItem.unit} in stock`
+        });
+      } else {
+        toast({
+          title: t('messages.scanNotFound'),
+          description: `Barcode: ${barcode}`,
+          variant: "destructive"
+        });
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -23,6 +50,13 @@ export default function Inventory() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <PageHeader title={t('title')} subtitle={t('subtitle')} />
+      
+      <div className="flex gap-2">
+        <Button onClick={handleScan} disabled={isScanning}>
+          <ScanLine className="mr-2 h-4 w-4" />
+          {isScanning ? 'Scanning...' : t('scan')}
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card className="p-4">
@@ -47,6 +81,12 @@ export default function Inventory() {
             <Card key={item.id} className="p-4">
               <h4 className="font-medium">{item.name}</h4>
               <p className="text-sm text-muted-foreground capitalize">{item.category}</p>
+              {item.barcode && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  <ScanLine className="inline h-3 w-3 mr-1" />
+                  {item.barcode}
+                </p>
+              )}
               <div className="mt-2 space-y-1">
                 <div className="flex justify-between text-sm">
                   <span>Current:</span>
