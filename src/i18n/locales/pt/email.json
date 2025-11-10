@@ -17,5 +17,14 @@
     "eventReminder": "Lembrete: O evento \"{{eventTitle}}\" está próximo.",
     "details": "Detalhes",
     "createdSuccessfully": "Criado com sucesso"
+  },
+  "eventDetails": {
+    "date": "Data:",
+    "type": "Tipo:",
+    "details": "Detalhes:",
+    "location": "Localização:",
+    "veterinarian": "Veterinário:",
+    "addToCalendar": "Adicionar ao Calendário:",
+    "viewFullCalendar": "Ver Calendário Completo"
   }
 }

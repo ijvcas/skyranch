@@ -10,10 +10,12 @@ import {
   CalendarEvent 
 } from '@/services/calendarService';
 import { useBreedingNotifications } from '@/hooks/useBreedingNotifications';
+import { useTranslation } from 'react-i18next';
 
 export const useCalendarEventOperations = (sendNotificationsToUsers: (selectedUserIds: string[], eventTitle: string, eventDate: string, isUpdate: boolean, eventDescription?: string) => Promise<void>) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setupPregnancyNotifications } = useBreedingNotifications();
 
@@ -51,23 +53,23 @@ export const useCalendarEventOperations = (sendNotificationsToUsers: (selectedUs
         }
 
         toast({
-          title: "Éxito",
-          description: "Evento creado correctamente"
+          title: t('common:messages.success'),
+          description: t('calendar:messages.created')
         });
         queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
       } else {
         console.error('📅 [CREATE EVENT DEBUG] Event creation returned null ID');
         toast({
-          title: "Error",
-          description: "No se pudo crear el evento",
+          title: t('common:messages.error'),
+          description: t('calendar:messages.createError'),
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('📅 [CREATE EVENT DEBUG] Error in createEvent:', error);
       toast({
-        title: "Error",
-        description: "Error al crear el evento: " + error.message,
+        title: t('common:messages.error'),
+        description: `${t('calendar:messages.createError')}: ${error.message}`,
         variant: "destructive"
       });
     } finally {
@@ -96,23 +98,23 @@ export const useCalendarEventOperations = (sendNotificationsToUsers: (selectedUs
         console.log('📅 [UPDATE EVENT DEBUG] Notification process completed');
 
         toast({
-          title: "Éxito",
-          description: "Evento actualizado correctamente"
+          title: t('common:messages.success'),
+          description: t('calendar:messages.updated')
         });
         queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
       } else {
         console.error('📅 [UPDATE EVENT DEBUG] Event update returned false');
         toast({
-          title: "Error",
-          description: "No se pudo actualizar el evento",
+          title: t('common:messages.error'),
+          description: t('calendar:messages.updateError'),
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('📅 [UPDATE EVENT DEBUG] Error in updateEvent:', error);
       toast({
-        title: "Error",
-        description: "Error al actualizar el evento: " + error.message,
+        title: t('common:messages.error'),
+        description: `${t('calendar:messages.updateError')}: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -136,15 +138,15 @@ export const useCalendarEventOperations = (sendNotificationsToUsers: (selectedUs
         console.log('🗑️ [DELETE HANDLER] Cache refreshed successfully');
         
         toast({
-          title: "Éxito",
-          description: "Evento eliminado correctamente"
+          title: t('common:messages.success'),
+          description: t('calendar:messages.deleted')
         });
       }
     } catch (error: any) {
       console.error('🗑️ [DELETE HANDLER] Error during deletion:', error);
       toast({
-        title: "Error",
-        description: error.message || "No se pudo eliminar el evento",
+        title: t('common:messages.error'),
+        description: error.message || t('calendar:messages.deleteError'),
         variant: "destructive"
       });
       throw error;

@@ -17,5 +17,14 @@
     "eventReminder": "Reminder: Event \"{{eventTitle}}\" is coming up.",
     "details": "Details",
     "createdSuccessfully": "Successfully created"
+  },
+  "eventDetails": {
+    "date": "Date:",
+    "type": "Type:",
+    "details": "Details:",
+    "location": "Location:",
+    "veterinarian": "Veterinarian:",
+    "addToCalendar": "Add to Calendar:",
+    "viewFullCalendar": "View Full Calendar"
   }
 }

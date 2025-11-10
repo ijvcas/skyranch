@@ -89,30 +89,30 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
         <div style="padding-top: 16px; margin-top: 16px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; width: 120px; vertical-align: top;">📅 Fecha:</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; width: 120px; vertical-align: top;">📅 ${i18n.t('email:eventDetails.date', { lng: language })}</td>
               <td style="color: #374151; font-weight: 600; font-size: 13px; padding: 8px 0;">${eventDate}</td>
             </tr>
             ${data.event.eventType ? `
             <tr>
-              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">🏷️ Tipo:</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">🏷️ ${i18n.t('email:eventDetails.type', { lng: language })}</td>
               <td style="color: #374151; font-size: 13px; padding: 8px 0;">${this.getEventTypeLabel(data.event.eventType)}</td>
             </tr>
             ` : ''}
             ${data.event.description ? `
             <tr>
-              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📄 Detalles:</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📄 ${i18n.t('email:eventDetails.details', { lng: language })}</td>
               <td style="color: #374151; font-size: 13px; padding: 8px 0; line-height: 1.5;">${data.event.description}</td>
             </tr>
             ` : ''}
             ${data.event.location ? `
             <tr>
-              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📍 Ubicación:</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">📍 ${i18n.t('email:eventDetails.location', { lng: language })}</td>
               <td style="color: #374151; font-size: 13px; padding: 8px 0;">${data.event.location}</td>
             </tr>
             ` : ''}
             ${data.event.veterinarian ? `
             <tr>
-              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">👨‍⚕️ Veterinario:</td>
+              <td style="color: #6b7280; font-weight: 600; font-size: 13px; padding: 8px 0; vertical-align: top;">👨‍⚕️ ${i18n.t('email:eventDetails.veterinarian', { lng: language })}</td>
               <td style="color: #374151; font-size: 13px; padding: 8px 0;">${data.event.veterinarian}</td>
             </tr>
             ` : ''}  
@@ -124,7 +124,7 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
       <!-- Call to Action -->
       <div style="text-align: center; margin: 32px 0;">
         <p style="color: #374151; font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">
-          📲 Agregar al Calendario:
+          📲 ${i18n.t('email:eventDetails.addToCalendar', { lng: language })}
         </p>
         <div style="margin-bottom: 16px;">
           <a href="${this.generateGoogleCalendarLink(data)}" 
@@ -148,7 +148,7 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
         </div>
         <a href="https://id-preview--d956216c-86a1-4ff3-9df4-bdfbbabf459a.lovable.app/calendar" 
            style="display: inline-block; color: ${primaryColor}; text-decoration: none; font-size: 13px; font-weight: 500;">
-           🌐 Ver Calendario Completo →
+           🌐 ${i18n.t('email:eventDetails.viewFullCalendar', { lng: language })} →
         </a>
       </div>
       ` : ''}
