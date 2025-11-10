@@ -1,0 +1,56 @@
+{
+  "title": "Inventaire",
+  "subtitle": "Suivez vos aliments, médicaments et fournitures",
+  "addItem": "Ajouter un Article",
+  "scan": "Scanner",
+  "totalItems": "Total d'Articles",
+  "lowStock": "Stock Faible",
+  "categories": "Catégories",
+  "adjustStock": "Ajuster le Stock",
+  "recordUsage": "Enregistrer l'Utilisation",
+  "recordPurchase": "Enregistrer l'Achat",
+  "category": {
+    "feed": "Aliment",
+    "medicine": "Médicament",
+    "supplement": "Suppléments",
+    "equipment": "Équipement",
+    "other": "Autre"
+  },
+  "transactionType": {
+    "purchase": "Achat (Ajouter)",
+    "usage": "Utilisation (Retirer)",
+    "waste": "Déchet (Retirer)",
+    "adjustment": "Ajustement"
+  },
+  "fields": {
+    "name": "Nom de l'Article",
+    "category": "Catégorie",
+    "unit": "Unité",
+    "currentQuantity": "Quantité Actuelle",
+    "minQuantity": "Quantité Minimale",
+    "maxQuantity": "Quantité Maximale",
+    "unitCost": "Coût Unitaire",
+    "barcode": "Code-Barres",
+    "supplier": "Fournisseur",
+    "storageLocation": "Lieu de Stockage",
+    "expiryDate": "Date d'Expiration",
+    "notes": "Notes",
+    "quantity": "Quantité",
+    "totalCost": "Coût Total"
+  },
+  "alerts": {
+    "lowStock": "Alerte de Stock Faible",
+    "lowStockMessage": "Les articles suivants sont en rupture:",
+    "expiringSoon": "Expire bientôt",
+    "outOfStock": "Rupture de stock"
+  },
+  "messages": {
+    "itemAdded": "Article ajouté avec succès",
+    "itemUpdated": "Article mis à jour avec succès",
+    "itemDeleted": "Article supprimé avec succès",
+    "transactionRecorded": "Transaction enregistrée avec succès",
+    "scanSuccess": "Trouvé: {{name}}",
+    "scanNotFound": "Aucun article trouvé avec ce code-barres. Ajouter?",
+    "scanError": "Échec du scan du code-barres"
+  }
+}

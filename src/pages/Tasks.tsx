@@ -31,7 +31,7 @@ export default function Tasks() {
         title={t('title')} 
         subtitle={t('subtitle')}
       >
-        <Button onClick={() => setIsQuickLogOpen(true)}>
+        <Button variant="gradient" onClick={() => setIsQuickLogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           {t('quickLog')}
         </Button>

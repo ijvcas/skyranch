@@ -23,6 +23,7 @@ import pricingES from './locales/es/pricing.json';
 import aiAssistantES from './locales/es/aiAssistant.json';
 import emailES from './locales/es/email.json';
 import tasksES from './locales/es/tasks.json';
+import inventoryES from './locales/es/inventory.json';
 
 import commonEN from './locales/en/common.json';
 import animalsEN from './locales/en/animals.json';
@@ -43,6 +44,7 @@ import pricingEN from './locales/en/pricing.json';
 import aiAssistantEN from './locales/en/aiAssistant.json';
 import emailEN from './locales/en/email.json';
 import tasksEN from './locales/en/tasks.json';
+import inventoryEN from './locales/en/inventory.json';
 
 import commonPT from './locales/pt/common.json';
 import animalsPT from './locales/pt/animals.json';
@@ -63,6 +65,7 @@ import pricingPT from './locales/pt/pricing.json';
 import aiAssistantPT from './locales/pt/aiAssistant.json';
 import emailPT from './locales/pt/email.json';
 import tasksPT from './locales/pt/tasks.json';
+import inventoryPT from './locales/pt/inventory.json';
 
 import commonFR from './locales/fr/common.json';
 import animalsFR from './locales/fr/animals.json';
@@ -83,6 +86,7 @@ import pricingFR from './locales/fr/pricing.json';
 import aiAssistantFR from './locales/fr/aiAssistant.json';
 import emailFR from './locales/fr/email.json';
 import tasksFR from './locales/fr/tasks.json';
+import inventoryFR from './locales/fr/inventory.json';
 
 const resources = {
   es: {
@@ -104,7 +108,8 @@ const resources = {
     pricing: pricingES,
     aiAssistant: aiAssistantES,
     email: emailES,
-    tasks: tasksES
+    tasks: tasksES,
+    inventory: inventoryES
   },
   en: {
     common: commonEN,
@@ -125,7 +130,8 @@ const resources = {
     pricing: pricingEN,
     aiAssistant: aiAssistantEN,
     email: emailEN,
-    tasks: tasksEN
+    tasks: tasksEN,
+    inventory: inventoryEN
   },
   pt: {
     common: commonPT,
@@ -146,7 +152,8 @@ const resources = {
     pricing: pricingPT,
     aiAssistant: aiAssistantPT,
     email: emailPT,
-    tasks: tasksPT
+    tasks: tasksPT,
+    inventory: inventoryPT
   },
   fr: {
     common: commonFR,
@@ -167,7 +174,8 @@ const resources = {
     pricing: pricingFR,
     aiAssistant: aiAssistantFR,
     email: emailFR,
-    tasks: tasksFR
+    tasks: tasksFR,
+    inventory: inventoryFR
   }
 };
 
@@ -180,7 +188,7 @@ i18n
     fallbackLng: 'es',
     supportedLngs: ['es', 'en', 'pt', 'fr'],
     defaultNS: 'common',
-    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots', 'notifications', 'weather', 'weatherConditions', 'pricing', 'aiAssistant', 'email', 'tasks'],
+    ns: ['common', 'animals', 'financial', 'breeding', 'health', 'reports', 'settings', 'auth', 'dashboard', 'users', 'calendar', 'lots', 'notifications', 'weather', 'weatherConditions', 'pricing', 'aiAssistant', 'email', 'tasks', 'inventory'],
     interpolation: {
       escapeValue: false
     },

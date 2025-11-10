@@ -1,17 +1,20 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useInventory } from '@/hooks/useInventory';
 import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
-import { ScanLine } from 'lucide-react';
+import { ScanLine, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import InventoryItemDialog from '@/components/inventory/InventoryItemDialog';
 
 export default function Inventory() {
   const { t } = useTranslation('inventory');
   const { items, isLoading } = useInventory();
   const { scanBarcode, isScanning } = useBarcodeScanner();
   const { toast } = useToast();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const lowStockItems = items.filter(
     item => item.min_quantity && item.current_quantity < item.min_quantity
@@ -52,9 +55,13 @@ export default function Inventory() {
       <PageHeader title={t('title')} subtitle={t('subtitle')} />
       
       <div className="flex gap-2">
-        <Button onClick={handleScan} disabled={isScanning}>
+        <Button variant="gradient" onClick={handleScan} disabled={isScanning}>
           <ScanLine className="mr-2 h-4 w-4" />
           {isScanning ? 'Scanning...' : t('scan')}
+        </Button>
+        <Button variant="gradient" onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          {t('addItem')}
         </Button>
       </div>
       
@@ -112,6 +119,8 @@ export default function Inventory() {
           )}
         </div>
       </Card>
+      
+      <InventoryItemDialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
     </div>
   );
 }
