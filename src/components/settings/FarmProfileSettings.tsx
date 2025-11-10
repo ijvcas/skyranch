@@ -31,9 +31,11 @@ const FarmProfileSettings = () => {
     createFarmProfile, 
     updateFarmProfile,
     uploadLogo,
+    uploadPicture,
     isCreating,
     isUpdating,
-    isUploadingLogo 
+    isUploadingLogo,
+    isUploadingPicture
   } = useFarmProfile();
   
   const { syncFromFarm } = useWeatherSettings();
@@ -136,6 +138,29 @@ const FarmProfileSettings = () => {
       });
     } catch (error) {
       console.error('Error uploading logo:', error);
+      toast({
+        title: t('common:error'),
+        description: t('settings:messages.error'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handlePictureChange = async (imageUrl: string | null) => {
+    if (!imageUrl || !farmProfile) return;
+
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'picture.png', { type: blob.type });
+      
+      await uploadPicture({ id: farmProfile.id, file });
+      toast({
+        title: t('settings:farmProfile.pictureUpdated'),
+        description: t('settings:farmProfile.pictureUpdatedDesc'),
+      });
+    } catch (error) {
+      console.error('Error uploading picture:', error);
       toast({
         title: t('common:error'),
         description: t('settings:messages.error'),
@@ -314,6 +339,25 @@ const FarmProfileSettings = () => {
               currentImage={farmProfile.logo_url || null}
               onImageChange={handleLogoChange}
               disabled={isUploadingLogo}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Farm Picture Upload */}
+      {farmProfile && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('settings:farmProfile.picture')}</CardTitle>
+            <CardDescription>
+              {t('settings:farmProfile.pictureDescription')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ImageUpload
+              currentImage={farmProfile.picture_url || null}
+              onImageChange={handlePictureChange}
+              disabled={isUploadingPicture}
             />
           </CardContent>
         </Card>
