@@ -12,6 +12,7 @@ import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 import { type FarmProfileFormData } from '@/services/farmProfileService';
 import { Loader2, MapPin, Building2, Check } from 'lucide-react';
 import { suggestPlaces, getPlaceDetails, type PlacePrediction } from '@/services/placesService';
+import { dashboardBannerService } from '@/services/dashboardBannerService';
 import ImageUpload from '@/components/ImageUpload';
 import { useTranslation } from 'react-i18next';
 
@@ -161,6 +162,40 @@ const FarmProfileSettings = () => {
       });
     } catch (error) {
       console.error('Error uploading picture:', error);
+      toast({
+        title: t('common:error'),
+        description: t('settings:messages.error'),
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSyncDashboardBanner = async () => {
+    if (!farmProfile) return;
+
+    try {
+      const banner = await dashboardBannerService.getBanner();
+      if (!banner?.image_url) {
+        toast({
+          title: t('common:error'),
+          description: t('settings:farmProfile.noDashboardBanner'),
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Convert base64 or URL to file and upload
+      const response = await fetch(banner.image_url);
+      const blob = await response.blob();
+      const file = new File([blob], 'dashboard-banner.jpg', { type: blob.type });
+      
+      await uploadPicture({ id: farmProfile.id, file });
+      toast({
+        title: t('settings:farmProfile.pictureUpdated'),
+        description: t('settings:farmProfile.syncedFromDashboard'),
+      });
+    } catch (error) {
+      console.error('Error syncing dashboard banner:', error);
       toast({
         title: t('common:error'),
         description: t('settings:messages.error'),
@@ -348,10 +383,22 @@ const FarmProfileSettings = () => {
       {farmProfile && (
         <Card>
           <CardHeader>
-            <CardTitle>{t('settings:farmProfile.picture')}</CardTitle>
-            <CardDescription>
-              {t('settings:farmProfile.pictureDescription')}
-            </CardDescription>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>{t('settings:farmProfile.picture')}</CardTitle>
+                <CardDescription>
+                  {t('settings:farmProfile.pictureDescription')}
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSyncDashboardBanner}
+                disabled={isUploadingPicture}
+              >
+                {t('settings:farmProfile.syncDashboard')}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ImageUpload
