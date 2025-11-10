@@ -1,116 +1,108 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useTaskStore, Task } from '@/stores/taskStore';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
-export const useTasks = () => {
+export interface Task {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  type: 'feeding' | 'health' | 'maintenance' | 'breeding' | 'custom';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  due_date?: string;
+  assigned_to?: string;
+  animal_id?: string;
+  lot_id?: string;
+  notes?: string;
+  completed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export function useTasks() {
+  const { toast } = useToast();
+  const { t } = useTranslation('tasks');
   const queryClient = useQueryClient();
-  const { setTasks, addTask, updateTask: updateTaskStore, deleteTask: deleteTaskStore } = useTaskStore();
 
-  const { data: tasks, isLoading } = useQuery({
+  const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['tasks'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .order('due_date', { ascending: true });
+        .order('due_date', { ascending: true, nullsFirst: false });
 
       if (error) throw error;
-      const tasks = (data || []) as Task[];
-      setTasks(tasks);
-      return tasks;
-    }
+      return data as Task[];
+    },
   });
 
   const createMutation = useMutation({
-    mutationFn: async (newTask: Partial<Task>) => {
+    mutationFn: async (task: Omit<Task, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
         .from('tasks')
-        .insert([{ ...newTask, user_id: user.id } as any])
+        .insert({ ...task, user_id: user.id })
         .select()
         .single();
 
       if (error) throw error;
-      return data as Task;
+      return data;
     },
-    onSuccess: (data) => {
-      addTask(data);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      toast.success('Task created successfully');
+      toast({
+        title: t('messages.created'),
+      });
     },
-    onError: (error) => {
-      toast.error('Failed to create task: ' + error.message);
-    }
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Task> }) => {
+    mutationFn: async (task: Partial<Task> & { id: string }) => {
       const { data, error } = await supabase
         .from('tasks')
-        .update(updates)
-        .eq('id', id)
+        .update(task)
+        .eq('id', task.id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as Task;
+      return data;
     },
-    onSuccess: (data) => {
-      updateTaskStore(data.id, data);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      toast.success('Task updated successfully');
+      toast({
+        title: t('messages.updated'),
+      });
     },
-    onError: (error) => {
-      toast.error('Failed to update task: ' + error.message);
-    }
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (taskId: string) => {
       const { error } = await supabase
         .from('tasks')
         .delete()
-        .eq('id', id);
+        .eq('id', taskId);
 
       if (error) throw error;
-      return id;
     },
-    onSuccess: (id) => {
-      deleteTaskStore(id);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      toast.success('Task deleted successfully');
+      toast({
+        title: t('messages.deleted'),
+      });
     },
-    onError: (error) => {
-      toast.error('Failed to delete task: ' + error.message);
-    }
   });
 
-  const completeTask = async (id: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    await updateMutation.mutateAsync({
-      id,
-      updates: {
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        completed_by: user.id
-      }
-    });
-  };
-
   return {
-    tasks: tasks || [],
+    tasks,
     isLoading,
     createTask: createMutation.mutateAsync,
     updateTask: updateMutation.mutateAsync,
     deleteTask: deleteMutation.mutateAsync,
-    completeTask,
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-    isDeleting: deleteMutation.isPending
   };
-};
+}

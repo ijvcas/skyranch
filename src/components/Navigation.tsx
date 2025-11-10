@@ -29,6 +29,8 @@ const Navigation = () => {
     { to: '/lots', icon: MapPin, label: t('nav.lots') },
     { to: '/breeding', icon: Heart, label: t('nav.breeding') },
     { to: '/calendar', icon: Calendar, label: t('nav.calendar') },
+    { to: '/tasks', icon: FileText, label: 'Tasks' },
+    { to: '/inventory', icon: Users, label: 'Inventory' },
     { to: '/finances', icon: DollarSign, label: t('nav.finances') },
     { to: '/reports', icon: FileText, label: t('nav.reports') },
     { to: '/notifications', icon: Bell, label: t('nav.notifications') },

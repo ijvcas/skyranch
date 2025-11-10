@@ -1,100 +1,50 @@
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from 'react-i18next';
+import { PageHeader } from '@/components/PageHeader';
+import { Card } from '@/components/ui/card';
 import { useTasks } from '@/hooks/useTasks';
-import { TaskCard } from '@/components/tasks/TaskCard';
-import { TaskCreateDialog } from '@/components/tasks/TaskCreateDialog';
-import { TaskStatus } from '@/stores/taskStore';
 
 export default function Tasks() {
+  const { t } = useTranslation('tasks');
   const { tasks, isLoading } = useTasks();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<TaskStatus | 'all'>('all');
 
-  const filteredTasks = selectedStatus === 'all' 
-    ? tasks 
-    : tasks.filter(t => t.status === selectedStatus);
-
-  const pendingTasks = tasks.filter(t => t.status === 'pending');
-  const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
-  const completedTasks = tasks.filter(t => t.status === 'completed');
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <PageHeader title={t('title')} subtitle={t('subtitle')} />
+        <Card className="p-8 text-center">Loading tasks...</Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 max-w-7xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Tasks</h1>
-          <p className="text-muted-foreground mt-1">Manage your farm tasks and activities</p>
+    <div className="container mx-auto p-6 space-y-6">
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
+      
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Task Management System</h3>
+        <p className="text-muted-foreground mb-4">
+          Found {tasks.length} tasks in the database.
+        </p>
+        
+        <div className="space-y-2">
+          {tasks.map((task) => (
+            <div key={task.id} className="p-4 border rounded-lg">
+              <h4 className="font-medium">{task.title}</h4>
+              <p className="text-sm text-muted-foreground">{task.description}</p>
+              <div className="mt-2 flex gap-2">
+                <span className="text-xs bg-primary/10 px-2 py-1 rounded">{task.status}</span>
+                <span className="text-xs bg-secondary/10 px-2 py-1 rounded">{task.priority}</span>
+              </div>
+            </div>
+          ))}
+          
+          {tasks.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">
+              No tasks yet. Database is ready!
+            </p>
+          )}
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Task
-        </Button>
-      </div>
-
-      <Tabs defaultValue="all" className="w-full" onValueChange={(v) => setSelectedStatus(v as any)}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="all">All ({tasks.length})</TabsTrigger>
-          <TabsTrigger value="pending">Pending ({pendingTasks.length})</TabsTrigger>
-          <TabsTrigger value="in_progress">In Progress ({inProgressTasks.length})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({completedTasks.length})</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4">
-          {isLoading ? (
-            <div className="text-center py-12">Loading tasks...</div>
-          ) : filteredTasks.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              No tasks yet. Create your first task!
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {filteredTasks.map(task => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="pending" className="space-y-4">
-          {pendingTasks.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No pending tasks</div>
-          ) : (
-            <div className="grid gap-4">
-              {pendingTasks.map(task => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="in_progress" className="space-y-4">
-          {inProgressTasks.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No tasks in progress</div>
-          ) : (
-            <div className="grid gap-4">
-              {inProgressTasks.map(task => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="completed" className="space-y-4">
-          {completedTasks.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No completed tasks</div>
-          ) : (
-            <div className="grid gap-4">
-              {completedTasks.map(task => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      <TaskCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
+      </Card>
     </div>
   );
 }

@@ -1,184 +1,109 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useInventoryStore, InventoryItem, InventoryTransaction } from '@/stores/inventoryStore';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
-export const useInventory = () => {
+export interface InventoryItem {
+  id: string;
+  user_id: string;
+  name: string;
+  category: 'feed' | 'medicine' | 'supplement' | 'equipment' | 'other';
+  unit: string;
+  current_quantity: number;
+  min_quantity?: number;
+  max_quantity?: number;
+  unit_cost?: number;
+  barcode?: string;
+  supplier?: string;
+  storage_location?: string;
+  expiry_date?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export function useInventory() {
+  const { toast } = useToast();
+  const { t } = useTranslation('inventory');
   const queryClient = useQueryClient();
-  const { setItems, addItem, updateItem: updateItemStore, deleteItem: deleteItemStore, setTransactions, addTransaction } = useInventoryStore();
 
-  const { data: items, isLoading } = useQuery({
-    queryKey: ['inventory-items'],
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['inventory'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('inventory_items')
         .select('*')
-        .order('name', { ascending: true });
+        .order('name');
 
       if (error) throw error;
-      const items = (data || []) as InventoryItem[];
-      setItems(items);
-      return items;
-    }
+      return data as InventoryItem[];
+    },
   });
 
-  const { data: transactions } = useQuery({
-    queryKey: ['inventory-transactions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_transactions')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (error) throw error;
-      const transactions = (data || []) as InventoryTransaction[];
-      setTransactions(transactions);
-      return transactions;
-    }
-  });
-
-  const createItemMutation = useMutation({
-    mutationFn: async (newItem: Partial<InventoryItem>) => {
+  const createMutation = useMutation({
+    mutationFn: async (item: Omit<InventoryItem, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
         .from('inventory_items')
-        .insert([{ ...newItem, user_id: user.id } as any])
+        .insert({ ...item, user_id: user.id })
         .select()
         .single();
 
       if (error) throw error;
-      return data as InventoryItem;
+      return data;
     },
-    onSuccess: (data) => {
-      addItem(data);
-      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
-      toast.success('Item added successfully');
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      toast({
+        title: t('messages.itemAdded'),
+      });
     },
-    onError: (error) => {
-      toast.error('Failed to add item: ' + error.message);
-    }
   });
 
-  const updateItemMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<InventoryItem> }) => {
+  const updateMutation = useMutation({
+    mutationFn: async (item: Partial<InventoryItem> & { id: string }) => {
       const { data, error } = await supabase
         .from('inventory_items')
-        .update(updates)
-        .eq('id', id)
+        .update(item)
+        .eq('id', item.id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as InventoryItem;
+      return data;
     },
-    onSuccess: (data) => {
-      updateItemStore(data.id, data);
-      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
-      toast.success('Item updated successfully');
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      toast({
+        title: t('messages.itemUpdated'),
+      });
     },
-    onError: (error) => {
-      toast.error('Failed to update item: ' + error.message);
-    }
   });
 
-  const deleteItemMutation = useMutation({
-    mutationFn: async (id: string) => {
+  const deleteMutation = useMutation({
+    mutationFn: async (itemId: string) => {
       const { error } = await supabase
         .from('inventory_items')
         .delete()
-        .eq('id', id);
+        .eq('id', itemId);
 
       if (error) throw error;
-      return id;
     },
-    onSuccess: (id) => {
-      deleteItemStore(id);
-      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
-      toast.success('Item deleted successfully');
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      toast({
+        title: t('messages.itemDeleted'),
+      });
     },
-    onError: (error) => {
-      toast.error('Failed to delete item: ' + error.message);
-    }
   });
-
-  const createTransactionMutation = useMutation({
-    mutationFn: async (transaction: Partial<InventoryTransaction>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      // Create transaction
-      const { data: txData, error: txError } = await supabase
-        .from('inventory_transactions')
-        .insert([{ ...transaction, created_by: user.id } as any])
-        .select()
-        .single();
-
-      if (txError) throw txError;
-      const txn = txData as InventoryTransaction;
-
-      // Update item quantity
-      const { data: item } = await supabase
-        .from('inventory_items')
-        .select('current_quantity')
-        .eq('id', transaction.item_id)
-        .single();
-
-      if (item) {
-        const quantityChange = transaction.transaction_type === 'purchase' ? transaction.quantity! : -transaction.quantity!;
-        await supabase
-          .from('inventory_items')
-          .update({ current_quantity: item.current_quantity + quantityChange })
-          .eq('id', transaction.item_id);
-      }
-
-      return txn;
-    },
-    onSuccess: (data) => {
-      addTransaction(data);
-      queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
-      toast.success('Transaction recorded successfully');
-    },
-    onError: (error) => {
-      toast.error('Failed to record transaction: ' + error.message);
-    }
-  });
-
-  const recordUsage = async (itemId: string, quantity: number, notes?: string) => {
-    await createTransactionMutation.mutateAsync({
-      item_id: itemId,
-      transaction_type: 'usage',
-      quantity,
-      notes
-    });
-  };
-
-  const recordPurchase = async (itemId: string, quantity: number, unitCost?: number, notes?: string) => {
-    await createTransactionMutation.mutateAsync({
-      item_id: itemId,
-      transaction_type: 'purchase',
-      quantity,
-      unit_cost: unitCost,
-      total_cost: unitCost ? unitCost * quantity : undefined,
-      notes
-    });
-  };
 
   return {
-    items: items || [],
-    transactions: transactions || [],
+    items,
     isLoading,
-    createItem: createItemMutation.mutateAsync,
-    updateItem: updateItemMutation.mutateAsync,
-    deleteItem: deleteItemMutation.mutateAsync,
-    createTransaction: createTransactionMutation.mutateAsync,
-    recordUsage,
-    recordPurchase,
-    isCreating: createItemMutation.isPending,
-    isUpdating: updateItemMutation.isPending,
-    isDeleting: deleteItemMutation.isPending
+    createItem: createMutation.mutateAsync,
+    updateItem: updateMutation.mutateAsync,
+    deleteItem: deleteMutation.mutateAsync,
   };
-};
+}
