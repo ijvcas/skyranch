@@ -26,8 +26,8 @@ const MobileNavigation = () => {
   const navItems = [
     { to: '/dashboard', icon: Home, label: t('nav.dashboard') },
     { to: '/animals', icon: Users, label: t('nav.animals') },
-    { to: '/tasks', icon: FileText, label: 'Tasks' },
-    { to: '/inventory', icon: Package, label: 'Inventory' },
+    { to: '/tasks', icon: FileText, label: t('nav.activities') },
+    { to: '/inventory', icon: Package, label: t('nav.inventory') },
     { to: '/calendar', icon: Calendar, label: t('nav.calendar') },
   ];
 
