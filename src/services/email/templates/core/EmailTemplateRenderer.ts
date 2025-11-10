@@ -14,7 +14,9 @@ export class EmailTemplateRenderer {
     logoUrl?: string;
     title: string;
     content: string;
+    language?: string;
   }): Promise<EmailContent> {
+    const language = data.language || 'es';
     // Fetch farm branding colors from database
     const { data: farmProfile } = await supabase
       .from('farm_profiles')
@@ -26,12 +28,12 @@ export class EmailTemplateRenderer {
     const organizationName = data.organizationName || farmProfile?.farm_name || this.defaultOrganizationName;
     const currentYear = new Date().getFullYear();
 
-    const header = EmailContentBuilder.buildHeader(logoUrl, organizationName, primaryColor);
+    const header = EmailContentBuilder.buildHeader(logoUrl, organizationName, primaryColor, language);
     const contentSection = `<div style="padding: 32px 28px;">${data.content}</div>`;
-    const footer = EmailContentBuilder.buildFooter(organizationName, currentYear, primaryColor);
-    const backgroundPattern = EmailContentBuilder.buildBackgroundPattern(primaryColor);
+    const footerHtml = EmailContentBuilder.buildFooter(organizationName, currentYear, primaryColor, language);
+    const backgroundPattern = EmailContentBuilder.buildBackgroundPattern(primaryColor, language);
 
-    const bodyContent = EmailContentBuilder.wrapInContainer(header + contentSection + footer) + backgroundPattern;
+    const bodyContent = EmailContentBuilder.wrapInContainer(header + contentSection + footerHtml) + backgroundPattern;
 
     const html = EmailContentBuilder.getEmailDoctype() + 
                  `<title>${data.title}</title>` +
@@ -41,10 +43,20 @@ export class EmailTemplateRenderer {
     // Generate simple text version
     const text = this.htmlToText(data.content);
 
+    // Generate text version with translations
+    const footerTranslations: Record<string, { systemName: string; contact: string }> = {
+      es: { systemName: 'Sistema de Gestión Ganadera', contact: 'Contacto' },
+      en: { systemName: 'Livestock Management System', contact: 'Contact' },
+      pt: { systemName: 'Sistema de Gestão Pecuária', contact: 'Contato' },
+      fr: { systemName: 'Système de Gestion du Bétail', contact: 'Contact' }
+    };
+    
+    const footerText = footerTranslations[language] || footerTranslations.es;
+    
     return {
       subject: data.title,
       html,
-      text: `${data.title}\n\n${text}\n\n© ${currentYear} ${organizationName} - Sistema de Gestión Ganadera\n\nContacto: soporte@skyranch.es`
+      text: `${data.title}\n\n${text}\n\n© ${currentYear} ${organizationName} - ${footerText.systemName}\n\n${footerText.contact}: soporte@skyranch.es`
     };
   }
 

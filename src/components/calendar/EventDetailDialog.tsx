@@ -1,6 +1,8 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useTimezone } from '@/hooks/useTimezone';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Calendar, MapPin, DollarSign, User, Clock, Bell } from 'lucide-react';
@@ -28,6 +30,9 @@ const EventDetailDialog = ({
   onDelete, 
   animals 
 }: EventDetailDialogProps) => {
+  const { t, i18n } = useTranslation();
+  const { formatCurrency } = useTimezone();
+  
   if (!event) return null;
 
   const getEventTypeColor = (type: string) => {
@@ -48,53 +53,38 @@ const EventDetailDialog = ({
   };
 
   const getEventTypeLabel = (type: string) => {
-    switch (type) {
-      case 'vaccination':
-        return 'Vacunación';
-      case 'checkup':
-        return 'Revisión';
-      case 'breeding':
-        return 'Reproducción';
-      case 'treatment':
-        return 'Tratamiento';
-      case 'feeding':
-        return 'Alimentación';
-      case 'appointment':
-        return 'Cita';
-      case 'reminder':
-        return 'Recordatorio';
-      default:
-        return type;
-    }
+    return t(`calendar:eventTypes.${type}`) || type;
   };
 
   const formatEventDateTime = (eventDate: string, endDate?: string, allDay?: boolean) => {
     const startDate = new Date(eventDate);
+    const locale = i18n.language === 'es' ? 'es-ES' : i18n.language === 'pt' ? 'pt-PT' : i18n.language === 'fr' ? 'fr-FR' : 'en-US';
     
     if (allDay) {
-      return startDate.toLocaleDateString('es-ES', {
+      return startDate.toLocaleDateString(locale, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
-      }) + ' (Todo el día)';
+      }) + ` (${t('calendar:form.allDay')})`;
     }
 
-    let timeString = startDate.toLocaleDateString('es-ES', {
+    let timeString = startDate.toLocaleDateString(locale, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
 
-    timeString += ' a las ' + startDate.toLocaleTimeString('es-ES', {
+    const atText = i18n.language === 'es' ? 'a las' : i18n.language === 'pt' ? 'às' : i18n.language === 'fr' ? 'à' : 'at';
+    timeString += ` ${atText} ` + startDate.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit'
     });
 
     if (endDate) {
       const endDateTime = new Date(endDate);
-      timeString += ' - ' + endDateTime.toLocaleTimeString('es-ES', {
+      timeString += ' - ' + endDateTime.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit'
       });
@@ -104,14 +94,23 @@ const EventDetailDialog = ({
   };
 
   const getReminderText = (minutes: number) => {
-    if (minutes === 0) return 'Sin recordatorio';
-    if (minutes < 60) return `${minutes} minutos antes`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} horas antes`;
-    return `${Math.floor(minutes / 1440)} días antes`;
+    if (minutes === 0) return t('calendar:reminders.none');
+    if (minutes === 15) return t('calendar:reminders.15min');
+    if (minutes === 30) return t('calendar:reminders.30min');
+    if (minutes === 60) return t('calendar:reminders.1hour');
+    if (minutes === 120) return t('calendar:reminders.2hours');
+    if (minutes === 1440) return t('calendar:reminders.1day');
+    if (minutes === 2880) return t('calendar:reminders.2days');
+    if (minutes === 10080) return t('calendar:reminders.1week');
+    
+    // Fallback for custom values
+    if (minutes < 60) return `${minutes} ${i18n.language === 'es' ? 'minutos antes' : i18n.language === 'pt' ? 'minutos antes' : i18n.language === 'fr' ? 'minutes avant' : 'minutes before'}`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} ${i18n.language === 'es' ? 'horas antes' : i18n.language === 'pt' ? 'horas antes' : i18n.language === 'fr' ? 'heures avant' : 'hours before'}`;
+    return `${Math.floor(minutes / 1440)} ${i18n.language === 'es' ? 'días antes' : i18n.language === 'pt' ? 'dias antes' : i18n.language === 'fr' ? 'jours avant' : 'days before'}`;
   };
 
   const handleDelete = () => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este evento?')) {
+    if (window.confirm(t('calendar:confirmDelete'))) {
       onDelete(event.id);
       onClose();
     }
@@ -142,7 +141,7 @@ const EventDetailDialog = ({
               <span>{event.title}</span>
               {event.createdByName && (
                 <p className="text-sm font-normal text-gray-500 mt-1">
-                  Creado por: {event.createdByName}
+                  {t('calendar:detail.createdBy')}: {event.createdByName}
                 </p>
               )}
             </div>
@@ -166,7 +165,7 @@ const EventDetailDialog = ({
               <div className="flex items-center space-x-2">
                 <Bell className="w-4 h-4 text-gray-500" />
                 <span className="text-sm">
-                  Recordatorio: {getReminderText(event.reminderMinutes)}
+                  {t('calendar:form.reminder')}: {getReminderText(event.reminderMinutes)}
                 </span>
               </div>
             )}
@@ -176,7 +175,7 @@ const EventDetailDialog = ({
                 <div className="flex items-center space-x-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm font-medium">
-                    Animales ({eventAnimals.length}):
+                    {t('calendar:detail.animals')} ({eventAnimals.length}):
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1 ml-6">
@@ -199,14 +198,14 @@ const EventDetailDialog = ({
             {event.veterinarian && (
               <div className="flex items-center space-x-2">
                 <User className="w-4 h-4 text-gray-500" />
-                <span className="text-sm">Veterinario: {event.veterinarian}</span>
+                <span className="text-sm">{t('calendar:veterinarian')}: {event.veterinarian}</span>
               </div>
             )}
 
             {event.cost && (
               <div className="flex items-center space-x-2">
                 <DollarSign className="w-4 h-4 text-gray-500" />
-                <span className="text-sm">Costo: ${event.cost}</span>
+                <span className="text-sm">{t('calendar:cost')}: {formatCurrency(event.cost)}</span>
               </div>
             )}
           </div>
@@ -214,7 +213,7 @@ const EventDetailDialog = ({
           {/* Description */}
           {event.description && (
             <div>
-              <h4 className="font-medium mb-2">Descripción</h4>
+              <h4 className="font-medium mb-2">{t('calendar:detail.description')}</h4>
               <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
                 {event.description}
               </p>
@@ -224,7 +223,7 @@ const EventDetailDialog = ({
           {/* Notes */}
           {event.notes && (
             <div>
-              <h4 className="font-medium mb-2">Notas</h4>
+              <h4 className="font-medium mb-2">{t('calendar:detail.notes')}</h4>
               <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
                 {event.notes}
               </p>
@@ -234,22 +233,20 @@ const EventDetailDialog = ({
           {/* Status and Event Properties */}
           <div className="flex flex-wrap gap-2">
             <Badge variant={event.status === 'completed' ? 'default' : 'secondary'}>
-              Estado: {event.status === 'completed' ? 'Completado' : 
-                      event.status === 'cancelled' ? 'Cancelado' :
-                      event.status === 'missed' ? 'Perdido' : 'Programado'}
+              {t('calendar:detail.status')}: {t(`calendar:status.${event.status || 'scheduled'}`)}
             </Badge>
             {event.allDay && (
-              <Badge variant="outline">Todo el día</Badge>
+              <Badge variant="outline">{t('calendar:form.allDay')}</Badge>
             )}
             {event.recurring && (
-              <Badge variant="outline">Recurrente</Badge>
+              <Badge variant="outline">{t('calendar:detail.recurring')}</Badge>
             )}
           </div>
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-2 pt-4 border-t">
             <Button variant="outline" onClick={onClose}>
-              Cerrar
+              {t('calendar:detail.close')}
             </Button>
             <Button
               variant="outline"
@@ -260,7 +257,7 @@ const EventDetailDialog = ({
               className="flex items-center space-x-2"
             >
               <Edit className="w-4 h-4" />
-              <span>Editar</span>
+              <span>{t('calendar:actions.edit')}</span>
             </Button>
             <Button
               variant="destructive"
@@ -268,7 +265,7 @@ const EventDetailDialog = ({
               className="flex items-center space-x-2"
             >
               <Trash2 className="w-4 h-4" />
-              <span>Eliminar</span>
+              <span>{t('calendar:actions.delete')}</span>
             </Button>
           </div>
         </div>

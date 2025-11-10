@@ -1,5 +1,6 @@
 
 import { BaseTemplateData } from '../BaseEmailTemplate';
+import i18n from '@/i18n/config';
 
 // Helper to convert hex color to HSL format for email gradients
 const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
@@ -39,7 +40,8 @@ const hexToHsl = (hex: string): string => {
 };
 
 export class EmailContentBuilder {
-  static buildHeader(logoUrl: string, organizationName: string, primaryColor: string = '#10b981'): string {
+  static buildHeader(logoUrl: string, organizationName: string, primaryColor: string = '#10b981', language: string = 'es'): string {
+    const subtitle = i18n.t('email:header.subtitle', { lng: language });
     return `
       <!-- Simple Centered Header -->
       <div style="padding: 40px 20px 20px; text-align: center; background-color: #ffffff;">
@@ -49,52 +51,57 @@ export class EmailContentBuilder {
         </h1>
         <div style="width: 200px; height: 3px; background-color: ${primaryColor}; margin: 0 auto 12px;"></div>
         <p style="margin: 0; font-size: 14px; color: #6b7280; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
-          Sistema de Gestión Ganadera
+          ${subtitle}
         </p>
       </div>
     `;
   }
 
-  static buildFooter(organizationName: string, currentYear: number, primaryColor: string = '#10b981'): string {
+  static buildFooter(organizationName: string, currentYear: number, primaryColor: string = '#10b981', language: string = 'es'): string {
+    const contactTitle = i18n.t('email:footer.contactTitle', { lng: language });
+    const systemName = i18n.t('email:footer.systemName', { lng: language });
+    const disclaimer = i18n.t('email:footer.disclaimer', { lng: language, organizationName });
+    const copyright = i18n.t('email:footer.copyright', { lng: language, year: currentYear, organizationName });
+    
     return `
       <!-- Clean SkyRanch Footer -->
       <div style="background: #f8fafc; padding: 32px 24px; text-align: center; border-top: 1px solid #e2e8f0;">
         <!-- Contact Information -->
         <div style="margin-bottom: 20px;">
           <h3 style="color: ${primaryColor}; margin: 0 0 12px 0; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif;">
-            Contacto Profesional
+            ${contactTitle}
           </h3>
           <div style="background: ${primaryColor}1a; padding: 12px 18px; border-radius: 8px; display: inline-block; border: 1px solid ${primaryColor}33;">
             <p style="color: ${primaryColor}; margin: 0 0 4px 0; font-size: 13px; font-weight: 600;">
               📧 soporte@skyranch.es
             </p>
             <p style="color: #6b7280; margin: 0; font-size: 11px;">
-              Sistema de Gestión Ganadera
+              ${systemName}
             </p>
           </div>
         </div>
         
         <!-- Disclaimer -->
         <p style="color: #6b7280; margin: 0 0 16px 0; font-size: 11px; line-height: 1.5;">
-          Este es un mensaje automático del sistema <strong style="color: ${primaryColor};">${organizationName}</strong>.<br>
-          Por favor, no respondas a este correo electrónico.
+          ${disclaimer}
         </p>
         
         <!-- Copyright -->
         <p style="color: #9ca3af; margin: 0; font-size: 10px;">
-          © ${currentYear} <span style="color: ${primaryColor}; font-weight: 600;">${organizationName}</span> - Todos los derechos reservados
+          ${copyright}
         </p>
       </div>
     `;
   }
 
-  static buildBackgroundPattern(primaryColor: string = '#10b981'): string {
+  static buildBackgroundPattern(primaryColor: string = '#10b981', language: string = 'es'): string {
+    const tagline = i18n.t('email:footer.tagline', { lng: language });
     return `
       <!-- Background accent -->
       <div style="text-align: center; margin-top: 20px; padding: 16px;">
         <div style="display: inline-block; padding: 8px 16px; background: ${primaryColor}0d; border-radius: 20px; border: 1px solid ${primaryColor}26;">
           <p style="color: ${primaryColor}; font-size: 10px; margin: 0; font-weight: 600; letter-spacing: 0.5px;">
-            🌿 GESTIÓN GANADERA PROFESIONAL 🌿
+            ${tagline}
           </p>
         </div>
       </div>

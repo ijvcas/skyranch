@@ -90,5 +90,24 @@
   "eventsList": {
     "viewByDate": "View by Date",
     "eventsHistory": "Events History"
-  }
+  },
+  "dialog": {
+    "edit": "Edit Event"
+  },
+  "detail": {
+    "animals": "Animals",
+    "description": "Description",
+    "notes": "Notes",
+    "status": "Status",
+    "recurring": "Recurring",
+    "close": "Close"
+  },
+  "status": {
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "missed": "Missed",
+    "scheduled": "Scheduled"
+  },
+  "saving": "Saving...",
+  "confirmDelete": "Are you sure you want to delete this event?"
 }

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +32,7 @@ const EventEditDialog = ({
   selectedUserIds, 
   onUserSelectionChange 
 }: EventEditDialogProps) => {
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editedEvent, setEditedEvent] = useState({
     title: '',
@@ -136,14 +138,14 @@ const EventEditDialog = ({
   };
 
   const reminderOptions = [
-    { value: 0, label: 'Sin recordatorio' },
-    { value: 15, label: '15 minutos antes' },
-    { value: 30, label: '30 minutos antes' },
-    { value: 60, label: '1 hora antes' },
-    { value: 120, label: '2 horas antes' },
-    { value: 1440, label: '1 día antes' },
-    { value: 2880, label: '2 días antes' },
-    { value: 10080, label: '1 semana antes' }
+    { value: 0, label: t('calendar:reminders.none') },
+    { value: 15, label: t('calendar:reminders.15min') },
+    { value: 30, label: t('calendar:reminders.30min') },
+    { value: 60, label: t('calendar:reminders.1hour') },
+    { value: 120, label: t('calendar:reminders.2hours') },
+    { value: 1440, label: t('calendar:reminders.1day') },
+    { value: 2880, label: t('calendar:reminders.2days') },
+    { value: 10080, label: t('calendar:reminders.1week') }
   ];
 
   if (!event) return null;
@@ -152,26 +154,26 @@ const EventEditDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Editar Evento</DialogTitle>
+          <DialogTitle>{t('calendar:dialog.edit')}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
           {/* Event Form Fields */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-title">Título *</Label>
+              <Label htmlFor="edit-title">{t('calendar:form.title')} *</Label>
               <Input
                 id="edit-title"
                 value={editedEvent.title}
                 onChange={(e) => setEditedEvent(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Título del evento"
+                placeholder={t('calendar:form.titlePlaceholder')}
                 className="w-full"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-date">Fecha *</Label>
+                <Label htmlFor="edit-date">{t('calendar:form.date')} *</Label>
                 <Input
                   id="edit-date"
                   type="date"
@@ -182,7 +184,7 @@ const EventEditDialog = ({
               </div>
 
               <div className="space-y-2">
-                <Label>Tipo de Evento</Label>
+                <Label>{t('calendar:form.type')}</Label>
                 <Select 
                   value={editedEvent.eventType} 
                   onValueChange={(value: CalendarEvent['eventType']) => 
@@ -193,13 +195,13 @@ const EventEditDialog = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="vaccination">Vacunación</SelectItem>
-                    <SelectItem value="checkup">Revisión</SelectItem>
-                    <SelectItem value="breeding">Reproducción</SelectItem>
-                    <SelectItem value="treatment">Tratamiento</SelectItem>
-                    <SelectItem value="feeding">Alimentación</SelectItem>
-                    <SelectItem value="appointment">Cita</SelectItem>
-                    <SelectItem value="reminder">Recordatorio</SelectItem>
+                    <SelectItem value="vaccination">{t('calendar:eventTypes.vaccination')}</SelectItem>
+                    <SelectItem value="checkup">{t('calendar:eventTypes.checkup')}</SelectItem>
+                    <SelectItem value="breeding">{t('calendar:eventTypes.breeding')}</SelectItem>
+                    <SelectItem value="treatment">{t('calendar:eventTypes.treatment')}</SelectItem>
+                    <SelectItem value="feeding">{t('calendar:eventTypes.feeding')}</SelectItem>
+                    <SelectItem value="appointment">{t('calendar:eventTypes.appointment')}</SelectItem>
+                    <SelectItem value="reminder">{t('calendar:eventTypes.reminder')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -215,13 +217,13 @@ const EventEditDialog = ({
                   onChange={(e) => setEditedEvent(prev => ({ ...prev, allDay: e.target.checked }))}
                   className="rounded"
                 />
-                <Label htmlFor="edit-allDay">Todo el día</Label>
+                <Label htmlFor="edit-allDay">{t('calendar:form.allDay')}</Label>
               </div>
 
               {!editedEvent.allDay && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-startTime">Hora de inicio</Label>
+                    <Label htmlFor="edit-startTime">{t('calendar:form.startTime')}</Label>
                     <Input
                       id="edit-startTime"
                       type="time"
@@ -232,7 +234,7 @@ const EventEditDialog = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="edit-endTime">Hora de fin (opcional)</Label>
+                    <Label htmlFor="edit-endTime">{t('calendar:form.endTime')}</Label>
                     <Input
                       id="edit-endTime"
                       type="time"
@@ -247,7 +249,7 @@ const EventEditDialog = ({
 
             {/* Reminder Settings */}
             <div className="space-y-2">
-              <Label>Recordatorio</Label>
+              <Label>{t('calendar:form.reminder')}</Label>
               <Select 
                 value={editedEvent.reminderMinutes.toString()} 
                 onValueChange={(value) => setEditedEvent(prev => ({ ...prev, reminderMinutes: parseInt(value) }))}
@@ -269,52 +271,52 @@ const EventEditDialog = ({
               animals={animals}
               selectedAnimalIds={editedEvent.animalIds}
               onChange={(selectedIds) => setEditedEvent(prev => ({ ...prev, animalIds: selectedIds }))}
-              label="Animales (Opcional)"
+              label={t('calendar:form.animals')}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-veterinarian">Veterinario</Label>
+                <Label htmlFor="edit-veterinarian">{t('calendar:veterinarian')}</Label>
                 <Input
                   id="edit-veterinarian"
                   value={editedEvent.veterinarian}
                   onChange={(e) => setEditedEvent(prev => ({ ...prev, veterinarian: e.target.value }))}
-                  placeholder="Nombre del veterinario"
+                  placeholder={t('calendar:veterinarianPlaceholder')}
                   className="w-full"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-cost">Costo</Label>
+                <Label htmlFor="edit-cost">{t('calendar:cost')}</Label>
                 <Input
                   id="edit-cost"
                   type="number"
                   value={editedEvent.cost}
                   onChange={(e) => setEditedEvent(prev => ({ ...prev, cost: e.target.value }))}
-                  placeholder="0.00"
+                  placeholder={t('calendar:costPlaceholder')}
                   className="w-full"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-location">Ubicación</Label>
+              <Label htmlFor="edit-location">{t('calendar:location')}</Label>
               <Input
                 id="edit-location"
                 value={editedEvent.location}
                 onChange={(e) => setEditedEvent(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="Ubicación del evento"
+                placeholder={t('calendar:locationPlaceholder')}
                 className="w-full"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-description">Descripción</Label>
+              <Label htmlFor="edit-description">{t('calendar:form.description')}</Label>
               <Textarea
                 id="edit-description"
                 value={editedEvent.description}
                 onChange={(e) => setEditedEvent(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Detalles adicionales"
+                placeholder={t('calendar:form.descriptionPlaceholder')}
                 className="w-full"
               />
             </div>
@@ -333,17 +335,17 @@ const EventEditDialog = ({
             onClick={handleDelete}
             disabled={isSubmitting}
           >
-            Eliminar
+            {t('calendar:actions.delete')}
           </Button>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancelar
+              {t('calendar:actions.cancel')}
             </Button>
             <Button 
               onClick={handleSave} 
               disabled={isSubmitting || !editedEvent.title}
             >
-              {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+              {isSubmitting ? t('calendar:saving') : t('calendar:actions.save')}
             </Button>
           </div>
         </div>

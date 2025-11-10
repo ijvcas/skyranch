@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { NotificationType, NotificationPriority } from '@/hooks/notifications/types';
+import i18n from '@/i18n/config';
 
 export interface SupabaseNotification {
   id: string;
@@ -101,12 +102,14 @@ class SupabaseNotificationService {
   }
 
   // Auto-generate notifications for calendar events
-  async createCalendarNotification(eventTitle: string, eventDate: string, animalName?: string): Promise<void> {
+  async createCalendarNotification(eventTitle: string, eventDate: string, animalName?: string, language: string = 'es'): Promise<void> {
+    const formattedDate = new Date(eventDate).toLocaleDateString(language === 'es' ? 'es-ES' : language === 'pt' ? 'pt-PT' : language === 'fr' ? 'fr-FR' : 'en-US');
+    
     await this.createNotification({
       type: 'calendar',
       priority: 'medium',
-      title: `Evento programado: ${eventTitle}`,
-      message: `Tienes un evento programado "${eventTitle}" para ${new Date(eventDate).toLocaleDateString('es-ES')}`,
+      title: i18n.t('notifications:calendar.title', { lng: language, eventTitle }),
+      message: i18n.t('notifications:calendar.message', { lng: language, eventTitle, eventDate: formattedDate }),
       read: false,
       action_required: true,
       animal_name: animalName
@@ -114,16 +117,18 @@ class SupabaseNotificationService {
   }
 
   // Auto-generate notifications for health records
-  async createHealthNotification(animalName: string, recordType: string, dueDate?: string): Promise<void> {
+  async createHealthNotification(animalName: string, recordType: string, dueDate?: string, language: string = 'es'): Promise<void> {
     const priority = recordType === 'vaccination' ? 'high' : 'medium';
+    const formattedDate = dueDate ? new Date(dueDate).toLocaleDateString(language === 'es' ? 'es-ES' : language === 'pt' ? 'pt-PT' : language === 'fr' ? 'fr-FR' : 'en-US') : '';
+    
     const message = dueDate 
-      ? `${animalName} tiene ${recordType} programado para ${new Date(dueDate).toLocaleDateString('es-ES')}`
-      : `Se ha registrado ${recordType} para ${animalName}`;
+      ? i18n.t('notifications:health.vaccination', { lng: language, animalName, dueDate: formattedDate })
+      : i18n.t('notifications:health.treatment', { lng: language, animalName });
 
     await this.createNotification({
       type: 'health',
       priority,
-      title: `Recordatorio de salud: ${animalName}`,
+      title: i18n.t('notifications:health.reminder', { lng: language, animalName }),
       message,
       read: false,
       action_required: !!dueDate,
@@ -132,12 +137,12 @@ class SupabaseNotificationService {
   }
 
   // Auto-generate notifications for breeding records
-  async createBreedingNotification(motherName: string, fatherName: string, status: string): Promise<void> {
+  async createBreedingNotification(motherName: string, fatherName: string, status: string, language: string = 'es'): Promise<void> {
     await this.createNotification({
       type: 'breeding',
       priority: 'medium',
-      title: `Actualización de reproducción`,
-      message: `El cruzamiento entre ${motherName} y ${fatherName} está ${status}`,
+      title: i18n.t('notifications:breeding.update', { lng: language }),
+      message: i18n.t('notifications:breeding.status', { lng: language, motherName, fatherName, status }),
       read: false,
       animal_name: motherName
     });

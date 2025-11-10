@@ -90,5 +90,24 @@
   "eventsList": {
     "viewByDate": "Vista por Fecha",
     "eventsHistory": "Historial de Eventos"
-  }
+  },
+  "dialog": {
+    "edit": "Editar Evento"
+  },
+  "detail": {
+    "animals": "Animales",
+    "description": "Descripción",
+    "notes": "Notas",
+    "status": "Estado",
+    "recurring": "Recurrente",
+    "close": "Cerrar"
+  },
+  "status": {
+    "completed": "Completado",
+    "cancelled": "Cancelado",
+    "missed": "Perdido",
+    "scheduled": "Programado"
+  },
+  "saving": "Guardando...",
+  "confirmDelete": "¿Estás seguro de que quieres eliminar este evento?"
 }

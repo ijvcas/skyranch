@@ -48,7 +48,8 @@ export class CalendarEventTemplate extends BaseEmailTemplate {
       organizationName: data.organizationName,
       logoUrl: data.logoUrl,
       title: subject,
-      content
+      content,
+      language: userLanguage
     });
   }
 

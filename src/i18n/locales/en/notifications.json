@@ -30,5 +30,19 @@
     "unread": "Unread",
     "read": "Read",
     "all": "All"
+  },
+  "calendar": {
+    "title": "Scheduled Event: {{eventTitle}}",
+    "message": "You have a scheduled event \"{{eventTitle}}\" for {{eventDate}}",
+    "actionRequired": "Action Required"
+  },
+  "health": {
+    "vaccination": "{{animalName}} has vaccination scheduled for {{dueDate}}",
+    "treatment": "Treatment recorded for {{animalName}}",
+    "reminder": "Health Reminder: {{animalName}}"
+  },
+  "breeding": {
+    "update": "Breeding Update",
+    "status": "The breeding between {{motherName}} and {{fatherName}} is {{status}}"
   }
 }

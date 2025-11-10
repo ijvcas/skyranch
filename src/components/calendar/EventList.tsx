@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { CalendarIcon, Bell, MapPin, DollarSign, Edit, Search } from 'lucide-react';
 import { CalendarEvent } from '@/services/calendarService';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/hooks/useTimezone';
 
 interface EventListProps {
   events: CalendarEvent[];
@@ -15,6 +16,7 @@ interface EventListProps {
 
 const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
   const { t } = useTranslation();
+  const { formatCurrency } = useTimezone();
   const [searchTerm, setSearchTerm] = useState("");
   const [showHistory, setShowHistory] = useState(false);
 
@@ -146,7 +148,7 @@ const EventList = ({ events, selectedDate, onEditEvent }: EventListProps) => {
                 {event.cost && (
                   <div className="flex items-center">
                     <DollarSign className="w-3 h-3 mr-1" />
-                    ${event.cost}
+                    {formatCurrency(event.cost)}
                   </div>
                 )}
               </div>

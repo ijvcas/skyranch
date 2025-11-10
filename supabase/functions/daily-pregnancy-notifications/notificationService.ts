@@ -1,6 +1,52 @@
 
 import { BreedingRecord, User, NotificationResult } from './types.ts';
 
+// Simple i18n for edge function
+const translations: Record<string, Record<string, string>> = {
+  es: {
+    overdueTitle: '🚨 Parto vencido',
+    overdueMessage: '{{motherName}} tenía fecha de parto el {{dueDate}} ({{daysDifference}} días vencido). Es urgente revisar y registrar el parto si ya ocurrió.',
+    todayTitle: '🚨 Parto hoy',
+    todayMessage: '{{motherName}} está programada para dar a luz HOY ({{dueDate}}). Mantén vigilancia constante y área de parto preparada.',
+    upcomingTitle: '🤰 Parto próximo',
+    upcomingMessage: '{{motherName}} está programada para dar a luz en {{daysDifference}} días ({{dueDate}}). Prepara el área de parto y mantén atención veterinaria disponible.'
+  },
+  en: {
+    overdueTitle: '🚨 Overdue Birth',
+    overdueMessage: '{{motherName}} was due to give birth on {{dueDate}} ({{daysDifference}} days overdue). It is urgent to check and register the birth if it has already occurred.',
+    todayTitle: '🚨 Birth Today',
+    todayMessage: '{{motherName}} is scheduled to give birth TODAY ({{dueDate}}). Maintain constant surveillance and have the birthing area prepared.',
+    upcomingTitle: '🤰 Upcoming Birth',
+    upcomingMessage: '{{motherName}} is scheduled to give birth in {{daysDifference}} days ({{dueDate}}). Prepare the birthing area and keep veterinary attention available.'
+  },
+  pt: {
+    overdueTitle: '🚨 Parto Atrasado',
+    overdueMessage: '{{motherName}} estava prevista para dar à luz em {{dueDate}} ({{daysDifference}} dias de atraso). É urgente verificar e registrar o parto se já ocorreu.',
+    todayTitle: '🚨 Parto Hoje',
+    todayMessage: '{{motherName}} está programada para dar à luz HOJE ({{dueDate}}). Mantenha vigilância constante e área de parto preparada.',
+    upcomingTitle: '🤰 Parto Próximo',
+    upcomingMessage: '{{motherName}} está programada para dar à luz em {{daysDifference}} dias ({{dueDate}}). Prepare a área de parto e mantenha atenção veterinária disponível.'
+  },
+  fr: {
+    overdueTitle: '🚨 Mise Bas En Retard',
+    overdueMessage: '{{motherName}} devait mettre bas le {{dueDate}} ({{daysDifference}} jours de retard). Il est urgent de vérifier et d\'enregistrer la mise bas si elle a déjà eu lieu.',
+    todayTitle: '🚨 Mise Bas Aujourd\'hui',
+    todayMessage: '{{motherName}} est prévue pour mettre bas AUJOURD\'HUI ({{dueDate}}). Maintenez une surveillance constante et préparez la zone de mise bas.',
+    upcomingTitle: '🤰 Mise Bas Prochaine',
+    upcomingMessage: '{{motherName}} est prévue pour mettre bas dans {{daysDifference}} jours ({{dueDate}}). Préparez la zone de mise bas et gardez l\'attention vétérinaire disponible.'
+  }
+};
+
+const t = (key: string, lang: string, vars?: Record<string, string>): string => {
+  let text = translations[lang]?.[key] || translations['es'][key] || key;
+  if (vars) {
+    Object.entries(vars).forEach(([k, v]) => {
+      text = text.replace(new RegExp(`{{${k}}}`, 'g'), v);
+    });
+  }
+  return text;
+};
+
 export class NotificationService {
   constructor(private supabase: any) {}
 
@@ -35,6 +81,13 @@ export class NotificationService {
 
       for (const user of users) {
         try {
+          // Get user's language preference (default to 'es')
+          const userLanguage = user.preferred_language || 'es';
+          
+          // Generate translated content
+          const { notificationTitle: translatedTitle, notificationMessage: translatedMessage } = 
+            this.generateNotificationContent(motherName, dueDateString, isOverdue, daysDifference, daysUntilDue, userLanguage);
+          
           // Check if we already sent a notification for this pregnancy today
           const alreadySent = await this.checkIfNotificationSentToday(user.id, motherName, today);
           
@@ -46,8 +99,8 @@ export class NotificationService {
           // Create in-app notification
           const success = await this.createNotification(
             user.id,
-            notificationTitle,
-            notificationMessage,
+            translatedTitle,
+            translatedMessage,
             motherName,
             record,
             daysDifference,
@@ -55,7 +108,7 @@ export class NotificationService {
           );
 
           if (success) {
-            console.log(`✅ Notification created for ${user.email} about ${motherName}`);
+            console.log(`✅ Notification created for ${user.email} about ${motherName} in ${userLanguage}`);
             notificationsSent++;
           } else {
             notificationsFailed++;
@@ -75,20 +128,32 @@ export class NotificationService {
     dueDateString: string,
     isOverdue: boolean,
     daysDifference: number,
-    daysUntilDue: number
+    daysUntilDue: number,
+    language: string = 'es'
   ): { notificationTitle: string; notificationMessage: string } {
     let notificationMessage: string;
     let notificationTitle: string;
 
     if (isOverdue) {
-      notificationTitle = '🚨 Parto vencido';
-      notificationMessage = `${motherName} tenía fecha de parto el ${dueDateString} (${daysDifference} días vencido). Es urgente revisar y registrar el parto si ya ocurrió.`;
+      notificationTitle = t('overdueTitle', language);
+      notificationMessage = t('overdueMessage', language, { 
+        motherName, 
+        dueDate: dueDateString, 
+        daysDifference: String(daysDifference) 
+      });
     } else if (daysUntilDue === 0) {
-      notificationTitle = '🚨 Parto hoy';
-      notificationMessage = `${motherName} está programada para dar a luz HOY (${dueDateString}). Mantén vigilancia constante y área de parto preparada.`;
+      notificationTitle = t('todayTitle', language);
+      notificationMessage = t('todayMessage', language, { 
+        motherName, 
+        dueDate: dueDateString 
+      });
     } else {
-      notificationTitle = '🤰 Parto próximo';
-      notificationMessage = `${motherName} está programada para dar a luz en ${daysDifference} días (${dueDateString}). Prepara el área de parto y mantén atención veterinaria disponible.`;
+      notificationTitle = t('upcomingTitle', language);
+      notificationMessage = t('upcomingMessage', language, { 
+        motherName, 
+        dueDate: dueDateString, 
+        daysDifference: String(daysDifference) 
+      });
     }
 
     return { notificationTitle, notificationMessage };

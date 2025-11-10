@@ -35,9 +35,8 @@ export const useLanguage = () => {
         console.log('📱 [LANGUAGE SYNC] iOS Settings value:', value, 'Current language:', i18n.language);
         
         if (value && value !== i18n.language) {
-          console.log('🔄 [LANGUAGE SYNC] Syncing language from iOS Settings:', value, '→', i18n.language);
-          await i18n.changeLanguage(value);
-          console.log('✅ [LANGUAGE SYNC] Language changed successfully to:', value);
+          console.log('🔄 [LANGUAGE SYNC] Language changed in iOS Settings! Updating app from', i18n.language, 'to', value);
+          await changeLanguage(value as Language);
         } else {
           console.log('✓ [LANGUAGE SYNC] Language already in sync');
         }
@@ -51,6 +50,7 @@ export const useLanguage = () => {
     // Listen for app state changes (returning from iOS Settings)
     if (Capacitor.isNativePlatform()) {
       let listenerHandle: any;
+      let pollingInterval: any;
       
       const setupListener = async () => {
         console.log('👂 [LANGUAGE SYNC] Setting up app state listener...');
@@ -68,11 +68,25 @@ export const useLanguage = () => {
       };
       
       setupListener();
+      
+      // Add polling as backup mechanism (check every 5 seconds)
+      pollingInterval = setInterval(async () => {
+        if (!isSyncing) {
+          const { value } = await Preferences.get({ key: 'app_language' });
+          if (value && value !== i18n.language) {
+            console.log('🔄 [POLLING] Language change detected from', i18n.language, 'to', value);
+            await changeLanguage(value as Language);
+          }
+        }
+      }, 5000);
 
       return () => {
-        console.log('🧹 [LANGUAGE SYNC] Cleaning up app state listener');
+        console.log('🧹 [LANGUAGE SYNC] Cleaning up app state listener and polling');
         if (listenerHandle) {
           listenerHandle.remove();
+        }
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
         }
       };
     }
