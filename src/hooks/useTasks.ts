@@ -35,7 +35,7 @@ export function useTasks() {
         .order('due_date', { ascending: true, nullsFirst: false });
 
       if (error) throw error;
-      return data as Task[];
+      return data as any as Task[];
     },
   });
 
@@ -46,7 +46,7 @@ export function useTasks() {
 
       const { data, error } = await supabase
         .from('tasks')
-        .insert({ ...task, user_id: user.id })
+        .insert({ ...task as any, user_id: user.id })
         .select()
         .single();
 
