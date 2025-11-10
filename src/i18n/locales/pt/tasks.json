@@ -1,0 +1,61 @@
+{
+  "title": "Atividades",
+  "subtitle": "Planeje tarefas e documente trabalho concluído",
+  "new": "Nova Atividade",
+  "newTask": "Planejar Tarefa",
+  "quickLog": "Registro Rápido",
+  "pending": "Pendente",
+  "inProgress": "Em Andamento",
+  "completed": "Concluídas",
+  "cancelled": "Canceladas",
+  "all": "Todas",
+  "create": "Criar Atividade",
+  "edit": "Editar Atividade",
+  "delete": "Excluir Atividade",
+  "complete": "Concluir",
+  "markComplete": "Marcar Concluída",
+  "completionDetails": "Detalhes da Conclusão",
+  "logCompleted": "Registrar Trabalho Concluído",
+  "planning": "Planejamento",
+  "workLog": "Registro de Trabalho",
+  "priority": {
+    "low": "Baixa",
+    "medium": "Média",
+    "high": "Alta",
+    "urgent": "Urgente"
+  },
+  "type": {
+    "feeding": "Alimentação",
+    "health": "Saúde",
+    "maintenance": "Manutenção",
+    "breeding": "Reprodução",
+    "veterinary": "Veterinária",
+    "pregnancy": "Gravidez",
+    "infrastructure": "Infraestrutura",
+    "general": "Geral",
+    "custom": "Personalizado"
+  },
+  "fields": {
+    "title": "Título",
+    "description": "Descrição",
+    "type": "Tipo",
+    "priority": "Prioridade",
+    "dueDate": "Data de Vencimento",
+    "assignedTo": "Atribuído A",
+    "notes": "Notas",
+    "completionNotes": "Notas de Conclusão",
+    "completionDate": "Data de Conclusão",
+    "completionPhotos": "Fotos",
+    "weather": "Clima",
+    "temperature": "Temperatura",
+    "location": "Localização",
+    "cost": "Custo"
+  },
+  "messages": {
+    "created": "Atividade criada com sucesso",
+    "updated": "Atividade atualizada com sucesso",
+    "deleted": "Atividade excluída com sucesso",
+    "completed": "Atividade concluída com sucesso",
+    "quickLogSuccess": "Trabalho registrado com sucesso"
+  }
+}

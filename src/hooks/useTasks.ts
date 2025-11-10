@@ -8,7 +8,7 @@ export interface Task {
   user_id: string;
   title: string;
   description?: string;
-  type: 'feeding' | 'health' | 'maintenance' | 'breeding' | 'custom';
+  type: 'feeding' | 'health' | 'maintenance' | 'breeding' | 'veterinary' | 'pregnancy' | 'infrastructure' | 'general' | 'custom';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   due_date?: string;
@@ -19,6 +19,15 @@ export interface Task {
   completed_at?: string;
   created_at: string;
   updated_at: string;
+  // New fields from field reports integration
+  weather_conditions?: string;
+  temperature?: number | null;
+  location_coordinates?: string;
+  report_type?: string;
+  completion_notes?: string;
+  completion_photos?: string[];
+  actual_completion_date?: string;
+  cost?: number | null;
 }
 
 export function useTasks() {

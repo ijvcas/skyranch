@@ -1,0 +1,61 @@
+{
+  "title": "Activités",
+  "subtitle": "Planifiez les tâches et documentez le travail accompli",
+  "new": "Nouvelle Activité",
+  "newTask": "Planifier une Tâche",
+  "quickLog": "Enregistrement Rapide",
+  "pending": "En Attente",
+  "inProgress": "En Cours",
+  "completed": "Terminées",
+  "cancelled": "Annulées",
+  "all": "Toutes",
+  "create": "Créer une Activité",
+  "edit": "Modifier l'Activité",
+  "delete": "Supprimer l'Activité",
+  "complete": "Terminer",
+  "markComplete": "Marquer Terminée",
+  "completionDetails": "Détails d'Achèvement",
+  "logCompleted": "Enregistrer le Travail Terminé",
+  "planning": "Planification",
+  "workLog": "Journal de Travail",
+  "priority": {
+    "low": "Faible",
+    "medium": "Moyenne",
+    "high": "Haute",
+    "urgent": "Urgente"
+  },
+  "type": {
+    "feeding": "Alimentation",
+    "health": "Santé",
+    "maintenance": "Entretien",
+    "breeding": "Reproduction",
+    "veterinary": "Vétérinaire",
+    "pregnancy": "Grossesse",
+    "infrastructure": "Infrastructure",
+    "general": "Général",
+    "custom": "Personnalisé"
+  },
+  "fields": {
+    "title": "Titre",
+    "description": "Description",
+    "type": "Type",
+    "priority": "Priorité",
+    "dueDate": "Date d'Échéance",
+    "assignedTo": "Assigné À",
+    "notes": "Notes",
+    "completionNotes": "Notes d'Achèvement",
+    "completionDate": "Date d'Achèvement",
+    "completionPhotos": "Photos",
+    "weather": "Météo",
+    "temperature": "Température",
+    "location": "Localisation",
+    "cost": "Coût"
+  },
+  "messages": {
+    "created": "Activité créée avec succès",
+    "updated": "Activité mise à jour avec succès",
+    "deleted": "Activité supprimée avec succès",
+    "completed": "Activité terminée avec succès",
+    "quickLogSuccess": "Travail enregistré avec succès"
+  }
+}

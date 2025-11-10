@@ -2256,67 +2256,88 @@ export type Database = {
       }
       tasks: {
         Row: {
+          actual_completion_date: string | null
           animal_ids: string[] | null
           assigned_to: string | null
           completed_at: string | null
           completed_by: string | null
+          completion_notes: string | null
+          completion_photos: string[] | null
           created_at: string | null
           description: string | null
           due_date: string
           id: string
+          location_coordinates: string | null
           lot_id: string | null
           metadata: Json | null
           priority: string | null
           recurrence_end_date: string | null
           recurrence_pattern: string | null
           recurring: boolean | null
+          report_type: string | null
           status: string | null
           task_type: string
+          temperature: number | null
           title: string
           updated_at: string | null
           user_id: string
+          weather_conditions: string | null
         }
         Insert: {
+          actual_completion_date?: string | null
           animal_ids?: string[] | null
           assigned_to?: string | null
           completed_at?: string | null
           completed_by?: string | null
+          completion_notes?: string | null
+          completion_photos?: string[] | null
           created_at?: string | null
           description?: string | null
           due_date: string
           id?: string
+          location_coordinates?: string | null
           lot_id?: string | null
           metadata?: Json | null
           priority?: string | null
           recurrence_end_date?: string | null
           recurrence_pattern?: string | null
           recurring?: boolean | null
+          report_type?: string | null
           status?: string | null
           task_type: string
+          temperature?: number | null
           title: string
           updated_at?: string | null
           user_id: string
+          weather_conditions?: string | null
         }
         Update: {
+          actual_completion_date?: string | null
           animal_ids?: string[] | null
           assigned_to?: string | null
           completed_at?: string | null
           completed_by?: string | null
+          completion_notes?: string | null
+          completion_photos?: string[] | null
           created_at?: string | null
           description?: string | null
           due_date?: string
           id?: string
+          location_coordinates?: string | null
           lot_id?: string | null
           metadata?: Json | null
           priority?: string | null
           recurrence_end_date?: string | null
           recurrence_pattern?: string | null
           recurring?: boolean | null
+          report_type?: string | null
           status?: string | null
           task_type?: string
+          temperature?: number | null
           title?: string
           updated_at?: string | null
           user_id?: string
+          weather_conditions?: string | null
         }
         Relationships: []
       }

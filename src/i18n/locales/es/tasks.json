@@ -1,16 +1,23 @@
 {
-  "title": "Tareas",
-  "subtitle": "Gestiona las tareas y actividades de tu rancho",
-  "new": "Nueva Tarea",
+  "title": "Actividades",
+  "subtitle": "Planifica tareas y documenta trabajo completado",
+  "new": "Nueva Actividad",
+  "newTask": "Planificar Tarea",
+  "quickLog": "Registro Rápido",
   "pending": "Pendiente",
   "inProgress": "En Progreso",
   "completed": "Completadas",
   "cancelled": "Canceladas",
   "all": "Todas",
-  "create": "Crear Tarea",
-  "edit": "Editar Tarea",
-  "delete": "Eliminar Tarea",
+  "create": "Crear Actividad",
+  "edit": "Editar Actividad",
+  "delete": "Eliminar Actividad",
   "complete": "Completar",
+  "markComplete": "Marcar Completada",
+  "completionDetails": "Detalles de Completación",
+  "logCompleted": "Registrar Trabajo Completado",
+  "planning": "Planificación",
+  "workLog": "Registro de Trabajo",
   "priority": {
     "low": "Baja",
     "medium": "Media",
@@ -22,6 +29,10 @@
     "health": "Salud",
     "maintenance": "Mantenimiento",
     "breeding": "Reproducción",
+    "veterinary": "Veterinaria",
+    "pregnancy": "Embarazo",
+    "infrastructure": "Infraestructura",
+    "general": "General",
     "custom": "Personalizado"
   },
   "fields": {
@@ -31,12 +42,20 @@
     "priority": "Prioridad",
     "dueDate": "Fecha de Vencimiento",
     "assignedTo": "Asignado A",
-    "notes": "Notas"
+    "notes": "Notas",
+    "completionNotes": "Notas de Completación",
+    "completionDate": "Fecha de Completación",
+    "completionPhotos": "Fotos",
+    "weather": "Clima",
+    "temperature": "Temperatura",
+    "location": "Ubicación",
+    "cost": "Costo"
   },
   "messages": {
-    "created": "Tarea creada exitosamente",
-    "updated": "Tarea actualizada exitosamente",
-    "deleted": "Tarea eliminada exitosamente",
-    "completed": "Tarea completada exitosamente"
+    "created": "Actividad creada exitosamente",
+    "updated": "Actividad actualizada exitosamente",
+    "deleted": "Actividad eliminada exitosamente",
+    "completed": "Actividad completada exitosamente",
+    "quickLogSuccess": "Trabajo registrado exitosamente"
   }
 }

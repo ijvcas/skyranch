@@ -1,16 +1,23 @@
 {
-  "title": "Tasks",
-  "subtitle": "Manage your farm tasks and activities",
-  "new": "New Task",
+  "title": "Activities",
+  "subtitle": "Plan tasks and document completed work",
+  "new": "New Activity",
+  "newTask": "Plan Task",
+  "quickLog": "Quick Log",
   "pending": "Pending",
   "inProgress": "In Progress",
   "completed": "Completed",
   "cancelled": "Cancelled",
   "all": "All",
-  "create": "Create Task",
-  "edit": "Edit Task",
-  "delete": "Delete Task",
+  "create": "Create Activity",
+  "edit": "Edit Activity",
+  "delete": "Delete Activity",
   "complete": "Complete",
+  "markComplete": "Mark Complete",
+  "completionDetails": "Completion Details",
+  "logCompleted": "Log Completed Work",
+  "planning": "Planning",
+  "workLog": "Work Log",
   "priority": {
     "low": "Low",
     "medium": "Medium",
@@ -22,6 +29,10 @@
     "health": "Health",
     "maintenance": "Maintenance",
     "breeding": "Breeding",
+    "veterinary": "Veterinary",
+    "pregnancy": "Pregnancy",
+    "infrastructure": "Infrastructure",
+    "general": "General",
     "custom": "Custom"
   },
   "fields": {
@@ -31,12 +42,20 @@
     "priority": "Priority",
     "dueDate": "Due Date",
     "assignedTo": "Assigned To",
-    "notes": "Notes"
+    "notes": "Notes",
+    "completionNotes": "Completion Notes",
+    "completionDate": "Completion Date",
+    "completionPhotos": "Photos",
+    "weather": "Weather",
+    "temperature": "Temperature",
+    "location": "Location",
+    "cost": "Cost"
   },
   "messages": {
-    "created": "Task created successfully",
-    "updated": "Task updated successfully",
-    "deleted": "Task deleted successfully",
-    "completed": "Task completed successfully"
+    "created": "Activity created successfully",
+    "updated": "Activity updated successfully",
+    "deleted": "Activity deleted successfully",
+    "completed": "Activity completed successfully",
+    "quickLogSuccess": "Work logged successfully"
   }
 }
