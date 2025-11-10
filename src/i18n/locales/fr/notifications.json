@@ -3,6 +3,7 @@
   "backToPanel": "Retour au Tableau de Bord",
   "unreadCount": "{{count}} notifications non lues",
   "allRead": "Toutes les notifications sont à jour",
+  "empty": "Aucune notification",
   "actions": {
     "markAllRead": "Marquer tout comme lu",
     "clearAll": "Tout effacer"

@@ -3,6 +3,7 @@
   "backToPanel": "Back to Dashboard",
   "unreadCount": "{{count}} unread notifications",
   "allRead": "All notifications are up to date",
+  "empty": "No notifications",
   "actions": {
     "markAllRead": "Mark all as read",
     "clearAll": "Clear all"

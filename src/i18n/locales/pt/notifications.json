@@ -3,6 +3,7 @@
   "backToPanel": "Voltar ao Painel",
   "unreadCount": "{{count}} notificações não lidas",
   "allRead": "Todas as notificações estão em dia",
+  "empty": "Sem notificações",
   "actions": {
     "markAllRead": "Marcar todas como lidas",
     "clearAll": "Limpar tudo"
