@@ -5,13 +5,14 @@
 
 export function BuildVersion() {
   // This timestamp will change every time you build
-  const buildTime = "2025-11-11-19:45:00";
+  const buildTime = "2025-11-11-20:15:00";
   const nfcPluginVersion = "@exxili/capacitor-nfc v0.0.12";
   
   return (
-    <div className="fixed bottom-2 right-2 bg-background/80 backdrop-blur-sm border border-border rounded-lg p-2 text-xs font-mono z-50">
-      <div className="text-muted-foreground">Build: {buildTime}</div>
-      <div className="text-muted-foreground">{nfcPluginVersion}</div>
+    <div className="fixed bottom-2 right-2 bg-primary text-primary-foreground border-2 border-primary rounded-lg p-3 text-sm font-bold z-[9999] shadow-lg">
+      <div className="mb-1">✅ NEW BUILD</div>
+      <div>Build: {buildTime}</div>
+      <div className="text-xs mt-1">{nfcPluginVersion}</div>
     </div>
   );
 }
