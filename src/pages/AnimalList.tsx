@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useOptimizedAnimalFiltering } from '@/hooks/useOptimizedAnimalFiltering';
+import { Capacitor } from '@capacitor/core';
 import PageLayout from '@/components/ui/page-layout';
 import LoadingState from '@/components/ui/loading-state';
 import ErrorState from '@/components/ui/error-state';
@@ -97,6 +98,12 @@ const AnimalList = () => {
   return (
     <PageLayout className="px-2 pt-4 pb-20 md:pb-4">
       <div className="max-w-7xl mx-auto">
+        {/* Version Indicator for Native Builds */}
+        {Capacitor.isNativePlatform() && (
+          <div className="mb-2 text-xs text-muted-foreground text-right">
+            v23.1
+          </div>
+        )}
         {(useMockData || isUsingMock) && (
           <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <p className="text-orange-800 text-sm">

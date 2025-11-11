@@ -12,30 +12,49 @@ import type { NFCTagData, NFCScanResult, NFCWriteOptions } from '@/types/nfc';
 // Import NFC plugin for native builds
 let NFC: any = null;
 if (Capacitor.isNativePlatform()) {
+  console.log('[NFC] 🔍 Attempting to load NFC plugin...');
+  console.log('[NFC] Platform:', Capacitor.getPlatform());
+  console.log('[NFC] Native platform:', Capacitor.isNativePlatform());
+  
   try {
-    // Try multiple import methods to ensure compatibility
-    const { NFC: NFCPlugin } = require('@exxili/capacitor-nfc');
-    NFC = NFCPlugin;
-    console.log('[NFC] ✅ Plugin loaded successfully');
+    // Try to import the plugin
+    const plugin = require('@exxili/capacitor-nfc');
+    console.log('[NFC] 📦 Raw plugin import:', plugin);
+    console.log('[NFC] 📦 Plugin keys:', Object.keys(plugin));
+    
+    NFC = plugin.NFC || plugin.default?.NFC || plugin;
+    console.log('[NFC] ✅ Plugin loaded:', !!NFC);
+    console.log('[NFC] ✅ Plugin type:', typeof NFC);
+    
+    if (NFC) {
+      console.log('[NFC] ✅ Plugin methods:', Object.keys(NFC));
+    }
   } catch (error) {
-    console.error('[NFC] ❌ Failed to load plugin:', error);
-    console.error('[NFC] Make sure to run: cd ios/App && pod install');
+    console.error('[NFC] ❌ CRITICAL: Failed to load @exxili/capacitor-nfc plugin');
+    console.error('[NFC] ❌ Error details:', error);
+    console.error('[NFC] ❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
+    console.error('[NFC] 🔧 Required steps:');
+    console.error('[NFC] 🔧   1. Verify package installed: npm list @exxili/capacitor-nfc');
+    console.error('[NFC] 🔧   2. Reinstall pods: cd ios/App && pod install');
+    console.error('[NFC] 🔧   3. Clean Xcode: Product → Clean Build Folder (twice)');
+    console.error('[NFC] 🔧   4. Check ios/App/Podfile has: pod ExxiliCapacitorNfc');
   }
 }
 
 export class NFCService {
   private static getNfcPlugin() {
     if (!Capacitor.isNativePlatform()) {
-      console.log('[NFC] Not a native platform');
+      console.log('[NFC] ⚠️ Not a native platform');
       return null;
     }
     
     if (!NFC) {
-      console.error('[NFC] Plugin not available');
+      console.error('[NFC] ❌ Plugin not loaded - Check Xcode console for details');
+      console.error('[NFC] ❌ This means the require() call failed during app initialization');
       return null;
     }
     
-    console.log('[NFC] Plugin available:', !!NFC);
+    console.log('[NFC] ✅ Plugin is ready');
     return NFC;
   }
 
@@ -48,7 +67,7 @@ export class NFCService {
     if (!NFC) {
       return {
         success: false,
-        error: 'NFC not available. Install @exxili/capacitor-nfc for native builds.',
+        error: 'NFC plugin not loaded. Check Xcode console for detailed error logs.',
       };
     }
 
