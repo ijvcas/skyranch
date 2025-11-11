@@ -15,11 +15,11 @@ if (Capacitor.isNativePlatform()) {
   console.log('[NFC] 🔍 Loading NFC plugin on', Capacitor.getPlatform());
   
   try {
-    // Use destructured require to get the named NFC export
-    const { NFC: NFCPlugin } = require('@exxili/capacitor-nfc');
-    NFC = NFCPlugin;
+    // Named export: import { NFC } from '@exxili/capacitor-nfc'
+    NFC = require('@exxili/capacitor-nfc').NFC;
     
-    console.log('[NFC] ✅ Plugin loaded successfully');
+    console.log('[NFC] ✅ Plugin loaded successfully:', !!NFC);
+    console.log('[NFC] ✅ Plugin type:', typeof NFC);
     console.log('[NFC] ✅ Available methods:', Object.keys(NFC || {}));
   } catch (error) {
     console.error('[NFC] ❌ Failed to load @exxili/capacitor-nfc');
