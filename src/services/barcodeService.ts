@@ -1,11 +1,15 @@
 import { supabase } from '@/integrations/supabase/client';
+import { ProductLookupService, type UniversalProduct } from './productLookupService';
+import { ProductCacheService } from './productCacheService';
 
 export interface BarcodeEntity {
   id: string;
-  type: 'animal' | 'inventory' | 'equipment' | 'lot' | 'user';
+  type: 'animal' | 'inventory' | 'equipment' | 'lot' | 'user' | 'universal_product';
   name: string;
   details?: any;
 }
+
+export type BarcodeLookupResult = BarcodeEntity | UniversalProduct | null;
 
 export interface BarcodeRegistryEntry {
   id: string;
@@ -18,9 +22,9 @@ export interface BarcodeRegistryEntry {
 
 export class BarcodeService {
   /**
-   * Universal barcode lookup - checks registry first, then legacy tables
+   * Universal barcode lookup - checks local farm database, then internet APIs
    */
-  static async lookupBarcode(barcode: string): Promise<BarcodeEntity | null> {
+  static async lookupBarcode(barcode: string): Promise<BarcodeLookupResult> {
     console.log('🔍 [Barcode] Looking up:', barcode);
 
     // 1. Check barcode registry first
@@ -70,7 +74,23 @@ export class BarcodeService {
       };
     }
 
-    console.log('❌ [Barcode] Not found:', barcode);
+    // 4. Check cached universal products
+    const cachedProduct = await ProductCacheService.get(barcode);
+    if (cachedProduct) {
+      console.log('✅ [Barcode] Found in product cache');
+      return cachedProduct;
+    }
+
+    // 5. Query internet APIs for unknown products
+    const internetProduct = await ProductLookupService.lookup(barcode);
+    if (internetProduct) {
+      console.log('✅ [Barcode] Found on internet:', internetProduct.source);
+      // Cache for future offline use
+      await ProductCacheService.set(internetProduct);
+      return internetProduct;
+    }
+
+    console.log('❌ [Barcode] Not found anywhere:', barcode);
     return null;
   }
 

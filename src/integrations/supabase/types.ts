@@ -2422,6 +2422,66 @@ export type Database = {
         }
         Relationships: []
       }
+      universal_products: {
+        Row: {
+          barcode: string
+          brand: string | null
+          cache_expires_at: string | null
+          cached_at: string | null
+          category: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          ingredients: string | null
+          last_scanned_at: string | null
+          nutrition_data: Json | null
+          product_name: string
+          raw_data: Json | null
+          scan_count: number | null
+          source: string
+          source_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          barcode: string
+          brand?: string | null
+          cache_expires_at?: string | null
+          cached_at?: string | null
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string | null
+          last_scanned_at?: string | null
+          nutrition_data?: Json | null
+          product_name: string
+          raw_data?: Json | null
+          scan_count?: number | null
+          source: string
+          source_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          barcode?: string
+          brand?: string | null
+          cache_expires_at?: string | null
+          cached_at?: string | null
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string | null
+          last_scanned_at?: string | null
+          nutrition_data?: Json | null
+          product_name?: string
+          raw_data?: Json | null
+          scan_count?: number | null
+          source?: string
+          source_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_connection_logs: {
         Row: {
           browser: string | null
@@ -2918,6 +2978,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_product_scan_count: {
+        Args: { product_barcode: string }
+        Returns: undefined
       }
       is_active_user: { Args: never; Returns: boolean }
       log_admin_operation: {

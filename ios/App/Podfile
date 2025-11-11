@@ -21,7 +21,7 @@ def capacitor_pods
   pod 'CapacitorNativeBiometric', :path => '../../node_modules/capacitor-native-biometric'
   pod 'CapacitorCommunityContacts', :path => '../../node_modules/@capacitor-community/contacts'
   pod 'CapacitorMlkitBarcodeScanning', :path => '../../node_modules/@capacitor-mlkit/barcode-scanning'
-  # NFC plugin will be added here after installation
+  # NFC plugin - install with: npm install @capawesome-team/capacitor-nfc
   # pod 'CapawesomeCapacitorNfc', :path => '../../node_modules/@capawesome-team/capacitor-nfc'
 end
 

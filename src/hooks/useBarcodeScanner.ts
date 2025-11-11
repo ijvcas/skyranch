@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BarcodeScanner, BarcodeFormat } from '@capacitor-mlkit/barcode-scanning';
 import { useToast } from '@/hooks/use-toast';
 import { Capacitor } from '@capacitor/core';
-import { BarcodeService, BarcodeEntity } from '@/services/barcodeService';
+import { BarcodeService, type BarcodeEntity, type BarcodeLookupResult } from '@/services/barcodeService';
 
 export const useBarcodeScanner = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -61,18 +61,25 @@ export const useBarcodeScanner = () => {
         console.log('📱 [Barcode] Scanned:', barcode);
 
         // Look up barcode in universal registry
-        const entity = await BarcodeService.lookupBarcode(barcode);
+        const lookupResult = await BarcodeService.lookupBarcode(barcode);
 
-        if (entity) {
-          // Record scan in history
-          await BarcodeService.recordScan(barcode, entity.type, entity.id, 'manual_scan');
+        if (lookupResult && 'type' in lookupResult) {
+          // It's a farm entity (BarcodeEntity)
+          await BarcodeService.recordScan(barcode, lookupResult.type, lookupResult.id, 'manual_scan');
 
           toast({
             title: "Scan Success",
-            description: `Found ${entity.type}: ${entity.name}`,
+            description: `Found ${lookupResult.type}: ${lookupResult.name}`,
           });
 
-          return entity;
+          return lookupResult;
+        } else if (lookupResult && 'source' in lookupResult) {
+          // It's a universal product
+          toast({
+            title: "Product Found",
+            description: `${lookupResult.product_name} - Add to inventory?`,
+          });
+          return null;
         } else {
           toast({
             title: "Not Found",
