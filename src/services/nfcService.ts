@@ -12,32 +12,22 @@ import type { NFCTagData, NFCScanResult, NFCWriteOptions } from '@/types/nfc';
 // Import NFC plugin for native builds
 let NFC: any = null;
 if (Capacitor.isNativePlatform()) {
-  console.log('[NFC] 🔍 Attempting to load NFC plugin...');
-  console.log('[NFC] Platform:', Capacitor.getPlatform());
-  console.log('[NFC] Native platform:', Capacitor.isNativePlatform());
+  console.log('[NFC] 🔍 Loading NFC plugin on', Capacitor.getPlatform());
   
   try {
-    // Try to import the plugin
-    const plugin = require('@exxili/capacitor-nfc');
-    console.log('[NFC] 📦 Raw plugin import:', plugin);
-    console.log('[NFC] 📦 Plugin keys:', Object.keys(plugin));
+    // Use destructured require to get the named NFC export
+    const { NFC: NFCPlugin } = require('@exxili/capacitor-nfc');
+    NFC = NFCPlugin;
     
-    NFC = plugin.NFC || plugin.default?.NFC || plugin;
-    console.log('[NFC] ✅ Plugin loaded:', !!NFC);
-    console.log('[NFC] ✅ Plugin type:', typeof NFC);
-    
-    if (NFC) {
-      console.log('[NFC] ✅ Plugin methods:', Object.keys(NFC));
-    }
+    console.log('[NFC] ✅ Plugin loaded successfully');
+    console.log('[NFC] ✅ Available methods:', Object.keys(NFC || {}));
   } catch (error) {
-    console.error('[NFC] ❌ CRITICAL: Failed to load @exxili/capacitor-nfc plugin');
-    console.error('[NFC] ❌ Error details:', error);
-    console.error('[NFC] ❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
-    console.error('[NFC] 🔧 Required steps:');
-    console.error('[NFC] 🔧   1. Verify package installed: npm list @exxili/capacitor-nfc');
-    console.error('[NFC] 🔧   2. Reinstall pods: cd ios/App && pod install');
-    console.error('[NFC] 🔧   3. Clean Xcode: Product → Clean Build Folder (twice)');
-    console.error('[NFC] 🔧   4. Check ios/App/Podfile has: pod ExxiliCapacitorNfc');
+    console.error('[NFC] ❌ Failed to load @exxili/capacitor-nfc');
+    console.error('[NFC] ❌ Error:', error);
+    console.error('[NFC] 🔧 Troubleshooting:');
+    console.error('[NFC] 🔧   1. Run: cd ios/App && pod install');
+    console.error('[NFC] 🔧   2. Clean Xcode build (Product → Clean Build Folder twice)');
+    console.error('[NFC] 🔧   3. Rebuild and deploy again');
   }
 }
 
