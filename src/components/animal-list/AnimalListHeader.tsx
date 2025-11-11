@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { BarcodeScanButton } from '@/components/animals/BarcodeScanButton';
+import { NFCScanButton } from '@/components/animals/NFCScanButton';
 
 interface AnimalListHeaderProps {
   userEmail?: string;
@@ -35,6 +36,7 @@ const AnimalListHeader = ({ userEmail, totalAnimals, onRefresh }: AnimalListHead
             size="default"
             className="w-full md:w-auto"
           />
+          <NFCScanButton />
           <Button
             variant="outline"
             onClick={onRefresh}

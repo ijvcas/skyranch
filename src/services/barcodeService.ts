@@ -1,6 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ProductLookupService, type UniversalProduct } from './productLookupService';
 import { ProductCacheService } from './productCacheService';
+import { ServiceLookupService } from './serviceLookupService';
+import { NFCService } from './nfcService';
 
 export interface BarcodeEntity {
   id: string;
@@ -57,15 +59,15 @@ export class BarcodeService {
       };
     }
 
-    // 3. Check animals table with barcode column
+    // 3. Check animals table with barcode/tag column
     const { data: animal } = await supabase
       .from('animals')
       .select('*')
-      .eq('barcode', barcode)
+      .or(`barcode.eq.${barcode},tag.eq.${barcode}`)
       .single();
 
     if (animal) {
-      console.log('✅ [Barcode] Found animal:', animal.name);
+      console.log('✅ [Barcode] Found animal by tag/barcode:', animal.name);
       return {
         id: animal.id,
         type: 'animal',
@@ -74,20 +76,55 @@ export class BarcodeService {
       };
     }
 
-    // 4. Check cached universal products
+    // 4. Check animals table by NFC tag
+    const { data: animalByNFC } = await supabase
+      .from('animals')
+      .select('*')
+      .eq('nfc_tag_id', barcode)
+      .single();
+
+    if (animalByNFC) {
+      console.log('✅ [Barcode] Found animal by NFC tag:', animalByNFC.name);
+      // Record NFC scan
+      await NFCService.recordNFCScan(animalByNFC.id).catch(() => {});
+      return {
+        id: animalByNFC.id,
+        type: 'animal',
+        name: animalByNFC.name,
+        details: animalByNFC,
+      };
+    }
+
+    // 5. Check cached universal products
     const cachedProduct = await ProductCacheService.get(barcode);
     if (cachedProduct) {
       console.log('✅ [Barcode] Found in product cache');
       return cachedProduct;
     }
 
-    // 5. Query internet APIs for unknown products
+    // 6. Query internet APIs for unknown products
     const internetProduct = await ProductLookupService.lookup(barcode);
     if (internetProduct) {
       console.log('✅ [Barcode] Found on internet:', internetProduct.source);
       // Cache for future offline use
       await ProductCacheService.set(internetProduct);
       return internetProduct;
+    }
+
+    // 7. Try service/QR code lookup (URLs, vCards, etc.)
+    try {
+      const serviceData = await ServiceLookupService.parse(barcode);
+      if (serviceData.type !== 'unknown') {
+        console.log('✅ [Barcode] Identified as service QR:', serviceData.type);
+        return {
+          barcode,
+          product_name: serviceData.parsed?.text || serviceData.parsed?.url || 'Service QR Code',
+          source: 'manual' as const,
+          raw_data: serviceData,
+        };
+      }
+    } catch (error) {
+      console.warn('⚠️ [Barcode] Service lookup failed:', error);
     }
 
     console.log('❌ [Barcode] Not found anywhere:', barcode);

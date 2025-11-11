@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Edit, Trash2, Activity, Share2, QrCode, Tag } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Activity, Share2, QrCode, Tag, Radio } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getAnimal } from '@/services/animalService';
 import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { BarcodeScanButton } from '@/components/animals/BarcodeScanButton';
 import { BarcodeGenerator } from '@/components/animals/BarcodeGenerator';
 import { BarcodeAssignDialog } from '@/components/animals/BarcodeAssignDialog';
+import { NFCAnimalDialog } from '@/components/animals/NFCAnimalDialog';
 
 const AnimalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +26,7 @@ const AnimalDetail = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showBarcodeGenerator, setShowBarcodeGenerator] = useState(false);
   const [showBarcodeAssign, setShowBarcodeAssign] = useState(false);
+  const [showNFCDialog, setShowNFCDialog] = useState(false);
 
   const { data: animal, isLoading: isLoadingAnimal } = useQuery({
     queryKey: ['animal', id],
@@ -124,6 +126,13 @@ const AnimalDetail = () => {
               </Button>
               <Button
                 variant="outline"
+                onClick={() => setShowNFCDialog(true)}
+              >
+                <Radio className="w-4 h-4 mr-2" />
+                NFC
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setShowBarcodeAssign(true)}
               >
                 <Tag className="w-4 h-4 mr-2" />
@@ -220,6 +229,16 @@ const AnimalDetail = () => {
         onSuccess={() => {
           window.location.reload();
         }}
+      />
+      
+      <NFCAnimalDialog
+        open={showNFCDialog}
+        onOpenChange={setShowNFCDialog}
+        animalId={animal.id}
+        animalName={animal.name}
+        currentNFCTag={(animal as any).nfc_tag_id}
+        nfcScanCount={(animal as any).nfc_scan_count || 0}
+        nfcLastScanned={(animal as any).nfc_last_scanned_at}
       />
     </div>
   );

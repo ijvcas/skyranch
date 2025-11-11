@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Package, ShoppingCart, Tag, ExternalLink } from 'lucide-react';
 import type { UniversalProduct } from '@/services/productLookupService';
 import type { BarcodeEntity } from '@/services/barcodeService';
@@ -88,16 +89,20 @@ function UniversalProductCard({
       )}
 
       <div className="space-y-2">
-        <h3 className="font-semibold text-lg">{product.product_name}</h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-lg">{product.product_name}</h3>
+          <Badge variant="secondary" className="shrink-0">
+            {product.source === 'openfoodfacts' && 'Open Food Facts'}
+            {product.source === 'upcitemdb' && 'UPC Database'}
+            {product.source === 'manual' && 'Manual Entry'}
+          </Badge>
+        </div>
         {product.brand && (
           <p className="text-sm text-muted-foreground">{product.brand}</p>
         )}
         {product.category && (
           <p className="text-xs text-muted-foreground">{product.category}</p>
         )}
-        <p className="text-xs text-muted-foreground">
-          Source: {product.source === 'openfoodfacts' ? 'Open Food Facts' : 'UPCitemdb'}
-        </p>
       </div>
 
       <div className="flex gap-2">
