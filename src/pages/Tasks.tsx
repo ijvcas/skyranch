@@ -20,7 +20,7 @@ export default function Tasks() {
     return (
       <div className="container mx-auto p-6">
         <PageHeader title={t('title')} subtitle={t('subtitle')} />
-        <Card className="p-8 text-center">Loading activities...</Card>
+        <Card className="p-8 text-center">{t('loading')}</Card>
       </div>
     );
   }
@@ -33,7 +33,7 @@ export default function Tasks() {
       >
         <Button variant="gradient" onClick={() => setIsQuickLogOpen(true)} className="whitespace-nowrap text-sm sm:text-base px-3 sm:px-4">
           <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-          {t('quickLog')}
+          {t('fieldTask')}
         </Button>
       </PageHeader>
       
@@ -53,7 +53,7 @@ export default function Tasks() {
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              Planned Tasks ({pendingTasks.length})
+              {t('plannedTasks')} ({pendingTasks.length})
             </h3>
             
             <div className="space-y-2">
@@ -65,7 +65,7 @@ export default function Tasks() {
                       <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
                       {task.due_date && (
                         <p className="text-xs text-muted-foreground mt-2">
-                          Due: {new Date(task.due_date).toLocaleDateString()}
+                          {t('due')}: {new Date(task.due_date).toLocaleDateString()}
                         </p>
                       )}
                     </div>
@@ -83,7 +83,7 @@ export default function Tasks() {
               
               {pendingTasks.length === 0 && (
                 <p className="text-center text-muted-foreground py-8">
-                  No pending tasks. Create one to get started!
+                  {t('noPendingTasks')}
                 </p>
               )}
             </div>
@@ -94,7 +94,7 @@ export default function Tasks() {
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
-              Completed Work ({completedTasks.length})
+              {t('completedWork')} ({completedTasks.length})
             </h3>
             
             <div className="space-y-2">
@@ -114,12 +114,12 @@ export default function Tasks() {
                       )}
                       {task.actual_completion_date && (
                         <p className="text-xs text-muted-foreground mt-2">
-                          Completed: {new Date(task.actual_completion_date).toLocaleDateString()}
+                          {t('completedOn')}: {new Date(task.actual_completion_date).toLocaleDateString()}
                         </p>
                       )}
                       {task.weather_conditions && (
                         <p className="text-xs text-muted-foreground">
-                          Weather: {task.weather_conditions} {task.temperature ? `• ${task.temperature}°C` : ''}
+                          {t('weather')}: {task.weather_conditions} {task.temperature ? `• ${task.temperature}°C` : ''}
                         </p>
                       )}
                     </div>
@@ -132,7 +132,7 @@ export default function Tasks() {
               
               {completedTasks.length === 0 && (
                 <p className="text-center text-muted-foreground py-8">
-                  No completed work yet. Use Quick Log to document your work!
+                  {t('noCompletedWork')}
                 </p>
               )}
             </div>
