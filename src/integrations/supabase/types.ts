@@ -205,6 +205,7 @@ export type Database = {
       }
       animals: {
         Row: {
+          barcode: string | null
           birth_date: string | null
           breed: string | null
           cause_of_death: string | null
@@ -275,6 +276,9 @@ export type Database = {
           maternal_great_grandmother_paternal_id: string | null
           mother_id: string | null
           name: string
+          nfc_last_scanned_at: string | null
+          nfc_scan_count: number | null
+          nfc_tag_id: string | null
           notes: string | null
           paternal_grandfather_id: string | null
           paternal_grandmother_id: string | null
@@ -291,6 +295,7 @@ export type Database = {
           weight: number | null
         }
         Insert: {
+          barcode?: string | null
           birth_date?: string | null
           breed?: string | null
           cause_of_death?: string | null
@@ -361,6 +366,9 @@ export type Database = {
           maternal_great_grandmother_paternal_id?: string | null
           mother_id?: string | null
           name: string
+          nfc_last_scanned_at?: string | null
+          nfc_scan_count?: number | null
+          nfc_tag_id?: string | null
           notes?: string | null
           paternal_grandfather_id?: string | null
           paternal_grandmother_id?: string | null
@@ -377,6 +385,7 @@ export type Database = {
           weight?: number | null
         }
         Update: {
+          barcode?: string | null
           birth_date?: string | null
           breed?: string | null
           cause_of_death?: string | null
@@ -447,6 +456,9 @@ export type Database = {
           maternal_great_grandmother_paternal_id?: string | null
           mother_id?: string | null
           name?: string
+          nfc_last_scanned_at?: string | null
+          nfc_scan_count?: number | null
+          nfc_tag_id?: string | null
           notes?: string | null
           paternal_grandfather_id?: string | null
           paternal_grandmother_id?: string | null
@@ -585,6 +597,75 @@ export type Database = {
           id?: string
           total_records?: number
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      barcode_registry: {
+        Row: {
+          barcode: string
+          created_at: string | null
+          created_by: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          is_active: boolean | null
+          notes: string | null
+        }
+        Insert: {
+          barcode: string
+          created_at?: string | null
+          created_by?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+        }
+        Update: {
+          barcode?: string
+          created_at?: string | null
+          created_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+        }
+        Relationships: []
+      }
+      barcode_scan_history: {
+        Row: {
+          barcode: string
+          device_info: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          scan_context: string | null
+          scan_location: Json | null
+          scanned_at: string | null
+          scanned_by: string | null
+        }
+        Insert: {
+          barcode: string
+          device_info?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          scan_context?: string | null
+          scan_location?: Json | null
+          scanned_at?: string | null
+          scanned_by?: string | null
+        }
+        Update: {
+          barcode?: string
+          device_info?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          scan_context?: string | null
+          scan_location?: Json | null
+          scanned_at?: string | null
+          scanned_by?: string | null
         }
         Relationships: []
       }

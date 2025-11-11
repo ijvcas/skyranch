@@ -55,6 +55,11 @@ const config: CapacitorConfig = {
       ios: {
         // Permissions are localized via Info.plist and .lproj/InfoPlist.strings files
       }
+    },
+    Nfc: {
+      ios: {
+        // Permissions are localized via Info.plist and .lproj/InfoPlist.strings files
+      }
     }
   }
 };

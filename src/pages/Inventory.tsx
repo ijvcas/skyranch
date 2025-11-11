@@ -21,21 +21,16 @@ export default function Inventory() {
   );
 
   const handleScan = async () => {
-    const barcode = await scanBarcode();
+    const entity = await scanBarcode();
     
-    if (barcode) {
-      const foundItem = items.find(item => item.barcode === barcode);
-      
-      if (foundItem) {
-        toast({
-          title: t('messages.scanSuccess', { name: foundItem.name }),
-          description: `${foundItem.current_quantity} ${foundItem.unit} in stock`
-        });
+    if (entity) {
+      if (entity.type === 'inventory') {
+        // Already handled by the barcode service toast
+        console.log('Found inventory item:', entity.name);
       } else {
         toast({
-          title: t('messages.scanNotFound'),
-          description: `Barcode: ${barcode}`,
-          variant: "destructive"
+          title: 'Different Entity Type',
+          description: `Found ${entity.type}: ${entity.name}`,
         });
       }
     }

@@ -3,31 +3,69 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
 
-// NFC plugin types
-interface NFCPlugin {
+/**
+ * NFC Scanner Hook for Capacitor
+ * 
+ * SETUP INSTRUCTIONS FOR iOS NFC:
+ * 
+ * 1. Install NFC plugin:
+ *    npm install @capawesome-team/capacitor-nfc@latest
+ * 
+ * 2. Update ios/App/App/Info.plist:
+ *    <key>NFCReaderUsageDescription</key>
+ *    <string>FARMIKA necesita acceso a NFC para escanear etiquetas de animales</string>
+ *    <key>com.apple.developer.nfc.readersession.formats</key>
+ *    <array>
+ *        <string>NDEF</string>
+ *        <string>TAG</string>
+ *    </array>
+ * 
+ * 3. Update ios/App/Podfile:
+ *    pod 'CapawesomeCapacitorNfc', :path => '../../node_modules/@capawesome-team/capacitor-nfc'
+ * 
+ * 4. Open Xcode, select App target → Signing & Capabilities
+ *    Add: "Near Field Communication Tag Reading"
+ * 
+ * 5. Run: npx cap sync ios
+ * 
+ * Until the plugin is installed, this will show setup instructions to users.
+ */
+
+// Type definitions for NFC plugin (for when it's installed)
+interface NfcPlugin {
   isSupported(): Promise<{ isSupported: boolean }>;
-  read(options?: { keepSessionAlive?: boolean }): Promise<{ message: NFCMessage }>;
-  write(options: { message: NFCMessage }): Promise<void>;
+  startScanSession(options: { alertMessage: string }): Promise<void>;
+  stopScanSession(): Promise<void>;
+  addListener(event: string, callback: (data: any) => void): Promise<{ remove: () => Promise<void> }>;
+  write(options: { message: { records: Array<{ type: string; payload: string }> } }): Promise<void>;
 }
 
-interface NFCMessage {
-  records: NFCRecord[];
+interface NfcUtilsPlugin {
+  convertBytesToString(bytes: any): string;
+  convertBytesToHexString(bytes: any): string;
 }
-
-interface NFCRecord {
-  id?: string;
-  payload?: string;
-  type?: string;
-  tnf?: number;
-}
-
-// Dynamic import for NFC plugin
-let NFC: NFCPlugin | null = null;
 
 export const useNFCScanner = () => {
   const { toast } = useToast();
   const { t } = useTranslation(['common', 'animals', 'inventory']);
   const [isScanning, setIsScanning] = useState(false);
+
+  const getNfcPlugin = async (): Promise<{ Nfc: NfcPlugin; NfcUtils: NfcUtilsPlugin } | null> => {
+    try {
+      // Check if plugin is available in Capacitor plugins
+      const plugins = (window as any).Capacitor?.Plugins;
+      if (plugins?.Nfc) {
+        return {
+          Nfc: plugins.Nfc,
+          NfcUtils: plugins.NfcUtils,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('❌ [NFC] Plugin not available:', error);
+      return null;
+    }
+  };
 
   const checkAvailability = async (): Promise<boolean> => {
     if (!Capacitor.isNativePlatform()) {
@@ -35,12 +73,20 @@ export const useNFCScanner = () => {
       return false;
     }
 
-    try {
-      // Note: NFC plugin needs to be installed manually
-      // Install with: npm install @capacitor-community/nfc (when available)
-      // For now, this is a placeholder that returns false
-      console.log('⚠️ [NFC] Plugin not installed. Please install @capacitor-community/nfc');
+    const nfcPlugin = await getNfcPlugin();
+    if (!nfcPlugin) {
+      toast({
+        title: 'NFC Plugin Required',
+        description: 'Please install @capawesome-team/capacitor-nfc to enable NFC scanning',
+        variant: 'destructive',
+      });
       return false;
+    }
+
+    try {
+      const { isSupported } = await nfcPlugin.Nfc.isSupported();
+      console.log(`✅ [NFC] Support status: ${isSupported}`);
+      return isSupported;
     } catch (error) {
       console.error('❌ [NFC] Availability check failed:', error);
       return false;
@@ -49,75 +95,100 @@ export const useNFCScanner = () => {
 
   const scanNFC = async (): Promise<string | null> => {
     if (!await checkAvailability()) {
-      toast({
-        title: t('common:error'),
-        description: t('animals:nfc.notSupported', 'NFC not supported on this device'),
-        variant: 'destructive',
-      });
       return null;
     }
 
+    const nfcPlugin = await getNfcPlugin();
+    if (!nfcPlugin) return null;
+
+    setIsScanning(true);
+    let tagData = '';
+    let listener: any = null;
+
     try {
-      setIsScanning(true);
-      console.log('🔍 [NFC] Starting NFC scan...');
+      const { Nfc, NfcUtils } = nfcPlugin;
+      console.log('🔍 [NFC] Starting NFC scan session...');
 
-      if (!NFC) {
-        throw new Error('NFC plugin not loaded');
-      }
+      await Nfc.startScanSession({
+        alertMessage: t('animals:nfc.scanPrompt', 'Hold your device near the NFC tag'),
+      });
 
-      const { message } = await NFC.read({ keepSessionAlive: false });
-      console.log('✅ [NFC] Scan successful:', message);
+      listener = await Nfc.addListener('nfcTagScanned', async (event: any) => {
+        const { nfcTag } = event;
+        console.log('✅ [NFC] Tag detected:', nfcTag);
 
-      // Extract data from first record
-      if (message.records && message.records.length > 0) {
-        const record = message.records[0];
-        let tagData = '';
-
-        // Try to decode payload
-        if (record.payload) {
-          try {
-            // Payload is typically base64 encoded
-            const decoded = atob(record.payload);
-            // Remove language code prefix if present (first 3 bytes for NDEF text records)
-            tagData = decoded.substring(3);
-          } catch (e) {
-            // If decoding fails, use raw payload
-            tagData = record.payload;
+        // Extract NDEF message if present
+        if (nfcTag.message?.records && nfcTag.message.records.length > 0) {
+          const record = nfcTag.message.records[0];
+          
+          if (record.payload) {
+            try {
+              tagData = NfcUtils.convertBytesToString(record.payload);
+            } catch (e) {
+              tagData = record.payload.toString();
+            }
           }
         }
 
-        if (record.id) {
-          tagData = tagData || record.id;
+        // Fallback to tag ID if no NDEF payload
+        if (!tagData && nfcTag.id) {
+          tagData = NfcUtils.convertBytesToHexString(nfcTag.id);
         }
 
-        toast({
-          title: t('animals:nfc.scanSuccess', 'NFC Tag Scanned'),
-          description: tagData,
-        });
+        await Nfc.stopScanSession();
+        await listener?.remove();
+      });
 
-        return tagData;
-      }
+      // Wait for scan with 30 second timeout
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(async () => {
+          await Nfc.stopScanSession();
+          await listener?.remove();
+          reject(new Error('Scan timeout'));
+        }, 30000);
+
+        const checkInterval = setInterval(() => {
+          if (tagData) {
+            clearTimeout(timeout);
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 100);
+      });
+
+      console.log('✅ [NFC] Scan completed:', tagData);
 
       toast({
-        title: t('common:warning'),
-        description: t('animals:nfc.noData', 'No data found on NFC tag'),
-        variant: 'destructive',
+        title: t('animals:nfc.scanSuccess', 'NFC Tag Scanned'),
+        description: tagData,
       });
-      return null;
+
+      return tagData;
     } catch (error: any) {
       console.error('❌ [NFC] Scan failed:', error);
-      
-      // Don't show error if user cancelled
-      if (error?.message?.includes('cancel') || error?.message?.includes('Cancel')) {
-        console.log('ℹ️ [NFC] Scan cancelled by user');
-        return null;
+
+      // Try to stop session on error
+      try {
+        const nfcPlugin = await getNfcPlugin();
+        if (nfcPlugin) {
+          await nfcPlugin.Nfc.stopScanSession();
+          await listener?.remove();
+        }
+      } catch (e) {
+        // Ignore cleanup errors
       }
 
-      toast({
-        title: t('common:error'),
-        description: t('animals:nfc.scanError', 'Failed to scan NFC tag'),
-        variant: 'destructive',
-      });
+      // Don't show error toast for cancellation or timeout
+      if (!error?.message?.includes('cancel') && 
+          !error?.message?.includes('Cancel') &&
+          !error?.message?.includes('timeout')) {
+        toast({
+          title: t('common:error'),
+          description: t('animals:nfc.scanError', 'Failed to scan NFC tag'),
+          variant: 'destructive',
+        });
+      }
+      
       return null;
     } finally {
       setIsScanning(false);
@@ -126,34 +197,29 @@ export const useNFCScanner = () => {
 
   const writeNFC = async (data: string): Promise<boolean> => {
     if (!await checkAvailability()) {
-      toast({
-        title: t('common:error'),
-        description: t('animals:nfc.notSupported', 'NFC not supported on this device'),
-        variant: 'destructive',
-      });
       return false;
     }
 
+    const nfcPlugin = await getNfcPlugin();
+    if (!nfcPlugin) return false;
+
     try {
       setIsScanning(true);
+      const { Nfc } = nfcPlugin;
+      
       console.log('✍️ [NFC] Writing to NFC tag:', data);
 
-      if (!NFC) {
-        throw new Error('NFC plugin not loaded');
-      }
+      await Nfc.write({
+        message: {
+          records: [
+            {
+              type: 'TEXT',
+              payload: data,
+            },
+          ],
+        },
+      });
 
-      // Create NDEF text record
-      const message: NFCMessage = {
-        records: [
-          {
-            tnf: 1, // TNF_WELL_KNOWN
-            type: 'T', // Text record
-            payload: btoa('\x02en' + data), // Language code + data
-          },
-        ],
-      };
-
-      await NFC.write({ message });
       console.log('✅ [NFC] Write successful');
 
       toast({
@@ -164,17 +230,15 @@ export const useNFCScanner = () => {
       return true;
     } catch (error: any) {
       console.error('❌ [NFC] Write failed:', error);
-      
-      if (error?.message?.includes('cancel') || error?.message?.includes('Cancel')) {
-        console.log('ℹ️ [NFC] Write cancelled by user');
-        return false;
-      }
 
-      toast({
-        title: t('common:error'),
-        description: t('animals:nfc.writeError', 'Failed to write NFC tag'),
-        variant: 'destructive',
-      });
+      if (!error?.message?.includes('cancel') && !error?.message?.includes('Cancel')) {
+        toast({
+          title: t('common:error'),
+          description: t('animals:nfc.writeError', 'Failed to write NFC tag'),
+          variant: 'destructive',
+        });
+      }
+      
       return false;
     } finally {
       setIsScanning(false);

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BarcodeScanner, BarcodeFormat } from '@capacitor-mlkit/barcode-scanning';
 import { useToast } from '@/hooks/use-toast';
 import { Capacitor } from '@capacitor/core';
+import { BarcodeService, BarcodeEntity } from '@/services/barcodeService';
 
 export const useBarcodeScanner = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -36,7 +37,7 @@ export const useBarcodeScanner = () => {
     return newPermission === 'granted';
   };
 
-  const scanBarcode = async (): Promise<string | null> => {
+  const scanBarcode = async (): Promise<BarcodeEntity | null> => {
     const hasPermission = await checkPermissions();
     if (!hasPermission) return null;
 
@@ -56,7 +57,30 @@ export const useBarcodeScanner = () => {
       });
 
       if (result.barcodes.length > 0) {
-        return result.barcodes[0].rawValue;
+        const barcode = result.barcodes[0].rawValue;
+        console.log('📱 [Barcode] Scanned:', barcode);
+
+        // Look up barcode in universal registry
+        const entity = await BarcodeService.lookupBarcode(barcode);
+
+        if (entity) {
+          // Record scan in history
+          await BarcodeService.recordScan(barcode, entity.type, entity.id, 'manual_scan');
+
+          toast({
+            title: "Scan Success",
+            description: `Found ${entity.type}: ${entity.name}`,
+          });
+
+          return entity;
+        } else {
+          toast({
+            title: "Not Found",
+            description: "No registered item found for this barcode",
+            variant: "destructive"
+          });
+          return null;
+        }
       }
 
       return null;
