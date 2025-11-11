@@ -9,20 +9,33 @@ import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import type { NFCTagData, NFCScanResult, NFCWriteOptions } from '@/types/nfc';
 
+// Import NFC plugin statically for native builds
+let NFC: any = null;
+if (Capacitor.isNativePlatform()) {
+  try {
+    // Static import for production native builds
+    const plugin = require('@exxili/capacitor-nfc');
+    NFC = plugin.NFC;
+    console.log('[NFC] Plugin imported:', NFC ? 'SUCCESS' : 'FAILED', plugin);
+  } catch (error) {
+    console.error('[NFC] Failed to import plugin:', error);
+  }
+}
+
 export class NFCService {
   private static getNfcPlugin() {
     if (!Capacitor.isNativePlatform()) {
+      console.log('[NFC] Not a native platform');
       return null;
     }
-    try {
-      // Use dynamic import for native platforms
-      const { NFC } = require('@exxili/capacitor-nfc');
-      console.log('[NFC] Plugin loaded:', NFC ? 'SUCCESS' : 'FAILED');
-      return NFC;
-    } catch (error) {
-      console.error('[NFC] Failed to load plugin:', error);
+    
+    if (!NFC) {
+      console.error('[NFC] Plugin not available');
       return null;
     }
+    
+    console.log('[NFC] Plugin available:', !!NFC);
+    return NFC;
   }
 
   /**
