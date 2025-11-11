@@ -15,9 +15,12 @@ export class NFCService {
       return null;
     }
     try {
+      // Use dynamic import for native platforms
       const { NFC } = require('@exxili/capacitor-nfc');
+      console.log('[NFC] Plugin loaded:', NFC ? 'SUCCESS' : 'FAILED');
       return NFC;
-    } catch {
+    } catch (error) {
+      console.error('[NFC] Failed to load plugin:', error);
       return null;
     }
   }
