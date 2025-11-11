@@ -8,32 +8,58 @@ import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
 import { ScanLine, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import InventoryItemDialog from '@/components/inventory/InventoryItemDialog';
+import { UniversalScanDialog } from '@/components/barcode/UniversalScanDialog';
+import { AddToInventoryDialog } from '@/components/barcode/AddToInventoryDialog';
+import { BarcodeService, BarcodeLookupResult } from '@/services/barcodeService';
+import type { UniversalProduct } from '@/services/productLookupService';
+import { useNavigate } from 'react-router-dom';
 
 export default function Inventory() {
   const { t } = useTranslation('inventory');
   const { items, isLoading } = useInventory();
   const { scanBarcode, isScanning } = useBarcodeScanner();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+  const [scanResult, setScanResult] = useState<BarcodeLookupResult>(null);
+  const [scannedBarcode, setScannedBarcode] = useState<string>('');
+  const [addToInventoryOpen, setAddToInventoryOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<UniversalProduct | null>(null);
 
   const lowStockItems = items.filter(
     item => item.min_quantity && item.current_quantity < item.min_quantity
   );
 
   const handleScan = async () => {
-    const entity = await scanBarcode();
-    
-    if (entity) {
-      if (entity.type === 'inventory') {
-        // Already handled by the barcode service toast
-        console.log('Found inventory item:', entity.name);
-      } else {
-        toast({
-          title: 'Different Entity Type',
-          description: `Found ${entity.type}: ${entity.name}`,
-        });
-      }
+    const result = await scanBarcode();
+    if (result) {
+      // We have a barcode result, show the universal scan dialog
+      setScannedBarcode(result.id || '');
+      setScanResult(result);
+      setScanDialogOpen(true);
     }
+  };
+
+  const handleAddToInventory = (product: UniversalProduct) => {
+    setSelectedProduct(product);
+    setScanDialogOpen(false);
+    setAddToInventoryOpen(true);
+  };
+
+  const handleViewDetails = (entity: { id: string; type: string; name: string }) => {
+    setScanDialogOpen(false);
+    // Navigate to the entity detail page
+    if (entity.type === 'inventory') {
+      toast({ title: 'Viewing inventory item', description: entity.name });
+    } else if (entity.type === 'animal') {
+      navigate(`/animals/${entity.id}`);
+    }
+  };
+
+  const handleCreateManual = () => {
+    setScanDialogOpen(false);
+    setIsAddDialogOpen(true);
   };
 
   if (isLoading) {
@@ -116,6 +142,28 @@ export default function Inventory() {
       </Card>
       
       <InventoryItemDialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
+      
+      <UniversalScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        result={scanResult}
+        barcode={scannedBarcode}
+        onAddToInventory={handleAddToInventory}
+        onViewDetails={handleViewDetails}
+        onCreateManual={handleCreateManual}
+      />
+      
+      {selectedProduct && (
+        <AddToInventoryDialog
+          open={addToInventoryOpen}
+          onOpenChange={setAddToInventoryOpen}
+          product={selectedProduct}
+          onSuccess={() => {
+            setAddToInventoryOpen(false);
+            setSelectedProduct(null);
+          }}
+        />
+      )}
     </div>
   );
 }

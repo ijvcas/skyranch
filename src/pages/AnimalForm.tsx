@@ -13,12 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
 
 const AnimalForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [permissionError, setPermissionError] = useState<string | null>(null);
+  const { scanBarcode, isScanning } = useBarcodeScanner();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -99,6 +101,23 @@ const AnimalForm = () => {
     setFormData(prev => ({ ...prev, location }));
   };
 
+  const handleScanBarcode = async () => {
+    const result = await scanBarcode();
+    if (result && result.type === 'animal') {
+      setFormData(prev => ({ ...prev, tag: result.id }));
+      toast({
+        title: 'Barcode Scanned',
+        description: `Tag number set to: ${result.id}`,
+      });
+    } else if (result) {
+      toast({
+        title: 'Invalid Scan',
+        description: 'This barcode is not linked to an animal tag',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPermissionError(null);
@@ -158,6 +177,8 @@ const AnimalForm = () => {
               formData={formData} 
               onInputChange={handleInputChange}
               onLocationChange={handleLocationChange}
+              onScanBarcode={handleScanBarcode}
+              isScanning={isScanning}
             />
             
             <HealthStatusForm 

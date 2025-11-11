@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Edit, Trash2, Activity, Share2 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Activity, Share2, QrCode, Tag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getAnimal } from '@/services/animalService';
 import AnimalDeleteDialog from '@/components/AnimalDeleteDialog';
@@ -15,11 +15,16 @@ import AnimalHistory from '@/components/animal-detail/AnimalHistory';
 import AnimalDocuments from '@/components/animal-detail/AnimalDocuments';
 import { shareService } from '@/services/mobile/shareService';
 import { toast } from 'sonner';
+import { BarcodeScanButton } from '@/components/animals/BarcodeScanButton';
+import { BarcodeGenerator } from '@/components/animals/BarcodeGenerator';
+import { BarcodeAssignDialog } from '@/components/animals/BarcodeAssignDialog';
 
 const AnimalDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showBarcodeGenerator, setShowBarcodeGenerator] = useState(false);
+  const [showBarcodeAssign, setShowBarcodeAssign] = useState(false);
 
   const { data: animal, isLoading: isLoadingAnimal } = useQuery({
     queryKey: ['animal', id],
@@ -109,6 +114,21 @@ const AnimalDetail = () => {
                   Compartir
                 </Button>
               )}
+              <BarcodeScanButton variant="outline" size="default" />
+              <Button
+                variant="outline"
+                onClick={() => setShowBarcodeGenerator(true)}
+              >
+                <QrCode className="w-4 h-4 mr-2" />
+                QR
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowBarcodeAssign(true)}
+              >
+                <Tag className="w-4 h-4 mr-2" />
+                Assign
+              </Button>
               <Button
                 onClick={() => navigate(`/animals/${animal.id}/edit`)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -182,6 +202,24 @@ const AnimalDetail = () => {
         isOpen={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         redirectAfterDelete={true}
+      />
+      
+      <BarcodeGenerator
+        open={showBarcodeGenerator}
+        onOpenChange={setShowBarcodeGenerator}
+        animalId={animal.id}
+        animalName={animal.name}
+        animalTag={animal.tag}
+      />
+      
+      <BarcodeAssignDialog
+        open={showBarcodeAssign}
+        onOpenChange={setShowBarcodeAssign}
+        animalId={animal.id}
+        animalName={animal.name}
+        onSuccess={() => {
+          window.location.reload();
+        }}
       />
     </div>
   );

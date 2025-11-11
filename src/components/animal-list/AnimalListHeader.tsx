@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { BarcodeScanButton } from '@/components/animals/BarcodeScanButton';
 
 interface AnimalListHeaderProps {
   userEmail?: string;
@@ -29,6 +30,11 @@ const AnimalListHeader = ({ userEmail, totalAnimals, onRefresh }: AnimalListHead
             <Plus className="w-4 h-4" />
             {t('nav.addAnimal')}
           </Button>
+          <BarcodeScanButton 
+            variant="outline" 
+            size="default"
+            className="w-full md:w-auto"
+          />
           <Button
             variant="outline"
             onClick={onRefresh}

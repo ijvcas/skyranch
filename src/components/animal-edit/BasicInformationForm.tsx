@@ -8,16 +8,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import LocationCapture from '@/components/location/LocationCapture';
 import type { LocationCoordinates } from '@/services/mobile/locationService';
 import { useNFCScanner } from '@/hooks/useNFCScanner';
-import { Radio, Loader2 } from 'lucide-react';
+import { Radio, Loader2, QrCode } from 'lucide-react';
 
 interface BasicInformationFormProps {
   formData: any;
   onInputChange: (field: string, value: string) => void;
   onLocationChange?: (location: LocationCoordinates | null) => void;
   disabled?: boolean;
+  onScanBarcode?: () => void;
+  isScanning?: boolean;
 }
 
-const BasicInformationForm = ({ formData, onInputChange, onLocationChange, disabled = false }: BasicInformationFormProps) => {
+const BasicInformationForm = ({ formData, onInputChange, onLocationChange, disabled = false, onScanBarcode, isScanning: isScanningBarcode }: BasicInformationFormProps) => {
   const { scanNFC, isScanning } = useNFCScanner();
 
   const handleNFCScan = async () => {
@@ -72,6 +74,22 @@ const BasicInformationForm = ({ formData, onInputChange, onLocationChange, disab
                 data-form-type="other"
                 spellCheck="false"
               />
+              {onScanBarcode && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={onScanBarcode}
+                  disabled={disabled || isScanningBarcode}
+                  title="Escanear Código de Barras"
+                >
+                  {isScanningBarcode ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <QrCode className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"
