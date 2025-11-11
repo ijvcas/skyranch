@@ -41,65 +41,88 @@ export class NFCService {
     if (!NFC) {
       return {
         success: false,
-        error: 'NFC plugin not loaded. Check Xcode console for detailed error logs.',
+        error: 'NFC plugin not available',
       };
     }
 
     try {
-      // Start NFC scan on iOS (Android auto-starts)
-      await NFC.startScan().catch((e: any) => {
-        console.warn('[NFC] Start scan warning:', e);
-      });
+      console.log('[NFC] 📱 Setting up NFC read listeners...');
 
       return new Promise((resolve) => {
         let isResolved = false;
+        let offRead: (() => void) | null = null;
+        let offError: (() => void) | null = null;
         
-        const cleanup = NFC.onRead((data: any) => {
+        const cleanup = () => {
+          if (offRead) offRead();
+          if (offError) offError();
+          NFC.cancelScan().catch(console.error);
+        };
+        
+        // Set up read listener FIRST
+        offRead = NFC.onRead((data: any) => {
           if (isResolved) return;
           isResolved = true;
-
-          // Stop scan on iOS
-          NFC.cancelScan().catch(console.error);
-
-          // Get tag ID from tagInfo
-          const tagId = data.tagInfo?.uid || '';
           
-          // Extract NDEF data if available
-          let animalId: string | undefined;
-          const asString = data.string();
-          
-          if (asString?.messages?.[0]?.records) {
-            for (const record of asString.messages[0].records) {
-              if (record.type === 'T' && record.payload) {
-                const text = record.payload;
-                if (text.startsWith('ANIMAL:')) {
-                  animalId = text.substring(7);
+          console.log('[NFC] ✅ Tag detected!', data);
+          cleanup();
+
+          try {
+            // Get tag ID from tagInfo
+            const asString = data.string();
+            const tagId = asString.tagInfo?.uid || '';
+            
+            console.log('[NFC] 🏷️  Tag ID:', tagId);
+            
+            // Extract NDEF data if available
+            let animalId: string | undefined;
+            
+            if (asString?.messages?.[0]?.records) {
+              for (const record of asString.messages[0].records) {
+                if (record.type === 'T' && record.payload) {
+                  const text = record.payload;
+                  console.log('[NFC] 📝 NDEF Text record:', text);
+                  
+                  if (text.startsWith('ANIMAL:')) {
+                    animalId = text.substring(7);
+                    console.log('[NFC] 🐄 Found animal ID:', animalId);
+                  }
                 }
               }
             }
-          }
 
-          resolve({
-            success: true,
-            tagId,
-            animalId,
-            data: {
-              id: tagId,
-              techTypes: data.tagInfo?.techTypes,
-              ndef: asString?.messages?.[0] ? {
-                records: asString.messages[0].records.map((r: any) => ({
-                  type: r.type,
-                  data: r.payload
-                }))
-              } : undefined,
-              raw: data,
-            } as NFCTagData,
-          });
+            resolve({
+              success: true,
+              tagId,
+              animalId,
+              data: {
+                id: tagId,
+                techTypes: asString.tagInfo?.techTypes,
+                ndef: asString?.messages?.[0] ? {
+                  records: asString.messages[0].records.map((r: any) => ({
+                    type: r.type,
+                    data: r.payload
+                  }))
+                } : undefined,
+                raw: data,
+              } as NFCTagData,
+            });
+          } catch (error) {
+            console.error('[NFC] ❌ Error processing tag data:', error);
+            resolve({
+              success: false,
+              error: 'Failed to process NFC tag data',
+            });
+          }
         });
 
-        NFC.onError((error: any) => {
+        // Set up error listener
+        offError = NFC.onError((error: any) => {
           if (isResolved) return;
           isResolved = true;
+          
+          console.error('[NFC] ❌ Error:', error);
+          cleanup();
           
           resolve({
             success: false,
@@ -107,12 +130,32 @@ export class NFCService {
           });
         });
 
+        // NOW start the scan (iOS only, no-op on Android)
+        NFC.startScan()
+          .then(() => {
+            console.log('[NFC] 🔍 Scan started, waiting for tag...');
+          })
+          .catch((error: any) => {
+            if (isResolved) return;
+            isResolved = true;
+            
+            console.error('[NFC] ❌ Failed to start scan:', error);
+            cleanup();
+            
+            resolve({
+              success: false,
+              error: error.message || 'Failed to start NFC scan',
+            });
+          });
+
         // Timeout after 30 seconds
         setTimeout(() => {
           if (isResolved) return;
           isResolved = true;
           
-          NFC.cancelScan().catch(console.error);
+          console.log('[NFC] ⏱️  Scan timeout');
+          cleanup();
+          
           resolve({
             success: false,
             error: 'Scan timeout',
@@ -120,7 +163,7 @@ export class NFCService {
         }, 30000);
       });
     } catch (error) {
-      console.error('[NFC] Read failed:', error);
+      console.error('[NFC] ❌ Read failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to read NFC tag',
@@ -142,31 +185,25 @@ export class NFCService {
     }
 
     try {
+      console.log('[NFC] 📝 Setting up NFC write listeners...');
+
       return new Promise((resolve) => {
         let isResolved = false;
+        let offWrite: (() => void) | null = null;
+        let offError: (() => void) | null = null;
 
-        // Write NDEF message with animal ID
-        NFC.writeNDEF({
-          records: [
-            {
-              type: 'T', // Text record
-              payload: `ANIMAL:${options.animalId}`,
-            },
-          ],
-        }).catch((error: any) => {
-          if (!isResolved) {
-            isResolved = true;
-            resolve({
-              success: false,
-              error: error.message || 'Failed to write NFC tag',
-            });
-          }
-        });
+        const cleanup = () => {
+          if (offWrite) offWrite();
+          if (offError) offError();
+        };
 
-        // Listen for write success
-        NFC.onWrite(() => {
+        // Set up write success listener FIRST
+        offWrite = NFC.onWrite(() => {
           if (isResolved) return;
           isResolved = true;
+          
+          console.log('[NFC] ✅ Write successful!');
+          cleanup();
           
           resolve({
             success: true,
@@ -174,10 +211,13 @@ export class NFCService {
           });
         });
 
-        // Handle errors
-        NFC.onError((error: any) => {
+        // Set up error listener
+        offError = NFC.onError((error: any) => {
           if (isResolved) return;
           isResolved = true;
+          
+          console.error('[NFC] ❌ Write error:', error);
+          cleanup();
           
           resolve({
             success: false,
@@ -185,10 +225,38 @@ export class NFCService {
           });
         });
 
+        // NOW initiate the write
+        NFC.writeNDEF({
+          records: [
+            {
+              type: 'T', // Text record
+              payload: `ANIMAL:${options.animalId}`,
+            },
+          ],
+        })
+          .then(() => {
+            console.log('[NFC] 🔍 Write initiated, waiting for tag...');
+          })
+          .catch((error: any) => {
+            if (isResolved) return;
+            isResolved = true;
+            
+            console.error('[NFC] ❌ Failed to initiate write:', error);
+            cleanup();
+            
+            resolve({
+              success: false,
+              error: error.message || 'Failed to write NFC tag',
+            });
+          });
+
         // Timeout after 30 seconds
         setTimeout(() => {
           if (isResolved) return;
           isResolved = true;
+          
+          console.log('[NFC] ⏱️  Write timeout');
+          cleanup();
           
           resolve({
             success: false,
@@ -197,7 +265,7 @@ export class NFCService {
         }, 30000);
       });
     } catch (error) {
-      console.error('[NFC] Write failed:', error);
+      console.error('[NFC] ❌ Write failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to write NFC tag',
