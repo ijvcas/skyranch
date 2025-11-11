@@ -9,27 +9,12 @@ import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import type { NFCTagData, NFCScanResult, NFCWriteOptions } from '@/types/nfc';
 
-// Import NFC plugin for native builds
-let NFC: any = null;
-if (Capacitor.isNativePlatform()) {
-  console.log('[NFC] 🔍 Loading NFC plugin on', Capacitor.getPlatform());
-  
-  try {
-    // Named export: import { NFC } from '@exxili/capacitor-nfc'
-    NFC = require('@exxili/capacitor-nfc').NFC;
-    
-    console.log('[NFC] ✅ Plugin loaded successfully:', !!NFC);
-    console.log('[NFC] ✅ Plugin type:', typeof NFC);
-    console.log('[NFC] ✅ Available methods:', Object.keys(NFC || {}));
-  } catch (error) {
-    console.error('[NFC] ❌ Failed to load @exxili/capacitor-nfc');
-    console.error('[NFC] ❌ Error:', error);
-    console.error('[NFC] 🔧 Troubleshooting:');
-    console.error('[NFC] 🔧   1. Run: cd ios/App && pod install');
-    console.error('[NFC] 🔧   2. Clean Xcode build (Product → Clean Build Folder twice)');
-    console.error('[NFC] 🔧   3. Rebuild and deploy again');
-  }
-}
+// Static import for native Capacitor plugin (required for proper native bridge)
+import { NFC } from '@exxili/capacitor-nfc';
+
+console.log('[NFC] 🚀 Module loaded, platform:', Capacitor.getPlatform());
+console.log('[NFC] 🚀 Plugin available:', !!NFC);
+console.log('[NFC] 🚀 Plugin methods:', Object.keys(NFC || {}));
 
 export class NFCService {
   private static getNfcPlugin() {
@@ -39,12 +24,11 @@ export class NFCService {
     }
     
     if (!NFC) {
-      console.error('[NFC] ❌ Plugin not loaded - Check Xcode console for details');
-      console.error('[NFC] ❌ This means the require() call failed during app initialization');
+      console.error('[NFC] ❌ Plugin not available');
       return null;
     }
     
-    console.log('[NFC] ✅ Plugin is ready');
+    console.log('[NFC] ✅ Plugin ready to use');
     return NFC;
   }
 
