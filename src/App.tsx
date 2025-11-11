@@ -19,7 +19,6 @@ import { Capacitor } from '@capacitor/core';
 // AI Chat using drawer component with OpenAI integration
 import ChatDrawer from '@/components/ai-chat/ChatDrawer';
 import OfflineIndicator from '@/components/OfflineIndicator';
-import { BuildVersion } from '@/components/debug/BuildVersion';
 import { offlineStorage } from '@/services/offline/offlineStorage';
 import { syncService } from '@/services/offline/syncService';
 import { mobilePushService } from '@/services/mobile/pushNotificationService';
@@ -278,9 +277,6 @@ function AppContent() {
       
       {/* Offline Indicator */}
       <OfflineIndicator />
-      
-      {/* Build Version Indicator - Shows current build timestamp */}
-      {Capacitor.isNativePlatform() && <BuildVersion />}
       
       {/* AI Chat Drawer - Only show when logged in */}
       {user && <ChatDrawer open={chatOpen} onOpenChange={setChatOpen} />}

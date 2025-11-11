@@ -9,16 +9,17 @@ import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import type { NFCTagData, NFCScanResult, NFCWriteOptions } from '@/types/nfc';
 
-// Import NFC plugin statically for native builds
+// Import NFC plugin for native builds
 let NFC: any = null;
 if (Capacitor.isNativePlatform()) {
   try {
-    // Static import for production native builds
-    const plugin = require('@exxili/capacitor-nfc');
-    NFC = plugin.NFC;
-    console.log('[NFC] Plugin imported:', NFC ? 'SUCCESS' : 'FAILED', plugin);
+    // Try multiple import methods to ensure compatibility
+    const { NFC: NFCPlugin } = require('@exxili/capacitor-nfc');
+    NFC = NFCPlugin;
+    console.log('[NFC] ✅ Plugin loaded successfully');
   } catch (error) {
-    console.error('[NFC] Failed to import plugin:', error);
+    console.error('[NFC] ❌ Failed to load plugin:', error);
+    console.error('[NFC] Make sure to run: cd ios/App && pod install');
   }
 }
 
