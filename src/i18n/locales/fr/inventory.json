@@ -34,9 +34,11 @@
     "supplier": "Fournisseur",
     "storageLocation": "Lieu de Stockage",
     "expiryDate": "Date d'Expiration",
+    "purchaseDate": "Date d'Achat",
     "notes": "Notes",
     "quantity": "Quantité",
-    "totalCost": "Coût Total"
+    "totalCost": "Coût Total",
+    "addItemPhoto": "Ajouter une photo de l'article"
   },
   "alerts": {
     "lowStock": "Alerte de Stock Faible",

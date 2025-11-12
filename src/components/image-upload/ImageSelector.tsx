@@ -9,20 +9,22 @@ interface ImageSelectorProps {
   disabled?: boolean;
   onFileUpload: () => void;
   onSearchToggle: () => void;
+  placeholderText?: string;
 }
 
 const ImageSelector: React.FC<ImageSelectorProps> = ({
   animalType,
   disabled = false,
   onFileUpload,
-  onSearchToggle
+  onSearchToggle,
+  placeholderText = 'Añadir foto del animal'
 }) => {
   return (
     <Card>
       <CardContent className="p-8 text-center border-2 border-dashed border-gray-300">
         <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <p className="text-gray-600 mb-4">
-          Añadir foto del animal
+          {placeholderText}
           {animalType && ` (${animalType})`}
         </p>
         <div className="flex flex-col sm:flex-row gap-2 justify-center">

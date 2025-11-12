@@ -15,7 +15,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   currentImage, 
   onImageChange, 
   disabled = false,
-  animalType = ''
+  animalType = '',
+  placeholderText = 'Añadir foto del animal'
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImage || null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -194,6 +195,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           disabled={disabled}
           onFileUpload={handleFileUploadClick}
           onSearchToggle={handleSearchToggle}
+          placeholderText={placeholderText}
         />
       )}
 

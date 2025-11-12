@@ -53,6 +53,7 @@ const inventoryItemSchema = z.object({
   supplier: z.string().optional(),
   storage_location: z.string().optional(),
   expiry_date: z.string().optional(),
+  purchase_date: z.string().optional(),
   notes: z.string().optional(),
   image: z.string().optional(),
   invoice_url: z.string().optional(),
@@ -96,6 +97,7 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
       supplier: '',
       storage_location: '',
       expiry_date: '',
+      purchase_date: '',
       notes: '',
       image: '',
       invoice_url: '',
@@ -211,17 +213,18 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
               control={form.control}
               name="image"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('fields.image', 'Photo')}</FormLabel>
-                  <FormControl>
-                    <ImageUpload
-                      currentImage={field.value}
-                      onImageChange={field.onChange}
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                 <FormItem>
+                   <FormLabel>{t('fields.image', 'Photo')}</FormLabel>
+                   <FormControl>
+                     <ImageUpload
+                       currentImage={field.value}
+                       onImageChange={field.onChange}
+                       disabled={isSubmitting}
+                       placeholderText={t('fields.addItemPhoto', 'Añadir foto del artículo')}
+                     />
+                   </FormControl>
+                   <FormMessage />
+                 </FormItem>
               )}
             />
 
@@ -434,6 +437,20 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('fields.expiryDate')}</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} disabled={isSubmitting} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="purchase_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('fields.purchaseDate')}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} disabled={isSubmitting} />
                     </FormControl>

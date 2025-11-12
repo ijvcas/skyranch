@@ -34,9 +34,11 @@
     "supplier": "Supplier",
     "storageLocation": "Storage Location",
     "expiryDate": "Expiry Date",
+    "purchaseDate": "Purchase Date",
     "notes": "Notes",
     "quantity": "Quantity",
-    "totalCost": "Total Cost"
+    "totalCost": "Total Cost",
+    "addItemPhoto": "Add item photo"
   },
   "alerts": {
     "lowStock": "Low Stock Alert",

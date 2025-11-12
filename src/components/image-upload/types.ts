@@ -4,6 +4,7 @@ export interface ImageUploadProps {
   onImageChange: (imageUrl: string | null) => void;
   disabled?: boolean;
   animalType?: string;
+  placeholderText?: string;
 }
 
 export interface PlaceholderImage {
