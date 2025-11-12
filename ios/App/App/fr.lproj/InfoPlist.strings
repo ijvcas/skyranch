@@ -17,6 +17,9 @@
 /* Calendar */
 "NSCalendarsUsageDescription" = "FARMIKA a besoin d'accéder à votre calendrier pour synchroniser les événements de votre ferme";
 
+/* NFC */
+"NFCReaderUsageDescription" = "FARMIKA a besoin d'accéder au NFC pour scanner les étiquettes de transpondeur d'animaux et d'inventaire";
+
 /* App Name */
 "CFBundleDisplayName" = "FARMIKA";
 "CFBundleName" = "FARMIKA";

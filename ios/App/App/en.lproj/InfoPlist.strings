@@ -20,3 +20,4 @@
 "NSCalendarsUsageDescription" = "FARMIKA needs access to your calendar to sync farm events";
 "NSRemindersUsageDescription" = "FARMIKA needs access to reminders to create reminders for important events";
 "NSLocalNetworkUsageDescription" = "FARMIKA needs access to the local network to sync data with the farm server";
+"NFCReaderUsageDescription" = "FARMIKA needs access to NFC to scan animal transponder tags and inventory labels";
