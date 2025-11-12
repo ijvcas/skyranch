@@ -29,17 +29,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ImageUpload } from '@/components/image-upload';
 import { useInventory } from '@/hooks/useInventory';
-import { Loader2, Upload, X, FileText, Radio } from 'lucide-react';
+import { Loader2, Upload, X, FileText, ScanBarcode } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useNFCScanner } from '@/hooks/useNFCScanner';
-import { isIOSDevice } from '@/utils/platformDetection';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { BarcodeScanner, BarcodeFormat } from '@capacitor-mlkit/barcode-scanning';
+import { Capacitor } from '@capacitor/core';
 
 const inventoryItemSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -70,16 +64,67 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
   const { t } = useTranslation('inventory');
   const { createItem } = useInventory();
   const { toast } = useToast();
-  const { scanNFC, isScanning: isScanningNFC } = useNFCScanner();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const [uploadingInvoice, setUploadingInvoice] = useState(false);
-  const isIOS = isIOSDevice();
+  const [isScanning, setIsScanning] = useState(false);
 
-  const handleNFCScan = async () => {
-    const tagData = await scanNFC();
-    if (tagData) {
-      form.setValue('barcode', tagData);
+  const handleBarcodeScan = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      toast({
+        title: t('scanBarcode', 'Scan Barcode'),
+        description: "Barcode scanning is only available on mobile devices",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { camera } = await BarcodeScanner.checkPermissions();
+    
+    if (camera !== 'granted') {
+      const { camera: newPermission } = await BarcodeScanner.requestPermissions();
+      if (newPermission !== 'granted') {
+        toast({
+          title: "Permission Denied",
+          description: "Camera permission is required for barcode scanning",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    setIsScanning(true);
+
+    try {
+      const result = await BarcodeScanner.scan({
+        formats: [
+          BarcodeFormat.Ean13,
+          BarcodeFormat.Ean8,
+          BarcodeFormat.UpcA,
+          BarcodeFormat.UpcE,
+          BarcodeFormat.Code128,
+          BarcodeFormat.Code39,
+          BarcodeFormat.QrCode
+        ]
+      });
+
+      if (result.barcodes.length > 0) {
+        const barcode = result.barcodes[0].rawValue;
+        form.setValue('barcode', barcode);
+        toast({
+          title: t('scanSuccess', 'Scan Success'),
+          description: `Barcode: ${barcode}`,
+        });
+      }
+    } catch (error) {
+      console.error('Barcode scanning error:', error);
+      toast({
+        title: t('scanFailed', 'Scan Failed'),
+        description: "Failed to scan barcode. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsScanning(false);
     }
   };
 
@@ -371,31 +416,20 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
                     <FormControl>
                       <div className="flex gap-2">
                         <Input {...field} disabled={isSubmitting} className="flex-1" />
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={handleNFCScan}
-                                disabled={isSubmitting || isScanningNFC || isIOS}
-                                title={isIOS ? t('nfc.notAvailableIOS', 'NFC not available on iOS') : t('nfc.scanButton', 'Scan NFC')}
-                              >
-                                {isScanningNFC ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Radio className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            {isIOS && (
-                              <TooltipContent>
-                                <p>{t('nfc.notAvailableIOSDescription', 'NFC temporarily unavailable on iOS. Use barcode scanning.')}</p>
-                              </TooltipContent>
-                            )}
-                          </Tooltip>
-                        </TooltipProvider>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={handleBarcodeScan}
+                          disabled={isSubmitting || isScanning}
+                          title={t('scanBarcode', 'Scan Barcode')}
+                        >
+                          {isScanning ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <ScanBarcode className="h-4 w-4" />
+                          )}
+                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />
