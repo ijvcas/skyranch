@@ -13,9 +13,11 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Radio, Link, History, Edit } from 'lucide-react';
+import { Radio, Link, History, Edit, AlertTriangle } from 'lucide-react';
 import { useNFCAnimalLink } from '@/hooks/useNFCAnimalLink';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { isIOSDevice } from '@/utils/platformDetection';
 
 interface NFCAnimalDialogProps {
   open: boolean;
@@ -38,6 +40,7 @@ export function NFCAnimalDialog({
 }: NFCAnimalDialogProps) {
   const { scanAndLink, writeTag, isScanning, isWriting } = useNFCAnimalLink();
   const [activeTab, setActiveTab] = useState('read');
+  const isIOS = isIOSDevice();
 
   const handleReadNFC = async () => {
     await scanAndLink(animalId);
@@ -59,6 +62,16 @@ export function NFCAnimalDialog({
             Manage NFC transponder for {animalName}
           </DialogDescription>
         </DialogHeader>
+
+        {isIOS && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>NFC Temporarily Unavailable on iOS</AlertTitle>
+            <AlertDescription>
+              Due to iOS compatibility issues, NFC scanning is temporarily disabled. Please use barcode/QR scanning instead to identify animals.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4">
@@ -105,11 +118,11 @@ export function NFCAnimalDialog({
 
                 <Button
                   onClick={handleReadNFC}
-                  disabled={isScanning}
+                  disabled={isScanning || isIOS}
                   className="w-full"
                 >
                   <Radio className={`w-4 h-4 mr-2 ${isScanning ? 'animate-pulse' : ''}`} />
-                  {isScanning ? 'Scanning...' : 'Scan Transponder'}
+                  {isScanning ? 'Scanning...' : isIOS ? 'Not Available on iOS' : 'Scan Transponder'}
                 </Button>
               </CardContent>
             </Card>
@@ -141,11 +154,11 @@ export function NFCAnimalDialog({
 
                 <Button
                   onClick={handleWriteNFC}
-                  disabled={isWriting}
+                  disabled={isWriting || isIOS}
                   className="w-full"
                 >
                   <Edit className={`w-4 h-4 mr-2 ${isWriting ? 'animate-pulse' : ''}`} />
-                  {isWriting ? 'Writing...' : 'Write to Transponder'}
+                  {isWriting ? 'Writing...' : isIOS ? 'Not Available on iOS' : 'Write to Transponder'}
                 </Button>
               </CardContent>
             </Card>
@@ -175,11 +188,11 @@ export function NFCAnimalDialog({
 
                 <Button
                   onClick={handleReadNFC}
-                  disabled={isScanning}
+                  disabled={isScanning || isIOS}
                   className="w-full"
                 >
                   <Link className={`w-4 h-4 mr-2 ${isScanning ? 'animate-pulse' : ''}`} />
-                  {isScanning ? 'Scanning...' : 'Scan & Link Transponder'}
+                  {isScanning ? 'Scanning...' : isIOS ? 'Not Available on iOS' : 'Scan & Link Transponder'}
                 </Button>
               </CardContent>
             </Card>

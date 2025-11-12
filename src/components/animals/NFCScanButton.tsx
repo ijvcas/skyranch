@@ -4,65 +4,52 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Radio } from 'lucide-react';
-import { NFCService } from '@/services/nfcService';
+import { QrCode } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { isIOSDevice } from '@/utils/platformDetection';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export function NFCScanButton() {
-  const [isScanning, setIsScanning] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const isIOS = isIOSDevice();
 
-  const handleScan = async () => {
-    setIsScanning(true);
-    try {
-      const result = await NFCService.readTransponder();
-      
-      if (result.success && result.tagId) {
-        // Try to find animal with this NFC tag
-        const animal = await NFCService.lookupByNFC(result.tagId);
-        
-        if (animal) {
-          toast({
-            title: 'Animal Found',
-            description: `Found: ${animal.name}`,
-          });
-          navigate(`/animals/${animal.id}`);
-        } else {
-          toast({
-            title: 'No Animal Found',
-            description: 'This NFC tag is not linked to any animal',
-            variant: 'destructive',
-          });
-        }
-      } else {
-        toast({
-          title: 'Scan Failed',
-          description: result.error || 'Could not read NFC tag',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+  const handleClick = () => {
+    if (isIOS) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to scan NFC',
+        title: 'NFC Unavailable',
+        description: 'NFC scanning is temporarily unavailable on iOS. Please use barcode/QR scanning instead.',
         variant: 'destructive',
       });
-    } finally {
-      setIsScanning(false);
     }
   };
 
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleScan}
-      disabled={isScanning}
-    >
-      <Radio className={`w-4 h-4 mr-2 ${isScanning ? 'animate-pulse' : ''}`} />
-      {isScanning ? 'Scanning...' : 'Scan NFC'}
-    </Button>
-  );
+  if (isIOS) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClick}
+              disabled
+            >
+              <QrCode className="w-4 h-4 mr-2" />
+              Use Barcode
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>NFC temporarily unavailable on iOS. Use barcode scanning instead.</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return null; // Hide on non-iOS for now since NFC is not working
 }

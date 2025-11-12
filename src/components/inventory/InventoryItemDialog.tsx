@@ -33,6 +33,13 @@ import { Loader2, Upload, X, FileText, Radio } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNFCScanner } from '@/hooks/useNFCScanner';
+import { isIOSDevice } from '@/utils/platformDetection';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const inventoryItemSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -66,6 +73,7 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const [uploadingInvoice, setUploadingInvoice] = useState(false);
+  const isIOS = isIOSDevice();
 
   const handleNFCScan = async () => {
     const tagData = await scanNFC();
@@ -360,20 +368,31 @@ export default function InventoryItemDialog({ open, onOpenChange }: InventoryIte
                     <FormControl>
                       <div className="flex gap-2">
                         <Input {...field} disabled={isSubmitting} className="flex-1" />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={handleNFCScan}
-                          disabled={isSubmitting || isScanningNFC}
-                          title={t('nfc.scanButton', 'Scan NFC')}
-                        >
-                          {isScanningNFC ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Radio className="h-4 w-4" />
-                          )}
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={handleNFCScan}
+                                disabled={isSubmitting || isScanningNFC || isIOS}
+                                title={isIOS ? t('nfc.notAvailableIOS', 'NFC not available on iOS') : t('nfc.scanButton', 'Scan NFC')}
+                              >
+                                {isScanningNFC ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Radio className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            {isIOS && (
+                              <TooltipContent>
+                                <p>{t('nfc.notAvailableIOSDescription', 'NFC temporarily unavailable on iOS. Use barcode scanning.')}</p>
+                              </TooltipContent>
+                            )}
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </FormControl>
                     <FormMessage />

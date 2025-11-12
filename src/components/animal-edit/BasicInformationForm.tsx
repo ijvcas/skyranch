@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,13 @@ import LocationCapture from '@/components/location/LocationCapture';
 import type { LocationCoordinates } from '@/services/mobile/locationService';
 import { useNFCScanner } from '@/hooks/useNFCScanner';
 import { Radio, Loader2, QrCode } from 'lucide-react';
+import { isIOSDevice } from '@/utils/platformDetection';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface BasicInformationFormProps {
   formData: any;
@@ -21,6 +27,7 @@ interface BasicInformationFormProps {
 
 const BasicInformationForm = ({ formData, onInputChange, onLocationChange, disabled = false, onScanBarcode, isScanning: isScanningBarcode }: BasicInformationFormProps) => {
   const { scanNFC, isScanning } = useNFCScanner();
+  const isIOS = isIOSDevice();
 
   const handleNFCScan = async () => {
     const tagData = await scanNFC();
@@ -90,20 +97,31 @@ const BasicInformationForm = ({ formData, onInputChange, onLocationChange, disab
                   )}
                 </Button>
               )}
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleNFCScan}
-                disabled={disabled || isScanning}
-                title="Escanear Transponder NFC"
-              >
-                {isScanning ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Radio className="h-4 w-4" />
-                )}
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleNFCScan}
+                      disabled={disabled || isScanning || isIOS}
+                      title={isIOS ? "NFC no disponible en iOS - Usa código de barras" : "Escanear Transponder NFC"}
+                    >
+                      {isScanning ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Radio className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  {isIOS && (
+                    <TooltipContent>
+                      <p>NFC temporalmente no disponible en iOS. Usa código de barras.</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         </div>
