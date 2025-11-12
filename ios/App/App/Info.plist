@@ -82,11 +82,6 @@
 	<string>FARMIKA necesita acceso a la red local para sincronizar datos con el servidor de la finca</string>
 	<key>NFCReaderUsageDescription</key>
 	<string>FARMIKA necesita acceso a NFC para escanear etiquetas de animales e inventario</string>
-	<key>com.apple.developer.nfc.readersession.formats</key>
-	<array>
-		<string>NDEF</string>
-		<string>TAG</string>
-	</array>
 
 </dict>
 </plist>
