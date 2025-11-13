@@ -15,6 +15,8 @@ import { calendarSyncService } from '@/services/mobile/calendarSyncService';
 import { useToast } from '@/hooks/use-toast';
 import { hapticService } from '@/services/mobile/hapticService';
 import { useFarmBranding } from '@/hooks/useFarmBranding';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface EmergencyContact {
   id: string;
@@ -27,12 +29,12 @@ interface EmergencyContact {
 const MobileSettings: React.FC = () => {
   const isNative = Capacitor.isNativePlatform();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { branding: farmBranding } = useFarmBranding();
   const farmName = farmBranding?.farm_name || 'SKYRANCH';
   
   // Contacts state
   const [veterinarian, setVeterinarian] = useState<ContactInfo | null>(null);
-  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
   
   // Calendar state
   const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(false);
@@ -46,6 +48,123 @@ const MobileSettings: React.FC = () => {
   const [selectedContact, setSelectedContact] = useState<ContactInfo | null>(null);
   const [phoneDialogMode, setPhoneDialogMode] = useState<'vet' | 'emergency' | 'change'>('vet');
   const [changingContactId, setChangingContactId] = useState<string | null>(null);
+
+  // Load emergency contacts from database
+  const { data: dbContacts = [] } = useQuery({
+    queryKey: ['emergency-contacts'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('user_emergency_contacts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: isNative
+  });
+
+  // Transform database contacts to UI format
+  const emergencyContacts: EmergencyContact[] = dbContacts
+    .filter(c => c.contact_type === 'emergency')
+    .map(c => ({
+      id: c.id,
+      name: c.name,
+      phone: c.phone,
+      relationship: c.relationship || farmName
+    }));
+
+  // Mutations for database operations
+  const saveVetMutation = useMutation({
+    mutationFn: async (contact: ContactInfo) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: existing } = await supabase
+        .from('user_emergency_contacts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('contact_type', 'veterinarian')
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('user_emergency_contacts')
+          .update({
+            name: contact.name,
+            phone: contact.phone || '',
+            email: contact.email || null
+          })
+          .eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('user_emergency_contacts')
+          .insert({
+            user_id: user.id,
+            contact_type: 'veterinarian',
+            name: contact.name,
+            phone: contact.phone || '',
+            email: contact.email || null
+          });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emergency-contacts'] });
+    }
+  });
+
+  const addEmergencyMutation = useMutation({
+    mutationFn: async (contact: EmergencyContact) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('user_emergency_contacts')
+        .insert({
+          user_id: user.id,
+          contact_type: 'emergency',
+          name: contact.name,
+          phone: contact.phone,
+          relationship: contact.relationship || null
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emergency-contacts'] });
+    }
+  });
+
+  const removeContactMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('user_emergency_contacts')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emergency-contacts'] });
+    }
+  });
+
+  const updateRelationshipMutation = useMutation({
+    mutationFn: async ({ id, relationship }: { id: string; relationship: string }) => {
+      const { error } = await supabase
+        .from('user_emergency_contacts')
+        .update({ relationship })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emergency-contacts'] });
+    }
+  });
 
   useEffect(() => {
     if (isNative) {
@@ -107,16 +226,33 @@ const MobileSettings: React.FC = () => {
     return status;
   };
 
-  const loadSavedSettings = () => {
-    // Load from localStorage or Capacitor Preferences
-    const savedVet = localStorage.getItem('farmika_veterinarian');
-    const savedContacts = localStorage.getItem('farmika_emergency_contacts');
+  const loadSavedSettings = async () => {
+    // Load veterinarian from database
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase
+        .from('user_emergency_contacts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('contact_type', 'veterinarian')
+        .maybeSingle();
+
+      if (data) {
+        setVeterinarian({
+          id: data.id,
+          name: data.name,
+          phone: data.phone,
+          email: data.email || undefined,
+          phones: [data.phone]
+        });
+      }
+    }
+
+    // Load calendar settings from localStorage (UI preferences, not sensitive data)
     const savedCalendarSync = localStorage.getItem('farmika_calendar_sync');
     const savedCalendarName = localStorage.getItem('farmika_calendar_name');
     const savedReminderTime = localStorage.getItem('farmika_reminder_time');
 
-    if (savedVet) setVeterinarian(JSON.parse(savedVet));
-    if (savedContacts) setEmergencyContacts(JSON.parse(savedContacts));
     if (savedCalendarSync) setCalendarSyncEnabled(savedCalendarSync === 'true');
     if (savedCalendarName) setCalendarName(savedCalendarName);
     if (savedReminderTime) setDefaultReminderTime(savedReminderTime);
@@ -133,7 +269,7 @@ const MobileSettings: React.FC = () => {
         setShowPhoneDialog(true);
       } else {
         setVeterinarian(contact);
-        localStorage.setItem('farmika_veterinarian', JSON.stringify(contact));
+        await saveVetMutation.mutateAsync(contact);
         toast({
           title: "Veterinario Seleccionado",
           description: `${contact.name} ha sido agregado como veterinario.`,
@@ -153,7 +289,7 @@ const MobileSettings: React.FC = () => {
         setShowPhoneDialog(true);
       } else {
         setVeterinarian(contact);
-        localStorage.setItem('farmika_veterinarian', JSON.stringify(contact));
+        await saveVetMutation.mutateAsync(contact);
         toast({
           title: "Veterinario Actualizado",
           description: `${contact.name} ha sido seleccionado como nuevo veterinario.`,
@@ -162,10 +298,22 @@ const MobileSettings: React.FC = () => {
     }
   };
 
-  const handleRemoveVeterinarian = () => {
+  const handleRemoveVeterinarian = async () => {
     hapticService.medium();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase
+        .from('user_emergency_contacts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('contact_type', 'veterinarian')
+        .maybeSingle();
+
+      if (data) {
+        await removeContactMutation.mutateAsync(data.id);
+      }
+    }
     setVeterinarian(null);
-    localStorage.removeItem('farmika_veterinarian');
     toast({
       title: "Veterinario Eliminado",
       description: "Puedes seleccionar uno nuevo cuando lo necesites.",
@@ -199,12 +347,9 @@ const MobileSettings: React.FC = () => {
         id: Date.now().toString(),
         name: contact.name,
         phone: contact.phone || '',
-        phones: contact.phones,
         relationship: farmName,
       };
-      const updated = [...emergencyContacts, newContact];
-      setEmergencyContacts(updated);
-      localStorage.setItem('farmika_emergency_contacts', JSON.stringify(updated));
+      await addEmergencyMutation.mutateAsync(newContact);
       toast({
         title: "Contacto Agregado",
         description: `${contact.name} ha sido agregado a contactos de emergencia.`,
@@ -212,19 +357,13 @@ const MobileSettings: React.FC = () => {
     }
   };
 
-  const handleRemoveContact = (id: string) => {
+  const handleRemoveContact = async (id: string) => {
     hapticService.medium();
-    const updated = emergencyContacts.filter(c => c.id !== id);
-    setEmergencyContacts(updated);
-    localStorage.setItem('farmika_emergency_contacts', JSON.stringify(updated));
+    await removeContactMutation.mutateAsync(id);
   };
 
-  const handleUpdateContactRelationship = (id: string, relationship: string) => {
-    const updated = emergencyContacts.map(c => 
-      c.id === id ? { ...c, relationship } : c
-    );
-    setEmergencyContacts(updated);
-    localStorage.setItem('farmika_emergency_contacts', JSON.stringify(updated));
+  const handleUpdateContactRelationship = async (id: string, relationship: string) => {
+    await updateRelationshipMutation.mutateAsync({ id, relationship });
   };
 
   const handleToggleCalendarSync = async (enabled: boolean) => {
@@ -335,27 +474,14 @@ const MobileSettings: React.FC = () => {
     }
   };
 
-  const handlePhoneSelection = (phone: string) => {
+  const handlePhoneSelection = async (phone: string) => {
     if (!selectedContact) return;
     
-    if (phoneDialogMode === 'vet' || phoneDialogMode === 'change') {
-      // For veterinarian
-      if (veterinarian && selectedContact.id === veterinarian.id) {
-        const updatedContact = { ...selectedContact, phone };
-        setVeterinarian(updatedContact);
-        localStorage.setItem('farmika_veterinarian', JSON.stringify(updatedContact));
-        toast({
-          title: "Teléfono Actualizado",
-          description: `Ahora usando ${phone}`,
-        });
-      }
-    }
-    
-    if (phoneDialogMode === 'vet' && !veterinarian) {
+    if (phoneDialogMode === 'vet') {
       // New veterinarian selection
       const updatedContact = { ...selectedContact, phone };
       setVeterinarian(updatedContact);
-      localStorage.setItem('farmika_veterinarian', JSON.stringify(updatedContact));
+      await saveVetMutation.mutateAsync(updatedContact);
       toast({
         title: "Veterinario Seleccionado",
         description: `${selectedContact.name} - ${phone}`,
@@ -365,26 +491,29 @@ const MobileSettings: React.FC = () => {
         id: Date.now().toString(),
         name: selectedContact.name,
         phone,
-        phones: selectedContact.phones,
         relationship: farmName,
       };
-      const updated = [...emergencyContacts, newContact];
-      setEmergencyContacts(updated);
-      localStorage.setItem('farmika_emergency_contacts', JSON.stringify(updated));
+      await addEmergencyMutation.mutateAsync(newContact);
       toast({
         title: "Contacto Agregado",
         description: `${selectedContact.name} - ${phone}`,
       });
     } else if (phoneDialogMode === 'change' && changingContactId) {
-      const updated = emergencyContacts.map(c => 
-        c.id === changingContactId ? { ...c, phone } : c
-      );
-      setEmergencyContacts(updated);
-      localStorage.setItem('farmika_emergency_contacts', JSON.stringify(updated));
-      toast({
-        title: "Teléfono Actualizado",
-        description: `Ahora usando ${phone}`,
-      });
+      const contact = emergencyContacts.find(c => c.id === changingContactId);
+      if (contact) {
+        const { error } = await supabase
+          .from('user_emergency_contacts')
+          .update({ phone })
+          .eq('id', changingContactId);
+        
+        if (!error) {
+          queryClient.invalidateQueries({ queryKey: ['emergency-contacts'] });
+          toast({
+            title: "Teléfono Actualizado",
+            description: `Ahora usando ${phone}`,
+          });
+        }
+      }
     }
     
     setShowPhoneDialog(false);

@@ -2539,6 +2539,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_emergency_contacts: {
+        Row: {
+          contact_type: string
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          phone: string
+          relationship: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          contact_type: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          phone: string
+          relationship?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          contact_type?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string
+          relationship?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_invitations: {
         Row: {
           accepted_at: string | null
