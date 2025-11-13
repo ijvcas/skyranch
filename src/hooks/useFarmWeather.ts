@@ -1,14 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { appleWeatherService, type AppleWeatherResponse } from "@/services/appleWeatherService";
+import { supabase } from "@/integrations/supabase/client";
+
+export interface GoogleWeatherResponse {
+  temperatureC: number | null;
+  temperatureF: number | null;
+  conditionText: string | null;
+  windKph: number | null;
+  humidity: number | null;
+  precipitationChance: number | null;
+  raw?: any;
+}
 
 export const useFarmWeather = (lat?: number, lng?: number, language: string = 'es') => {
-  return useQuery<AppleWeatherResponse | null>({
-    queryKey: ["farm-weather-apple", lat, lng, language],
+  return useQuery<GoogleWeatherResponse | null>({
+    queryKey: ["farm-weather-google", lat, lng, language],
     queryFn: async () => {
       const canFetch = typeof lat === "number" && typeof lng === "number";
       if (!canFetch) return null;
 
-      const key = `weather-apple:${lat},${lng}:${language}`;
+      const key = `weather-google:${lat},${lng}:${language}`;
       const now = Date.now();
       const TTL = 10 * 60 * 1000; // 10 min
 
@@ -18,30 +28,38 @@ export const useFarmWeather = (lat?: number, lng?: number, language: string = 'e
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed?.ts && now - parsed.ts < TTL && parsed?.data) {
-            console.log("🌤️ [useFarmWeather] Apple WeatherKit cache hit", { key, ageMs: now - parsed.ts });
-            return parsed.data as AppleWeatherResponse;
+            console.log("🌤️ [useFarmWeather] Google Weather cache hit", { key, ageMs: now - parsed.ts });
+            return parsed.data as GoogleWeatherResponse;
           }
         }
       } catch (e) {
         console.warn("🌤️ [useFarmWeather] cache read failed", e);
       }
 
-      // 2) Fetch from Apple WeatherKit
-      console.log("🌤️ [useFarmWeather] fetching from Apple WeatherKit", { lat, lng, language });
-      let data: AppleWeatherResponse | null = null;
+      // 2) Fetch from Google Weather API
+      console.log("🌤️ [useFarmWeather] fetching from Google Weather", { lat, lng, language });
+      let data: GoogleWeatherResponse | null = null;
       try {
-        data = await appleWeatherService.getCurrentWeather(lat as number, lng as number, language);
+        const { data: responseData, error } = await supabase.functions.invoke("get-weather-google", {
+          body: { lat, lng, language, unitSystem: "metric" },
+        });
+
+        if (error) {
+          console.error("🌤️ [useFarmWeather] Google Weather fetch error", error);
+        } else {
+          data = responseData as GoogleWeatherResponse;
+        }
       } catch (err) {
-        console.error("🌤️ [useFarmWeather] Apple WeatherKit fetch failed", err);
+        console.error("🌤️ [useFarmWeather] Google Weather fetch failed", err);
       }
 
-      if (data?.current) {
+      if (data?.temperatureC != null) {
         try {
           localStorage.setItem(key, JSON.stringify({ ts: now, data }));
         } catch (e) {
           console.warn("🌤️ [useFarmWeather] cache write failed", e);
         }
-        console.log("🌤️ [useFarmWeather] Apple WeatherKit fetch success, cached");
+        console.log("🌤️ [useFarmWeather] Google Weather fetch success, cached");
         return data;
       }
 
@@ -52,7 +70,7 @@ export const useFarmWeather = (lat?: number, lng?: number, language: string = 'e
           const parsed = JSON.parse(raw);
           if (parsed?.data) {
             console.log("🌤️ [useFarmWeather] using stale cached weather due to fetch failure");
-            return parsed.data as AppleWeatherResponse;
+            return parsed.data as GoogleWeatherResponse;
           }
         }
       } catch (_) {}

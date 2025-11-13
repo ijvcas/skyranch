@@ -57,8 +57,8 @@ const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) =
         priority: 'medium',
         completion_notes: data.completion_notes || '',
         actual_completion_date: new Date().toISOString(),
-        weather_conditions: currentWeather?.current?.conditionCode || '',
-        temperature: currentWeather?.current?.temperature || null,
+        weather_conditions: currentWeather?.conditionText || '',
+        temperature: currentWeather?.temperatureC || null,
         cost: data.cost ? parseFloat(data.cost) : null,
       });
       
@@ -169,10 +169,10 @@ const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) =
               )}
             />
 
-            {currentWeather && currentWeather.current && (
+            {currentWeather && currentWeather.temperatureC != null && (
               <div className="bg-muted p-3 rounded-lg text-sm">
                 <p className="text-muted-foreground">
-                  {t('fields.weather')}: {currentWeather.current.conditionCode} • {Math.round(currentWeather.current.temperature)}°C
+                  {t('fields.weather')}: {currentWeather.conditionText} • {Math.round(currentWeather.temperatureC)}°C
                 </p>
               </div>
             )}
