@@ -107,7 +107,7 @@ const AnimalDetail = () => {
               </h1>
               <p className="text-gray-600">ID: #{animal.tag}</p>
             </div>
-            <div className="flex gap-2 mt-4 md:mt-0 justify-center">
+            <div className="flex flex-wrap gap-2 mt-4 md:mt-0 justify-center md:justify-end">
               {shareService.isAvailable() && (
                 <Button
                   variant="outline"
