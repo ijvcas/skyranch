@@ -36,11 +36,11 @@ const WeatherBadge: React.FC = () => {
     return null;
   }
 
-  const Icon = pickIcon(wx?.conditionText);
+  const Icon = pickIcon(wx?.current?.conditionCode);
   
   const getTranslatedCondition = () => {
-    if (!wx?.conditionText) return null;
-    const conditionKey = detectWeatherCondition(wx.conditionText);
+    if (!wx?.current?.conditionCode) return null;
+    const conditionKey = detectWeatherCondition(wx.current.conditionCode);
     return t(`weatherConditions:${conditionKey}`);
   };
 
@@ -57,10 +57,10 @@ const WeatherBadge: React.FC = () => {
         <div className="text-base font-medium text-gray-900">
           {wxLoading ? (
             <span className="text-gray-400">{t('loadingShort')}</span>
-          ) : wx && wx.temperatureC != null ? (
+          ) : wx?.current && wx.current.temperature != null ? (
             <>
-              {Math.round(wx.temperatureC)}°C
-              {wx.conditionText ? <span className="text-gray-500 ml-1">· {getTranslatedCondition()}</span> : null}
+              {Math.round(wx.current.temperature)}°C
+              {wx.current.conditionCode ? <span className="text-gray-500 ml-1">· {getTranslatedCondition()}</span> : null}
             </>
           ) : (
             <span className="text-gray-400">{t('noData')}</span>

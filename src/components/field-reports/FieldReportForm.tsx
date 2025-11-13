@@ -64,8 +64,8 @@ const FieldReportForm = ({ onSuccess }: FieldReportFormProps) => {
 
   const onSubmit = (data: FieldReportFormData) => {
     // Capture current weather data
-    const weatherConditions = weatherData?.conditionText || undefined;
-    const temperature = weatherData?.temperatureC || undefined;
+    const weatherConditions = weatherData?.current?.conditionCode || undefined;
+    const temperature = weatherData?.current?.temperature || undefined;
     
     // Ensure all required fields are present
     const reportData = {

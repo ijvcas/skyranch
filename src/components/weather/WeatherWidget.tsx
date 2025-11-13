@@ -1,8 +1,7 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind } from "lucide-react";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
-import { useGoogleWeatherAPI } from "@/hooks/useGoogleWeatherAPI";
+import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { useTranslation } from 'react-i18next';
 import { detectWeatherCondition } from '@/utils/weatherTranslation';
 
@@ -56,17 +55,18 @@ const WeatherWidget: React.FC = () => {
   console.log("🌤️ [WeatherWidget] Weather settings:", weatherSettings);
   console.log("🌤️ [WeatherWidget] Settings loading:", settingsLoading);
   
-  const { data: weather, isLoading, error } = useGoogleWeatherAPI(
-    weatherSettings?.location_query || undefined,
-    weatherSettings ? { lat: weatherSettings.lat, lng: weatherSettings.lng } : undefined
+  const { data: weather, isLoading, error } = useFarmWeather(
+    weatherSettings?.lat,
+    weatherSettings?.lng,
+    weatherSettings?.language || 'es'
   );
   console.log("🌤️ [WeatherWidget] Weather data:", weather);
   console.log("🌤️ [WeatherWidget] Weather loading:", isLoading);
   console.log("🌤️ [WeatherWidget] Weather error:", error);
 
-  const TempIcon = pickIcon(weather?.conditionText);
-  const iconColor = pickIconColor(weather?.conditionText);
-  const tempValue = weather?.temperatureC;
+  const TempIcon = pickIcon(weather?.current?.conditionCode);
+  const iconColor = pickIconColor(weather?.current?.conditionCode);
+  const tempValue = weather?.current?.temperature;
   
   const formatLocation = () => {
     return weatherSettings?.display_name || t('location');
@@ -75,10 +75,10 @@ const WeatherWidget: React.FC = () => {
   const getWeatherCondition = () => {
     if (settingsLoading || isLoading) return t('loading');
     if (!weatherSettings?.location_query) return t('noLocation');
-    if (!weather?.conditionText) return t('connecting');
+    if (!weather?.current?.conditionCode) return t('connecting');
     
     // Translate weather condition to app language
-    const conditionKey = detectWeatherCondition(weather.conditionText);
+    const conditionKey = detectWeatherCondition(weather.current.conditionCode);
     return t(`weatherConditions:${conditionKey}`);
   };
 
