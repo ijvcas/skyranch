@@ -49,7 +49,8 @@
     "viewMore": "Voir plus",
     "saving": "Enregistrement...",
     "loading": "Chargement...",
-    "restore": "Restaurer"
+    "restore": "Restaurer",
+    "select": "Sélectionner"
   },
   "messages": {
     "success": "Opération réussie",
