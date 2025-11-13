@@ -13,6 +13,7 @@ import { AddToInventoryDialog } from '@/components/barcode/AddToInventoryDialog'
 import { BarcodeService, BarcodeLookupResult } from '@/services/barcodeService';
 import type { UniversalProduct } from '@/services/productLookupService';
 import { useNavigate } from 'react-router-dom';
+import { InventoryPrintButton } from '@/components/inventory/InventoryPrintButton';
 
 export default function Inventory() {
   const { t } = useTranslation('inventory');
@@ -84,6 +85,7 @@ export default function Inventory() {
           <Plus className="mr-2 h-4 w-4" />
           {t('addItem')}
         </Button>
+        <InventoryPrintButton />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

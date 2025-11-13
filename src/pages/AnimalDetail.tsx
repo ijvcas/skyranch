@@ -19,6 +19,7 @@ import { BarcodeScanButton } from '@/components/animals/BarcodeScanButton';
 import { BarcodeGenerator } from '@/components/animals/BarcodeGenerator';
 import { BarcodeAssignDialog } from '@/components/animals/BarcodeAssignDialog';
 import { NFCAnimalDialog } from '@/components/animals/NFCAnimalDialog';
+import { AnimalPrintButton } from '@/components/animals/AnimalPrintButton';
 
 const AnimalDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -116,6 +117,17 @@ const AnimalDetail = () => {
                   Compartir
                 </Button>
               )}
+              <AnimalPrintButton animal={{
+                id: animal.id,
+                name: animal.name,
+                species: animal.species,
+                breed: animal.breed || '',
+                tag_number: animal.tag,
+                birth_date: animal.birthDate,
+                sex: (animal as any).sex || '',
+                weight: (animal as any).weight || 0,
+                health_status: animal.healthStatus,
+              }} />
               <BarcodeScanButton variant="outline" size="default" />
               <Button
                 variant="outline"

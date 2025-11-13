@@ -4,17 +4,48 @@ import { PageHeader } from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTasks } from '@/hooks/useTasks';
-import { Calendar, CheckCircle2, Clock, Plus } from 'lucide-react';
+import { useTasks, type Task } from '@/hooks/useTasks';
+import { Calendar, CheckCircle2, Clock, Plus, Pencil, Trash2 } from 'lucide-react';
 import QuickLogDialog from '@/components/activities/QuickLogDialog';
+import TaskDialog from '@/components/activities/TaskDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function Tasks() {
   const { t } = useTranslation('tasks');
-  const { tasks, isLoading } = useTasks();
+  const { tasks, isLoading, updateTask, deleteTask } = useTasks();
   const [isQuickLogOpen, setIsQuickLogOpen] = useState(false);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | undefined>();
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
   const pendingTasks = tasks.filter(task => ['pending', 'in_progress'].includes(task.status));
   const completedTasks = tasks.filter(task => task.status === 'completed');
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsTaskDialogOpen(true);
+  };
+
+  const handleSaveTask = async (data: Partial<Task>) => {
+    await updateTask(data as any);
+    setEditingTask(undefined);
+  };
+
+  const handleDeleteTask = async () => {
+    if (deletingTaskId) {
+      await deleteTask(deletingTaskId);
+      setDeletingTaskId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -59,23 +90,45 @@ export default function Tasks() {
             <div className="space-y-2">
               {pendingTasks.map((task) => (
                 <div key={task.id} className="p-4 border rounded-lg hover:bg-accent/50 transition-colors">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <h4 className="font-medium">{task.title}</h4>
                       <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                      {task.due_date && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {t('due')}: {new Date(task.due_date).toLocaleDateString()}
-                        </p>
-                      )}
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {task.due_date && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(task.due_date).toLocaleDateString()}
+                          </div>
+                        )}
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                          {t(task.status)}
+                        </span>
+                        <span className="text-xs bg-secondary/10 text-secondary-foreground px-2 py-1 rounded">
+                          {t(`priority.${task.priority}`)}
+                        </span>
+                        <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                          {t(`type.${task.type}`)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex gap-2 ml-4">
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded whitespace-nowrap">
-                        {task.status}
-                      </span>
-                      <span className="text-xs bg-secondary/10 text-secondary-foreground px-2 py-1 rounded whitespace-nowrap">
-                        {task.priority}
-                      </span>
+                    <div className="flex gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleEditTask(task)}
+                        className="h-8 w-8"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setDeletingTaskId(task.id)}
+                        className="h-8 w-8"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -141,6 +194,29 @@ export default function Tasks() {
       </Tabs>
 
       <QuickLogDialog open={isQuickLogOpen} onOpenChange={setIsQuickLogOpen} />
+      <TaskDialog
+        open={isTaskDialogOpen}
+        onOpenChange={(open) => {
+          setIsTaskDialogOpen(open);
+          if (!open) setEditingTask(undefined);
+        }}
+        task={editingTask}
+        onSave={handleSaveTask}
+      />
+      <AlertDialog open={!!deletingTaskId} onOpenChange={() => setDeletingTaskId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('delete')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('confirmDelete', 'Are you sure you want to delete this task? This action cannot be undone.')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('cancel', 'Cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTask}>{t('delete')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
