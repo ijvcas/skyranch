@@ -64,9 +64,9 @@ const WeatherWidget: React.FC = () => {
   console.log("🌤️ [WeatherWidget] Weather loading:", isLoading);
   console.log("🌤️ [WeatherWidget] Weather error:", error);
 
-  const TempIcon = pickIcon(weather?.current?.conditionCode);
-  const iconColor = pickIconColor(weather?.current?.conditionCode);
-  const tempValue = weather?.current?.temperature;
+  const TempIcon = pickIcon(weather?.conditionText);
+  const iconColor = pickIconColor(weather?.conditionText);
+  const tempValue = weather?.temperatureC;
   
   const formatLocation = () => {
     return weatherSettings?.display_name || t('location');
@@ -75,10 +75,10 @@ const WeatherWidget: React.FC = () => {
   const getWeatherCondition = () => {
     if (settingsLoading || isLoading) return t('loading');
     if (!weatherSettings?.location_query) return t('noLocation');
-    if (!weather?.current?.conditionCode) return t('connecting');
+    if (!weather?.conditionText) return t('connecting');
     
     // Translate weather condition to app language
-    const conditionKey = detectWeatherCondition(weather.current.conditionCode);
+    const conditionKey = detectWeatherCondition(weather.conditionText);
     return t(`weatherConditions:${conditionKey}`);
   };
 
