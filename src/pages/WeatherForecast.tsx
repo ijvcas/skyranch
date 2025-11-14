@@ -33,16 +33,19 @@ const WeatherForecast = () => {
     return `${date.getHours()}:00`;
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string, short: boolean = false) => {
     const date = new Date(dateStr);
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
-    if (date.toDateString() === today.toDateString()) return t('weather:forecast.today');
-    if (date.toDateString() === tomorrow.toDateString()) return t('weather:forecast.tomorrow');
+    if (date.toDateString() === today.toDateString()) return short ? 'Today' : t('weather:forecast.today');
+    if (date.toDateString() === tomorrow.toDateString()) return short ? 'Tomorrow' : t('weather:forecast.tomorrow');
     
     const locale = i18n.language || 'es';
+    if (short) {
+      return date.toLocaleDateString(locale, { weekday: 'short' });
+    }
     return date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
   };
 
@@ -322,35 +325,51 @@ const WeatherForecast = () => {
           </CardContent>
         </Card>
 
-        {/* 10-Day Forecast */}
-        <Card className="rounded-3xl border-0 shadow-sm bg-card/50 backdrop-blur">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">{t('weather:forecast.next10Days')}</CardTitle>
+        {/* 10-Day Forecast - iOS Style */}
+        <Card className="rounded-3xl border-0 shadow-sm bg-card/50 backdrop-blur overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-bold tracking-tight">
+              {t('weather:forecast.next10Days')}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-0 divide-y divide-border/30">
+          <CardContent className="pt-0 px-4 pb-4">
+            <div className="space-y-0">
               {forecast.daily.map((day, idx) => (
-                <div key={idx} className="flex items-center gap-3 py-3">
-                  <div className="w-12 shrink-0">
-                    <div className="text-lg font-medium">{formatDate(day.date)}</div>
+                <div 
+                  key={idx} 
+                  className={`flex items-center gap-4 py-3 ${idx < forecast.daily.length - 1 ? 'border-b border-border/20' : ''}`}
+                >
+                  {/* Day Name */}
+                  <div className="w-20 shrink-0">
+                    <div className="text-lg font-semibold">
+                      {formatDate(day.date, true)}
+                    </div>
                   </div>
-                  <div className="flex flex-col items-center w-14 shrink-0">
+                  
+                  {/* Weather Icon + Rain % */}
+                  <div className="flex flex-col items-center w-16 shrink-0">
                     <WeatherIcon 
                       condition={day.conditionText}
                       isDaytime={true}
-                      size={36}
-                      className={getWeatherIconColor(day.conditionText)}
+                      size={40}
+                      className="text-foreground"
                     />
                     {day.precipitationChance > 0 && (
-                      <div className="text-sm text-cyan-500 font-semibold mt-0.5">
+                      <div className="text-base text-cyan-400 font-semibold mt-0.5">
                         {day.precipitationChance}%
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 flex-1 justify-end">
-                    <span className="text-lg text-muted-foreground w-10 text-right">{day.minTempC}°</span>
-                    <div className="w-24 h-1.5 bg-gradient-to-r from-cyan-400 to-orange-400 rounded-full" />
-                    <span className="text-lg font-semibold w-10 text-right">{day.maxTempC}°</span>
+                  
+                  {/* Temperature Range */}
+                  <div className="flex items-center gap-3 flex-1 justify-end">
+                    <span className="text-lg text-muted-foreground/80 w-9 text-right">
+                      {day.minTempC}°
+                    </span>
+                    <div className="w-20 h-1.5 bg-gradient-to-r from-cyan-400 via-teal-400 to-orange-400 rounded-full" />
+                    <span className="text-xl font-bold w-11 text-right">
+                      {day.maxTempC}°
+                    </span>
                   </div>
                 </div>
               ))}
