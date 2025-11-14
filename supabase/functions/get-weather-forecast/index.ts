@@ -132,39 +132,39 @@ function transformGoogleWeatherData(
 ): WeatherForecastResponse {
   console.log('🔄 Transforming Google Weather data');
   
-  // Transform hourly forecast
-  const hourly: HourlyForecast[] = (hourlyData.hourlyForecasts || []).map((hour: any) => {
-    const tempC = hour.temperature?.value || 0;
+  // Transform hourly forecast - Google uses 'forecastHours' property
+  const hourly: HourlyForecast[] = (hourlyData.forecastHours || []).map((hour: any) => {
+    const tempC = hour.temperature?.degrees || 0;
     return {
-      timestamp: hour.time || new Date().toISOString(),
+      timestamp: hour.interval?.startTime || new Date().toISOString(),
       temperatureC: Math.round(tempC),
       temperatureF: Math.round(tempC * 9/5 + 32),
-      conditionText: translateCondition(hour.condition?.description || ''),
-      windKph: Math.round((hour.wind?.speed?.value || 0) * 3.6), // m/s to km/h
-      humidity: hour.relativeHumidity?.value || 0,
-      precipitationChance: hour.precipitationProbability?.value || 0,
-      precipitationMm: hour.rain?.value || 0
+      conditionText: translateCondition(hour.weatherCondition?.description?.text || ''),
+      windKph: Math.round(hour.wind?.speed?.value || 0),
+      humidity: hour.relativeHumidity || 0,
+      precipitationChance: hour.precipitation?.probability?.percent || 0,
+      precipitationMm: hour.precipitation?.qpf?.quantity || 0
     };
   });
   
-  // Transform daily forecast
-  const daily: DailyForecast[] = (dailyData.dailyForecasts || []).map((day: any) => {
-    const maxTempC = day.temperature?.high?.value || 0;
-    const minTempC = day.temperature?.low?.value || 0;
+  // Transform daily forecast - Google uses 'forecastDays' property
+  const daily: DailyForecast[] = (dailyData.forecastDays || []).map((day: any) => {
+    const maxTempC = day.maxTemperature?.degrees || 0;
+    const minTempC = day.minTemperature?.degrees || 0;
     
     return {
-      date: day.date || new Date().toISOString().split('T')[0],
+      date: day.interval?.startTime || new Date().toISOString().split('T')[0],
       maxTempC: Math.round(maxTempC),
       minTempC: Math.round(minTempC),
       maxTempF: Math.round(maxTempC * 9/5 + 32),
       minTempF: Math.round(minTempC * 9/5 + 32),
-      conditionText: translateCondition(day.condition?.description || ''),
-      maxWindKph: Math.round((day.wind?.speed?.value || 0) * 3.6), // m/s to km/h
-      avgHumidity: day.relativeHumidity?.value || 0,
-      precipitationChance: day.precipitationProbability?.value || 0,
-      totalPrecipitationMm: day.rain?.value || 0,
-      sunrise: day.sun?.sunrise || '',
-      sunset: day.sun?.sunset || ''
+      conditionText: translateCondition(day.daytimeForecast?.weatherCondition?.description?.text || ''),
+      maxWindKph: Math.round(day.maxWind?.speed?.value || 0),
+      avgHumidity: Math.round(day.avgRelativeHumidity || 0),
+      precipitationChance: day.precipitation?.probability?.percent || 0,
+      totalPrecipitationMm: day.precipitation?.totalQpf?.quantity || 0,
+      sunrise: day.sunrise || '',
+      sunset: day.sunset || ''
     };
   });
   
