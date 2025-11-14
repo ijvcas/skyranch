@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { WeatherIcon, getWeatherIconColor } from '@/components/weather/WeatherIcon';
+import { detectWeatherCondition } from '@/utils/weatherTranslation';
 
 const WeatherForecast = () => {
   const navigate = useNavigate();
@@ -201,7 +202,9 @@ const WeatherForecast = () => {
               />
               <div className="text-center">
                 <div className="text-5xl font-bold tracking-tight">{today?.maxTempC}°</div>
-                <div className="text-sm text-muted-foreground mt-1">{today?.conditionText}</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {t(`weatherConditions:${detectWeatherCondition(today?.conditionText || '')}`)}
+                </div>
               </div>
             </div>
           </div>
@@ -325,24 +328,26 @@ const WeatherForecast = () => {
             <CardTitle className="text-base">{t('weather:forecast.next10Days')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {forecast.daily.map((day, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-background/60 transition-colors">
+                <div key={idx} className="flex items-center justify-between p-3 rounded-2xl hover:bg-background/60 transition-colors">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="text-xs font-medium w-16 shrink-0">{formatDate(day.date)}</div>
+                    <div className="text-sm font-medium w-20 shrink-0">{formatDate(day.date)}</div>
                     <WeatherIcon 
                       condition={day.conditionText}
                       isDaytime={true}
-                      size={28}
+                      size={36}
                       className={getWeatherIconColor(day.conditionText)}
                     />
-                    <div className="text-xs flex-1 truncate">{day.conditionText}</div>
+                    <div className="text-sm flex-1 truncate">
+                      {t(`weatherConditions:${detectWeatherCondition(day.conditionText)}`)}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-muted-foreground w-7 text-right">{day.minTempC}°</span>
-                    <div className="w-12 h-1.5 bg-gradient-to-r from-blue-300 to-orange-400 rounded-full" />
-                    <span className="text-xs font-semibold w-7">{day.maxTempC}°</span>
-                    <div className="text-[10px] text-blue-500 w-9 text-right">☔{day.precipitationChance}%</div>
+                    <span className="text-sm text-muted-foreground w-8 text-right">{day.minTempC}°</span>
+                    <div className="w-14 h-2 bg-gradient-to-r from-blue-300 to-orange-400 rounded-full" />
+                    <span className="text-sm font-semibold w-8">{day.maxTempC}°</span>
+                    <div className="text-xs text-blue-500 w-10 text-right">☔{day.precipitationChance}%</div>
                   </div>
                 </div>
               ))}
