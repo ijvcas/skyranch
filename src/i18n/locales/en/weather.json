@@ -10,11 +10,32 @@
   },
   "forecast": {
     "title": "Weather Forecast",
+    "extendedTitle": "Extended Forecast",
+    "nextDays": "Next 10 Days",
     "hourly": "Next 48 Hours",
+    "hourlyForecast": "Hourly Forecast",
     "daily": "10-Day Forecast",
+    "next10Days": "Next 10 Days",
     "current": "Current Conditions",
     "recommendations": "Smart Recommendations",
+    "recommendationsTitle": "Recommendations",
     "temperature": "Temperature Trend",
-    "precipitation": "Precipitation Forecast"
+    "temperature24h": "Temperature Next 24h",
+    "precipitation": "Precipitation Forecast",
+    "precipitation24h": "Precipitation Next 24h",
+    "humidity": "Humidity",
+    "wind": "Wind",
+    "rain": "Rain",
+    "min": "Min",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "delayFieldWork": "Delay Field Work",
+    "frostProtection": "Frost Protection",
+    "idealConditions": "Ideal Conditions",
+    "heavyRainExpected": "mm of rain expected in next 3 days. Reschedule outdoor tasks.",
+    "tempsBelowZero": "Temperatures below zero expected on",
+    "ensureShelters": "Ensure shelters.",
+    "perfectWeather": "Perfect weather for",
+    "daysFrom": "days from"
   }
 }
