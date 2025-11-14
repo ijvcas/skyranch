@@ -5,46 +5,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 import { useWeatherForecast } from '@/hooks/useWeatherForecast';
-import { useFarmWeather } from '@/hooks/useFarmWeather';
 import { 
-  CloudRain, Sun, CloudSun, Cloud, Wind, Droplets, 
-  AlertCircle, ArrowLeft, Snowflake, CloudDrizzle,
-  Calendar, Heart, List, Loader2
+  Wind, Droplets, Snowflake, CloudRain,
+  AlertCircle, ArrowLeft,
+  Calendar, Heart, List
 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { WeatherIcon, getWeatherIconColor } from '@/components/weather/WeatherIcon';
 
 const WeatherForecast = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['weather', 'weatherConditions']);
   const { data: settings } = useWeatherSettings();
-  const { data: currentWeather, isLoading: currentLoading } = useFarmWeather(
-    settings?.lat,
-    settings?.lng,
-    'es'
-  );
-  const { data: forecast, isLoading: forecastLoading } = useWeatherForecast(
+  const { data: forecast, isLoading, error } = useWeatherForecast(
     settings?.lat,
     settings?.lng,
     'es',
     10
   );
-
-  const isLoading = currentLoading || forecastLoading;
-
-  const getWeatherIcon = (condition: string) => {
-    const text = condition.toLowerCase();
-    if (/lluvi|rain|pluie|chuva/.test(text)) return CloudRain;
-    if (/tormenta|thunderstorm|orage/.test(text)) return CloudRain;
-    if (/nieve|snow|neige|neve/.test(text)) return Snowflake;
-    if (/nubla|cloud|nuage/.test(text)) return CloudSun;
-    if (/despejado|clear|dégagé|limpo/.test(text)) return Sun;
-    if (/soleado|sunny|ensoleillé/.test(text)) return Sun;
-    if (/viento|wind|venteux/.test(text)) return Wind;
-    if (/llovizna|drizzle|bruine|garoa/.test(text)) return CloudDrizzle;
-    return Cloud;
-  };
 
   const formatHour = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -62,6 +43,13 @@ const WeatherForecast = () => {
     
     return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
   };
+
+  const isHourDaytime = (timestamp: string) => {
+    const hour = new Date(timestamp).getHours();
+    return hour >= 6 && hour < 20;
+  };
+
+  const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 20;
 
   // Generate recommendations based on forecast
   const generateRecommendations = () => {
@@ -116,223 +104,254 @@ const WeatherForecast = () => {
 
   const recommendations = generateRecommendations();
 
+  // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando pronóstico...</p>
+      <div className="container mx-auto p-4 space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <Skeleton className="h-8 w-64" />
         </div>
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold">Pronóstico Extendido</h1>
+        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error al cargar el pronóstico</AlertTitle>
+          <AlertDescription>
+            {error instanceof Error ? error.message : 'No se pudo obtener información del pronóstico'}
+          </AlertDescription>
+        </Alert>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="mt-4"
+        >
+          Reintentar
+        </Button>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!forecast || !forecast.daily || forecast.daily.length === 0) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold">Pronóstico Extendido</h1>
+        </div>
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Sin datos de pronóstico</AlertTitle>
+          <AlertDescription>
+            Configure las coordenadas del clima en ajustes para ver el pronóstico.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const today = forecast.daily[0];
+  const hourlyNext24 = forecast.hourly.slice(0, 24);
+
+  // Prepare chart data
+  const tempChartData = hourlyNext24.map(hour => ({
+    time: formatHour(hour.timestamp),
+    temp: hour.temperatureC,
+  }));
+
+  const precipChartData = hourlyNext24.map(hour => ({
+    time: formatHour(hour.timestamp),
+    precip: hour.precipitationChance,
+  }));
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted p-4 pb-20 md:pb-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted p-4 pb-20">
+      <div className="container mx-auto space-y-6 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-4 w-4" />
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Pronóstico del Tiempo</h1>
-            <p className="text-muted-foreground">{settings?.display_name || 'Mi Ubicación'}</p>
+            <h1 className="text-2xl font-bold">Pronóstico Extendido</h1>
+            <p className="text-sm text-muted-foreground">Próximos 10 días</p>
           </div>
         </div>
 
         {/* Current Conditions */}
-        {currentWeather && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  {React.createElement(getWeatherIcon(currentWeather.conditionText || ''), {
-                    className: 'h-20 w-20 text-primary',
-                  })}
-                  <div>
-                    <div className="text-6xl font-bold">{currentWeather.temperatureC?.toFixed(0)}°C</div>
-                    <div className="text-2xl text-muted-foreground capitalize">{currentWeather.conditionText}</div>
-                  </div>
-                </div>
-                <div className="text-right space-y-2">
-                  <div className="flex items-center gap-2 justify-end">
-                    <Droplets className="h-5 w-5 text-blue-500" />
-                    <span>{currentWeather.humidity}%</span>
-                  </div>
-                  <div className="flex items-center gap-2 justify-end">
-                    <Wind className="h-5 w-5 text-slate-500" />
-                    <span>{currentWeather.windKph} km/h</span>
-                  </div>
-                  <div className="flex items-center gap-2 justify-end">
-                    <CloudRain className="h-5 w-5 text-blue-400" />
-                    <span>{currentWeather.precipitationChance}%</span>
-                  </div>
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <WeatherIcon 
+                condition={today?.conditionText || 'Clear'}
+                isDaytime={isDaytime}
+                size={80}
+                className={getWeatherIconColor(today?.conditionText || '')}
+              />
+              <div>
+                <div className="text-5xl font-bold">{today?.maxTempC}°C</div>
+                <div className="text-xl text-muted-foreground">{today?.conditionText}</div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <Droplets className="h-5 w-5 text-blue-500" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Humedad</div>
+                  <div className="font-semibold">{today?.avgHumidity}%</div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Hourly Forecast */}
-        {forecast?.hourly && forecast.hourly.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Próximas 48 Horas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="w-full">
-                <div className="flex gap-4 pb-4">
-                  {forecast.hourly.slice(0, 48).map((hour, index) => {
-                    const WeatherIcon = getWeatherIcon(hour.conditionText);
-                    return (
-                      <div key={index} className="flex flex-col items-center min-w-[80px] p-3 rounded-lg hover:bg-muted transition-colors">
-                        <div className="text-sm text-muted-foreground font-medium">
-                          {formatHour(hour.timestamp)}
-                        </div>
-                        <WeatherIcon className="h-8 w-8 my-2 text-primary" />
-                        <div className="font-semibold text-lg">{hour.temperatureC.toFixed(0)}°</div>
-                        <div className="text-xs text-blue-500 mt-1">☔ {hour.precipitationChance}%</div>
-                      </div>
-                    );
-                  })}
+              <div className="flex items-center gap-2">
+                <Wind className="h-5 w-5 text-cyan-500" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Viento</div>
+                  <div className="font-semibold">{today?.maxWindKph} km/h</div>
                 </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Temperature Chart */}
-        {forecast?.hourly && forecast.hourly.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Tendencia de Temperatura</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={forecast.hourly.slice(0, 24)}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis 
-                    dataKey="timestamp" 
-                    tickFormatter={formatHour}
-                    className="text-xs"
-                  />
-                  <YAxis className="text-xs" />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="temperatureC" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={2}
-                    name="Temperatura (°C)" 
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Precipitation Chart */}
-        {forecast?.hourly && forecast.hourly.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Pronóstico de Precipitación</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={forecast.hourly.slice(0, 24)}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis 
-                    dataKey="timestamp" 
-                    tickFormatter={formatHour}
-                    className="text-xs"
-                  />
-                  <YAxis className="text-xs" />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
-                  />
-                  <Bar 
-                    dataKey="precipitationMm" 
-                    fill="hsl(var(--chart-1))"
-                    name="Precipitación (mm)" 
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* 10-Day Forecast */}
-        {forecast?.daily && forecast.daily.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Pronóstico de 10 Días</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {forecast.daily.map((day, index) => {
-                  const WeatherIcon = getWeatherIcon(day.conditionText);
-                  return (
-                    <div 
-                      key={index} 
-                      className="flex items-center justify-between p-4 rounded-lg hover:bg-muted transition-colors border border-border"
-                    >
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="text-sm font-medium w-24">{formatDate(day.date)}</div>
-                        <WeatherIcon className="h-8 w-8 text-primary" />
-                        <div className="text-sm flex-1 capitalize">{day.conditionText}</div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <div className="text-sm">
-                          <span className="font-semibold text-red-500">{day.maxTempC.toFixed(0)}°</span>
-                          <span className="text-muted-foreground mx-1">/</span>
-                          <span className="text-blue-500">{day.minTempC.toFixed(0)}°</span>
-                        </div>
-                        <div className="text-sm text-blue-500 w-16 text-right">
-                          ☔ {day.precipitationChance}%
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="flex items-center gap-2">
+                <CloudRain className="h-5 w-5 text-blue-600" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Lluvia</div>
+                  <div className="font-semibold">{today?.precipitationChance}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
 
         {/* Smart Recommendations */}
         {recommendations.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Recomendaciones Inteligentes</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <List className="h-5 w-5" />
+                Recomendaciones Inteligentes
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recommendations.map((rec) => (
-                  <div 
-                    key={rec.id} 
-                    className="flex items-start gap-3 p-4 bg-muted rounded-lg border border-border"
-                  >
-                    <rec.icon className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium">{rec.title}</div>
-                      <div className="text-sm text-muted-foreground mt-1">{rec.message}</div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      onClick={() => navigate(rec.action)}
-                      className="flex-shrink-0"
-                    >
-                      {rec.actionLabel}
-                    </Button>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="space-y-3">
+              {recommendations.map(rec => (
+                <Alert key={rec.id} className="cursor-pointer hover:bg-muted" onClick={() => navigate(rec.action)}>
+                  <rec.icon className="h-4 w-4" />
+                  <AlertTitle>{rec.title}</AlertTitle>
+                  <AlertDescription>{rec.message}</AlertDescription>
+                </Alert>
+              ))}
             </CardContent>
           </Card>
         )}
+
+        {/* Hourly Forecast */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pronóstico por Hora</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="flex gap-4 pb-4">
+                {forecast.hourly.map((hour, idx) => (
+                  <div key={idx} className="flex flex-col items-center min-w-[80px]">
+                    <div className="text-sm text-muted-foreground">{formatHour(hour.timestamp)}</div>
+                    <WeatherIcon 
+                      condition={hour.conditionText}
+                      isDaytime={isHourDaytime(hour.timestamp)}
+                      size={40}
+                      className={getWeatherIconColor(hour.conditionText)}
+                    />
+                    <div className="font-semibold">{hour.temperatureC}°</div>
+                    <div className="text-xs text-blue-500">☔ {hour.precipitationChance}%</div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        {/* Temperature Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Temperatura - Próximas 24 Horas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={tempChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="time" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="temp" stroke="#ef4444" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Precipitation Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Probabilidad de Precipitación - 24 Horas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={precipChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="time" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="precip" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* 10-Day Forecast */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pronóstico de 10 Días</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {forecast.daily.map((day, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="text-sm font-medium w-24">{formatDate(day.date)}</div>
+                    <WeatherIcon 
+                      condition={day.conditionText}
+                      isDaytime={true}
+                      size={40}
+                      className={getWeatherIconColor(day.conditionText)}
+                    />
+                    <div className="text-sm flex-1">{day.conditionText}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{day.minTempC}°</span>
+                    <div className="w-20 h-2 bg-gradient-to-r from-blue-200 to-orange-400 rounded-full" />
+                    <span className="text-sm font-semibold">{day.maxTempC}°</span>
+                  </div>
+                  <div className="text-xs text-blue-500 ml-4">☔ {day.precipitationChance}%</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
