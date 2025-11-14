@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { Camera, Image as ImageIcon } from 'lucide-react';
 import ImagePreview from './ImagePreview';
 import ImageSelector from './ImageSelector';
@@ -26,6 +27,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [isSelectingFromGallery, setIsSelectingFromGallery] = useState(false);
   const [compressionInfo, setCompressionInfo] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [progressStage, setProgressStage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load and display device conditions on mount
@@ -41,17 +45,49 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setIsProcessing(true);
+      setProgressPercent(0);
+      setProgressStage('Cargando archivo...');
+      
       const reader = new FileReader();
       reader.onload = async (e) => {
         const result = e.target?.result as string;
         
-        // Apply compression
-        const compressionResult = await imageCompressionService.compressImage(result);
-        const tier = imageCompressionService.getTierDescription(compressionResult.tier);
-        setCompressionInfo(`${tier} - ${compressionResult.reductionPercent}% reducido`);
+        setProgressPercent(10);
+        setProgressStage('Preparando compresión...');
         
-        setPreviewUrl(compressionResult.dataUrl);
-        onImageChange(compressionResult.dataUrl);
+        try {
+          // Apply compression with progress tracking
+          const compressionResult = await imageCompressionService.compressImage(
+            result,
+            (progress, stage) => {
+              setProgressPercent(10 + (progress * 0.8)); // 10-90%
+              setProgressStage(stage);
+            }
+          );
+          
+          const tier = imageCompressionService.getTierDescription(compressionResult.tier);
+          setCompressionInfo(`${tier} - ${compressionResult.reductionPercent}% reducido`);
+          
+          setProgressPercent(100);
+          setProgressStage('¡Completo!');
+          
+          setPreviewUrl(compressionResult.dataUrl);
+          onImageChange(compressionResult.dataUrl);
+          
+          // Reset progress after a short delay
+          setTimeout(() => {
+            setIsProcessing(false);
+            setProgressPercent(0);
+            setProgressStage('');
+          }, 1000);
+        } catch (error) {
+          console.error('Error compressing image:', error);
+          toast.error('Error al procesar la imagen');
+          setIsProcessing(false);
+          setProgressPercent(0);
+          setProgressStage('');
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -153,9 +189,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div className="space-y-4">
-      {compressionInfo && (
+      {compressionInfo && !isProcessing && (
         <div className="text-xs text-muted-foreground text-center py-1">
           {compressionInfo}
+        </div>
+      )}
+      
+      {isProcessing && (
+        <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">{progressStage}</span>
+            <span className="font-medium">{Math.round(progressPercent)}%</span>
+          </div>
+          <Progress value={progressPercent} className="h-2" />
         </div>
       )}
       
