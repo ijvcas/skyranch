@@ -37,7 +37,7 @@ export interface WeatherForecastResponse {
   hourly: HourlyForecast[];
 }
 
-const CACHE_KEY = 'weather_forecast_cache';
+const CACHE_KEY = 'weather_forecast_cache_v2'; // v2: Fixed Google Weather API property names
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
 export const useWeatherForecast = (
