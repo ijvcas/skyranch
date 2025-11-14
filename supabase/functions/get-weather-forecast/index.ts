@@ -56,9 +56,26 @@ async function generateWeatherKitToken(): Promise<string> {
   const keyId = Deno.env.get('APPLE_WEATHERKIT_KEY_ID');
   const privateKey = Deno.env.get('APPLE_WEATHERKIT_PRIVATE_KEY');
 
+  // Debug: Log environment variables presence
+  console.log('🔍 Environment Variables Check:', {
+    teamId: teamId ? `✓ Present (${teamId.length} chars)` : '✗ Missing',
+    serviceId: serviceId ? `✓ Present (${serviceId.length} chars)` : '✗ Missing',
+    keyId: keyId ? `✓ Present (${keyId.length} chars)` : '✗ Missing',
+    privateKey: privateKey ? `✓ Present (${privateKey.length} chars)` : '✗ Missing',
+  });
+
   if (!teamId || !serviceId || !keyId || !privateKey) {
     throw new Error('Apple WeatherKit credentials not configured');
   }
+
+  // Debug: Log actual values (first/last chars only for security)
+  console.log('🔑 Credential Details:', {
+    teamId: teamId,
+    serviceId: serviceId,
+    keyId: keyId,
+    privateKeyStart: privateKey.substring(0, 30) + '...',
+    privateKeyEnd: '...' + privateKey.substring(privateKey.length - 30),
+  });
 
   const { SignJWT, importPKCS8 } = await import('https://deno.land/x/jose@v5.2.0/index.ts');
 
@@ -68,26 +85,54 @@ async function generateWeatherKitToken(): Promise<string> {
     .replace('-----BEGIN PRIVATE KEY-----', '-----BEGIN PRIVATE KEY-----\n')
     .replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----');
 
+  // Debug: Log key format
+  console.log('🔐 Private Key Format:', {
+    hasBeginMarker: formattedKey.includes('-----BEGIN PRIVATE KEY-----'),
+    hasEndMarker: formattedKey.includes('-----END PRIVATE KEY-----'),
+    lineCount: formattedKey.split('\n').length,
+    totalLength: formattedKey.length,
+  });
+
   const key = await importPKCS8(formattedKey, 'ES256');
+
+  // Create JWT token header
+  const header = { alg: 'ES256', kid: keyId, id: `${teamId}.${serviceId}` };
+  console.log('📝 JWT Header:', header);
 
   // Create JWT token
   const token = await new SignJWT({})
-    .setProtectedHeader({ alg: 'ES256', kid: keyId, id: `${teamId}.${serviceId}` })
+    .setProtectedHeader(header)
     .setIssuedAt()
     .setIssuer(teamId)
     .setSubject(serviceId)
     .setExpirationTime('1h')
     .sign(key);
 
+  // Debug: Show token structure (not the actual token)
+  const parts = token.split('.');
+  console.log('🎫 JWT Token Structure:', {
+    parts: parts.length,
+    headerLength: parts[0]?.length,
+    payloadLength: parts[1]?.length,
+    signatureLength: parts[2]?.length,
+  });
+
   return token;
 }
 
 // Fetch forecast from Apple WeatherKit
 async function fetchWeatherKitForecast(lat: number, lng: number, language: string) {
+  console.log('🔐 Generating WeatherKit JWT token...');
   const token = await generateWeatherKitToken();
 
   // Request daily and hourly forecasts
   const weatherUrl = `https://weatherkit.apple.com/api/v1/weather/${language}/${lat}/${lng}?dataSets=currentWeather,forecastDaily,forecastHourly&timezone=auto`;
+  
+  console.log('🌐 API Request:', {
+    url: weatherUrl,
+    tokenLength: token.length,
+    tokenPreview: token.substring(0, 20) + '...' + token.substring(token.length - 20),
+  });
 
   const response = await fetch(weatherUrl, {
     headers: {
@@ -96,10 +141,21 @@ async function fetchWeatherKitForecast(lat: number, lng: number, language: strin
     },
   });
 
+  console.log('📡 API Response:', {
+    status: response.status,
+    statusText: response.statusText,
+    headers: Object.fromEntries(response.headers.entries()),
+  });
+
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('WeatherKit API error:', errorText);
-    throw new Error(`WeatherKit API error: ${response.status}`);
+    console.error('❌ WeatherKit API Error Details:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText,
+      url: weatherUrl,
+    });
+    throw new Error(`WeatherKit API error: ${response.status} - ${errorText}`);
   }
 
   return await response.json();
