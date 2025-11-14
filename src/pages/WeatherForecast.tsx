@@ -328,26 +328,29 @@ const WeatherForecast = () => {
             <CardTitle className="text-base">{t('weather:forecast.next10Days')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-2">
+            <div className="space-y-0 divide-y divide-border/30">
               {forecast.daily.map((day, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-2xl hover:bg-background/60 transition-colors">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="text-sm font-medium w-20 shrink-0">{formatDate(day.date)}</div>
+                <div key={idx} className="flex items-center justify-between py-3 px-2">
+                  <div className="w-16 shrink-0">
+                    <div className="text-base font-medium">{formatDate(day.date)}</div>
+                  </div>
+                  <div className="flex flex-col items-center w-16 shrink-0">
                     <WeatherIcon 
                       condition={day.conditionText}
                       isDaytime={true}
-                      size={36}
+                      size={32}
                       className={getWeatherIconColor(day.conditionText)}
                     />
-                    <div className="text-sm flex-1 truncate">
-                      {t(`weatherConditions:${detectWeatherCondition(day.conditionText)}`)}
-                    </div>
+                    {day.precipitationChance > 0 && (
+                      <div className="text-xs text-blue-500 font-medium mt-1">
+                        {day.precipitationChance}%
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-sm text-muted-foreground w-8 text-right">{day.minTempC}°</span>
-                    <div className="w-14 h-2 bg-gradient-to-r from-blue-300 to-orange-400 rounded-full" />
-                    <span className="text-sm font-semibold w-8">{day.maxTempC}°</span>
-                    <div className="text-xs text-blue-500 w-10 text-right">☔{day.precipitationChance}%</div>
+                  <div className="flex items-center gap-2 flex-1 justify-end">
+                    <span className="text-base text-muted-foreground w-8 text-right">{day.minTempC}°</span>
+                    <div className="w-20 h-2 bg-gradient-to-r from-blue-400 via-cyan-400 to-orange-400 rounded-full" />
+                    <span className="text-base font-semibold w-8 text-right">{day.maxTempC}°</span>
                   </div>
                 </div>
               ))}
