@@ -23,17 +23,23 @@ export interface CompressionResult {
   conditions: DeviceConditions;
 }
 
+export type CompressionProgressCallback = (progress: number, stage: string) => void;
+
 class ImageCompressionService {
   /**
    * Compress image intelligently based on current device conditions
    */
-  async compressImage(dataUrl: string): Promise<CompressionResult> {
+  async compressImage(dataUrl: string, onProgress?: CompressionProgressCallback): Promise<CompressionResult> {
     console.log('📸 Starting smart image compression...');
+    
+    onProgress?.(10, 'Analizando condiciones...');
     
     // Get current device conditions
     const conditions = await networkStorageService.getDeviceConditions();
     console.log('📊 Device conditions:', conditions);
 
+    onProgress?.(20, 'Determinando calidad...');
+    
     // Determine compression tier
     const tier = this.determineCompressionTier(conditions);
     console.log('🎚️ Compression tier:', tier);
@@ -42,12 +48,20 @@ class ImageCompressionService {
     const settings = this.getCompressionSettings(tier);
     console.log('⚙️ Compression settings:', settings);
 
+    onProgress?.(30, 'Calculando tamaño...');
+    
     // Calculate original size
     const originalSizeKB = this.getDataUrlSizeKB(dataUrl);
     console.log('📏 Original size:', originalSizeKB, 'KB');
 
+    onProgress?.(40, 'Comprimiendo imagen...');
+    
     // Compress the image
-    const compressedDataUrl = await this.applyCompression(dataUrl, settings);
+    const compressedDataUrl = await this.applyCompression(dataUrl, settings, (progress) => {
+      onProgress?.(40 + (progress * 0.5), 'Comprimiendo imagen...');
+    });
+    
+    onProgress?.(90, 'Finalizando...');
     
     // Calculate compressed size
     const compressedSizeKB = this.getDataUrlSizeKB(compressedDataUrl);
@@ -58,6 +72,8 @@ class ImageCompressionService {
       compressedKB: compressedSizeKB,
       reduction: reductionPercent + '%'
     });
+
+    onProgress?.(100, 'Compresión completa');
 
     return {
       dataUrl: compressedDataUrl,
@@ -145,12 +161,14 @@ class ImageCompressionService {
   /**
    * Apply compression to image
    */
-  private async applyCompression(dataUrl: string, settings: CompressionSettings): Promise<string> {
+  private async applyCompression(dataUrl: string, settings: CompressionSettings, onProgress?: (progress: number) => void): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       
       img.onload = () => {
         try {
+          onProgress?.(0.2);
+          
           // Create canvas
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
@@ -160,6 +178,8 @@ class ImageCompressionService {
             return;
           }
 
+          onProgress?.(0.4);
+          
           // Calculate new dimensions
           let width = img.width;
           let height = img.height;
@@ -178,13 +198,19 @@ class ImageCompressionService {
           canvas.width = width;
           canvas.height = height;
 
+          onProgress?.(0.6);
+          
           // Draw image with high quality
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, width, height);
 
+          onProgress?.(0.8);
+          
           // Convert to data URL with compression
           const compressedDataUrl = canvas.toDataURL(settings.format, settings.quality);
+          
+          onProgress?.(1);
           
           resolve(compressedDataUrl);
         } catch (error) {

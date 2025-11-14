@@ -79,7 +79,9 @@ class FarmProfileService {
     return data;
   }
 
-  async uploadLogo(file: File | string): Promise<string> {
+  async uploadLogo(file: File | string, onProgress?: (progress: number) => void): Promise<string> {
+    onProgress?.(0);
+    
     // Convert data URL to blob if needed
     let uploadFile: File;
     if (typeof file === 'string') {
@@ -89,7 +91,12 @@ class FarmProfileService {
       uploadFile = file;
     }
 
+    onProgress?.(20);
+
     const fileName = `logo-${Date.now()}-${uploadFile.name}`;
+    
+    onProgress?.(40);
+    
     const { data, error } = await supabase.storage
       .from('farm-logos')
       .upload(fileName, uploadFile, {
@@ -102,14 +109,20 @@ class FarmProfileService {
       throw error;
     }
 
+    onProgress?.(80);
+
     const { data: { publicUrl } } = supabase.storage
       .from('farm-logos')
       .getPublicUrl(data.path);
 
+    onProgress?.(100);
+
     return publicUrl;
   }
 
-  async uploadPicture(file: File | string): Promise<string> {
+  async uploadPicture(file: File | string, onProgress?: (progress: number) => void): Promise<string> {
+    onProgress?.(0);
+    
     // Convert data URL to blob if needed
     let uploadFile: File;
     if (typeof file === 'string') {
@@ -119,7 +132,12 @@ class FarmProfileService {
       uploadFile = file;
     }
 
+    onProgress?.(20);
+
     const fileName = `picture-${Date.now()}-${uploadFile.name}`;
+    
+    onProgress?.(40);
+    
     const { data, error } = await supabase.storage
       .from('farm-pictures')
       .upload(fileName, uploadFile, {
@@ -132,9 +150,13 @@ class FarmProfileService {
       throw error;
     }
 
+    onProgress?.(80);
+
     const { data: { publicUrl } } = supabase.storage
       .from('farm-pictures')
       .getPublicUrl(data.path);
+
+    onProgress?.(100);
 
     return publicUrl;
   }

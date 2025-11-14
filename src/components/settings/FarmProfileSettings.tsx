@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useFarmProfile } from '@/hooks/useFarmProfile';
+import { useFarmProfileWithProgress } from '@/hooks/useFarmProfileWithProgress';
 import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 import { type FarmProfileFormData } from '@/services/farmProfileService';
 import { Loader2, MapPin, Building2, Check } from 'lucide-react';
 import { suggestPlaces, getPlaceDetails, type PlacePrediction } from '@/services/placesService';
 import { dashboardBannerService } from '@/services/dashboardBannerService';
 import ImageUpload from '@/components/ImageUpload';
+import { ImageUploadProgress } from '@/components/image-upload/ImageUploadProgress';
 import { useTranslation } from 'react-i18next';
 
 const farmProfileSchema = z.object({
@@ -36,8 +37,9 @@ const FarmProfileSettings = () => {
     isCreating,
     isUpdating,
     isUploadingLogo,
-    isUploadingPicture
-  } = useFarmProfile();
+    isUploadingPicture,
+    uploadProgress
+  } = useFarmProfileWithProgress();
   
   const { syncFromFarm } = useWeatherSettings();
 
@@ -370,6 +372,15 @@ const FarmProfileSettings = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {uploadProgress && isUploadingLogo && (
+              <div className="mb-4">
+                <ImageUploadProgress
+                  stage={uploadProgress.stage}
+                  progress={uploadProgress.progress}
+                  statusText={uploadProgress.statusText}
+                />
+              </div>
+            )}
             <ImageUpload
               currentImage={farmProfile.logo_url || null}
               onImageChange={handleLogoChange}
@@ -401,6 +412,15 @@ const FarmProfileSettings = () => {
             </div>
           </CardHeader>
           <CardContent>
+            {uploadProgress && isUploadingPicture && (
+              <div className="mb-4">
+                <ImageUploadProgress
+                  stage={uploadProgress.stage}
+                  progress={uploadProgress.progress}
+                  statusText={uploadProgress.statusText}
+                />
+              </div>
+            )}
             <ImageUpload
               currentImage={farmProfile.picture_url || null}
               onImageChange={handlePictureChange}
