@@ -32,15 +32,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [progressStage, setProgressStage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load and display device conditions on mount
+  // Load and display device conditions on mount (only when not disabled)
   useEffect(() => {
-    const loadConditions = async () => {
-      const conditions = await networkStorageService.getDeviceConditions();
-      const description = networkStorageService.getConditionsDescription(conditions);
-      setCompressionInfo(description);
-    };
-    loadConditions();
-  }, []);
+    if (!disabled) {
+      const loadConditions = async () => {
+        const conditions = await networkStorageService.getDeviceConditions();
+        const description = networkStorageService.getConditionsDescription(conditions);
+        setCompressionInfo(description);
+      };
+      loadConditions();
+    }
+  }, [disabled]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
