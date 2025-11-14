@@ -44,6 +44,7 @@ const Pricing = lazy(() => import('@/pages/Pricing'));
 const Finances = lazy(() => import('@/pages/Finances'));
 const Tasks = lazy(() => import('@/pages/Tasks'));
 const Inventory = lazy(() => import('@/pages/Inventory'));
+const WeatherForecast = lazy(() => import('@/pages/WeatherForecast'));
 
 // Keep lightweight pages eager-loaded
 import GmailCallback from '@/pages/GmailCallback';
@@ -267,6 +268,11 @@ function AppContent() {
                   <Route path="/inventory" element={
                     <ProtectedRoute>
                       <Inventory />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/weather/forecast" element={
+                    <ProtectedRoute>
+                      <WeatherForecast />
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />

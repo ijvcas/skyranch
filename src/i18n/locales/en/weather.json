@@ -7,5 +7,14 @@
   "noData": "No weather data",
   "settings": {
     "title": "Weather Information"
+  },
+  "forecast": {
+    "title": "Weather Forecast",
+    "hourly": "Next 48 Hours",
+    "daily": "10-Day Forecast",
+    "current": "Current Conditions",
+    "recommendations": "Smart Recommendations",
+    "temperature": "Temperature Trend",
+    "precipitation": "Precipitation Forecast"
   }
 }

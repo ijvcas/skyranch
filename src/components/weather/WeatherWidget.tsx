@@ -1,5 +1,6 @@
 import React from "react";
-import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind } from "lucide-react";
+import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { useTranslation } from 'react-i18next';
@@ -50,6 +51,7 @@ function pickIconColor(text?: string | null) {
 }
 
 const WeatherWidget: React.FC = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation('weather');
   const { data: weatherSettings, isLoading: settingsLoading } = useWeatherSettings();
   console.log("🌤️ [WeatherWidget] Weather settings:", weatherSettings);
@@ -82,8 +84,24 @@ const WeatherWidget: React.FC = () => {
     return t(`weatherConditions:${conditionKey}`);
   };
 
+  const handleClick = () => {
+    navigate('/weather/forecast');
+  };
+
   return (
-    <section aria-label="Clima actual">
+    <section 
+      aria-label="Clima actual"
+      onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      className="cursor-pointer hover:opacity-80 transition-opacity group"
+    >
       <div className="flex items-start gap-3">
         <TempIcon className={`h-7 w-7 ${iconColor} flex-shrink-0`} strokeWidth={2.5} aria-hidden />
         
@@ -93,8 +111,9 @@ const WeatherWidget: React.FC = () => {
             {settingsLoading || isLoading ? "—" :
               typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground flex items-center gap-1">
             {getWeatherCondition()}
+            <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         </div>
       </div>

@@ -7,5 +7,14 @@
   "noData": "Pas de données météo",
   "settings": {
     "title": "Informations Météorologiques"
+  },
+  "forecast": {
+    "title": "Prévisions Météo",
+    "hourly": "Prochaines 48 Heures",
+    "daily": "Prévisions 10 Jours",
+    "current": "Conditions Actuelles",
+    "recommendations": "Recommandations Intelligentes",
+    "temperature": "Tendance de Température",
+    "precipitation": "Prévisions de Précipitations"
   }
 }
