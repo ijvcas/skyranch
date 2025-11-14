@@ -107,43 +107,21 @@ const WeatherForecast = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <Skeleton className="h-8 w-64" />
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        <div className="max-w-2xl mx-auto p-4 space-y-4">
+          <div className="flex items-center gap-3 mb-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <Skeleton className="h-8 w-48 mb-2" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+          <Skeleton className="h-48 w-full rounded-3xl" />
+          <Skeleton className="h-32 w-full rounded-3xl" />
+          <Skeleton className="h-64 w-full rounded-3xl" />
         </div>
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-96 w-full" />
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">Pronóstico Extendido</h1>
-        </div>
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error al cargar el pronóstico</AlertTitle>
-          <AlertDescription>
-            {error instanceof Error ? error.message : 'No se pudo obtener información del pronóstico'}
-          </AlertDescription>
-        </Alert>
-        <Button 
-          onClick={() => window.location.reload()} 
-          className="mt-4"
-        >
-          Reintentar
-        </Button>
       </div>
     );
   }
