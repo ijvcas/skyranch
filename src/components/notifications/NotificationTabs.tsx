@@ -14,6 +14,8 @@ interface NotificationTabsProps {
   unreadCount: number;
   onMarkAsRead: (id: string) => void;
   onDelete: (id: string) => void;
+  onSnooze?: (id: string, duration: number) => void;
+  onMarkAsDone?: (id: string) => void;
 }
 
 export const NotificationTabs = ({
@@ -22,7 +24,9 @@ export const NotificationTabs = ({
   filteredNotifications,
   unreadCount,
   onMarkAsRead,
-  onDelete
+  onDelete,
+  onSnooze,
+  onMarkAsDone
 }: NotificationTabsProps) => {
   const { t } = useTranslation('notifications');
   
@@ -56,6 +60,8 @@ export const NotificationTabs = ({
                 notification={notification}
                 onMarkAsRead={onMarkAsRead}
                 onDelete={onDelete}
+                onSnooze={onSnooze}
+                onMarkAsDone={onMarkAsDone}
               />
             ))}
           </div>
@@ -73,6 +79,8 @@ export const NotificationTabs = ({
                 notification={notification}
                 onMarkAsRead={onMarkAsRead}
                 onDelete={onDelete}
+                onSnooze={onSnooze}
+                onMarkAsDone={onMarkAsDone}
               />
             ))}
           </div>
@@ -90,6 +98,8 @@ export const NotificationTabs = ({
                 notification={notification}
                 onMarkAsRead={onMarkAsRead}
                 onDelete={onDelete}
+                onSnooze={onSnooze}
+                onMarkAsDone={onMarkAsDone}
               />
             ))}
           </div>

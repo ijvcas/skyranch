@@ -24,7 +24,15 @@ export const useRealNotificationQueries = () => {
   });
 
   // Transform to match existing interface
-  const notifications = supabaseNotifications.map(transformNotification);
+  const allNotifications = supabaseNotifications.map(transformNotification);
+  
+  // Filter out snoozed notifications
+  const now = new Date().toISOString();
+  const notifications = allNotifications.filter(n => {
+    const snoozedUntil = n.metadata?.snoozedUntil;
+    return !snoozedUntil || snoozedUntil <= now;
+  });
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return {

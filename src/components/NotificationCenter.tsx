@@ -15,6 +15,8 @@ const NotificationCenter = () => {
     markAllAsRead, 
     deleteNotification,
     clearAllNotifications,
+    snoozeNotification,
+    markAsDone
   } = useNotifications();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -71,6 +73,8 @@ const NotificationCenter = () => {
         unreadCount={unreadCount}
         onMarkAsRead={markAsRead}
         onDelete={deleteNotification}
+        onSnooze={snoozeNotification}
+        onMarkAsDone={markAsDone}
       />
     </div>
   );
