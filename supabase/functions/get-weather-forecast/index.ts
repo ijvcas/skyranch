@@ -49,244 +49,188 @@ interface WeatherForecastResponse {
   raw?: any;
 }
 
-// Generate JWT token for Apple WeatherKit
-async function generateWeatherKitToken(): Promise<string> {
-  const teamId = Deno.env.get('APPLE_WEATHERKIT_TEAM_ID');
-  const serviceId = Deno.env.get('APPLE_WEATHERKIT_SERVICE_ID');
-  const keyId = Deno.env.get('APPLE_WEATHERKIT_KEY_ID');
-  const privateKey = Deno.env.get('APPLE_WEATHERKIT_PRIVATE_KEY');
-
-  // Debug: Log environment variables presence
-  console.log('🔍 Environment Variables Check:', {
-    teamId: teamId ? `✓ Present (${teamId.length} chars)` : '✗ Missing',
-    serviceId: serviceId ? `✓ Present (${serviceId.length} chars)` : '✗ Missing',
-    keyId: keyId ? `✓ Present (${keyId.length} chars)` : '✗ Missing',
-    privateKey: privateKey ? `✓ Present (${privateKey.length} chars)` : '✗ Missing',
-  });
-
-  if (!teamId || !serviceId || !keyId || !privateKey) {
-    throw new Error('Apple WeatherKit credentials not configured');
-  }
-
-  // Debug: Log actual values (first/last chars only for security)
-  console.log('🔑 Credential Details:', {
-    teamId: teamId,
-    serviceId: serviceId,
-    keyId: keyId,
-    privateKeyStart: privateKey.substring(0, 30) + '...',
-    privateKeyEnd: '...' + privateKey.substring(privateKey.length - 30),
-  });
-
-  const { SignJWT, importPKCS8 } = await import('https://deno.land/x/jose@v5.2.0/index.ts');
-
-  // Format and import the private key
-  const formattedKey = privateKey
-    .replace(/\\n/g, '\n')
-    .replace('-----BEGIN PRIVATE KEY-----', '-----BEGIN PRIVATE KEY-----\n')
-    .replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----');
-
-  // Debug: Log key format
-  console.log('🔐 Private Key Format:', {
-    hasBeginMarker: formattedKey.includes('-----BEGIN PRIVATE KEY-----'),
-    hasEndMarker: formattedKey.includes('-----END PRIVATE KEY-----'),
-    lineCount: formattedKey.split('\n').length,
-    totalLength: formattedKey.length,
-  });
-
-  const key = await importPKCS8(formattedKey, 'ES256');
-
-  // Create JWT token header
-  const header = { alg: 'ES256', kid: keyId, id: `${teamId}.${serviceId}` };
-  console.log('📝 JWT Header:', header);
-
-  // Create JWT token
-  const token = await new SignJWT({})
-    .setProtectedHeader(header)
-    .setIssuedAt()
-    .setIssuer(teamId)
-    .setSubject(serviceId)
-    .setExpirationTime('1h')
-    .sign(key);
-
-  // Debug: Show token structure (not the actual token)
-  const parts = token.split('.');
-  console.log('🎫 JWT Token Structure:', {
-    parts: parts.length,
-    headerLength: parts[0]?.length,
-    payloadLength: parts[1]?.length,
-    signatureLength: parts[2]?.length,
-  });
-
-  return token;
+// Translate weather conditions to Spanish
+function translateCondition(text: string): string {
+  if (!text) return 'Desconocido';
+  
+  const lowerText = text.toLowerCase();
+  
+  if (/clear|sunny/i.test(lowerText)) return 'Despejado';
+  if (/partly cloudy|partly sunny/i.test(lowerText)) return 'Parcialmente nublado';
+  if (/cloudy|overcast/i.test(lowerText)) return 'Nublado';
+  if (/thunderstorm|storm/i.test(lowerText)) return 'Tormenta';
+  if (/heavy rain/i.test(lowerText)) return 'Lluvia intensa';
+  if (/rain|rainy|shower/i.test(lowerText)) return 'Lluvia';
+  if (/drizzle/i.test(lowerText)) return 'Llovizna';
+  if (/snow|snowy/i.test(lowerText)) return 'Nieve';
+  if (/fog|mist/i.test(lowerText)) return 'Niebla';
+  if (/wind/i.test(lowerText)) return 'Ventoso';
+  if (/hail/i.test(lowerText)) return 'Granizo';
+  if (/sleet/i.test(lowerText)) return 'Aguanieve';
+  
+  return text;
 }
 
-// Fetch forecast from Apple WeatherKit
-async function fetchWeatherKitForecast(lat: number, lng: number, language: string) {
-  console.log('🔐 Generating WeatherKit JWT token...');
-  const token = await generateWeatherKitToken();
-
-  // Request daily and hourly forecasts
-  const weatherUrl = `https://weatherkit.apple.com/api/v1/weather/${language}/${lat}/${lng}?dataSets=currentWeather,forecastDaily,forecastHourly&timezone=auto`;
+// Fetch current conditions from Google Weather API
+async function fetchCurrentConditions(apiKey: string, lat: number, lng: number, language: string) {
+  const url = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&languageCode=${language}`;
   
-  console.log('🌐 API Request:', {
-    url: weatherUrl,
-    tokenLength: token.length,
-    tokenPreview: token.substring(0, 20) + '...' + token.substring(token.length - 20),
-  });
-
-  const response = await fetch(weatherUrl, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-
-  console.log('📡 API Response:', {
-    status: response.status,
-    statusText: response.statusText,
-    headers: Object.fromEntries(response.headers.entries()),
-  });
-
+  console.log('🌤️ Fetching current conditions from Google Weather API');
+  
+  const response = await fetch(url);
+  
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('❌ WeatherKit API Error Details:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText,
-      url: weatherUrl,
-    });
-    throw new Error(`WeatherKit API error: ${response.status} - ${errorText}`);
+    console.error('❌ Google Weather API error (current):', errorText);
+    throw new Error(`Google Weather API error: ${response.status} - ${errorText}`);
   }
-
+  
   return await response.json();
 }
 
-// Map Apple WeatherKit condition codes to readable text
-function mapWeatherKitCondition(code: string): string {
-  const conditionMap: Record<string, string> = {
-    'Clear': 'Despejado',
-    'Cloudy': 'Nublado',
-    'MostlyClear': 'Mayormente despejado',
-    'MostlyCloudy': 'Mayormente nublado',
-    'PartlyCloudy': 'Parcialmente nublado',
-    'Rain': 'Lluvia',
-    'Drizzle': 'Llovizna',
-    'HeavyRain': 'Lluvia fuerte',
-    'ScatteredShowers': 'Chubascos dispersos',
-    'Showers': 'Chubascos',
-    'ScatteredThunderstorms': 'Tormentas dispersas',
-    'Thunderstorms': 'Tormentas',
-    'IsolatedThunderstorms': 'Tormentas aisladas',
-    'SevereThunderstorm': 'Tormenta severa',
-    'Thunderstorm': 'Tormenta',
-    'Snow': 'Nieve',
-    'HeavySnow': 'Nieve fuerte',
-    'LightSnow': 'Nieve ligera',
-    'Flurries': 'Ráfagas de nieve',
-    'SnowShowers': 'Chubascos de nieve',
-    'ScatteredSnowShowers': 'Chubascos de nieve dispersos',
-    'Sleet': 'Aguanieve',
-    'MixedRainAndSleet': 'Lluvia y aguanieve',
-    'MixedRainAndSnow': 'Lluvia y nieve',
-    'MixedSnowAndSleet': 'Nieve y aguanieve',
-    'Hail': 'Granizo',
-    'BlowingSnow': 'Nieve voladora',
-    'FreezingDrizzle': 'Llovizna helada',
-    'FreezingRain': 'Lluvia helada',
-    'Blizzard': 'Ventisca',
-    'Fog': 'Niebla',
-    'Haze': 'Neblina',
-    'Smoke': 'Humo',
-    'Dust': 'Polvo',
-    'Windy': 'Ventoso',
-    'Breezy': 'Ventoso',
-    'StrongWinds': 'Vientos fuertes',
-    'Hurricane': 'Huracán',
-    'TropicalStorm': 'Tormenta tropical',
-    'Tornado': 'Tornado',
-    'Hot': 'Calor extremo',
-    'Frigid': 'Frío extremo',
-  };
-
-  return conditionMap[code] || code;
+// Fetch daily forecast from Google Weather API
+async function fetchDailyForecast(apiKey: string, lat: number, lng: number, language: string, days: number = 10) {
+  const url = `https://weather.googleapis.com/v1/forecast.days:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&days=${days}&languageCode=${language}`;
+  
+  console.log(`📅 Fetching ${days}-day forecast from Google Weather API`);
+  
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('❌ Google Weather API error (daily):', errorText);
+    throw new Error(`Google Weather API error: ${response.status} - ${errorText}`);
+  }
+  
+  return await response.json();
 }
 
-// Transform Apple WeatherKit data to our format
-function transformWeatherKitData(data: any): WeatherForecastResponse {
-  const dailyDays = data.forecastDaily?.days || [];
-  const hourlyHours = data.forecastHourly?.hours || [];
+// Fetch hourly forecast from Google Weather API
+async function fetchHourlyForecast(apiKey: string, lat: number, lng: number, language: string, hours: number = 48) {
+  const url = `https://weather.googleapis.com/v1/forecast.hours:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&hours=${hours}&languageCode=${language}`;
+  
+  console.log(`⏰ Fetching ${hours}-hour forecast from Google Weather API`);
+  
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('❌ Google Weather API error (hourly):', errorText);
+    throw new Error(`Google Weather API error: ${response.status} - ${errorText}`);
+  }
+  
+  return await response.json();
+}
 
+// Transform Google Weather API response to our format
+function transformGoogleWeatherData(
+  currentData: any,
+  dailyData: any,
+  hourlyData: any,
+  lat: number,
+  lng: number
+): WeatherForecastResponse {
+  console.log('🔄 Transforming Google Weather data');
+  
+  // Transform hourly forecast
+  const hourly: HourlyForecast[] = (hourlyData.hourlyForecasts || []).map((hour: any) => {
+    const tempC = hour.temperature?.value || 0;
+    return {
+      timestamp: hour.time || new Date().toISOString(),
+      temperatureC: Math.round(tempC),
+      temperatureF: Math.round(tempC * 9/5 + 32),
+      conditionText: translateCondition(hour.condition?.description || ''),
+      windKph: Math.round((hour.wind?.speed?.value || 0) * 3.6), // m/s to km/h
+      humidity: hour.relativeHumidity?.value || 0,
+      precipitationChance: hour.precipitationProbability?.value || 0,
+      precipitationMm: hour.rain?.value || 0
+    };
+  });
+  
+  // Transform daily forecast
+  const daily: DailyForecast[] = (dailyData.dailyForecasts || []).map((day: any) => {
+    const maxTempC = day.temperature?.high?.value || 0;
+    const minTempC = day.temperature?.low?.value || 0;
+    
+    return {
+      date: day.date || new Date().toISOString().split('T')[0],
+      maxTempC: Math.round(maxTempC),
+      minTempC: Math.round(minTempC),
+      maxTempF: Math.round(maxTempC * 9/5 + 32),
+      minTempF: Math.round(minTempC * 9/5 + 32),
+      conditionText: translateCondition(day.condition?.description || ''),
+      maxWindKph: Math.round((day.wind?.speed?.value || 0) * 3.6), // m/s to km/h
+      avgHumidity: day.relativeHumidity?.value || 0,
+      precipitationChance: day.precipitationProbability?.value || 0,
+      totalPrecipitationMm: day.rain?.value || 0,
+      sunrise: day.sun?.sunrise || '',
+      sunset: day.sun?.sunset || ''
+    };
+  });
+  
+  console.log(`✅ Transformed ${hourly.length} hourly and ${daily.length} daily forecasts`);
+  
   return {
     location: {
-      name: 'Current Location',
-      lat: data.metadata?.latitude || 0,
-      lng: data.metadata?.longitude || 0,
+      name: currentData.regionCode || 'Unknown',
+      lat,
+      lng
     },
-    daily: dailyDays.slice(0, 10).map((day: any) => ({
-      date: day.forecastStart.split('T')[0],
-      maxTempC: Math.round(day.temperatureMax),
-      minTempC: Math.round(day.temperatureMin),
-      maxTempF: Math.round((day.temperatureMax * 9 / 5) + 32),
-      minTempF: Math.round((day.temperatureMin * 9 / 5) + 32),
-      conditionText: mapWeatherKitCondition(day.conditionCode),
-      maxWindKph: Math.round((day.windSpeedMax || 0) * 3.6), // m/s to km/h
-      avgHumidity: Math.round((day.humidity || 0) * 100),
-      precipitationChance: Math.round((day.precipitationChance || 0) * 100),
-      totalPrecipitationMm: day.precipitationAmount || 0,
-      sunrise: day.sunrise || '',
-      sunset: day.sunset || '',
-    })),
-    hourly: hourlyHours.slice(0, 48).map((hour: any) => ({
-      timestamp: hour.forecastStart,
-      temperatureC: Math.round(hour.temperature),
-      temperatureF: Math.round((hour.temperature * 9 / 5) + 32),
-      conditionText: mapWeatherKitCondition(hour.conditionCode),
-      windKph: Math.round((hour.windSpeed || 0) * 3.6),
-      humidity: Math.round((hour.humidity || 0) * 100),
-      precipitationChance: Math.round((hour.precipitationChance || 0) * 100),
-      precipitationMm: hour.precipitationIntensity || 0,
-    })),
-    raw: data,
+    daily,
+    hourly,
+    raw: { currentData, dailyData, hourlyData }
   };
 }
 
-serve(async (req: Request) => {
+serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const body: ForecastRequest = await req.json();
-    const { lat, lng, language = 'es', forecastDays = 10 } = body;
-
-    console.log('🌤️ Fetching weather forecast from Apple WeatherKit:', { lat, lng, forecastDays });
-
-    if (!lat || !lng) {
-      throw new Error('Location coordinates required');
+    const apiKey = Deno.env.get('GOOGLE_WEATHER_API_KEY');
+    if (!apiKey) {
+      throw new Error('GOOGLE_WEATHER_API_KEY not configured');
     }
 
-    // Fetch from Apple WeatherKit
-    const weatherData = await fetchWeatherKitForecast(lat, lng, language);
+    const { lat, lng, language = 'es', forecastDays = 10 }: ForecastRequest = await req.json();
 
-    // Transform to our format
-    const response = transformWeatherKitData(weatherData);
+    if (!lat || !lng) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameters: lat, lng' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    console.log('✅ Weather forecast fetched successfully from Apple WeatherKit');
+    console.log(`🌍 Fetching weather forecast for: ${lat}, ${lng} (${language})`);
 
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    // Fetch all data in parallel
+    const [currentData, dailyData, hourlyData] = await Promise.all([
+      fetchCurrentConditions(apiKey, lat, lng, language),
+      fetchDailyForecast(apiKey, lat, lng, language, forecastDays),
+      fetchHourlyForecast(apiKey, lat, lng, language, 48)
+    ]);
+
+    // Transform and return the data
+    const forecast = transformGoogleWeatherData(currentData, dailyData, hourlyData, lat, lng);
+
+    return new Response(
+      JSON.stringify(forecast),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
-    console.error('❌ Error fetching weather forecast:', error);
+    console.error('Error fetching weather forecast:', error);
+    
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: error instanceof Error ? error.stack : undefined
+        error: error.message,
+        details: error.toString()
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
   }
