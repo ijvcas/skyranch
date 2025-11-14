@@ -2713,6 +2713,7 @@ export type Database = {
           action_type: string
           condition: string
           created_at: string | null
+          forecast_hours: number | null
           id: string
           is_active: boolean | null
           rule_type: string
@@ -2724,6 +2725,7 @@ export type Database = {
           action_type: string
           condition: string
           created_at?: string | null
+          forecast_hours?: number | null
           id?: string
           is_active?: boolean | null
           rule_type: string
@@ -2735,11 +2737,42 @@ export type Database = {
           action_type?: string
           condition?: string
           created_at?: string | null
+          forecast_hours?: number | null
           id?: string
           is_active?: boolean | null
           rule_type?: string
           threshold?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      weather_forecasts: {
+        Row: {
+          created_at: string
+          expires_at: string
+          fetched_at: string
+          forecast_data: Json
+          forecast_type: string
+          id: string
+          location_key: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          fetched_at?: string
+          forecast_data: Json
+          forecast_type: string
+          id?: string
+          location_key: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          fetched_at?: string
+          forecast_data?: Json
+          forecast_type?: string
+          id?: string
+          location_key?: string
         }
         Relationships: []
       }
@@ -2912,6 +2945,7 @@ export type Database = {
         Args: { last_grazing_end_date: string; rest_days_required: number }
         Returns: string
       }
+      cleanup_expired_forecasts: { Args: never; Returns: undefined }
       cleanup_old_connection_logs: { Args: never; Returns: undefined }
       cleanup_old_notifications: { Args: never; Returns: undefined }
       create_lots_from_propiedad_parcels: {

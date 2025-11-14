@@ -18,6 +18,9 @@ verify_jwt = true
 [functions.get-weather-google]
 verify_jwt = true
 
+[functions.get-weather-forecast]
+verify_jwt = true
+
 [functions.get-weather]
 verify_jwt = true
 
