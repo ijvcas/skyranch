@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { imageCompressionService } from './mobile/imageCompressionService';
 
 export interface FarmProfile {
   id: string;
@@ -78,11 +79,20 @@ class FarmProfileService {
     return data;
   }
 
-  async uploadLogo(file: File): Promise<string> {
-    const fileName = `logo-${Date.now()}-${file.name}`;
+  async uploadLogo(file: File | string): Promise<string> {
+    // Convert data URL to blob if needed
+    let uploadFile: File;
+    if (typeof file === 'string') {
+      const blob = imageCompressionService.dataUrlToBlob(file);
+      uploadFile = new File([blob], `logo-${Date.now()}.jpg`, { type: blob.type });
+    } else {
+      uploadFile = file;
+    }
+
+    const fileName = `logo-${Date.now()}-${uploadFile.name}`;
     const { data, error } = await supabase.storage
       .from('farm-logos')
-      .upload(fileName, file, {
+      .upload(fileName, uploadFile, {
         cacheControl: '3600',
         upsert: true
       });
@@ -99,11 +109,20 @@ class FarmProfileService {
     return publicUrl;
   }
 
-  async uploadPicture(file: File): Promise<string> {
-    const fileName = `picture-${Date.now()}-${file.name}`;
+  async uploadPicture(file: File | string): Promise<string> {
+    // Convert data URL to blob if needed
+    let uploadFile: File;
+    if (typeof file === 'string') {
+      const blob = imageCompressionService.dataUrlToBlob(file);
+      uploadFile = new File([blob], `picture-${Date.now()}.jpg`, { type: blob.type });
+    } else {
+      uploadFile = file;
+    }
+
+    const fileName = `picture-${Date.now()}-${uploadFile.name}`;
     const { data, error } = await supabase.storage
       .from('farm-pictures')
-      .upload(fileName, file, {
+      .upload(fileName, uploadFile, {
         cacheControl: '3600',
         upsert: true
       });

@@ -28,7 +28,7 @@ export const useFarmProfile = () => {
   });
 
   const uploadLogoMutation = useMutation({
-    mutationFn: ({ id, file }: { id: string; file: File }) =>
+    mutationFn: ({ id, file }: { id: string; file: File | string }) =>
       farmProfileService.uploadLogo(file).then(url => 
         farmProfileService.updateLogo(id, url)
       ),
@@ -38,7 +38,7 @@ export const useFarmProfile = () => {
   });
 
   const uploadPictureMutation = useMutation({
-    mutationFn: ({ id, file }: { id: string; file: File }) =>
+    mutationFn: ({ id, file }: { id: string; file: File | string }) =>
       farmProfileService.uploadPicture(file).then(url => 
         farmProfileService.updatePicture(id, url)
       ),
