@@ -90,7 +90,7 @@ async function fetchCurrentConditions(apiKey: string, lat: number, lng: number, 
 
 // Fetch daily forecast from Google Weather API
 async function fetchDailyForecast(apiKey: string, lat: number, lng: number, language: string, days: number = 10) {
-  const url = `https://weather.googleapis.com/v1/forecast.days:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&days=${days}&languageCode=${language}`;
+  const url = `https://weather.googleapis.com/v1/forecast/days:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&days=${days}&languageCode=${language}`;
   
   console.log(`📅 Fetching ${days}-day forecast from Google Weather API`);
   
@@ -107,7 +107,7 @@ async function fetchDailyForecast(apiKey: string, lat: number, lng: number, lang
 
 // Fetch hourly forecast from Google Weather API
 async function fetchHourlyForecast(apiKey: string, lat: number, lng: number, language: string, hours: number = 48) {
-  const url = `https://weather.googleapis.com/v1/forecast.hours:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&hours=${hours}&languageCode=${language}`;
+  const url = `https://weather.googleapis.com/v1/forecast/hours:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&hours=${hours}&languageCode=${language}`;
   
   console.log(`⏰ Fetching ${hours}-hour forecast from Google Weather API`);
   
