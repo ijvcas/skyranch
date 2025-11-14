@@ -18,7 +18,7 @@ import { WeatherIcon, getWeatherIconColor } from '@/components/weather/WeatherIc
 
 const WeatherForecast = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['weather', 'weatherConditions']);
+  const { t, i18n } = useTranslation(['weather', 'weatherConditions']);
   const { data: settings } = useWeatherSettings();
   const { data: forecast, isLoading, error } = useWeatherForecast(
     settings?.lat,
@@ -38,10 +38,11 @@ const WeatherForecast = () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
-    if (date.toDateString() === today.toDateString()) return 'Hoy';
-    if (date.toDateString() === tomorrow.toDateString()) return 'Mañana';
+    if (date.toDateString() === today.toDateString()) return t('weather:forecast.today');
+    if (date.toDateString() === tomorrow.toDateString()) return t('weather:forecast.tomorrow');
     
-    return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+    const locale = i18n.language || 'es';
+    return date.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
   };
 
   const isHourDaytime = (timestamp: string) => {
@@ -63,10 +64,13 @@ const WeatherForecast = () => {
       recommendations.push({
         id: 'delay-field-work',
         icon: Calendar,
-        title: 'Posponer Trabajo de Campo',
-        message: `${totalRain.toFixed(1)}mm de lluvia esperados en próximos 3 días. Reprograme tareas exteriores.`,
+        title: t('weather:forecast.delayFieldWork'),
+        message: `${totalRain.toFixed(1)}${t('weather:forecast.heavyRainExpected')}`,
         action: '/tasks?filter=outdoor',
         actionLabel: 'Ver Tareas',
+        severity: 'high',
+        color: 'bg-red-500/10 border-red-500/30 hover:bg-red-500/20',
+        iconColor: 'text-red-600',
       });
     }
     
@@ -75,10 +79,13 @@ const WeatherForecast = () => {
       recommendations.push({
         id: 'frost-protection',
         icon: Snowflake,
-        title: 'Protección Contra Heladas',
-        message: `Temperaturas bajo cero esperadas el ${formatDate(frostDays[0].date)}. Asegure refugios.`,
+        title: t('weather:forecast.frostProtection'),
+        message: `${t('weather:forecast.tempsBelowZero')} ${formatDate(frostDays[0].date)}. ${t('weather:forecast.ensureShelters')}`,
         action: '/animals',
         actionLabel: 'Ver Animales',
+        severity: 'critical',
+        color: 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20',
+        iconColor: 'text-blue-600',
       });
     }
     
@@ -92,10 +99,13 @@ const WeatherForecast = () => {
       recommendations.push({
         id: 'ideal-breeding',
         icon: Heart,
-        title: 'Condiciones Ideales',
-        message: `Clima perfecto por ${idealDays.length} días desde ${formatDate(idealDays[0].date)}`,
+        title: t('weather:forecast.idealConditions'),
+        message: `${t('weather:forecast.perfectWeather')} ${idealDays.length} ${t('weather:forecast.daysFrom')} ${formatDate(idealDays[0].date)}`,
         action: '/breeding',
         actionLabel: 'Ver Reproducción',
+        severity: 'positive',
+        color: 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20',
+        iconColor: 'text-green-600',
       });
     }
     
@@ -161,6 +171,10 @@ const WeatherForecast = () => {
     precip: hour.precipitationChance,
   }));
 
+  // Dynamic color based on temperature
+  const avgTemp = tempChartData.reduce((sum, d) => sum + d.temp, 0) / tempChartData.length;
+  const tempColor = avgTemp < 10 ? 'hsl(210, 100%, 50%)' : avgTemp > 25 ? 'hsl(15, 100%, 50%)' : 'hsl(var(--primary))';
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 pb-8">
       <div className="max-w-lg mx-auto px-3 pt-3 space-y-3">
@@ -170,24 +184,24 @@ const WeatherForecast = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-xl font-bold">Pronóstico Extendido</h1>
-            <p className="text-xs text-muted-foreground">Próximos 10 días</p>
+            <h1 className="text-xl font-bold">{t('weather:forecast.extendedTitle')}</h1>
+            <p className="text-xs text-muted-foreground">{t('weather:forecast.nextDays')}</p>
           </div>
         </div>
 
         {/* Current Conditions */}
         <Card className="rounded-3xl border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col items-center justify-center gap-3">
+            <div className="flex flex-col items-center gap-2">
               <WeatherIcon 
                 condition={today?.conditionText || 'Clear'}
                 isDaytime={isDaytime}
-                size={56}
+                size={64}
                 className={getWeatherIconColor(today?.conditionText || '')}
               />
-              <div>
-                <div className="text-4xl font-bold tracking-tight">{today?.maxTempC}°</div>
-                <div className="text-sm text-muted-foreground mt-0.5">{today?.conditionText}</div>
+              <div className="text-center">
+                <div className="text-5xl font-bold tracking-tight">{today?.maxTempC}°</div>
+                <div className="text-sm text-muted-foreground mt-1">{today?.conditionText}</div>
               </div>
             </div>
           </div>
@@ -195,22 +209,22 @@ const WeatherForecast = () => {
           <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-border/50">
             <div className="text-center">
               <Droplets className="h-4 w-4 mx-auto mb-1 text-blue-500" />
-              <div className="text-xs text-muted-foreground">Humedad</div>
+              <div className="text-xs text-muted-foreground">{t('weather:forecast.humidity')}</div>
               <div className="text-sm font-semibold">{today?.avgHumidity}%</div>
             </div>
             <div className="text-center">
               <Wind className="h-4 w-4 mx-auto mb-1 text-cyan-500" />
-              <div className="text-xs text-muted-foreground">Viento</div>
+              <div className="text-xs text-muted-foreground">{t('weather:forecast.wind')}</div>
               <div className="text-sm font-semibold">{today?.maxWindKph}</div>
             </div>
             <div className="text-center">
               <CloudRain className="h-4 w-4 mx-auto mb-1 text-blue-600" />
-              <div className="text-xs text-muted-foreground">Lluvia</div>
+              <div className="text-xs text-muted-foreground">{t('weather:forecast.rain')}</div>
               <div className="text-sm font-semibold">{today?.precipitationChance}%</div>
             </div>
             <div className="text-center">
               <div className="h-4 w-4 mx-auto mb-1 text-xs">🌡️</div>
-              <div className="text-xs text-muted-foreground">Mín</div>
+              <div className="text-xs text-muted-foreground">{t('weather:forecast.min')}</div>
               <div className="text-sm font-semibold">{today?.minTempC}°</div>
             </div>
           </div>
@@ -222,20 +236,20 @@ const WeatherForecast = () => {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
                 <List className="h-4 w-4" />
-                Recomendaciones
+                {t('weather:forecast.recommendationsTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 pt-0">
               {recommendations.map(rec => (
                 <div 
                   key={rec.id} 
-                  className="flex items-start gap-3 p-3 rounded-2xl bg-background/60 hover:bg-background/80 transition-colors cursor-pointer"
+                  className={`flex items-start gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${rec.color}`}
                   onClick={() => navigate(rec.action)}
                 >
-                  <rec.icon className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+                  <rec.icon className={`h-5 w-5 mt-0.5 shrink-0 ${rec.iconColor}`} />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm">{rec.title}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{rec.message}</div>
+                    <div className="font-semibold text-sm">{rec.title}</div>
+                    <div className="text-xs mt-0.5 opacity-90">{rec.message}</div>
                   </div>
                 </div>
               ))}
@@ -246,7 +260,7 @@ const WeatherForecast = () => {
         {/* Hourly Forecast */}
         <Card className="rounded-3xl border-0 shadow-sm bg-card/50 backdrop-blur">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Pronóstico por Hora</CardTitle>
+            <CardTitle className="text-base">{t('weather:forecast.hourlyForecast')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <ScrollArea className="w-full whitespace-nowrap">
@@ -272,7 +286,7 @@ const WeatherForecast = () => {
         {/* Temperature Chart */}
         <Card className="rounded-3xl border-0 shadow-sm bg-card/50 backdrop-blur">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Temperatura 24h</CardTitle>
+            <CardTitle className="text-base">{t('weather:forecast.temperature24h')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 -mx-2">
             <ResponsiveContainer width="100%" height={160}>
@@ -281,7 +295,7 @@ const WeatherForecast = () => {
                 <XAxis dataKey="time" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                <Line type="monotone" dataKey="temp" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="temp" stroke={tempColor} strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -290,7 +304,7 @@ const WeatherForecast = () => {
         {/* Precipitation Chart */}
         <Card className="rounded-3xl border-0 shadow-sm bg-card/50 backdrop-blur">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Precipitación 24h</CardTitle>
+            <CardTitle className="text-base">{t('weather:forecast.precipitation24h')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 -mx-2">
             <ResponsiveContainer width="100%" height={160}>
@@ -299,7 +313,7 @@ const WeatherForecast = () => {
                 <XAxis dataKey="time" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                <Bar dataKey="precip" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="precip" fill="hsl(210, 100%, 55%)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -308,7 +322,7 @@ const WeatherForecast = () => {
         {/* 10-Day Forecast */}
         <Card className="rounded-3xl border-0 shadow-sm bg-card/50 backdrop-blur">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Próximos 10 Días</CardTitle>
+            <CardTitle className="text-base">{t('weather:forecast.next10Days')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-1.5">

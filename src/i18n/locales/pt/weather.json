@@ -10,11 +10,32 @@
   },
   "forecast": {
     "title": "Previsão do Tempo",
+    "extendedTitle": "Previsão Estendida",
+    "nextDays": "Próximos 10 dias",
     "hourly": "Próximas 48 Horas",
+    "hourlyForecast": "Previsão por Hora",
     "daily": "Previsão de 10 Dias",
+    "next10Days": "Próximos 10 Dias",
     "current": "Condições Atuais",
     "recommendations": "Recomendações Inteligentes",
+    "recommendationsTitle": "Recomendações",
     "temperature": "Tendência de Temperatura",
-    "precipitation": "Previsão de Precipitação"
+    "temperature24h": "Temperatura Próximas 24h",
+    "precipitation": "Previsão de Precipitação",
+    "precipitation24h": "Precipitação Próximas 24h",
+    "humidity": "Umidade",
+    "wind": "Vento",
+    "rain": "Chuva",
+    "min": "Mín",
+    "today": "Hoje",
+    "tomorrow": "Amanhã",
+    "delayFieldWork": "Adiar Trabalho de Campo",
+    "frostProtection": "Proteção Contra Geadas",
+    "idealConditions": "Condições Ideais",
+    "heavyRainExpected": "mm de chuva esperados nos próximos 3 dias. Reagende tarefas externas.",
+    "tempsBelowZero": "Temperaturas abaixo de zero esperadas em",
+    "ensureShelters": "Garanta abrigos.",
+    "perfectWeather": "Clima perfeito por",
+    "daysFrom": "dias a partir de"
   }
 }
