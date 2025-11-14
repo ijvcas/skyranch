@@ -75,11 +75,36 @@ export const useRealNotificationMutations = () => {
     }
   });
 
+  const snoozeMutation = useMutation({
+    mutationFn: ({ notificationId, duration }: { notificationId: string; duration: number }) => 
+      supabaseNotificationService.snoozeNotification(notificationId, duration),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['real-notifications'] });
+    },
+    onError: (error) => {
+      console.error('Error snoozing notification:', error);
+      toast.error('Error al posponer notificación');
+    }
+  });
+
+  const markAsDoneMutation = useMutation({
+    mutationFn: (notificationId: string) => supabaseNotificationService.markAsDone(notificationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['real-notifications'] });
+    },
+    onError: (error) => {
+      console.error('Error marking notification as done:', error);
+      toast.error('Error al marcar como completada');
+    }
+  });
+
   return {
     markAsReadMutation,
     deleteNotificationMutation,
     addNotificationMutation,
     markAllAsReadMutation,
-    clearAllNotificationsMutation
+    clearAllNotificationsMutation,
+    snoozeMutation,
+    markAsDoneMutation
   };
 };

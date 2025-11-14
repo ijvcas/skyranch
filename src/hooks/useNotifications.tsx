@@ -14,7 +14,9 @@ export const useNotifications = () => {
     deleteNotificationMutation,
     addNotificationMutation,
     markAllAsReadMutation,
-    clearAllNotificationsMutation
+    clearAllNotificationsMutation,
+    snoozeMutation,
+    markAsDoneMutation
   } = useNotificationMutations();
 
   const markAsRead = useCallback(async (notificationId: string) => {
@@ -37,6 +39,14 @@ export const useNotifications = () => {
     await clearAllNotificationsMutation.mutateAsync();
   }, [clearAllNotificationsMutation]);
 
+  const snoozeNotification = useCallback(async (notificationId: string, duration: number) => {
+    await snoozeMutation.mutateAsync({ notificationId, duration });
+  }, [snoozeMutation]);
+
+  const markAsDone = useCallback(async (notificationId: string) => {
+    await markAsDoneMutation.mutateAsync(notificationId);
+  }, [markAsDoneMutation]);
+
   const loadNotifications = useCallback(async () => {
     queryClient.invalidateQueries({ queryKey: ['notifications'] });
   }, [queryClient]);
@@ -50,6 +60,8 @@ export const useNotifications = () => {
     addNotification,
     markAllAsRead,
     clearAllNotifications,
+    snoozeNotification,
+    markAsDone,
     loadNotifications
   };
 };

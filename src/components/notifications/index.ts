@@ -1,4 +1,3 @@
-
 export { NotificationIcon } from './NotificationIcon';
 export { NotificationItem } from './NotificationItem';
 export { NotificationPopoverContent } from './NotificationPopoverContent';
@@ -7,3 +6,7 @@ export { NotificationEmptyState } from './NotificationEmptyState';
 export { NotificationActions } from './NotificationActions';
 export { NotificationListItem } from './NotificationListItem';
 export { NotificationTabs } from './NotificationTabs';
+export { RichNotificationCard } from './RichNotificationCard';
+export { NotificationActionButtons } from './NotificationActionButtons';
+export { NotificationImage } from './NotificationImage';
+export { NotificationChart } from './NotificationChart';
