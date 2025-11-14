@@ -1,54 +1,11 @@
 import React from "react";
-import { MapPin, Sun, Cloud, CloudRain, CloudSun, Snowflake, Wind, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { useTranslation } from 'react-i18next';
 import { detectWeatherCondition } from '@/utils/weatherTranslation';
-
-function pickIcon(text?: string | null) {
-  const t = (text || "").toLowerCase();
-  
-  // Rain patterns - include drizzle, light rain, heavy rain
-  if (/lluvia|llovizna|garúa|rain|drizzle|chubasco|aguacero/.test(t)) return CloudRain;
-  
-  // Snow patterns
-  if (/nieve|snow|nevada/.test(t)) return Snowflake;
-  
-  // Wind patterns
-  if (/viento|wind|ventoso|windy/.test(t)) return Wind;
-  
-  // Cloudy patterns
-  if (/nubes|nubla|cloud|overcast/.test(t)) return Cloud;
-  
-  // Partly cloudy patterns
-  if (/parcial|intervalos|partly|soleado con nubes/.test(t)) return CloudSun;
-  
-  // Clear/sunny is the default
-  return Sun;
-}
-
-function pickIconColor(text?: string | null) {
-  const t = (text || "").toLowerCase();
-  
-  // Rain patterns - vivid blue
-  if (/lluvia|llovizna|garúa|rain|drizzle|chubasco|aguacero/.test(t)) return "text-sky-600";
-  
-  // Snow patterns - icy cyan
-  if (/nieve|snow|nevada/.test(t)) return "text-cyan-300";
-  
-  // Wind patterns - slate gray
-  if (/viento|wind|ventoso|windy/.test(t)) return "text-slate-500";
-  
-  // Cloudy/overcast patterns - darker gray
-  if (/nubes|nubla|cloud|overcast|cubierto/.test(t)) return "text-slate-600";
-  
-  // Partly cloudy patterns - warm orange
-  if (/parcial|intervalos|partly|soleado con nubes/.test(t)) return "text-orange-400";
-  
-  // Clear/sunny - golden yellow
-  return "text-amber-400";
-}
+import { WeatherIcon, getWeatherIconColor } from '@/components/weather/WeatherIcon';
 
 const WeatherWidget: React.FC = () => {
   const navigate = useNavigate();
@@ -66,9 +23,9 @@ const WeatherWidget: React.FC = () => {
   console.log("🌤️ [WeatherWidget] Weather loading:", isLoading);
   console.log("🌤️ [WeatherWidget] Weather error:", error);
 
-  const TempIcon = pickIcon(weather?.conditionText);
-  const iconColor = pickIconColor(weather?.conditionText);
   const tempValue = weather?.temperatureC;
+  const iconColor = getWeatherIconColor(weather?.conditionText || '');
+  const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 20;
   
   const formatLocation = () => {
     return weatherSettings?.display_name || t('location');
@@ -100,10 +57,15 @@ const WeatherWidget: React.FC = () => {
       }}
       role="button"
       tabIndex={0}
-      className="cursor-pointer hover:opacity-80 transition-opacity group"
+      className="cursor-pointer hover:opacity-80 transition-all duration-200 group"
     >
       <div className="flex items-start gap-3">
-        <TempIcon className={`h-7 w-7 ${iconColor} flex-shrink-0`} strokeWidth={2.5} aria-hidden />
+        <WeatherIcon 
+          condition={weather?.conditionText || 'Clear'}
+          isDaytime={isDaytime}
+          size={28}
+          className={iconColor}
+        />
         
         {/* Temperature and condition grouped */}
         <div className="flex-shrink-0">

@@ -127,6 +127,35 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
+
+  /* Weather icon animations */
+  @keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  @keyframes sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    50% { transform: translateX(5px) rotate(2deg); }
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    33% { transform: translateY(-3px) translateX(2px); }
+    66% { transform: translateY(-5px) translateX(-2px); }
+  }
+
+  .animate-bounce-slow {
+    animation: bounce-slow 2s ease-in-out infinite;
+  }
+
+  .animate-sway {
+    animation: sway 3s ease-in-out infinite;
+  }
+
+  .animate-drift {
+    animation: drift 4s ease-in-out infinite;
+  }
   
   /* Better tap targets for mobile */
   .mobile-tap-target {
