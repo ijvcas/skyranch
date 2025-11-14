@@ -1,5 +1,6 @@
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
+import { imageCompressionService } from './imageCompressionService';
 
 // Helper to delay execution - critical for iOS after permission dialogs
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -73,7 +74,12 @@ class CameraService {
         throw new Error('Camera returned empty photo');
       }
       
-      return photo.dataUrl;
+      // Apply smart compression
+      console.log('📸 Applying smart compression...');
+      const compressionResult = await imageCompressionService.compressImage(photo.dataUrl);
+      console.log('✅ Compression applied:', compressionResult.reductionPercent, '% reduction');
+      
+      return compressionResult.dataUrl;
     } catch (error) {
       console.error('❌ Error taking picture:', error);
       if (error instanceof Error) {
@@ -120,7 +126,17 @@ class CameraService {
       const photo: Photo = await Promise.race([galleryPromise, timeoutPromise]) as Photo;
 
       console.log('✅ Photo selected successfully');
-      return photo.dataUrl || null;
+      
+      if (!photo.dataUrl) {
+        return null;
+      }
+      
+      // Apply smart compression
+      console.log('📸 Applying smart compression...');
+      const compressionResult = await imageCompressionService.compressImage(photo.dataUrl);
+      console.log('✅ Compression applied:', compressionResult.reductionPercent, '% reduction');
+      
+      return compressionResult.dataUrl;
     } catch (error) {
       console.error('❌ Error selecting from gallery:', error);
       if (error instanceof Error) {

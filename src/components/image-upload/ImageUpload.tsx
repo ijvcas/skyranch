@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Camera, Image as ImageIcon } from 'lucide-react';
@@ -9,6 +9,8 @@ import ImageGallery from './ImageGallery';
 import { ImageUploadProps } from './types';
 import { cameraService } from '@/services/mobile/cameraService';
 import { actionSheetService } from '@/services/mobile/actionSheetService';
+import { networkStorageService } from '@/services/mobile/networkStorageService';
+import { imageCompressionService } from '@/services/mobile/imageCompressionService';
 import { toast } from 'sonner';
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
@@ -23,16 +25,33 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [isSelectingFromGallery, setIsSelectingFromGallery] = useState(false);
+  const [compressionInfo, setCompressionInfo] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Load and display device conditions on mount
+  useEffect(() => {
+    const loadConditions = async () => {
+      const conditions = await networkStorageService.getDeviceConditions();
+      const description = networkStorageService.getConditionsDescription(conditions);
+      setCompressionInfo(description);
+    };
+    loadConditions();
+  }, []);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const result = e.target?.result as string;
-        setPreviewUrl(result);
-        onImageChange(result);
+        
+        // Apply compression
+        const compressionResult = await imageCompressionService.compressImage(result);
+        const tier = imageCompressionService.getTierDescription(compressionResult.tier);
+        setCompressionInfo(`${tier} - ${compressionResult.reductionPercent}% reducido`);
+        
+        setPreviewUrl(compressionResult.dataUrl);
+        onImageChange(compressionResult.dataUrl);
       };
       reader.readAsDataURL(file);
     }
@@ -134,6 +153,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div className="space-y-4">
+      {compressionInfo && (
+        <div className="text-xs text-muted-foreground text-center py-1">
+          {compressionInfo}
+        </div>
+      )}
+      
       {previewUrl ? (
         <ImagePreview
           imageUrl={previewUrl}
