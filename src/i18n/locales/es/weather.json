@@ -44,6 +44,11 @@
     "strongWind": "Viento fuerte — asegura cobertizos y estructuras.",
     "extremeHeat": "Calor extremo — provee sombra y agua abundante al ganado.",
     "belowZero": "Temperaturas bajo cero — protege al ganado del frío.",
-    "heavyRain": "Lluvia intensa — mueve el ganado a refugio cubierto."
+    "heavyRain": "Lluvia intensa — mueve el ganado a refugio cubierto.",
+    "moderateWind": "Condiciones de viento moderado — monitorea el ganado y asegura objetos sueltos.",
+    "highTemp": "Temperaturas altas — asegura suministro adecuado de agua para los animales.",
+    "coldWeather": "Clima frío esperado — prepara refugios para el ganado.",
+    "rainLikely": "Lluvia probable — planifica actividades bajo techo y revisa sistemas de drenaje.",
+    "goodDay": "Buen día para actividades agrícolas al aire libre"
   }
 }
