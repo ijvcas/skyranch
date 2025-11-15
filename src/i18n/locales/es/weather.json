@@ -13,11 +13,13 @@
     "extendedTitle": "Pronóstico Extendido",
     "nextDays": "Próximos 10 días",
     "next5Days": "Próximos 5 días",
+    "next12Hours": "Próximas 12 horas",
     "hourly": "Próximas 48 Horas",
     "hourlyForecast": "Pronóstico por Hora",
     "daily": "Pronóstico de 10 Días",
     "next10Days": "Próximos 10 Días",
     "current": "Condiciones Actuales",
+    "now": "Ahora",
     "recommendations": "Recomendaciones Inteligentes",
     "recommendationsTitle": "Recomendaciones",
     "temperature": "Tendencia de Temperatura",
@@ -28,6 +30,7 @@
     "wind": "Viento",
     "rain": "Lluvia",
     "min": "Mín",
+    "max": "Máx",
     "today": "Hoy",
     "tomorrow": "Mañana",
     "delayFieldWork": "Posponer Trabajo de Campo",
@@ -37,6 +40,10 @@
     "tempsBelowZero": "Temperaturas bajo cero esperadas el",
     "ensureShelters": "Asegure refugios.",
     "perfectWeather": "Clima perfecto por",
-    "daysFrom": "días desde"
+    "daysFrom": "días desde",
+    "strongWind": "Viento fuerte — asegura cobertizos y estructuras.",
+    "extremeHeat": "Calor extremo — provee sombra y agua abundante al ganado.",
+    "belowZero": "Temperaturas bajo cero — protege al ganado del frío.",
+    "heavyRain": "Lluvia intensa — mueve el ganado a refugio cubierto."
   }
 }

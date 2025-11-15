@@ -13,11 +13,13 @@
     "extendedTitle": "Previsão Estendida",
     "nextDays": "Próximos 10 dias",
     "next5Days": "Próximos 5 dias",
+    "next12Hours": "Próximas 12 horas",
     "hourly": "Próximas 48 Horas",
     "hourlyForecast": "Previsão por Hora",
     "daily": "Previsão de 10 Dias",
     "next10Days": "Próximos 10 Dias",
     "current": "Condições Atuais",
+    "now": "Agora",
     "recommendations": "Recomendações Inteligentes",
     "recommendationsTitle": "Recomendações",
     "temperature": "Tendência de Temperatura",
@@ -28,6 +30,7 @@
     "wind": "Vento",
     "rain": "Chuva",
     "min": "Mín",
+    "max": "Máx",
     "today": "Hoje",
     "tomorrow": "Amanhã",
     "delayFieldWork": "Adiar Trabalho de Campo",
@@ -37,6 +40,10 @@
     "tempsBelowZero": "Temperaturas abaixo de zero esperadas em",
     "ensureShelters": "Garanta abrigos.",
     "perfectWeather": "Clima perfeito por",
-    "daysFrom": "dias a partir de"
+    "daysFrom": "dias a partir de",
+    "strongWind": "Vento forte — proteja abrigos e estruturas.",
+    "extremeHeat": "Calor extremo — forneça sombra e água abundante ao gado.",
+    "belowZero": "Temperaturas abaixo de zero — proteja o gado do frio.",
+    "heavyRain": "Chuva intensa — mova o gado para abrigo coberto."
   }
 }

@@ -13,11 +13,13 @@
     "extendedTitle": "Prévisions Étendues",
     "nextDays": "Prochains 10 jours",
     "next5Days": "Prochains 5 jours",
+    "next12Hours": "Prochaines 12 heures",
     "hourly": "Prochaines 48 Heures",
     "hourlyForecast": "Prévisions Horaires",
     "daily": "Prévisions 10 Jours",
     "next10Days": "Prochains 10 Jours",
     "current": "Conditions Actuelles",
+    "now": "Maintenant",
     "recommendations": "Recommandations Intelligentes",
     "recommendationsTitle": "Recommandations",
     "temperature": "Tendance de Température",
@@ -28,6 +30,7 @@
     "wind": "Vent",
     "rain": "Pluie",
     "min": "Min",
+    "max": "Max",
     "today": "Aujourd'hui",
     "tomorrow": "Demain",
     "delayFieldWork": "Reporter Travaux Terrain",
@@ -37,6 +40,10 @@
     "tempsBelowZero": "Températures sous zéro attendues le",
     "ensureShelters": "Assurez les abris.",
     "perfectWeather": "Temps parfait pendant",
-    "daysFrom": "jours à partir du"
+    "daysFrom": "jours à partir du",
+    "strongWind": "Vent fort — sécurisez les abris et structures.",
+    "extremeHeat": "Chaleur extrême — fournissez ombre et eau abondante au bétail.",
+    "belowZero": "Températures sous zéro — protégez le bétail du froid.",
+    "heavyRain": "Pluie intense — déplacez le bétail vers un abri couvert."
   }
 }

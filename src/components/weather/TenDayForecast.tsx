@@ -1,5 +1,6 @@
 import { WiCloud, WiRain, WiDaySunny, WiSnow, WiCloudy, WiThunderstorm } from "react-icons/wi";
 import { DailyForecast } from "@/hooks/useWeatherForecast";
+import { useTranslation } from "react-i18next";
 
 interface TenDayForecastProps {
   data: DailyForecast[];
@@ -8,35 +9,41 @@ interface TenDayForecastProps {
 const getWeatherIcon = (condition: string) => {
   const conditionLower = condition.toLowerCase();
   
-  // Rain
+  // Rain/Drizzle
   if (conditionLower.includes("rain") || conditionLower.includes("lluvia") || 
       conditionLower.includes("drizzle") || conditionLower.includes("llovizna") ||
-      conditionLower.includes("shower") || conditionLower.includes("chubasco")) {
+      conditionLower.includes("shower") || conditionLower.includes("chubasco") ||
+      conditionLower.includes("pluie") || conditionLower.includes("chuva")) {
     return <WiRain className="weather-day-icon" />;
   }
   
   // Storm
   if (conditionLower.includes("storm") || conditionLower.includes("tormenta") ||
-      conditionLower.includes("thunder") || conditionLower.includes("trueno")) {
+      conditionLower.includes("thunder") || conditionLower.includes("trueno") ||
+      conditionLower.includes("orage") || conditionLower.includes("tempestade")) {
     return <WiThunderstorm className="weather-day-icon" />;
   }
   
   // Snow
   if (conditionLower.includes("snow") || conditionLower.includes("nieve") ||
-      conditionLower.includes("sleet") || conditionLower.includes("aguanieve")) {
+      conditionLower.includes("sleet") || conditionLower.includes("aguanieve") ||
+      conditionLower.includes("neige") || conditionLower.includes("neve")) {
     return <WiSnow className="weather-day-icon" />;
   }
   
   // Cloudy (including partial/overcast)
   if (conditionLower.includes("cloud") || conditionLower.includes("nublado") ||
       conditionLower.includes("nube") || conditionLower.includes("overcast") ||
-      conditionLower.includes("encapotado") || conditionLower.includes("parcialmente")) {
+      conditionLower.includes("encapotado") || conditionLower.includes("parcialmente") ||
+      conditionLower.includes("nuageux") || conditionLower.includes("nublado") ||
+      conditionLower.includes("partiellement") || conditionLower.includes("parcialmente")) {
     return <WiCloudy className="weather-day-icon" />;
   }
   
   // Sunny/Clear
   if (conditionLower.includes("sunny") || conditionLower.includes("soleado") ||
-      conditionLower.includes("clear") || conditionLower.includes("despejado")) {
+      conditionLower.includes("clear") || conditionLower.includes("despejado") ||
+      conditionLower.includes("ensoleillé") || conditionLower.includes("limpo")) {
     return <WiDaySunny className="weather-day-icon" />;
   }
   
@@ -45,16 +52,18 @@ const getWeatherIcon = (condition: string) => {
 };
 
 export default function TenDayForecast({ data }: TenDayForecastProps) {
+  const { t, i18n } = useTranslation('weather');
+  
   return (
     <div className="weather-ten-day">
-      <h3 className="weather-section-title">Próximos 10 días</h3>
+      <h3 className="weather-section-title">{t('forecast.nextDays')}</h3>
       <div className="weather-frosted-card">
         {data.slice(0, 10).map((day, index) => {
           const date = new Date(day.date);
           const dayName = index === 0 
-            ? "Hoy" 
-            : date.toLocaleDateString("es-ES", { weekday: "short" }).charAt(0).toUpperCase() + 
-              date.toLocaleDateString("es-ES", { weekday: "short" }).slice(1);
+            ? t('forecast.today')
+            : date.toLocaleDateString(i18n.language, { weekday: "short" }).charAt(0).toUpperCase() + 
+              date.toLocaleDateString(i18n.language, { weekday: "short" }).slice(1);
           
           return (
             <div key={day.date} className="weather-day-row">
