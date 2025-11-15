@@ -5,6 +5,8 @@ import { ArrowLeft } from 'lucide-react';
 import { useWeatherSettings } from '@/hooks/useWeatherSettings';
 import { useWeatherForecast } from '@/hooks/useWeatherForecast';
 import { WeatherIcon } from '@/components/weather/WeatherIcon';
+import { HourlyForecast } from '@/components/weather/HourlyForecast';
+import { ForecastChart } from '@/components/weather/ForecastChart';
 import { detectWeatherCondition } from '@/utils/weatherTranslation';
 
 const WeatherForecast = () => {
@@ -38,6 +40,16 @@ const WeatherForecast = () => {
 
   const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 20;
 
+  // Prepare chart data from hourly forecast
+  const precipitationChartData = forecast?.hourly?.slice(0, 24).map((hour) => ({
+    hour: new Date(hour.timestamp).getHours().toString().padStart(2, '0'),
+    value: hour.precipitationChance || 0
+  })) || [];
+
+  const temperatureChartData = forecast?.hourly?.slice(0, 24).map((hour) => ({
+    hour: new Date(hour.timestamp).getHours().toString().padStart(2, '0'),
+    value: Math.round(hour.temperatureC)
+  })) || [];
 
   // Loading state
   if (isLoading) {
@@ -103,42 +115,29 @@ const WeatherForecast = () => {
         </div>
 
         {/* Content Cards */}
-        <div className="px-4 space-y-4 pb-safe pb-8">
-          {/* Hourly Forecast */}
-          <div className="bg-white/20 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 border border-white/30 dark:border-slate-700/50">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-white/70 dark:text-foreground/70 mb-3 font-semibold">
-              <span className="text-sm">🕐</span>
-              <span>HOURLY FORECAST</span>
-            </div>
-            <div className="border-t border-white/20 dark:border-slate-700/50 pt-3">
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                {forecast.hourly.slice(0, 24).map((hour, idx) => {
-                  const hourTime = formatHour(hour.timestamp);
-                  return (
-                    <div key={idx} className="flex flex-col items-center min-w-[50px] text-white dark:text-foreground">
-                      <div className="text-sm font-medium mb-2 opacity-90">
-                        {hourTime}
-                      </div>
-                      <WeatherIcon 
-                        condition={hour.conditionText}
-                        isDaytime={isHourDaytime(hour.timestamp)}
-                        size={36}
-                        className="text-white dark:text-foreground mb-2"
-                      />
-                      {hour.precipitationChance > 0 && (
-                        <div className="text-cyan-400 text-sm font-semibold mb-1">
-                          {hour.precipitationChance}%
-                        </div>
-                      )}
-                      <div className="text-lg font-medium">
-                        {hour.temperatureC}°
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+        <div className="px-4 space-y-6 pb-safe pb-8">
+          {/* Hourly Forecast - Horizontal Scroll */}
+          {forecast?.hourly && forecast.hourly.length > 0 && (
+            <HourlyForecast 
+              hourlyData={forecast.hourly}
+            />
+          )}
+
+          {/* Precipitation Chart - 24 Hours */}
+          {precipitationChartData.length > 0 && (
+            <ForecastChart
+              data={precipitationChartData}
+              type="precipitation"
+            />
+          )}
+
+          {/* Temperature Chart - 24 Hours */}
+          {temperatureChartData.length > 0 && (
+            <ForecastChart
+              data={temperatureChartData}
+              type="temperature"
+            />
+          )}
 
           {/* 10-Day Forecast */}
           <div className="bg-white/20 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 border border-white/30 dark:border-slate-700/50">
