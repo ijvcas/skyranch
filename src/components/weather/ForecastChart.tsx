@@ -49,10 +49,10 @@ export default function ForecastChart({ data, type, className }: ForecastChartPr
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="hsl(var(--chart-2))"
+                stroke="#FFD700"
                 strokeWidth={3}
-                dot={false}
-                fill="url(#colorTemp)"
+                dot={{ fill: '#FFD700', r: 4 }}
+                activeDot={{ r: 6 }}
               />
             </LineChart>
           ) : (
@@ -69,7 +69,7 @@ export default function ForecastChart({ data, type, className }: ForecastChartPr
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="hsl(var(--chart-1))"
+                stroke="#87CEEB"
                 strokeWidth={3}
                 fill="url(#colorPrecip)"
               />

@@ -14,27 +14,27 @@ export default function CurrentConditions({ windKph, humidity, precipitationChan
   const { t } = useTranslation();
   
   return (
-    <div className="weather-frosted-card">
-      <div className="weather-detail-grid">
+    <div className="weather-frosted-card" style={{ padding: '12px 16px' }}>
+      <div className="weather-detail-grid" style={{ gap: '12px' }}>
         <div className="weather-detail-item">
-          <WiStrongWind className="weather-detail-icon" />
-          <h4 className="weather-detail-label">{t('weather.forecast.wind')}</h4>
-          <p className="weather-detail-value">{windKph !== null ? `${Math.round(windKph)} km/h` : "N/A"}</p>
+          <WiStrongWind style={{ fontSize: '32px', color: 'white' }} />
+          <h4 style={{ fontSize: '11px', opacity: 0.7, margin: '4px 0 2px' }}>{t('weather.forecast.wind')}</h4>
+          <p style={{ fontSize: '18px', fontWeight: '600' }}>{windKph !== null ? `${Math.round(windKph)} km/h` : "N/A"}</p>
         </div>
         <div className="weather-detail-item">
-          <WiHumidity className="weather-detail-icon" />
-          <h4 className="weather-detail-label">{t('weather.forecast.humidity')}</h4>
-          <p className="weather-detail-value">{humidity !== null ? `${humidity}%` : "N/A"}</p>
+          <WiHumidity style={{ fontSize: '32px', color: 'white' }} />
+          <h4 style={{ fontSize: '11px', opacity: 0.7, margin: '4px 0 2px' }}>{t('weather.forecast.humidity')}</h4>
+          <p style={{ fontSize: '18px', fontWeight: '600' }}>{humidity !== null ? `${humidity}%` : "N/A"}</p>
         </div>
         <div className="weather-detail-item">
-          <WiRaindrop className="weather-detail-icon" />
-          <h4 className="weather-detail-label">{t('weather.forecast.rain')}</h4>
-          <p className="weather-detail-value">{precipitationChance !== null ? `${precipitationChance}%` : "N/A"}</p>
+          <WiRaindrop style={{ fontSize: '32px', color: 'white' }} />
+          <h4 style={{ fontSize: '11px', opacity: 0.7, margin: '4px 0 2px' }}>{t('weather.forecast.rain')}</h4>
+          <p style={{ fontSize: '18px', fontWeight: '600' }}>{precipitationChance !== null ? `${precipitationChance}%` : "N/A"}</p>
         </div>
         <div className="weather-detail-item">
-          <WiThermometer className="weather-detail-icon" />
-          <h4 className="weather-detail-label">{t('weather.forecast.min')}/Max</h4>
-          <p className="weather-detail-value">
+          <WiThermometer style={{ fontSize: '32px', color: 'white' }} />
+          <h4 style={{ fontSize: '11px', opacity: 0.7, margin: '4px 0 2px' }}>{t('weather.forecast.min')}/Max</h4>
+          <p style={{ fontSize: '18px', fontWeight: '600' }}>
             {high && low ? `${Math.round(low)}° / ${Math.round(high)}°` : "N/A"}
           </p>
         </div>
