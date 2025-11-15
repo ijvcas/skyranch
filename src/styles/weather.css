@@ -37,11 +37,19 @@
   left: 1rem;
   top: 1rem;
   color: white !important;
-  z-index: 10;
+  z-index: 50;
+  min-width: 44px;
+  min-height: 44px;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .weather-back-button:hover {
   background: rgba(255,255,255,0.2) !important;
+}
+
+.weather-back-button:active {
+  background: rgba(255,255,255,0.3) !important;
 }
 
 .weather-location {

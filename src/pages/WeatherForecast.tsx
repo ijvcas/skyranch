@@ -107,10 +107,15 @@ export default function WeatherForecast() {
       {/* Header with gradient background */}
       <header className="weather-header">
         <Button
-          onClick={() => navigate(-1)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate(-1);
+          }}
           variant="ghost"
           size="icon"
           className="weather-back-button"
+          aria-label="Go back"
         >
           <ArrowLeft className="h-6 w-6" />
         </Button>
