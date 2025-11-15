@@ -2,7 +2,7 @@
 
 .weather-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, hsl(var(--chart-1)) 0%, hsl(var(--primary)) 100%);
+  background: linear-gradient(180deg, #4A90E2 0%, #2E5C8A 100%);
   color: white;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
 }
@@ -10,7 +10,7 @@
 /* Loading Screen */
 .weather-loading-screen {
   min-height: 100vh;
-  background: linear-gradient(180deg, hsl(var(--chart-1)) 0%, hsl(var(--primary)) 100%);
+  background: linear-gradient(180deg, #4A90E2 0%, #2E5C8A 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
