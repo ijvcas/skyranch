@@ -12,6 +12,7 @@
     "title": "Weather Forecast",
     "extendedTitle": "Extended Forecast",
     "nextDays": "Next 10 Days",
+    "next5Days": "Next 5 Days",
     "hourly": "Next 48 Hours",
     "hourlyForecast": "Hourly Forecast",
     "daily": "10-Day Forecast",

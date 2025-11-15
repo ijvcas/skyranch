@@ -12,6 +12,7 @@
     "title": "Pronóstico del Tiempo",
     "extendedTitle": "Pronóstico Extendido",
     "nextDays": "Próximos 10 días",
+    "next5Days": "Próximos 5 días",
     "hourly": "Próximas 48 Horas",
     "hourlyForecast": "Pronóstico por Hora",
     "daily": "Pronóstico de 10 Días",

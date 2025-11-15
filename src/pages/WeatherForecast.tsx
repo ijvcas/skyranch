@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useWeatherForecast } from "@/hooks/useWeatherForecast";
+import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { WiDaySunny, WiCloud, WiRain, WiSnow, WiCloudy, WiThunderstorm } from "react-icons/wi";
 import CurrentConditions from "@/components/weather/CurrentConditions";
 import Recommendations from "@/components/weather/Recommendations";
@@ -33,13 +34,14 @@ const getWeatherIcon = (condition: string, size: number = 120) => {
 
 export default function WeatherForecast() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: settings } = useWeatherSettings();
+  const { data: currentWeather } = useFarmWeather(settings?.lat, settings?.lng, settings?.language || i18n.language);
   const { data: forecast, isLoading } = useWeatherForecast(
     settings?.lat,
     settings?.lng,
-    'es',
-    10
+    settings?.language || i18n.language,
+    5
   );
 
   const formatHour = (timestamp: string) => {
@@ -85,9 +87,13 @@ export default function WeatherForecast() {
   }
 
   const today = forecast.daily[0];
-  const locationName = settings?.display_name || forecast.location?.name || 'Mi Ubicación';
+  const locationName = settings?.display_name || forecast.location?.name || t('weather.noLocation');
   const dailyHigh = today?.maxTempC || 0;
   const dailyLow = today?.minTempC || 0;
+  
+  // Use current weather for main display
+  const displayTemp = currentWeather?.temperatureC ?? today?.maxTempC ?? 0;
+  const displayCondition = currentWeather?.conditionText ?? today?.conditionText ?? '';
 
   return (
     <div className="weather-page">
@@ -104,10 +110,10 @@ export default function WeatherForecast() {
         
         <h2 className="weather-location">{locationName}</h2>
         <div className="weather-main-icon">
-          {getWeatherIcon(today.conditionText)}
+          {getWeatherIcon(displayCondition)}
         </div>
-        <h1 className="weather-main-temp">{Math.round(today.maxTempC)}°</h1>
-        <p className="weather-condition">{today.conditionText}</p>
+        <h1 className="weather-main-temp">{Math.round(displayTemp)}°</h1>
+        <p className="weather-condition">{displayCondition}</p>
         <p className="weather-high-low">
           H: {Math.round(dailyHigh)}°  L: {Math.round(dailyLow)}°
         </p>
@@ -117,10 +123,10 @@ export default function WeatherForecast() {
       <div className="weather-content">
         {/* Current Conditions Card */}
         <CurrentConditions
-          windKph={null}
-          humidity={null}
-          precipitationChance={today.precipitationChance}
-          temperatureC={today.maxTempC}
+          windKph={currentWeather?.windKph ?? null}
+          humidity={currentWeather?.humidity ?? null}
+          precipitationChance={currentWeather?.precipitationChance ?? null}
+          temperatureC={displayTemp}
           high={dailyHigh}
           low={dailyLow}
         />
@@ -153,7 +159,7 @@ export default function WeatherForecast() {
           />
         )}
 
-        {/* 10-Day Forecast */}
+        {/* 5-Day Forecast */}
         <TenDayForecast data={forecast.daily} />
       </div>
     </div>
