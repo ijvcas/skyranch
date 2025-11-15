@@ -6,6 +6,7 @@ import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { useTranslation } from 'react-i18next';
 import { detectWeatherCondition } from '@/utils/weatherTranslation';
 import { WeatherIcon, getWeatherIconColor } from '@/components/weather/WeatherIcon';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const WeatherWidget: React.FC = () => {
   const navigate = useNavigate();
@@ -41,14 +42,32 @@ const WeatherWidget: React.FC = () => {
     return t(`weatherConditions:${conditionKey}`);
   };
 
-  const handleClick = () => {
+  const handleClick = async (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log('🌤️ [WeatherWidget] Click detected - navigating to forecast');
+    
+    // Haptic feedback for native mobile
+    try {
+      await Haptics.impact({ style: ImpactStyle.Light });
+    } catch (err) {
+      // Haptics not available (web)
+    }
+    
     navigate('/weather/forecast');
   };
 
   return (
-    <section 
+    <div 
       aria-label="Clima actual"
       onClick={handleClick}
+      onTouchEnd={(e) => {
+        e.preventDefault();
+        handleClick(e);
+      }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -57,7 +76,12 @@ const WeatherWidget: React.FC = () => {
       }}
       role="button"
       tabIndex={0}
-      className="cursor-pointer hover:opacity-80 transition-all duration-200 group"
+      className="cursor-pointer hover:opacity-80 transition-all duration-200 group active:opacity-60"
+      style={{ 
+        WebkitTapHighlightColor: 'transparent',
+        touchAction: 'manipulation',
+        userSelect: 'none'
+      }}
     >
       <div className="flex items-start gap-3">
         <WeatherIcon 
@@ -79,7 +103,7 @@ const WeatherWidget: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
