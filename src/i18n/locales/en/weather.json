@@ -49,6 +49,12 @@
     "highTemp": "High temperatures — ensure adequate water supply for animals.",
     "coldWeather": "Cold weather expected — prepare shelters for livestock.",
     "rainLikely": "Rain likely — plan indoor activities and check drainage systems.",
-    "goodDay": "Good day for outdoor farm activities"
+    "goodDay": "Good day for outdoor farm activities",
+    "extremeWeatherDetected": "Extreme weather detected in next 10 days",
+    "heavyRainOn": "Heavy rain on {{date}}",
+    "extremeHeatOn": "Extreme heat on {{date}}",
+    "freezingOn": "Freezing temperatures on {{date}}",
+    "strongWindOn": "Strong winds on {{date}}",
+    "planAccordingly": "Plan your activities accordingly"
   }
 }
