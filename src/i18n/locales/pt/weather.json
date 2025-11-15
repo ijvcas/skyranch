@@ -44,6 +44,11 @@
     "strongWind": "Vento forte — proteja abrigos e estruturas.",
     "extremeHeat": "Calor extremo — forneça sombra e água abundante ao gado.",
     "belowZero": "Temperaturas abaixo de zero — proteja o gado do frio.",
-    "heavyRain": "Chuva intensa — mova o gado para abrigo coberto."
+    "heavyRain": "Chuva intensa — mova o gado para abrigo coberto.",
+    "moderateWind": "Condições de vento moderado — monitore o gado e proteja objetos soltos.",
+    "highTemp": "Temperaturas altas — garanta fornecimento adequado de água para os animais.",
+    "coldWeather": "Tempo frio esperado — prepare abrigos para o gado.",
+    "rainLikely": "Chuva provável — planeje atividades internas e verifique sistemas de drenagem.",
+    "goodDay": "Bom dia para atividades agrícolas ao ar livre"
   }
 }

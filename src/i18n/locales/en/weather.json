@@ -44,6 +44,11 @@
     "strongWind": "Strong wind — secure shelters and structures.",
     "extremeHeat": "Extreme heat — provide shade and abundant water to livestock.",
     "belowZero": "Below zero temperatures — protect livestock from cold.",
-    "heavyRain": "Heavy rain — move livestock to covered shelter."
+    "heavyRain": "Heavy rain — move livestock to covered shelter.",
+    "moderateWind": "Moderate wind conditions — monitor livestock and secure loose items.",
+    "highTemp": "High temperatures — ensure adequate water supply for animals.",
+    "coldWeather": "Cold weather expected — prepare shelters for livestock.",
+    "rainLikely": "Rain likely — plan indoor activities and check drainage systems.",
+    "goodDay": "Good day for outdoor farm activities"
   }
 }

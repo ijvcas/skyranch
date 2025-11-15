@@ -26,24 +26,22 @@ export default function Recommendations({ windKph, temperatureC, precipitationCh
   
   // Moderate weather warnings
   if (windKph && windKph > 25 && windKph <= 40) {
-    tips.push(`🌬️ Moderate wind conditions — monitor livestock and secure loose items.`);
+    tips.push(`🌬️ ${t('forecast.moderateWind')}`);
   }
   if (temperatureC && temperatureC > 28 && temperatureC <= 32) {
-    tips.push(`☀️ High temperatures — ensure adequate water supply for animals.`);
+    tips.push(`☀️ ${t('forecast.highTemp')}`);
   }
   if (temperatureC && temperatureC < 5 && temperatureC >= 0) {
-    tips.push(`🥶 Cold weather expected — prepare shelters for livestock.`);
+    tips.push(`🥶 ${t('forecast.coldWeather')}`);
   }
   if (precipitationChance && precipitationChance > 50 && precipitationChance <= 70) {
-    tips.push(`🌧️ Rain likely — plan indoor activities and check drainage systems.`);
+    tips.push(`🌧️ ${t('forecast.rainLikely')}`);
   }
   
-  // Ideal conditions message
+  // Only show ideal conditions if NO warnings
   if (tips.length === 0) {
-    tips.push(`✅ ${t('forecast.idealConditions')} — Good day for outdoor farm activities.`);
+    tips.push(`✅ ${t('forecast.idealConditions')} — ${t('forecast.goodDay')}`);
   }
-  
-  if (tips.length === 0) return null;
   
   return (
     <div className="weather-recommendations">

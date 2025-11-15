@@ -44,6 +44,11 @@
     "strongWind": "Vent fort — sécurisez les abris et structures.",
     "extremeHeat": "Chaleur extrême — fournissez ombre et eau abondante au bétail.",
     "belowZero": "Températures sous zéro — protégez le bétail du froid.",
-    "heavyRain": "Pluie intense — déplacez le bétail vers un abri couvert."
+    "heavyRain": "Pluie intense — déplacez le bétail vers un abri couvert.",
+    "moderateWind": "Conditions de vent modéré — surveillez le bétail et sécurisez les objets.",
+    "highTemp": "Températures élevées — assurez un approvisionnement en eau adéquat pour les animaux.",
+    "coldWeather": "Temps froid attendu — préparez les abris pour le bétail.",
+    "rainLikely": "Pluie probable — planifiez des activités intérieures et vérifiez les systèmes de drainage.",
+    "goodDay": "Bonne journée pour les activités agricoles en plein air"
   }
 }
