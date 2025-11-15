@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface HourlyForecast {
+export interface HourlyForecast {
   timestamp: string;
   temperatureC: number;
   temperatureF: number;
@@ -12,7 +12,7 @@ interface HourlyForecast {
   precipitationMm: number;
 }
 
-interface DailyForecast {
+export interface DailyForecast {
   date: string;
   maxTempC: number;
   minTempC: number;
