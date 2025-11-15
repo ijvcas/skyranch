@@ -41,7 +41,7 @@ export default function WeatherForecast() {
     settings?.lat,
     settings?.lng,
     settings?.language || i18n.language,
-    5
+    10
   );
 
   const formatHour = (timestamp: string) => {
@@ -159,7 +159,7 @@ export default function WeatherForecast() {
           />
         )}
 
-        {/* 5-Day Forecast */}
+        {/* 10-Day Forecast */}
         <TenDayForecast data={forecast.daily} />
       </div>
     </div>
