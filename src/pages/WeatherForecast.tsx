@@ -136,8 +136,8 @@ export default function WeatherForecast() {
 
         {/* Recommendations */}
         <Recommendations
-          windKph={null}
-          temperatureC={today.maxTempC}
+          windKph={currentWeather?.windKph ?? null}
+          temperatureC={currentWeather?.temperatureC ?? today.maxTempC}
           precipitationChance={today.precipitationChance}
         />
 
@@ -162,7 +162,7 @@ export default function WeatherForecast() {
           />
         )}
 
-        {/* 10-Day Forecast */}
+        {/* 5-Day Forecast */}
         <TenDayForecast data={forecast.daily} />
       </div>
     </div>
