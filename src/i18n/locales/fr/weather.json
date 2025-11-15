@@ -49,6 +49,12 @@
     "highTemp": "Températures élevées — assurez un approvisionnement en eau adéquat pour les animaux.",
     "coldWeather": "Temps froid attendu — préparez les abris pour le bétail.",
     "rainLikely": "Pluie probable — planifiez des activités intérieures et vérifiez les systèmes de drainage.",
-    "goodDay": "Bonne journée pour les activités agricoles en plein air"
+    "goodDay": "Bonne journée pour les activités agricoles en plein air",
+    "extremeWeatherDetected": "Conditions météorologiques extrêmes détectées dans les 10 prochains jours",
+    "heavyRainOn": "Fortes pluies le {{date}}",
+    "extremeHeatOn": "Chaleur extrême le {{date}}",
+    "freezingOn": "Températures glaciales le {{date}}",
+    "strongWindOn": "Vents forts le {{date}}",
+    "planAccordingly": "Planifiez vos activités en conséquence"
   }
 }

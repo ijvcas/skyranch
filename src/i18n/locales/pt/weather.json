@@ -49,6 +49,12 @@
     "highTemp": "Temperaturas altas — garanta fornecimento adequado de água para os animais.",
     "coldWeather": "Tempo frio esperado — prepare abrigos para o gado.",
     "rainLikely": "Chuva provável — planeje atividades internas e verifique sistemas de drenagem.",
-    "goodDay": "Bom dia para atividades agrícolas ao ar livre"
+    "goodDay": "Bom dia para atividades agrícolas ao ar livre",
+    "extremeWeatherDetected": "Clima extremo detectado nos próximos 10 dias",
+    "heavyRainOn": "Chuva forte em {{date}}",
+    "extremeHeatOn": "Calor extremo em {{date}}",
+    "freezingOn": "Temperaturas abaixo de zero em {{date}}",
+    "strongWindOn": "Ventos fortes em {{date}}",
+    "planAccordingly": "Planeje suas atividades adequadamente"
   }
 }

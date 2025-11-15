@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
 import { useWeatherForecast } from "@/hooks/useWeatherForecast";
 import { useFarmWeather } from "@/hooks/useFarmWeather";
+import { useWeatherNotifications } from "@/hooks/useWeatherNotifications";
 import { WiDaySunny, WiCloud, WiRain, WiSnow, WiCloudy, WiThunderstorm } from "react-icons/wi";
 import CurrentConditions from "@/components/weather/CurrentConditions";
 import Recommendations from "@/components/weather/Recommendations";
@@ -46,6 +47,9 @@ export default function WeatherForecast() {
     settings?.language || i18n.language,
     10
   );
+
+  // Enable weather notifications for extreme conditions
+  useWeatherNotifications(forecast?.daily, !!forecast?.daily);
 
   const formatHour = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -138,7 +142,8 @@ export default function WeatherForecast() {
         <Recommendations
           windKph={currentWeather?.windKph ?? null}
           temperatureC={currentWeather?.temperatureC ?? today.maxTempC}
-          precipitationChance={today.precipitationChance}
+          precipitationChance={currentWeather?.precipitationChance ?? null}
+          dailyForecast={forecast.daily}
         />
 
         {/* Hourly Forecast */}
