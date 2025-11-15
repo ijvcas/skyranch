@@ -10,35 +10,37 @@ export default function Recommendations({ windKph, temperatureC, precipitationCh
   const { t } = useTranslation('weather');
   const tips: string[] = [];
   
-  // Critical weather alerts
-  if (windKph && windKph > 40) {
+  console.log('🔍 Recommendations data:', { windKph, temperatureC, precipitationChance });
+  
+  // Critical weather alerts (check these first)
+  if (precipitationChance !== null && precipitationChance > 70) {
+    tips.push(`💧 ${t('forecast.heavyRain')}`);
+  }
+  if (windKph !== null && windKph > 40) {
     tips.push(`⚠️ ${t('forecast.strongWind')}`);
   }
-  if (temperatureC && temperatureC > 32) {
+  if (temperatureC !== null && temperatureC > 32) {
     tips.push(`🔥 ${t('forecast.extremeHeat')}`);
   }
-  if (temperatureC && temperatureC < 0) {
+  if (temperatureC !== null && temperatureC < 0) {
     tips.push(`❄️ ${t('forecast.belowZero')}`);
-  }
-  if (precipitationChance && precipitationChance > 70) {
-    tips.push(`💧 ${t('forecast.heavyRain')}`);
   }
   
   // Moderate weather warnings
-  if (windKph && windKph > 25 && windKph <= 40) {
-    tips.push(`🌬️ ${t('forecast.moderateWind')}`);
-  }
-  if (temperatureC && temperatureC > 28 && temperatureC <= 32) {
-    tips.push(`☀️ ${t('forecast.highTemp')}`);
-  }
-  if (temperatureC && temperatureC < 5 && temperatureC >= 0) {
-    tips.push(`🥶 ${t('forecast.coldWeather')}`);
-  }
-  if (precipitationChance && precipitationChance > 50 && precipitationChance <= 70) {
+  if (precipitationChance !== null && precipitationChance > 50 && precipitationChance <= 70) {
     tips.push(`🌧️ ${t('forecast.rainLikely')}`);
   }
+  if (windKph !== null && windKph > 25 && windKph <= 40) {
+    tips.push(`🌬️ ${t('forecast.moderateWind')}`);
+  }
+  if (temperatureC !== null && temperatureC > 28 && temperatureC <= 32) {
+    tips.push(`☀️ ${t('forecast.highTemp')}`);
+  }
+  if (temperatureC !== null && temperatureC < 5 && temperatureC >= 0) {
+    tips.push(`🥶 ${t('forecast.coldWeather')}`);
+  }
   
-  // Only show ideal conditions if NO warnings
+  // Only show ideal conditions if NO warnings at all
   if (tips.length === 0) {
     tips.push(`✅ ${t('forecast.idealConditions')} — ${t('forecast.goodDay')}`);
   }
