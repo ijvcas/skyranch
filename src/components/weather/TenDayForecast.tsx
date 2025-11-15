@@ -56,9 +56,9 @@ export default function TenDayForecast({ data }: TenDayForecastProps) {
   
   return (
     <div className="weather-ten-day">
-      <h3 className="weather-section-title">{t('forecast.nextDays')}</h3>
+      <h3 className="weather-section-title">{t('forecast.next5Days')}</h3>
       <div className="weather-frosted-card">
-        {data.slice(0, 10).map((day, index) => {
+        {data.slice(0, 5).map((day, index) => {
           const date = new Date(day.date);
           const dayName = index === 0 
             ? t('forecast.today')
