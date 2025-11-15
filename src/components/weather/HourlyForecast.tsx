@@ -1,5 +1,6 @@
 import { WiCloud, WiRain, WiDaySunny, WiSnow, WiCloudy, WiThunderstorm } from "react-icons/wi";
 import { HourlyForecast as HourlyForecastType } from "@/hooks/useWeatherForecast";
+import { useTranslation } from "react-i18next";
 
 interface HourlyForecastProps {
   hourlyData: HourlyForecastType[];
@@ -8,7 +9,11 @@ interface HourlyForecastProps {
 
 const getWeatherIcon = (condition: string) => {
   const conditionLower = condition.toLowerCase();
-  if (conditionLower.includes("rain") || conditionLower.includes("lluvia")) {
+  
+  // Rain/Drizzle
+  if (conditionLower.includes("rain") || conditionLower.includes("lluvia") ||
+      conditionLower.includes("drizzle") || conditionLower.includes("llovizna") ||
+      conditionLower.includes("shower") || conditionLower.includes("chubasco")) {
     return <WiRain className="weather-hour-icon" />;
   }
   if (conditionLower.includes("storm") || conditionLower.includes("tormenta")) {
@@ -23,7 +28,7 @@ const getWeatherIcon = (condition: string) => {
   return <WiDaySunny className="weather-hour-icon" />;
 };
 
-const formatHour = (timestamp: string) => {
+const formatHour = (timestamp: string, t: any) => {
   const date = new Date(timestamp);
   const hour = date.getHours();
   const now = new Date();
@@ -31,7 +36,7 @@ const formatHour = (timestamp: string) => {
   if (date.getDate() === now.getDate() && 
       date.getMonth() === now.getMonth() && 
       hour === now.getHours()) {
-    return "Ahora";
+    return t('forecast.now');
   }
   
   if (hour === 0) return "12 AM";
@@ -41,14 +46,16 @@ const formatHour = (timestamp: string) => {
 };
 
 export default function HourlyForecast({ hourlyData, className }: HourlyForecastProps) {
+  const { t } = useTranslation('weather');
+  
   return (
     <div className={className}>
-      <h3 className="weather-section-title">Próximas 12 horas</h3>
+      <h3 className="weather-section-title">{t('forecast.next12Hours')}</h3>
       <div className="weather-hourly-scroll">
         {hourlyData.slice(0, 12).map((hour, index) => (
           <div key={index} className="weather-hour-card">
             <span className="weather-hour-time">
-              {formatHour(hour.timestamp)}
+              {formatHour(hour.timestamp, t)}
             </span>
             {getWeatherIcon(hour.conditionText)}
             <span className="weather-hour-temp">

@@ -13,11 +13,13 @@
     "extendedTitle": "Extended Forecast",
     "nextDays": "Next 10 Days",
     "next5Days": "Next 5 Days",
+    "next12Hours": "Next 12 Hours",
     "hourly": "Next 48 Hours",
     "hourlyForecast": "Hourly Forecast",
     "daily": "10-Day Forecast",
     "next10Days": "Next 10 Days",
     "current": "Current Conditions",
+    "now": "Now",
     "recommendations": "Smart Recommendations",
     "recommendationsTitle": "Recommendations",
     "temperature": "Temperature Trend",
@@ -28,6 +30,7 @@
     "wind": "Wind",
     "rain": "Rain",
     "min": "Min",
+    "max": "Max",
     "today": "Today",
     "tomorrow": "Tomorrow",
     "delayFieldWork": "Delay Field Work",
@@ -37,6 +40,10 @@
     "tempsBelowZero": "Temperatures below zero expected on",
     "ensureShelters": "Ensure shelters.",
     "perfectWeather": "Perfect weather for",
-    "daysFrom": "days from"
+    "daysFrom": "days from",
+    "strongWind": "Strong wind — secure shelters and structures.",
+    "extremeHeat": "Extreme heat — provide shade and abundant water to livestock.",
+    "belowZero": "Below zero temperatures — protect livestock from cold.",
+    "heavyRain": "Heavy rain — move livestock to covered shelter."
   }
 }

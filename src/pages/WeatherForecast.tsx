@@ -17,7 +17,10 @@ const getWeatherIcon = (condition: string, size: number = 120) => {
   const conditionLower = condition.toLowerCase();
   const style = { fontSize: size, color: "white" };
   
-  if (conditionLower.includes("rain") || conditionLower.includes("lluvia")) {
+  // Rain/Drizzle
+  if (conditionLower.includes("rain") || conditionLower.includes("lluvia") ||
+      conditionLower.includes("drizzle") || conditionLower.includes("llovizna") ||
+      conditionLower.includes("shower") || conditionLower.includes("chubasco")) {
     return <WiRain style={style} />;
   }
   if (conditionLower.includes("storm") || conditionLower.includes("tormenta")) {

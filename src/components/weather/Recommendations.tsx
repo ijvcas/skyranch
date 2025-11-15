@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface RecommendationsProps {
   windKph: number | null;
   temperatureC: number | null;
@@ -5,19 +7,20 @@ interface RecommendationsProps {
 }
 
 export default function Recommendations({ windKph, temperatureC, precipitationChance }: RecommendationsProps) {
+  const { t } = useTranslation('weather');
   const tips: string[] = [];
   
   if (windKph && windKph > 40) {
-    tips.push("⚠️ Viento fuerte — asegura cobertizos y estructuras.");
+    tips.push(`⚠️ ${t('forecast.strongWind')}`);
   }
   if (temperatureC && temperatureC > 32) {
-    tips.push("🔥 Calor extremo — provee sombra y agua abundante al ganado.");
+    tips.push(`🔥 ${t('forecast.extremeHeat')}`);
   }
   if (temperatureC && temperatureC < 0) {
-    tips.push("❄️ Temperaturas bajo cero — protege al ganado del frío.");
+    tips.push(`❄️ ${t('forecast.belowZero')}`);
   }
   if (precipitationChance && precipitationChance > 80) {
-    tips.push("💧 Lluvia intensa — mueve el ganado a refugio cubierto.");
+    tips.push(`💧 ${t('forecast.heavyRain')}`);
   }
   
   if (tips.length === 0) return null;
