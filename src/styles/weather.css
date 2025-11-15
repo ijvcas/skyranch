@@ -1,0 +1,319 @@
+/* Weather Page - iOS Weather App Style */
+
+.weather-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, hsl(var(--chart-1)) 0%, hsl(var(--primary)) 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+}
+
+/* Loading Screen */
+.weather-loading-screen {
+  min-height: 100vh;
+  background: linear-gradient(180deg, hsl(var(--chart-1)) 0%, hsl(var(--primary)) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.weather-loading-text {
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+/* Header Section */
+.weather-header {
+  position: relative;
+  padding: 4rem 2rem 3rem;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+}
+
+.weather-back-button {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  color: white !important;
+  z-index: 10;
+}
+
+.weather-back-button:hover {
+  background: rgba(255,255,255,0.2) !important;
+}
+
+.weather-location {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.weather-main-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.weather-main-temp {
+  font-size: 6rem;
+  font-weight: 200;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.weather-condition {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.weather-high-low {
+  font-size: 1.125rem;
+  font-weight: 400;
+  opacity: 0.9;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Content Container */
+.weather-content {
+  padding: 1rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Frosted Glass Cards */
+.weather-frosted-card {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Current Details Grid */
+.weather-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.weather-detail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.weather-detail-icon {
+  font-size: 2rem;
+  opacity: 0.9;
+}
+
+.weather-detail-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.weather-detail-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Recommendations Section */
+.weather-recommendations {
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.9), rgba(255, 69, 0, 0.9));
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.weather-recommendation-item {
+  color: white;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Section Titles */
+.weather-section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Hourly Forecast Scroll */
+.weather-hourly-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.weather-hourly-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.weather-hour-card {
+  flex: 0 0 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1.25rem;
+  padding: 0.75rem 0.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.weather-hour-time {
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.weather-hour-icon {
+  font-size: 2rem;
+}
+
+.weather-hour-temp {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.weather-hour-precip {
+  font-size: 0.75rem;
+  color: rgba(135, 206, 250, 1);
+  font-weight: 500;
+}
+
+/* Chart Container */
+.weather-chart-container {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.weather-tooltip {
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.75);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.weather-tooltip-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+/* Ten Day Forecast */
+.weather-ten-day {
+  margin-top: 1rem;
+}
+
+.weather-day-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.weather-day-row:last-child {
+  border-bottom: none;
+}
+
+.weather-day-name {
+  flex: 0 0 70px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.weather-day-icon {
+  font-size: 2rem;
+  flex: 0 0 40px;
+}
+
+.weather-temp-bar-container {
+  flex: 1;
+  max-width: 120px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 1rem;
+}
+
+.weather-temp-bar-gradient {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.weather-day-temps {
+  flex: 0 0 80px;
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.weather-day-precip {
+  flex: 0 0 40px;
+  text-align: right;
+  font-size: 0.875rem;
+  color: rgba(135, 206, 250, 1);
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .weather-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .weather-detail-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .weather-main-temp {
+    font-size: 8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .weather-header {
+    padding: 3rem 1rem 2rem;
+  }
+  
+  .weather-main-temp {
+    font-size: 5rem;
+  }
+  
+  .weather-detail-grid {
+    gap: 1rem;
+  }
+}

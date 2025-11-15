@@ -1,88 +1,94 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { ArrowLeft } from 'lucide-react';
-import { useWeatherSettings } from '@/hooks/useWeatherSettings';
-import { useWeatherForecast } from '@/hooks/useWeatherForecast';
-import { WeatherIcon } from '@/components/weather/WeatherIcon';
-import { HourlyForecast } from '@/components/weather/HourlyForecast';
-import { ForecastChart } from '@/components/weather/ForecastChart';
-import { detectWeatherCondition } from '@/utils/weatherTranslation';
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useWeatherSettings } from "@/hooks/useWeatherSettings";
+import { useWeatherForecast } from "@/hooks/useWeatherForecast";
+import { WiDaySunny, WiCloud, WiRain, WiSnow, WiCloudy, WiThunderstorm } from "react-icons/wi";
+import CurrentConditions from "@/components/weather/CurrentConditions";
+import Recommendations from "@/components/weather/Recommendations";
+import HourlyForecast from "@/components/weather/HourlyForecast";
+import ForecastChart from "@/components/weather/ForecastChart";
+import TenDayForecast from "@/components/weather/TenDayForecast";
+import "@/styles/weather.css";
 
-const WeatherForecast = () => {
+const getWeatherIcon = (condition: string, size: number = 120) => {
+  const conditionLower = condition.toLowerCase();
+  const style = { fontSize: size, color: "white" };
+  
+  if (conditionLower.includes("rain") || conditionLower.includes("lluvia")) {
+    return <WiRain style={style} />;
+  }
+  if (conditionLower.includes("storm") || conditionLower.includes("tormenta")) {
+    return <WiThunderstorm style={style} />;
+  }
+  if (conditionLower.includes("snow") || conditionLower.includes("nieve")) {
+    return <WiSnow style={style} />;
+  }
+  if (conditionLower.includes("cloud") || conditionLower.includes("nublado")) {
+    return <WiCloudy style={style} />;
+  }
+  return <WiDaySunny style={style} />;
+};
+
+export default function WeatherForecast() {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation(['weather', 'weatherConditions']);
+  const { t } = useTranslation();
   const { data: settings } = useWeatherSettings();
   const { data: forecast, isLoading } = useWeatherForecast(
     settings?.lat,
     settings?.lng,
-    i18n.language || 'es',
+    'es',
     10
   );
 
   const formatHour = (timestamp: string) => {
     const date = new Date(timestamp);
-    const hours = date.getHours();
-    return hours === 0 ? 'Now' : `${hours}`;
+    return date.toLocaleTimeString('es', { hour: 'numeric', hour12: true });
   };
 
-  const formatDay = (dateStr: string, isToday: boolean) => {
-    if (isToday) return 'Today';
-    const date = new Date(dateStr);
-    const locale = i18n.language || 'en';
-    return date.toLocaleDateString(locale, { weekday: 'short' });
-  };
-
-  const isHourDaytime = (timestamp: string) => {
-    const hour = new Date(timestamp).getHours();
-    return hour >= 6 && hour < 20;
-  };
-
-  const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 20;
-
-  // Prepare chart data from hourly forecast
-  const precipitationChartData = forecast?.hourly?.slice(0, 24).map((hour) => ({
-    hour: new Date(hour.timestamp).getHours().toString().padStart(2, '0'),
-    value: hour.precipitationChance || 0
+  // Prepare chart data for precipitation
+  const precipitationChartData = forecast?.hourly.slice(0, 24).map(hour => ({
+    time: formatHour(hour.timestamp),
+    value: hour.precipitationChance
   })) || [];
 
-  const temperatureChartData = forecast?.hourly?.slice(0, 24).map((hour) => ({
-    hour: new Date(hour.timestamp).getHours().toString().padStart(2, '0'),
-    value: Math.round(hour.temperatureC)
+  // Prepare chart data for temperature
+  const temperatureChartData = forecast?.hourly.slice(0, 24).map(hour => ({
+    time: formatHour(hour.timestamp),
+    value: hour.temperatureC
   })) || [];
 
-  // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-200 to-sky-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
-          <div className="text-center text-foreground/60 text-sm">Loading weather...</div>
-        </div>
+      <div className="weather-loading-screen">
+        <div className="weather-loading-text">Cargando datos meteorológicos…</div>
       </div>
     );
   }
 
-  // No data state
   if (!forecast || !forecast.daily || forecast.daily.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-sky-200 to-sky-100 dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-lg mx-auto px-4 py-8">
-          <button 
-            onClick={() => navigate(-1)}
-            className="mb-6 text-white dark:text-foreground"
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div className="text-center text-foreground/60">
-            No weather data available. Please configure your location in settings.
-          </div>
-        </div>
+      <div className="weather-loading-screen">
+        <WiCloud style={{ fontSize: 64, color: "white" }} />
+        <p className="weather-loading-text">No hay datos meteorológicos disponibles</p>
+        <Button
+          onClick={() => navigate(-1)}
+          variant="secondary"
+          className="mt-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver
+        </Button>
       </div>
     );
   }
 
   const today = forecast.daily[0];
-  const locationName = settings?.display_name || forecast.location.name || 'Current Location';
+  const locationName = settings?.display_name || forecast.location?.name || 'Mi Ubicación';
+  const current = forecast.current;
+  const dailyHigh = today?.maxTempC || 0;
+  const dailyLow = today?.minTempC || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-200 via-sky-100 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
