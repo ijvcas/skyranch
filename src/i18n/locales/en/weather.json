@@ -56,6 +56,16 @@
     "freezingOn": "Freezing temperatures on {{date}}",
     "strongWindOn": "Strong winds on {{date}}",
     "planAccordingly": "Plan your activities accordingly",
-    "inDays": "In {{count}} days"
+    "inDays": "In {{count}} days",
+    "pleasantTemperature": "Pleasant temperature of {{temp}}°C",
+    "mildTemperature": "Mild temperature of {{temp}}°C",
+    "warmDay": "Warm day with {{temp}}°C",
+    "coolDay": "Cool day with {{temp}}°C",
+    "currentTemperature": "Current temperature: {{temp}}°C",
+    "lightBreeze": "Light breeze at {{speed}} km/h",
+    "calmWind": "Calm winds",
+    "lowRainChance": "Low rain chance ({{chance}}%)",
+    "moderateRainChance": "Moderate rain chance ({{chance}}%)",
+    "goodForActivities": "Good day for outdoor activities"
   }
 }
