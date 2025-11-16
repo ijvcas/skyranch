@@ -17,14 +17,14 @@ export default function Recommendations({ windKph, temperatureC, precipitationCh
   if (dailyForecast && dailyForecast.length > 0) {
     const analysis = weatherAnalysisService.analyzeForecast(dailyForecast);
     
-    if (analysis.hasExtremeConditions) {
+    // Only show extreme weather warnings if there are CRITICAL or HIGH severity events
+    const criticalEvents = analysis.events.filter(e => e.severity === 'critical').slice(0, 3);
+    const highEvents = analysis.events.filter(e => e.severity === 'high').slice(0, 2);
+    const hasSignificantEvents = criticalEvents.length > 0 || highEvents.length > 0;
+    
+    if (hasSignificantEvents) {
       // Show proactive warnings about upcoming extreme weather
-      const criticalEvents = analysis.events.filter(e => e.severity === 'critical').slice(0, 3);
-      const highEvents = analysis.events.filter(e => e.severity === 'high').slice(0, 2);
-      
-      if (criticalEvents.length > 0 || highEvents.length > 0) {
-        tips.push(`⚠️ ${t('forecast.extremeWeatherDetected')}`);
-      }
+      tips.push(`⚠️ ${t('forecast.extremeWeatherDetected')}`);
       
       // Show critical events first with prominent timing
       criticalEvents.forEach(event => {
