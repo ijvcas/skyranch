@@ -56,6 +56,16 @@
     "freezingOn": "Températures glaciales le {{date}}",
     "strongWindOn": "Vents forts le {{date}}",
     "planAccordingly": "Planifiez vos activités en conséquence",
-    "inDays": "Dans {{count}} jours"
+    "inDays": "Dans {{count}} jours",
+    "pleasantTemperature": "Température agréable de {{temp}}°C",
+    "mildTemperature": "Température douce de {{temp}}°C",
+    "warmDay": "Journée chaude avec {{temp}}°C",
+    "coolDay": "Journée fraîche avec {{temp}}°C",
+    "currentTemperature": "Température actuelle: {{temp}}°C",
+    "lightBreeze": "Brise légère à {{speed}} km/h",
+    "calmWind": "Vents calmes",
+    "lowRainChance": "Faible probabilité de pluie ({{chance}}%)",
+    "moderateRainChance": "Probabilité modérée de pluie ({{chance}}%)",
+    "goodForActivities": "Bonne journée pour activités extérieures"
   }
 }

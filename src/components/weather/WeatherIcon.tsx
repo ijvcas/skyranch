@@ -156,26 +156,26 @@ export const getWeatherIconColor = (condition: string): string => {
   const conditionLower = condition.toLowerCase();
   
   if (/clear|despejado|sunny|soleado/.test(conditionLower)) {
-    return 'text-yellow-400';
+    return 'text-amber-400';
   }
   if (/rain|lluvia|drizzle|llovizna/.test(conditionLower)) {
-    return 'text-blue-500';
+    return 'text-blue-400';
   }
   if (/thunder|tormenta/.test(conditionLower)) {
-    return 'text-purple-600';
+    return 'text-purple-500';
   }
   if (/snow|nieve/.test(conditionLower)) {
-    return 'text-blue-200';
+    return 'text-sky-200';
   }
   if (/cloud|nubla/.test(conditionLower)) {
-    return 'text-gray-400';
+    return 'text-slate-300';
   }
   if (/fog|niebla|mist|neblina/.test(conditionLower)) {
-    return 'text-gray-300';
+    return 'text-slate-200';
   }
   if (/wind|viento/.test(conditionLower)) {
-    return 'text-cyan-500';
+    return 'text-cyan-400';
   }
   
-  return 'text-gray-500';
+  return 'text-slate-400';
 };

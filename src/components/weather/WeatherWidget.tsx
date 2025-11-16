@@ -87,8 +87,8 @@ const WeatherWidget: React.FC = () => {
         <WeatherIcon 
           condition={weather?.conditionText || 'Clear'}
           isDaytime={isDaytime}
-          size={28}
-          className={iconColor}
+          size={36}
+          className={`${iconColor} drop-shadow-lg`}
         />
         
         {/* Temperature and condition grouped */}

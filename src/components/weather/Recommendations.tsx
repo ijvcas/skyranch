@@ -111,9 +111,47 @@ export default function Recommendations({ windKph, temperatureC, precipitationCh
     tips.push(`🥶 ${t('forecast.coldWeather')}`);
   }
   
-  // Only show ideal conditions if NO warnings at all
+  // Only show descriptive message if NO warnings at all
   if (tips.length === 0) {
-    tips.push(`✅ ${t('forecast.idealConditions')} — ${t('forecast.goodDay')}`);
+    let description = '';
+    
+    // Temperature description
+    if (temperatureC !== null) {
+      if (temperatureC >= 20 && temperatureC <= 28) {
+        description = t('forecast.pleasantTemperature', { temp: Math.round(temperatureC) });
+      } else if (temperatureC > 15 && temperatureC < 20) {
+        description = t('forecast.mildTemperature', { temp: Math.round(temperatureC) });
+      } else if (temperatureC > 28 && temperatureC <= 32) {
+        description = t('forecast.warmDay', { temp: Math.round(temperatureC) });
+      } else if (temperatureC >= 10 && temperatureC <= 15) {
+        description = t('forecast.coolDay', { temp: Math.round(temperatureC) });
+      } else {
+        description = t('forecast.currentTemperature', { temp: Math.round(temperatureC) });
+      }
+    }
+    
+    // Wind description
+    if (windKph !== null && windKph > 15 && windKph <= 25) {
+      description += `. ${t('forecast.lightBreeze', { speed: Math.round(windKph) })}`;
+    } else if (windKph !== null && windKph <= 15 && windKph > 0) {
+      description += `. ${t('forecast.calmWind')}`;
+    }
+    
+    // Precipitation description
+    if (precipitationChance !== null && precipitationChance > 10 && precipitationChance <= 30) {
+      description += `. ${t('forecast.lowRainChance', { chance: precipitationChance })}`;
+    } else if (precipitationChance !== null && precipitationChance > 30 && precipitationChance <= 50) {
+      description += `. ${t('forecast.moderateRainChance', { chance: precipitationChance })}`;
+    }
+    
+    // Fallback if no description was built
+    if (!description) {
+      description = `✅ ${t('forecast.idealConditions')} — ${t('forecast.goodDay')}`;
+    } else {
+      description = `☀️ ${description}. ${t('forecast.goodForActivities')}`;
+    }
+    
+    tips.push(description);
   }
   
   return (

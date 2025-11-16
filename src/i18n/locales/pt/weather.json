@@ -56,6 +56,16 @@
     "freezingOn": "Temperaturas abaixo de zero em {{date}}",
     "strongWindOn": "Ventos fortes em {{date}}",
     "planAccordingly": "Planeje suas atividades de acordo",
-    "inDays": "Em {{count}} dias"
+    "inDays": "Em {{count}} dias",
+    "pleasantTemperature": "Temperatura agradável de {{temp}}°C",
+    "mildTemperature": "Temperatura suave de {{temp}}°C",
+    "warmDay": "Dia quente com {{temp}}°C",
+    "coolDay": "Dia fresco com {{temp}}°C",
+    "currentTemperature": "Temperatura atual: {{temp}}°C",
+    "lightBreeze": "Brisa leve de {{speed}} km/h",
+    "calmWind": "Ventos calmos",
+    "lowRainChance": "Baixa probabilidade de chuva ({{chance}}%)",
+    "moderateRainChance": "Probabilidade moderada de chuva ({{chance}}%)",
+    "goodForActivities": "Bom dia para atividades ao ar livre"
   }
 }
