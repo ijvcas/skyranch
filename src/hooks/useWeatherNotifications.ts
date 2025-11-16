@@ -68,11 +68,11 @@ function createWeatherNotification(
   formattedDate: string,
   addNotification: (notification: any) => void
 ) {
-  const timeframe = daysUntil === 0 
-    ? 'hoy' 
+  const timeframeUpper = daysUntil === 0 
+    ? 'HOY' 
     : daysUntil === 1 
-    ? 'mañana' 
-    : `en ${daysUntil} días`;
+    ? 'MAÑANA' 
+    : `EN ${daysUntil} DÍAS`;
 
   let title = '';
   let message = '';
@@ -82,22 +82,22 @@ function createWeatherNotification(
     case 'heavy_rain':
       icon = '💧';
       title = 'Alerta de Lluvia';
-      message = `Lluvia fuerte esperada ${timeframe} (${formattedDate}). Considere posponer actividades al aire libre.`;
+      message = `${timeframeUpper} (${formattedDate}): Lluvia fuerte esperada. Mueva el ganado a refugio y posponga actividades al aire libre.`;
       break;
     case 'extreme_heat':
       icon = '🔥';
       title = 'Alerta de Calor Extremo';
-      message = `Temperaturas muy altas ${timeframe} (${Math.round(event.value)}°C en ${formattedDate}). Proteja a los animales y evite trabajo pesado.`;
+      message = `${timeframeUpper} (${formattedDate}): Temperaturas muy altas (${Math.round(event.value)}°C). Provea sombra y agua abundante a los animales.`;
       break;
     case 'freezing':
       icon = '❄️';
       title = 'Alerta de Helada';
-      message = `Temperaturas bajo cero ${timeframe} (${Math.round(event.value)}°C en ${formattedDate}). Proteja cultivos y animales del frío.`;
+      message = `${timeframeUpper} (${formattedDate}): Temperaturas bajo cero (${Math.round(event.value)}°C). Proteja cultivos y asegure refugios para animales.`;
       break;
     case 'strong_wind':
       icon = '🌬️';
       title = 'Alerta de Viento Fuerte';
-      message = `Vientos fuertes esperados ${timeframe} (${Math.round(event.value)} km/h en ${formattedDate}). Asegure estructuras y equipo.`;
+      message = `${timeframeUpper} (${formattedDate}): Vientos fuertes (${Math.round(event.value)} km/h). Asegure estructuras, cobertizos y equipo.`;
       break;
   }
 

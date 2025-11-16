@@ -19,37 +19,52 @@ export default function Recommendations({ windKph, temperatureC, precipitationCh
     
     if (analysis.hasExtremeConditions) {
       // Show proactive warnings about upcoming extreme weather
-      tips.push(`⚠️ ${t('forecast.extremeWeatherDetected')}`);
-      
       const criticalEvents = analysis.events.filter(e => e.severity === 'critical').slice(0, 3);
       const highEvents = analysis.events.filter(e => e.severity === 'high').slice(0, 2);
       
-      // Show critical events first
+      if (criticalEvents.length > 0 || highEvents.length > 0) {
+        tips.push(`⚠️ ${t('forecast.extremeWeatherDetected')}`);
+      }
+      
+      // Show critical events first with prominent timing
       criticalEvents.forEach(event => {
         const daysUntil = weatherAnalysisService.getDaysUntil(event.date);
         const formattedDate = weatherAnalysisService.formatDate(event.date, i18n.language);
-        const timeframe = daysUntil === 0 ? t('forecast.today') : daysUntil === 1 ? t('forecast.tomorrow') : `${formattedDate}`;
+        
+        // Create prominent time prefix
+        const timePrefix = daysUntil === 0 
+          ? t('forecast.today').toUpperCase()
+          : daysUntil === 1 
+          ? t('forecast.tomorrow').toUpperCase()
+          : t('forecast.inDays', { count: daysUntil }).toUpperCase();
         
         switch (event.type) {
           case 'heavy_rain':
-            tips.push(`💧 ${t('forecast.heavyRainOn', { date: timeframe })} (${event.value}%)`);
+            tips.push(`💧 ${timePrefix} (${formattedDate}): Lluvia fuerte — ${event.value}% probabilidad. ${t('forecast.heavyRain')}`);
             break;
           case 'extreme_heat':
-            tips.push(`🔥 ${t('forecast.extremeHeatOn', { date: timeframe })} (${Math.round(event.value)}°C)`);
+            tips.push(`🔥 ${timePrefix} (${formattedDate}): Calor extremo — ${Math.round(event.value)}°C. ${t('forecast.extremeHeat')}`);
             break;
           case 'freezing':
-            tips.push(`❄️ ${t('forecast.freezingOn', { date: timeframe })} (${Math.round(event.value)}°C)`);
+            tips.push(`❄️ ${timePrefix} (${formattedDate}): Helada — ${Math.round(event.value)}°C. ${t('forecast.belowZero')}`);
             break;
           case 'strong_wind':
-            tips.push(`🌬️ ${t('forecast.strongWindOn', { date: timeframe })} (${Math.round(event.value)} km/h)`);
+            tips.push(`🌬️ ${timePrefix} (${formattedDate}): Vientos fuertes — ${Math.round(event.value)} km/h. ${t('forecast.strongWind')}`);
             break;
         }
       });
       
       // Show some high priority events
       highEvents.forEach(event => {
+        const daysUntil = weatherAnalysisService.getDaysUntil(event.date);
         const formattedDate = weatherAnalysisService.formatDate(event.date, i18n.language);
-        tips.push(`⚠️ ${event.description} - ${formattedDate}`);
+        const timePrefix = daysUntil === 0 
+          ? t('forecast.today').toUpperCase()
+          : daysUntil === 1 
+          ? t('forecast.tomorrow').toUpperCase()
+          : t('forecast.inDays', { count: daysUntil }).toUpperCase();
+        
+        tips.push(`⚠️ ${timePrefix} (${formattedDate}): ${event.description}`);
       });
       
       tips.push(`📋 ${t('forecast.planAccordingly')}`);

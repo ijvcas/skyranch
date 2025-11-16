@@ -79,10 +79,12 @@ export default function TenDayForecast({ data }: TenDayForecastProps) {
                 />
               </div>
               <span className="weather-day-temps">
-                {Math.round(day.maxTempC)}° / {Math.round(day.minTempC)}°
+                <span style={{ color: '#4169E1' }}>L: {Math.round(day.minTempC)}°</span>
+                {' / '}
+                <span style={{ color: '#FFD700' }}>H: {Math.round(day.maxTempC)}°</span>
               </span>
               {day.precipitationChance > 0 && (
-                <span className="weather-day-precip">{day.precipitationChance}%</span>
+                <span className="weather-day-precip" style={{ fontWeight: '600' }}>💧 {day.precipitationChance}%</span>
               )}
             </div>
           );
