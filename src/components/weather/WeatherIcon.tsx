@@ -141,13 +141,11 @@ export const WeatherIcon: React.FC<WeatherIconProps> = ({
   const animationClass = getAnimationClass();
   
   return (
-    <div className={`weather-icon-container ${animationClass}`}>
-      <Icon 
-        size={size} 
-        className={`${className} transition-transform duration-300 hover:scale-110`}
-        aria-label={condition}
-      />
-    </div>
+    <Icon 
+      size={size} 
+      className={`${className} transition-transform duration-300 hover:scale-110`}
+      aria-label={condition}
+    />
   );
 };
 
