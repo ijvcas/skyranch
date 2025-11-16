@@ -55,6 +55,7 @@
     "extremeHeatOn": "Extreme heat on {{date}}",
     "freezingOn": "Freezing temperatures on {{date}}",
     "strongWindOn": "Strong winds on {{date}}",
-    "planAccordingly": "Plan your activities accordingly"
+    "planAccordingly": "Plan your activities accordingly",
+    "inDays": "In {{count}} days"
   }
 }

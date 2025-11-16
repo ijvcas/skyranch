@@ -55,6 +55,7 @@
     "extremeHeatOn": "Calor extremo em {{date}}",
     "freezingOn": "Temperaturas abaixo de zero em {{date}}",
     "strongWindOn": "Ventos fortes em {{date}}",
-    "planAccordingly": "Planeje suas atividades adequadamente"
+    "planAccordingly": "Planeje suas atividades de acordo",
+    "inDays": "Em {{count}} dias"
   }
 }

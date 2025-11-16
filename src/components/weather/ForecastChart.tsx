@@ -43,7 +43,14 @@ export default function ForecastChart({ data, type, className }: ForecastChartPr
                   <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="time" hide />
+              <XAxis 
+                dataKey="time" 
+                stroke="rgba(255,255,255,0.5)"
+                tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 11 }}
+                tickLine={{ stroke: 'rgba(255,255,255,0.3)' }}
+                interval="preserveStartEnd"
+                minTickGap={30}
+              />
               <YAxis hide />
               <Tooltip content={<CustomTooltip type={type} />} />
               <Line
@@ -63,7 +70,14 @@ export default function ForecastChart({ data, type, className }: ForecastChartPr
                   <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="time" hide />
+              <XAxis 
+                dataKey="time" 
+                stroke="rgba(255,255,255,0.5)"
+                tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 11 }}
+                tickLine={{ stroke: 'rgba(255,255,255,0.3)' }}
+                interval="preserveStartEnd"
+                minTickGap={30}
+              />
               <YAxis hide />
               <Tooltip content={<CustomTooltip type={type} />} />
               <Area
