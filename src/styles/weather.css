@@ -245,9 +245,9 @@
 .weather-day-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.875rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.75rem;
 }
 
 .weather-day-row:last-child {
@@ -255,7 +255,7 @@
 }
 
 .weather-day-name {
-  flex: 0 0 70px;
+  flex: 0 0 40px;
   font-size: 1rem;
   font-weight: 500;
   text-transform: capitalize;
@@ -263,17 +263,43 @@
 
 .weather-day-icon {
   font-size: 2rem;
-  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-icon-precip-group {
+  flex: 0 0 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.weather-precip-percent {
+  font-size: 0.75rem;
+  color: #4FC3F7;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.weather-temp-low {
+  flex: 0 0 35px;
+  text-align: right;
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  padding-right: 8px;
 }
 
 .weather-temp-bar-container {
   flex: 1;
-  max-width: 120px;
+  display: flex;
+  align-items: center;
   height: 4px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 2px;
-  overflow: hidden;
-  margin: 0 1rem;
+  min-width: 80px;
 }
 
 .weather-temp-bar-gradient {
@@ -281,19 +307,13 @@
   border-radius: 2px;
 }
 
-.weather-day-temps {
-  flex: 0 0 80px;
-  text-align: right;
-  font-size: 1rem;
+.weather-temp-high {
+  flex: 0 0 35px;
+  text-align: left;
+  font-size: 1.25rem;
   font-weight: 600;
-}
-
-.weather-day-precip {
-  flex: 0 0 40px;
-  text-align: right;
-  font-size: 0.875rem;
-  color: rgba(135, 206, 250, 1);
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  padding-left: 8px;
 }
 
 /* Responsive Design */

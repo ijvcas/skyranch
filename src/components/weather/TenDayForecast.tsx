@@ -68,24 +68,27 @@ export default function TenDayForecast({ data }: TenDayForecastProps) {
           return (
             <div key={day.date} className="weather-day-row">
               <span className="weather-day-name">{dayName}</span>
-              {getWeatherIcon(day.conditionText)}
+              
+              <div className="weather-icon-precip-group">
+                {getWeatherIcon(day.conditionText)}
+                {day.precipitationChance > 0 && (
+                  <span className="weather-precip-percent">{day.precipitationChance}%</span>
+                )}
+              </div>
+              
+              <span className="weather-temp-low">{Math.round(day.minTempC)}°</span>
+              
               <div className="weather-temp-bar-container">
                 <div 
                   className="weather-temp-bar-gradient"
                   style={{
-                    background: `linear-gradient(90deg, #4169E1 0%, #FFD700 100%)`,
+                    background: `linear-gradient(90deg, #6B9BD1 0%, #FFB74D 100%)`,
                     width: '100%'
                   }}
                 />
               </div>
-              <span className="weather-day-temps">
-                <span style={{ color: '#4169E1' }}>L: {Math.round(day.minTempC)}°</span>
-                {' / '}
-                <span style={{ color: '#FFD700' }}>H: {Math.round(day.maxTempC)}°</span>
-              </span>
-              {day.precipitationChance > 0 && (
-                <span className="weather-day-precip" style={{ fontWeight: '600' }}>💧 {day.precipitationChance}%</span>
-              )}
+              
+              <span className="weather-temp-high">{Math.round(day.maxTempC)}°</span>
             </div>
           );
         })}
