@@ -25,7 +25,6 @@ const WeatherWidget: React.FC = () => {
   console.log("🌤️ [WeatherWidget] Weather error:", error);
 
   const tempValue = weather?.temperatureC;
-  const iconColor = getWeatherIconColor(weather?.conditionText || '');
   const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 20;
   
   const formatLocation = () => {
@@ -88,7 +87,7 @@ const WeatherWidget: React.FC = () => {
           condition={weather?.conditionText || 'Clear'}
           isDaytime={isDaytime}
           size={36}
-          className={`${iconColor} drop-shadow-lg`}
+          className="drop-shadow-lg"
         />
         
         {/* Temperature and condition grouped */}
