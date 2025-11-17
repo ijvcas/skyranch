@@ -139,10 +139,12 @@ export const WeatherIcon: React.FC<WeatherIconProps> = ({
 
   const Icon = getIcon();
   const animationClass = getAnimationClass();
+  const iconColor = getWeatherIconColor(condition);
   
   return (
     <Icon 
-      size={size} 
+      size={size}
+      color={iconColor}
       className={`${className} transition-transform duration-300 hover:scale-110`}
       aria-label={condition}
     />
@@ -154,26 +156,26 @@ export const getWeatherIconColor = (condition: string): string => {
   const conditionLower = condition.toLowerCase();
   
   if (/clear|despejado|sunny|soleado/.test(conditionLower)) {
-    return 'text-amber-400';
+    return '#FBB040';
   }
   if (/rain|lluvia|drizzle|llovizna/.test(conditionLower)) {
-    return 'text-blue-400';
+    return '#60A5FA';
   }
   if (/thunder|tormenta/.test(conditionLower)) {
-    return 'text-purple-500';
+    return '#A78BFA';
   }
   if (/snow|nieve/.test(conditionLower)) {
-    return 'text-sky-200';
+    return '#BAE6FD';
   }
   if (/cloud|nubla/.test(conditionLower)) {
-    return 'text-slate-300';
+    return '#CBD5E1';
   }
   if (/fog|niebla|mist|neblina/.test(conditionLower)) {
-    return 'text-slate-200';
+    return '#E2E8F0';
   }
   if (/wind|viento/.test(conditionLower)) {
-    return 'text-cyan-400';
+    return '#22D3EE';
   }
   
-  return 'text-slate-400';
+  return '#94A3B8';
 };
