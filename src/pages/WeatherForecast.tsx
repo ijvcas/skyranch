@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
@@ -66,6 +67,21 @@ export default function WeatherForecast() {
 
   // Enable weather notifications for extreme conditions
   useWeatherNotifications(forecast?.daily, !!forecast?.daily);
+
+  // Save weather snapshot to localStorage for dashboard widget
+  useEffect(() => {
+    if (currentWeather) {
+      try {
+        localStorage.setItem('farmika-weather-snapshot', JSON.stringify({
+          conditionText: currentWeather.conditionText,
+          temperatureC: currentWeather.temperatureC,
+          timestamp: Date.now()
+        }));
+      } catch (error) {
+        console.error('Error saving weather snapshot:', error);
+      }
+    }
+  }, [currentWeather]);
 
   const formatHour = (timestamp: string) => {
     const date = new Date(timestamp);

@@ -2,29 +2,41 @@ import React from "react";
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useWeatherSettings } from "@/hooks/useWeatherSettings";
-import { useFarmWeather } from "@/hooks/useFarmWeather";
 import { useTranslation } from 'react-i18next';
 import { detectWeatherCondition } from '@/utils/weatherTranslation';
-import { WeatherIcon, getWeatherIconColor } from '@/components/weather/WeatherIcon';
+import { WeatherIcon } from '@/components/weather/WeatherIcon';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+
+interface WeatherSnapshot {
+  conditionText: string;
+  temperatureC: number;
+  timestamp: number;
+}
 
 const WeatherWidget: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('weather');
   const { data: weatherSettings, isLoading: settingsLoading } = useWeatherSettings();
-  console.log("🌤️ [WeatherWidget] Weather settings:", weatherSettings);
-  console.log("🌤️ [WeatherWidget] Settings loading:", settingsLoading);
   
-  const { data: weather, isLoading, error } = useFarmWeather(
-    weatherSettings?.lat,
-    weatherSettings?.lng,
-    weatherSettings?.language || 'es'
-  );
-  console.log("🌤️ [WeatherWidget] Weather data:", weather);
-  console.log("🌤️ [WeatherWidget] Weather loading:", isLoading);
-  console.log("🌤️ [WeatherWidget] Weather error:", error);
+  // Get cached weather data instead of making API call
+  const getCachedWeather = (): WeatherSnapshot | null => {
+    try {
+      const cached = localStorage.getItem('farmika-weather-snapshot');
+      if (cached) {
+        const data = JSON.parse(cached);
+        // Check if cache is recent (< 30 minutes old)
+        if (Date.now() - data.timestamp < 30 * 60 * 1000) {
+          return data;
+        }
+      }
+    } catch (error) {
+      console.error('Error reading cached weather:', error);
+    }
+    return null;
+  };
 
-  const tempValue = weather?.temperatureC;
+  const cachedWeather = getCachedWeather();
+  const tempValue = cachedWeather?.temperatureC;
   const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 20;
   
   const formatLocation = () => {
@@ -32,12 +44,12 @@ const WeatherWidget: React.FC = () => {
   };
 
   const getWeatherCondition = () => {
-    if (settingsLoading || isLoading) return t('loading');
+    if (settingsLoading) return t('loading');
     if (!weatherSettings?.location_query) return t('noLocation');
-    if (!weather?.conditionText) return t('connecting');
+    if (!cachedWeather?.conditionText) return t('tapForForecast');
     
-    // Translate weather condition to app language
-    const conditionKey = detectWeatherCondition(weather.conditionText);
+    // Translate cached weather condition to app language
+    const conditionKey = detectWeatherCondition(cachedWeather.conditionText);
     return t(`weatherConditions:${conditionKey}`);
   };
 
@@ -84,16 +96,16 @@ const WeatherWidget: React.FC = () => {
     >
       <div className="flex items-start gap-3">
         <WeatherIcon 
-          condition={weather?.conditionText || 'Clear'}
+          condition={cachedWeather?.conditionText || 'Unknown'}
           isDaytime={isDaytime}
           size={36}
-          className="drop-shadow-lg"
+          className={`drop-shadow-lg ${!cachedWeather ? 'opacity-70' : ''}`}
         />
         
         {/* Temperature and condition grouped */}
         <div className="flex-shrink-0">
           <div className="text-base text-foreground">
-            {settingsLoading || isLoading ? "—" :
+            {settingsLoading ? "—" :
               typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
           </div>
           <div className="text-xs text-muted-foreground flex items-center gap-1">

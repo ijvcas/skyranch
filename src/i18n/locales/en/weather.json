@@ -5,6 +5,7 @@
   "noLocation": "No location",
   "connecting": "Connecting...",
   "noData": "No weather data",
+  "tapForForecast": "Tap for forecast",
   "settings": {
     "title": "Weather Information"
   },
