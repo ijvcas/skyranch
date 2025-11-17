@@ -78,17 +78,19 @@ const WeatherWidget: React.FC = () => {
         userSelect: 'none'
       }}
     >
-      <div className="flex items-start gap-3">
-        <WeatherIcon 
-          condition={weather?.conditionText || 'Unknown'}
-          isDaytime={isDaytime}
-          size={36}
-          className={`drop-shadow-lg ${!weather ? 'opacity-70' : ''}`}
-        />
+      <div className="flex items-center gap-3 relative">
+        <div className="relative z-10 flex-shrink-0">
+          <WeatherIcon 
+            condition={weather?.conditionText || 'Unknown'}
+            isDaytime={isDaytime}
+            size={40}
+            className={`drop-shadow-lg ${!weather ? 'opacity-70' : ''}`}
+          />
+        </div>
         
         {/* Temperature and condition grouped */}
-        <div className="flex-shrink-0">
-          <div className="text-base text-foreground">
+        <div className="flex-shrink-0 relative z-10">
+          <div className="text-base font-semibold text-foreground">
             {settingsLoading || weatherLoading ? "—" :
               typeof tempValue === "number" ? `${Math.round(tempValue)}°C` : "—"}
           </div>
