@@ -5,6 +5,7 @@
   "noLocation": "Sin ubicación",
   "connecting": "Conectando...",
   "noData": "Sin datos de clima",
+  "tapForForecast": "Toca para ver pronóstico",
   "settings": {
     "title": "Información Meteorológica"
   },

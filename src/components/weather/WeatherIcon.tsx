@@ -35,10 +35,15 @@ export const WeatherIcon: React.FC<WeatherIconProps> = ({
   size = 64,
   className = '',
 }) => {
-  const conditionLower = condition.toLowerCase();
+  const conditionLower = condition?.toLowerCase() || '';
   
   // Map conditions to professional weather icons
   const getIcon = () => {
+    // Unknown/no condition - fallback
+    if (!condition || conditionLower === 'unknown') {
+      return isDaytime ? WiDaySunny : WiNightClear;
+    }
+    
     // Clear/Sunny
     if (/clear|despejado|limpo|dégagé/.test(conditionLower)) {
       return isDaytime ? WiDaySunny : WiNightClear;

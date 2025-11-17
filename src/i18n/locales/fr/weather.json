@@ -5,6 +5,7 @@
   "noLocation": "Pas de localisation",
   "connecting": "Connexion...",
   "noData": "Pas de données météo",
+  "tapForForecast": "Toucher pour voir prévisions",
   "settings": {
     "title": "Informations Météorologiques"
   },
