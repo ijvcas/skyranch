@@ -10,22 +10,26 @@ interface HourlyForecastProps {
 const getWeatherIcon = (condition: string) => {
   const conditionLower = condition.toLowerCase();
   
-  // Rain/Drizzle
+  // Rain/Drizzle - Blue
   if (conditionLower.includes("rain") || conditionLower.includes("lluvia") ||
       conditionLower.includes("drizzle") || conditionLower.includes("llovizna") ||
       conditionLower.includes("shower") || conditionLower.includes("chubasco")) {
-    return <WiRain className="weather-hour-icon" />;
+    return <WiRain className="weather-hour-icon" style={{ color: '#60A5FA' }} />;
   }
+  // Thunderstorm - Purple
   if (conditionLower.includes("storm") || conditionLower.includes("tormenta")) {
-    return <WiThunderstorm className="weather-hour-icon" />;
+    return <WiThunderstorm className="weather-hour-icon" style={{ color: '#A78BFA' }} />;
   }
+  // Snow - Light icy blue
   if (conditionLower.includes("snow") || conditionLower.includes("nieve")) {
-    return <WiSnow className="weather-hour-icon" />;
+    return <WiSnow className="weather-hour-icon" style={{ color: '#BAE6FD' }} />;
   }
+  // Cloudy - Light gray
   if (conditionLower.includes("cloud") || conditionLower.includes("nublado")) {
-    return <WiCloudy className="weather-hour-icon" />;
+    return <WiCloudy className="weather-hour-icon" style={{ color: '#CBD5E1' }} />;
   }
-  return <WiDaySunny className="weather-hour-icon" />;
+  // Clear/Sunny - Golden amber
+  return <WiDaySunny className="weather-hour-icon" style={{ color: '#FBB040' }} />;
 };
 
 const formatHour = (timestamp: string, t: any) => {

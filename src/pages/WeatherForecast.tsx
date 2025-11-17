@@ -16,24 +16,40 @@ import "@/styles/weather.css";
 
 const getWeatherIcon = (condition: string, size: number = 120) => {
   const conditionLower = condition.toLowerCase();
-  const style = { fontSize: size, color: "white" };
   
-  // Rain/Drizzle
+  // Determine vibrant color based on condition
+  let color = "#FFB347"; // Default amber/orange for sunny
+  let Icon = WiDaySunny;
+  
+  // Rain/Drizzle - Blue
   if (conditionLower.includes("rain") || conditionLower.includes("lluvia") ||
       conditionLower.includes("drizzle") || conditionLower.includes("llovizna") ||
       conditionLower.includes("shower") || conditionLower.includes("chubasco")) {
-    return <WiRain style={style} />;
+    Icon = WiRain;
+    color = "#60A5FA"; // Bright blue
   }
-  if (conditionLower.includes("storm") || conditionLower.includes("tormenta")) {
-    return <WiThunderstorm style={style} />;
+  // Thunderstorm - Purple
+  else if (conditionLower.includes("storm") || conditionLower.includes("tormenta")) {
+    Icon = WiThunderstorm;
+    color = "#A78BFA"; // Purple
   }
-  if (conditionLower.includes("snow") || conditionLower.includes("nieve")) {
-    return <WiSnow style={style} />;
+  // Snow - Light icy blue
+  else if (conditionLower.includes("snow") || conditionLower.includes("nieve")) {
+    Icon = WiSnow;
+    color = "#BAE6FD"; // Sky blue
   }
-  if (conditionLower.includes("cloud") || conditionLower.includes("nublado")) {
-    return <WiCloudy style={style} />;
+  // Cloudy - Light gray
+  else if (conditionLower.includes("cloud") || conditionLower.includes("nublado")) {
+    Icon = WiCloudy;
+    color = "#CBD5E1"; // Slate gray
   }
-  return <WiDaySunny style={style} />;
+  // Clear/Sunny - Golden amber
+  else {
+    Icon = WiDaySunny;
+    color = "#FBB040"; // Vibrant amber/gold
+  }
+  
+  return <Icon style={{ fontSize: size, color }} />;
 };
 
 export default function WeatherForecast() {
