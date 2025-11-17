@@ -9,46 +9,46 @@ interface TenDayForecastProps {
 const getWeatherIcon = (condition: string) => {
   const conditionLower = condition.toLowerCase();
   
-  // Rain/Drizzle
+  // Rain/Drizzle - Blue
   if (conditionLower.includes("rain") || conditionLower.includes("lluvia") || 
       conditionLower.includes("drizzle") || conditionLower.includes("llovizna") ||
       conditionLower.includes("shower") || conditionLower.includes("chubasco") ||
       conditionLower.includes("pluie") || conditionLower.includes("chuva")) {
-    return <WiRain className="weather-day-icon" />;
+    return <WiRain className="weather-day-icon" style={{ color: '#60A5FA' }} />;
   }
   
-  // Storm
+  // Storm - Purple
   if (conditionLower.includes("storm") || conditionLower.includes("tormenta") ||
       conditionLower.includes("thunder") || conditionLower.includes("trueno") ||
       conditionLower.includes("orage") || conditionLower.includes("tempestade")) {
-    return <WiThunderstorm className="weather-day-icon" />;
+    return <WiThunderstorm className="weather-day-icon" style={{ color: '#A78BFA' }} />;
   }
   
-  // Snow
+  // Snow - Light icy blue
   if (conditionLower.includes("snow") || conditionLower.includes("nieve") ||
       conditionLower.includes("sleet") || conditionLower.includes("aguanieve") ||
       conditionLower.includes("neige") || conditionLower.includes("neve")) {
-    return <WiSnow className="weather-day-icon" />;
+    return <WiSnow className="weather-day-icon" style={{ color: '#BAE6FD' }} />;
   }
   
-  // Cloudy (including partial/overcast)
+  // Cloudy - Light gray
   if (conditionLower.includes("cloud") || conditionLower.includes("nublado") ||
       conditionLower.includes("nube") || conditionLower.includes("overcast") ||
       conditionLower.includes("encapotado") || conditionLower.includes("parcialmente") ||
       conditionLower.includes("nuageux") || conditionLower.includes("nublado") ||
       conditionLower.includes("partiellement") || conditionLower.includes("parcialmente")) {
-    return <WiCloudy className="weather-day-icon" />;
+    return <WiCloudy className="weather-day-icon" style={{ color: '#CBD5E1' }} />;
   }
   
-  // Sunny/Clear
+  // Sunny/Clear - Golden amber
   if (conditionLower.includes("sunny") || conditionLower.includes("soleado") ||
       conditionLower.includes("clear") || conditionLower.includes("despejado") ||
       conditionLower.includes("ensoleillé") || conditionLower.includes("limpo")) {
-    return <WiDaySunny className="weather-day-icon" />;
+    return <WiDaySunny className="weather-day-icon" style={{ color: '#FBB040' }} />;
   }
   
   // Default to cloudy for unknown conditions
-  return <WiCloudy className="weather-day-icon" />;
+  return <WiCloudy className="weather-day-icon" style={{ color: '#CBD5E1' }} />;
 };
 
 export default function TenDayForecast({ data }: TenDayForecastProps) {
