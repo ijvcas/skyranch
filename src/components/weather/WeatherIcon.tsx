@@ -160,6 +160,11 @@ export const WeatherIcon: React.FC<WeatherIconProps> = ({
 export const getWeatherIconColor = (condition: string): string => {
   const conditionLower = condition.toLowerCase();
   
+  // Partly/Partially conditions - use golden color for visibility (check FIRST)
+  if (/partly|parcial|parcialmente|partiellement|intervalos/.test(conditionLower)) {
+    return '#FBB040';
+  }
+  
   if (/clear|despejado|sunny|soleado/.test(conditionLower)) {
     return '#FBB040';
   }
@@ -173,14 +178,14 @@ export const getWeatherIconColor = (condition: string): string => {
     return '#BAE6FD';
   }
   if (/cloud|nubla/.test(conditionLower)) {
-    return '#CBD5E1';
+    return '#64748B'; // Darker gray for better visibility
   }
   if (/fog|niebla|mist|neblina/.test(conditionLower)) {
-    return '#E2E8F0';
+    return '#94A3B8';
   }
   if (/wind|viento/.test(conditionLower)) {
     return '#22D3EE';
   }
   
-  return '#94A3B8';
+  return '#FBB040'; // Default to golden for visibility
 };
