@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `skyranch-${CACHE_VERSION}`;
 const ASSET_CACHE = `skyranch-assets-${CACHE_VERSION}`;
 
