@@ -37,9 +37,14 @@ export function InventoryPrintButton() {
   };
 
   return (
-    <Button onClick={handlePrint} variant="outline" size="sm">
-      <Printer className="h-4 w-4 mr-2" />
-      Print Report
+    <Button 
+      onClick={handlePrint} 
+      variant="outline" 
+      size="icon"
+      aria-label="Print Report"
+      title="Print Report"
+    >
+      <Printer className="h-4 w-4" />
     </Button>
   );
 }
