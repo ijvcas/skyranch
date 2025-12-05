@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3, Cloud, DollarSign, Package, CheckSquare, UserCog, Home, Settings, MessageSquare, Scan, Dna, CreditCard, LifeBuoy } from 'lucide-react';
+import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3, Cloud, DollarSign, Package, CheckSquare, UserCog, Home, Settings, MessageSquare, Scan, Dna, CreditCard, LifeBuoy, CloudSun, ShieldCheck, Barcode } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { Capacitor } from '@capacitor/core';
@@ -34,6 +34,9 @@ import {
   getAllBarcodeData,
   getAllPedigreeData,
   getAllSubscriptionData,
+  getAllWeatherData,
+  getAllUserRolesData,
+  getAllProductData,
   importLots,
   importCadastralData,
   importHealthRecords,
@@ -51,6 +54,9 @@ import {
   importBarcodeData,
   importPedigreeData,
   importSubscriptionData,
+  importWeatherData,
+  importUserRolesData,
+  importProductData,
   importSupportSettings,
   getAllSupportSettings,
   type ComprehensiveBackupData
@@ -79,6 +85,10 @@ interface BackupData {
   pedigreeData: boolean;
   subscriptionData: boolean;
   supportSettings: boolean;
+  // CRITICAL missing categories
+  weatherData: boolean;
+  userRolesData: boolean;
+  productData: boolean;
 }
 
 const SystemBackupManager: React.FC = () => {
@@ -113,6 +123,10 @@ const SystemBackupManager: React.FC = () => {
     pedigreeData: true,
     subscriptionData: true,
     supportSettings: true,
+    // CRITICAL new categories
+    weatherData: true,
+    userRolesData: true,
+    productData: true,
   });
 
   // Get data for export with actual counts
@@ -244,6 +258,25 @@ const SystemBackupManager: React.FC = () => {
     enabled: selectedData.supportSettings,
   });
 
+  // CRITICAL new data queries
+  const { data: weatherData } = useQuery({
+    queryKey: ['backup-weather'],
+    queryFn: getAllWeatherData,
+    enabled: selectedData.weatherData,
+  });
+
+  const { data: userRolesData } = useQuery({
+    queryKey: ['backup-user-roles'],
+    queryFn: getAllUserRolesData,
+    enabled: selectedData.userRolesData,
+  });
+
+  const { data: productData } = useQuery({
+    queryKey: ['backup-products'],
+    queryFn: getAllProductData,
+    enabled: selectedData.productData,
+  });
+
   // Count helper functions
   const getLotsCount = () => {
     if (!lotsData) return 0;
@@ -315,6 +348,20 @@ const SystemBackupManager: React.FC = () => {
     return (subscriptionData.subscriptions?.length || 0) + (subscriptionData.subscriptionUsage?.length || 0);
   };
 
+  // CRITICAL new count functions
+  const getWeatherCount = () => {
+    if (!weatherData) return 0;
+    return (weatherData.weatherSettings?.length || 0) + (weatherData.weatherAlerts?.length || 0) + 
+           (weatherData.weatherAutomationRules?.length || 0);
+  };
+
+  const getUserRolesCount = () => {
+    if (!userRolesData) return 0;
+    return (userRolesData.userRoles?.length || 0) + (userRolesData.userRoleAudit?.length || 0);
+  };
+
+  const getProductCount = () => productData?.universalProducts?.length || 0;
+
   const backupCategories = [
     { key: 'users', label: t('backup.categories.users', 'Users'), icon: Users, description: t('backup.descriptions.users', 'App users and permissions'), count: users.length },
     { key: 'animals', label: t('backup.categories.animals', 'Animals'), icon: Database, description: t('backup.descriptions.animals', 'All animal records'), count: animals.length },
@@ -338,6 +385,10 @@ const SystemBackupManager: React.FC = () => {
     { key: 'pedigreeData', label: t('backup.categories.pedigreeData', 'Pedigree Analysis'), icon: Dna, description: t('backup.descriptions.pedigreeData', 'Pedigree analyses'), count: getPedigreeCount() },
     { key: 'subscriptionData', label: t('backup.categories.subscriptionData', 'Subscriptions'), icon: CreditCard, description: t('backup.descriptions.subscriptionData', 'Subscription and usage data'), count: getSubscriptionCount() },
     { key: 'supportSettings', label: t('backup.categories.supportSettings', 'Support Settings'), icon: LifeBuoy, description: t('backup.descriptions.supportSettings', 'Support contact information'), count: supportSettings.length },
+    // CRITICAL new categories
+    { key: 'weatherData', label: t('backup.categories.weatherData', 'Weather Settings'), icon: CloudSun, description: t('backup.descriptions.weatherData', 'Weather location, alerts, automation'), count: getWeatherCount() },
+    { key: 'userRolesData', label: t('backup.categories.userRolesData', 'User Roles'), icon: ShieldCheck, description: t('backup.descriptions.userRolesData', 'User permissions and audit trail'), count: getUserRolesCount() },
+    { key: 'productData', label: t('backup.categories.productData', 'Products'), icon: Barcode, description: t('backup.descriptions.productData', 'Universal product database'), count: getProductCount() },
   ];
 
   const handleDataSelectionChange = (category: keyof BackupData, checked: boolean) => {
@@ -386,6 +437,11 @@ const SystemBackupManager: React.FC = () => {
     if (selectedData.barcodeData) total += getBarcodeCount();
     if (selectedData.pedigreeData) total += getPedigreeCount();
     if (selectedData.subscriptionData) total += getSubscriptionCount();
+    if (selectedData.supportSettings) total += supportSettings.length;
+    // CRITICAL new categories
+    if (selectedData.weatherData) total += getWeatherCount();
+    if (selectedData.userRolesData) total += getUserRolesCount();
+    if (selectedData.productData) total += getProductCount();
     return total;
   };
 
@@ -401,7 +457,7 @@ const SystemBackupManager: React.FC = () => {
         const backupData: ComprehensiveBackupData = {
           metadata: {
             exportDate: new Date().toISOString(),
-            version: '4.0.0',
+            version: '6.0.0', // Updated with ALL tables
             platform: 'ios',
             appVersion: '1.0.0',
             selectedCategories,
@@ -432,6 +488,10 @@ const SystemBackupManager: React.FC = () => {
         if (selectedData.pedigreeData && pedigreeData) backupData.pedigreeData = pedigreeData;
         if (selectedData.subscriptionData && subscriptionData) backupData.subscriptionData = subscriptionData;
         if (selectedData.supportSettings && supportSettings) backupData.supportSettings = supportSettings;
+        // CRITICAL new categories
+        if (selectedData.weatherData && weatherData) backupData.weatherData = weatherData;
+        if (selectedData.userRolesData && userRolesData) backupData.userRolesData = userRolesData;
+        if (selectedData.productData && productData) backupData.productData = productData;
 
         const dataStr = JSON.stringify(backupData, null, 2);
         const backupSizeMB = (dataStr.length / 1024 / 1024).toFixed(2);
@@ -571,6 +631,16 @@ const SystemBackupManager: React.FC = () => {
         if (backupData.supportSettings && selectedData.supportSettings) {
           totalImported += await importSupportSettings(backupData.supportSettings);
         }
+        // CRITICAL new imports
+        if (backupData.weatherData && selectedData.weatherData) {
+          totalImported += await importWeatherData(backupData.weatherData);
+        }
+        if (backupData.userRolesData && selectedData.userRolesData) {
+          totalImported += await importUserRolesData(backupData.userRolesData);
+        }
+        if (backupData.productData && selectedData.productData) {
+          totalImported += await importProductData(backupData.productData);
+        }
 
         toast({ title: t('backup.messages.importComplete'), description: `${totalImported} records imported` });
 
@@ -597,6 +667,7 @@ const SystemBackupManager: React.FC = () => {
       reports: true, financialData: true, inventoryData: true, tasksData: true,
       userManagement: true, parcelOwners: true, systemData: true, communicationData: true,
       barcodeData: true, pedigreeData: true, subscriptionData: true, supportSettings: true,
+      weatherData: true, userRolesData: true, productData: true,
     });
   };
 
@@ -607,6 +678,7 @@ const SystemBackupManager: React.FC = () => {
       reports: false, financialData: false, inventoryData: false, tasksData: false,
       userManagement: false, parcelOwners: false, systemData: false, communicationData: false,
       barcodeData: false, pedigreeData: false, subscriptionData: false, supportSettings: false,
+      weatherData: false, userRolesData: false, productData: false,
     });
   };
 
