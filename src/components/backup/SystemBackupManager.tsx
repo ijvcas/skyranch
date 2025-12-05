@@ -273,7 +273,8 @@ const SystemBackupManager: React.FC = () => {
 
   const getUserManagementCount = () => {
     if (!userManagementData) return 0;
-    return (userManagementData.userRoles?.length || 0) + (userManagementData.profiles?.length || 0);
+    return (userManagementData.profiles?.length || 0) + (userManagementData.emergencyContacts?.length || 0) + 
+           (userManagementData.userInvitations?.length || 0) + (userManagementData.connectionLogs?.length || 0);
   };
 
   const getSystemCount = () => {
