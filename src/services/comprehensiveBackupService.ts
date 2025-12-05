@@ -61,8 +61,10 @@ export interface ComprehensiveBackupData {
   
   // User Management Data
   userManagementData?: {
-    userRoles: any[];
     profiles: any[];
+    emergencyContacts: any[];
+    userInvitations: any[];
+    connectionLogs: any[];
   };
   
   // Property Ownership Data
@@ -329,19 +331,34 @@ export const getAllTasksData = async () => {
 
 // User Management Data
 export const getAllUserManagementData = async () => {
-  const { data: userRoles, error: rolesError } = await supabase
-    .from('user_roles')
-    .select('*');
-  if (rolesError) console.error('Error fetching user_roles:', rolesError);
-
+  // Note: user_roles table doesn't exist - roles are stored in app_users.role field
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select('*');
   if (profilesError) console.error('Error fetching profiles:', profilesError);
 
+  const { data: emergencyContacts, error: contactsError } = await supabase
+    .from('user_emergency_contacts')
+    .select('*');
+  if (contactsError) console.error('Error fetching user_emergency_contacts:', contactsError);
+
+  const { data: userInvitations, error: invitationsError } = await supabase
+    .from('user_invitations')
+    .select('*');
+  if (invitationsError) console.error('Error fetching user_invitations:', invitationsError);
+
+  const { data: connectionLogs, error: logsError } = await supabase
+    .from('user_connection_logs')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(1000); // Limit logs to prevent huge exports
+  if (logsError) console.error('Error fetching user_connection_logs:', logsError);
+
   return {
-    userRoles: userRoles || [],
-    profiles: profiles || []
+    profiles: profiles || [],
+    emergencyContacts: emergencyContacts || [],
+    userInvitations: userInvitations || [],
+    connectionLogs: connectionLogs || []
   };
 };
 
@@ -663,11 +680,24 @@ export const importUserManagementData = async (userManagementData: any): Promise
     else console.error('Error importing profiles:', error);
   }
 
-  if (userManagementData.userRoles?.length) {
-    const { error } = await supabase.from('user_roles').insert(userManagementData.userRoles);
-    if (!error) importCount += userManagementData.userRoles.length;
-    else console.error('Error importing user_roles:', error);
+  if (userManagementData.emergencyContacts?.length) {
+    const { error } = await supabase.from('user_emergency_contacts').insert(userManagementData.emergencyContacts);
+    if (!error) importCount += userManagementData.emergencyContacts.length;
+    else console.error('Error importing user_emergency_contacts:', error);
   }
+
+  if (userManagementData.userInvitations?.length) {
+    const { error } = await supabase.from('user_invitations').insert(userManagementData.userInvitations);
+    if (!error) importCount += userManagementData.userInvitations.length;
+    else console.error('Error importing user_invitations:', error);
+  }
+
+  // Note: connectionLogs are usually not imported as they are audit data
+  // If needed, uncomment below:
+  // if (userManagementData.connectionLogs?.length) {
+  //   const { error } = await supabase.from('user_connection_logs').insert(userManagementData.connectionLogs);
+  //   if (!error) importCount += userManagementData.connectionLogs.length;
+  // }
 
   return importCount;
 };
@@ -849,7 +879,8 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     financialData.farmLedger.length + financialData.expenseCategories.length + financialData.financialBudgets.length +
     inventoryData.items.length + inventoryData.transactions.length + inventoryData.alerts.length +
     tasksData.tasks.length +
-    userManagementData.userRoles.length + userManagementData.profiles.length +
+    userManagementData.profiles.length + userManagementData.emergencyContacts.length + 
+    userManagementData.userInvitations.length + userManagementData.connectionLogs.length +
     parcelOwners.length +
     systemData.aiSettings.length + systemData.appVersion.length + systemData.dashboardBanners.length + systemData.farmProfiles.length +
     communicationData.chatHistory.length + communicationData.pushTokens.length + communicationData.localReminders.length + communicationData.emailAuditLog.length +
