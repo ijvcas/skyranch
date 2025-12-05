@@ -35,6 +35,36 @@ export interface ComprehensiveBackupData {
   reports?: any[];
   properties?: any[];
   animalAttachments?: any[];
+  
+  // NEW: Financial Data
+  financialData?: {
+    animalSales: any[];
+    salePayments: any[];
+    farmLedger: any[];
+    expenseCategories: any[];
+    financialBudgets: any[];
+  };
+  
+  // NEW: Inventory Data
+  inventoryData?: {
+    items: any[];
+    transactions: any[];
+    alerts: any[];
+  };
+  
+  // NEW: Tasks Data
+  tasksData?: {
+    tasks: any[];
+  };
+  
+  // NEW: User Management Data
+  userManagementData?: {
+    userRoles: any[];
+    profiles: any[];
+  };
+  
+  // NEW: Property Ownership Data
+  parcelOwners?: any[];
 }
 
 // Lots and related data
@@ -169,7 +199,131 @@ export const getAllReports = async () => {
   return data || [];
 };
 
-// Import functions
+// Animal attachments (document metadata)
+export const getAllAnimalAttachments = async () => {
+  const { data, error } = await supabase
+    .from('animal_attachments')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+// ==================== NEW DATA FETCH FUNCTIONS ====================
+
+// Financial Data
+export const getAllFinancialData = async () => {
+  const { data: animalSales, error: salesError } = await supabase
+    .from('animal_sales')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (salesError) console.error('Error fetching animal_sales:', salesError);
+
+  const { data: salePayments, error: paymentsError } = await supabase
+    .from('sale_payments')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (paymentsError) console.error('Error fetching sale_payments:', paymentsError);
+
+  const { data: farmLedger, error: ledgerError } = await supabase
+    .from('farm_ledger')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (ledgerError) console.error('Error fetching farm_ledger:', ledgerError);
+
+  const { data: expenseCategories, error: categoriesError } = await supabase
+    .from('expense_categories')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (categoriesError) console.error('Error fetching expense_categories:', categoriesError);
+
+  const { data: financialBudgets, error: budgetsError } = await supabase
+    .from('financial_budgets')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (budgetsError) console.error('Error fetching financial_budgets:', budgetsError);
+
+  return {
+    animalSales: animalSales || [],
+    salePayments: salePayments || [],
+    farmLedger: farmLedger || [],
+    expenseCategories: expenseCategories || [],
+    financialBudgets: financialBudgets || []
+  };
+};
+
+// Inventory Data
+export const getAllInventoryData = async () => {
+  const { data: items, error: itemsError } = await supabase
+    .from('inventory_items')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (itemsError) console.error('Error fetching inventory_items:', itemsError);
+
+  const { data: transactions, error: transactionsError } = await supabase
+    .from('inventory_transactions')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (transactionsError) console.error('Error fetching inventory_transactions:', transactionsError);
+
+  const { data: alerts, error: alertsError } = await supabase
+    .from('inventory_alerts')
+    .select('*')
+    .order('triggered_at', { ascending: false });
+  if (alertsError) console.error('Error fetching inventory_alerts:', alertsError);
+
+  return {
+    items: items || [],
+    transactions: transactions || [],
+    alerts: alerts || []
+  };
+};
+
+// Tasks Data
+export const getAllTasksData = async () => {
+  const { data: tasks, error: tasksError } = await supabase
+    .from('tasks')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (tasksError) console.error('Error fetching tasks:', tasksError);
+
+  return {
+    tasks: tasks || []
+  };
+};
+
+// User Management Data
+export const getAllUserManagementData = async () => {
+  const { data: userRoles, error: rolesError } = await supabase
+    .from('user_roles')
+    .select('*');
+  if (rolesError) console.error('Error fetching user_roles:', rolesError);
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('*');
+  if (profilesError) console.error('Error fetching profiles:', profilesError);
+
+  return {
+    userRoles: userRoles || [],
+    profiles: profiles || []
+  };
+};
+
+// Parcel Owners
+export const getAllParcelOwners = async () => {
+  const { data, error } = await supabase
+    .from('parcel_owners')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) console.error('Error fetching parcel_owners:', error);
+  return data || [];
+};
+
+// ==================== IMPORT FUNCTIONS ====================
+
 export const importLots = async (lotsData: any): Promise<number> => {
   let importCount = 0;
 
@@ -259,23 +413,116 @@ export const importReports = async (reports: any[]): Promise<number> => {
   return error ? 0 : reports.length;
 };
 
-// Animal attachments (document metadata)
-export const getAllAnimalAttachments = async () => {
-  const { data, error } = await supabase
-    .from('animal_attachments')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data || [];
-};
-
 export const importAnimalAttachments = async (attachments: any[]): Promise<number> => {
   if (!attachments || attachments.length === 0) return 0;
   
   // Note: This only imports metadata, not the actual files from storage
   const { error } = await supabase.from('animal_attachments').insert(attachments);
   return error ? 0 : attachments.length;
+};
+
+// ==================== NEW IMPORT FUNCTIONS ====================
+
+export const importFinancialData = async (financialData: any): Promise<number> => {
+  let importCount = 0;
+
+  if (financialData.expenseCategories?.length) {
+    const { error } = await supabase.from('expense_categories').insert(financialData.expenseCategories);
+    if (!error) importCount += financialData.expenseCategories.length;
+    else console.error('Error importing expense_categories:', error);
+  }
+
+  if (financialData.animalSales?.length) {
+    const { error } = await supabase.from('animal_sales').insert(financialData.animalSales);
+    if (!error) importCount += financialData.animalSales.length;
+    else console.error('Error importing animal_sales:', error);
+  }
+
+  if (financialData.salePayments?.length) {
+    const { error } = await supabase.from('sale_payments').insert(financialData.salePayments);
+    if (!error) importCount += financialData.salePayments.length;
+    else console.error('Error importing sale_payments:', error);
+  }
+
+  if (financialData.farmLedger?.length) {
+    const { error } = await supabase.from('farm_ledger').insert(financialData.farmLedger);
+    if (!error) importCount += financialData.farmLedger.length;
+    else console.error('Error importing farm_ledger:', error);
+  }
+
+  if (financialData.financialBudgets?.length) {
+    const { error } = await supabase.from('financial_budgets').insert(financialData.financialBudgets);
+    if (!error) importCount += financialData.financialBudgets.length;
+    else console.error('Error importing financial_budgets:', error);
+  }
+
+  return importCount;
+};
+
+export const importInventoryData = async (inventoryData: any): Promise<number> => {
+  let importCount = 0;
+
+  if (inventoryData.items?.length) {
+    const { error } = await supabase.from('inventory_items').insert(inventoryData.items);
+    if (!error) importCount += inventoryData.items.length;
+    else console.error('Error importing inventory_items:', error);
+  }
+
+  if (inventoryData.transactions?.length) {
+    const { error } = await supabase.from('inventory_transactions').insert(inventoryData.transactions);
+    if (!error) importCount += inventoryData.transactions.length;
+    else console.error('Error importing inventory_transactions:', error);
+  }
+
+  if (inventoryData.alerts?.length) {
+    const { error } = await supabase.from('inventory_alerts').insert(inventoryData.alerts);
+    if (!error) importCount += inventoryData.alerts.length;
+    else console.error('Error importing inventory_alerts:', error);
+  }
+
+  return importCount;
+};
+
+export const importTasksData = async (tasksData: any): Promise<number> => {
+  let importCount = 0;
+
+  if (tasksData.tasks?.length) {
+    const { error } = await supabase.from('tasks').insert(tasksData.tasks);
+    if (!error) importCount += tasksData.tasks.length;
+    else console.error('Error importing tasks:', error);
+  }
+
+  return importCount;
+};
+
+export const importUserManagementData = async (userManagementData: any): Promise<number> => {
+  let importCount = 0;
+
+  // Import profiles first (as user_roles may depend on them)
+  if (userManagementData.profiles?.length) {
+    const { error } = await supabase.from('profiles').insert(userManagementData.profiles);
+    if (!error) importCount += userManagementData.profiles.length;
+    else console.error('Error importing profiles:', error);
+  }
+
+  if (userManagementData.userRoles?.length) {
+    const { error } = await supabase.from('user_roles').insert(userManagementData.userRoles);
+    if (!error) importCount += userManagementData.userRoles.length;
+    else console.error('Error importing user_roles:', error);
+  }
+
+  return importCount;
+};
+
+export const importParcelOwners = async (parcelOwners: any[]): Promise<number> => {
+  if (!parcelOwners?.length) return 0;
+  
+  const { error } = await supabase.from('parcel_owners').insert(parcelOwners);
+  if (error) {
+    console.error('Error importing parcel_owners:', error);
+    return 0;
+  }
+  return parcelOwners.length;
 };
 
 // Get farm profile for backup
@@ -315,17 +562,28 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
   const notifications = await getAllNotifications();
   const reports = await getAllReports();
   const attachments = await getAllAnimalAttachments();
+  
+  // NEW data categories
+  const financialData = await getAllFinancialData();
+  const inventoryData = await getAllInventoryData();
+  const tasksData = await getAllTasksData();
+  const userManagementData = await getAllUserManagementData();
+  const parcelOwners = await getAllParcelOwners();
+
+  const totalRecords = users.length + animals.length + fieldReports.length + 
+    lotsData.lots.length + cadastralData.parcels.length + healthRecords.length +
+    breedingData.breedingRecords.length + calendarData.events.length +
+    financialData.animalSales.length + financialData.farmLedger.length +
+    inventoryData.items.length + tasksData.tasks.length + parcelOwners.length;
 
   const backupData: ComprehensiveBackupData = {
     metadata: {
       exportDate: new Date().toISOString(),
-      version: '2.0.0',
+      version: '3.0.0',
       platform: 'ios',
       appVersion: '1.0.0',
       selectedCategories: ['all'],
-      totalRecords: users.length + animals.length + fieldReports.length + 
-        lotsData.lots.length + cadastralData.parcels.length + healthRecords.length +
-        breedingData.breedingRecords.length + calendarData.events.length
+      totalRecords
     },
     farmProfile,
     users,
@@ -339,7 +597,12 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     notifications,
     reports,
     properties: cadastralData.properties,
-    animalAttachments: attachments
+    animalAttachments: attachments,
+    financialData,
+    inventoryData,
+    tasksData,
+    userManagementData,
+    parcelOwners
   };
 
   // Save to Capacitor Preferences for quick access
