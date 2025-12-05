@@ -28,7 +28,6 @@ export interface ComprehensiveBackupData {
   users?: any[];
   animals?: any[];
   fieldReports?: any[];
-  lots?: any[];
   cadastralParcels?: any[];
   healthRecords?: any[];
   breedingRecords?: any[];
@@ -37,6 +36,14 @@ export interface ComprehensiveBackupData {
   reports?: any[];
   properties?: any[];
   animalAttachments?: any[];
+  
+  // Lots Data (complete)
+  lotsData?: {
+    lots: any[];
+    polygons: any[];
+    assignments: any[];
+    rotations: any[];
+  };
   
   // Financial Data
   financialData?: {
@@ -54,10 +61,15 @@ export interface ComprehensiveBackupData {
     alerts: any[];
   };
   
-  // Tasks Data
+  // Tasks Data (complete)
   tasksData?: {
     tasks: any[];
+    taskAttachments: any[];
+    taskComments: any[];
   };
+  
+  // Support Settings
+  supportSettings?: any[];
   
   // User Management Data
   userManagementData?: {
@@ -316,7 +328,7 @@ export const getAllInventoryData = async () => {
   };
 };
 
-// Tasks Data
+// Tasks Data (complete with attachments and comments)
 export const getAllTasksData = async () => {
   const { data: tasks, error: tasksError } = await supabase
     .from('tasks')
@@ -324,9 +336,32 @@ export const getAllTasksData = async () => {
     .order('created_at', { ascending: false });
   if (tasksError) console.error('Error fetching tasks:', tasksError);
 
+  const { data: taskAttachments, error: attachmentsError } = await supabase
+    .from('task_attachments')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (attachmentsError) console.error('Error fetching task_attachments:', attachmentsError);
+
+  const { data: taskComments, error: commentsError } = await supabase
+    .from('task_comments')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (commentsError) console.error('Error fetching task_comments:', commentsError);
+
   return {
-    tasks: tasks || []
+    tasks: tasks || [],
+    taskAttachments: taskAttachments || [],
+    taskComments: taskComments || []
   };
+};
+
+// Support Settings
+export const getAllSupportSettings = async () => {
+  const { data, error } = await supabase
+    .from('support_settings')
+    .select('*');
+  if (error) console.error('Error fetching support_settings:', error);
+  return data || [];
 };
 
 // User Management Data
@@ -665,10 +700,34 @@ export const importInventoryData = async (inventoryData: any): Promise<number> =
 };
 
 export const importTasksData = async (tasksData: any): Promise<number> => {
-  if (!tasksData.tasks?.length) return 0;
-  const { error } = await supabase.from('tasks').insert(tasksData.tasks);
-  if (error) console.error('Error importing tasks:', error);
-  return error ? 0 : tasksData.tasks.length;
+  let importCount = 0;
+
+  if (tasksData.tasks?.length) {
+    const { error } = await supabase.from('tasks').insert(tasksData.tasks);
+    if (!error) importCount += tasksData.tasks.length;
+    else console.error('Error importing tasks:', error);
+  }
+
+  if (tasksData.taskAttachments?.length) {
+    const { error } = await supabase.from('task_attachments').insert(tasksData.taskAttachments);
+    if (!error) importCount += tasksData.taskAttachments.length;
+    else console.error('Error importing task_attachments:', error);
+  }
+
+  if (tasksData.taskComments?.length) {
+    const { error } = await supabase.from('task_comments').insert(tasksData.taskComments);
+    if (!error) importCount += tasksData.taskComments.length;
+    else console.error('Error importing task_comments:', error);
+  }
+
+  return importCount;
+};
+
+export const importSupportSettings = async (supportSettings: any[]): Promise<number> => {
+  if (!supportSettings?.length) return 0;
+  const { error } = await supabase.from('support_settings').upsert(supportSettings);
+  if (error) console.error('Error importing support_settings:', error);
+  return error ? 0 : supportSettings.length;
 };
 
 export const importUserManagementData = async (userManagementData: any): Promise<number> => {
@@ -867,6 +926,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
   const barcodeData = await getAllBarcodeData();
   const pedigreeData = await getAllPedigreeData();
   const subscriptionData = await getAllSubscriptionData();
+  const supportSettings = await getAllSupportSettings();
 
   const totalRecords = 
     users.length + animals.length + fieldReports.length + 
@@ -878,7 +938,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     financialData.animalSales.length + financialData.salePayments.length + 
     financialData.farmLedger.length + financialData.expenseCategories.length + financialData.financialBudgets.length +
     inventoryData.items.length + inventoryData.transactions.length + inventoryData.alerts.length +
-    tasksData.tasks.length +
+    tasksData.tasks.length + tasksData.taskAttachments.length + tasksData.taskComments.length +
     userManagementData.profiles.length + userManagementData.emergencyContacts.length + 
     userManagementData.userInvitations.length + userManagementData.connectionLogs.length +
     parcelOwners.length +
@@ -886,12 +946,13 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     communicationData.chatHistory.length + communicationData.pushTokens.length + communicationData.localReminders.length + communicationData.emailAuditLog.length +
     barcodeData.barcodeRegistry.length + barcodeData.barcodeScanHistory.length +
     pedigreeData.pedigreeAnalyses.length +
-    subscriptionData.subscriptions.length + subscriptionData.subscriptionUsage.length;
+    subscriptionData.subscriptions.length + subscriptionData.subscriptionUsage.length +
+    supportSettings.length;
 
   const backupData: ComprehensiveBackupData = {
     metadata: {
       exportDate: new Date().toISOString(),
-      version: '4.0.0',
+      version: '5.0.0',
       platform: 'ios',
       appVersion: '1.0.0',
       selectedCategories: ['all'],
@@ -901,7 +962,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     users,
     animals,
     fieldReports,
-    lots: lotsData.lots,
+    lotsData,
     cadastralParcels: cadastralData.parcels,
     healthRecords,
     breedingRecords: breedingData.breedingRecords,
@@ -919,7 +980,8 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     communicationData,
     barcodeData,
     pedigreeData,
-    subscriptionData
+    subscriptionData,
+    supportSettings
   };
 
   if (storageType === 'icloud') {

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3, Cloud, DollarSign, Package, CheckSquare, UserCog, Home, Settings, MessageSquare, Scan, Dna, CreditCard } from 'lucide-react';
+import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3, Cloud, DollarSign, Package, CheckSquare, UserCog, Home, Settings, MessageSquare, Scan, Dna, CreditCard, LifeBuoy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { Capacitor } from '@capacitor/core';
@@ -51,6 +51,8 @@ import {
   importBarcodeData,
   importPedigreeData,
   importSubscriptionData,
+  importSupportSettings,
+  getAllSupportSettings,
   type ComprehensiveBackupData
 } from '@/services/comprehensiveBackupService';
 
@@ -76,6 +78,7 @@ interface BackupData {
   barcodeData: boolean;
   pedigreeData: boolean;
   subscriptionData: boolean;
+  supportSettings: boolean;
 }
 
 const SystemBackupManager: React.FC = () => {
@@ -109,6 +112,7 @@ const SystemBackupManager: React.FC = () => {
     barcodeData: true,
     pedigreeData: true,
     subscriptionData: true,
+    supportSettings: true,
   });
 
   // Get data for export with actual counts
@@ -234,6 +238,12 @@ const SystemBackupManager: React.FC = () => {
     enabled: selectedData.subscriptionData,
   });
 
+  const { data: supportSettings = [] } = useQuery({
+    queryKey: ['backup-support-settings'],
+    queryFn: getAllSupportSettings,
+    enabled: selectedData.supportSettings,
+  });
+
   // Count helper functions
   const getLotsCount = () => {
     if (!lotsData) return 0;
@@ -269,7 +279,11 @@ const SystemBackupManager: React.FC = () => {
            (inventoryData.alerts?.length || 0);
   };
 
-  const getTasksCount = () => tasksData?.tasks?.length || 0;
+  const getTasksCount = () => {
+    if (!tasksData) return 0;
+    return (tasksData.tasks?.length || 0) + (tasksData.taskAttachments?.length || 0) + 
+           (tasksData.taskComments?.length || 0);
+  };
 
   const getUserManagementCount = () => {
     if (!userManagementData) return 0;
@@ -323,6 +337,7 @@ const SystemBackupManager: React.FC = () => {
     { key: 'barcodeData', label: t('backup.categories.barcodeData', 'Barcode Data'), icon: Scan, description: t('backup.descriptions.barcodeData', 'Barcode registry and scan history'), count: getBarcodeCount() },
     { key: 'pedigreeData', label: t('backup.categories.pedigreeData', 'Pedigree Analysis'), icon: Dna, description: t('backup.descriptions.pedigreeData', 'Pedigree analyses'), count: getPedigreeCount() },
     { key: 'subscriptionData', label: t('backup.categories.subscriptionData', 'Subscriptions'), icon: CreditCard, description: t('backup.descriptions.subscriptionData', 'Subscription and usage data'), count: getSubscriptionCount() },
+    { key: 'supportSettings', label: t('backup.categories.supportSettings', 'Support Settings'), icon: LifeBuoy, description: t('backup.descriptions.supportSettings', 'Support contact information'), count: supportSettings.length },
   ];
 
   const handleDataSelectionChange = (category: keyof BackupData, checked: boolean) => {
@@ -398,7 +413,7 @@ const SystemBackupManager: React.FC = () => {
         if (selectedData.users) backupData.users = users;
         if (selectedData.animals) backupData.animals = animals;
         if (selectedData.fieldReports) backupData.fieldReports = fieldReports;
-        if (selectedData.lots && lotsData) backupData.lots = [lotsData];
+        if (selectedData.lots && lotsData) backupData.lotsData = lotsData;
         if (selectedData.cadastralData && cadastralData) backupData.cadastralParcels = [cadastralData];
         if (selectedData.healthRecords) backupData.healthRecords = healthRecords;
         if (selectedData.breedingRecords && breedingData) backupData.breedingRecords = [breedingData];
@@ -416,6 +431,7 @@ const SystemBackupManager: React.FC = () => {
         if (selectedData.barcodeData && barcodeData) backupData.barcodeData = barcodeData;
         if (selectedData.pedigreeData && pedigreeData) backupData.pedigreeData = pedigreeData;
         if (selectedData.subscriptionData && subscriptionData) backupData.subscriptionData = subscriptionData;
+        if (selectedData.supportSettings && supportSettings) backupData.supportSettings = supportSettings;
 
         const dataStr = JSON.stringify(backupData, null, 2);
         const backupSizeMB = (dataStr.length / 1024 / 1024).toFixed(2);
@@ -500,8 +516,8 @@ const SystemBackupManager: React.FC = () => {
         if (backupData.fieldReports && selectedData.fieldReports) {
           totalImported += await importFieldReports(backupData.fieldReports);
         }
-        if (backupData.lots && selectedData.lots && Array.isArray(backupData.lots) && backupData.lots.length > 0) {
-          totalImported += await importLots(backupData.lots[0]);
+        if (backupData.lotsData && selectedData.lots) {
+          totalImported += await importLots(backupData.lotsData);
         }
         if (backupData.cadastralParcels && selectedData.cadastralData && Array.isArray(backupData.cadastralParcels) && backupData.cadastralParcels.length > 0) {
           totalImported += await importCadastralData(backupData.cadastralParcels[0]);
@@ -552,6 +568,9 @@ const SystemBackupManager: React.FC = () => {
         if (backupData.subscriptionData && selectedData.subscriptionData) {
           totalImported += await importSubscriptionData(backupData.subscriptionData);
         }
+        if (backupData.supportSettings && selectedData.supportSettings) {
+          totalImported += await importSupportSettings(backupData.supportSettings);
+        }
 
         toast({ title: t('backup.messages.importComplete'), description: `${totalImported} records imported` });
 
@@ -577,7 +596,7 @@ const SystemBackupManager: React.FC = () => {
       healthRecords: true, breedingRecords: true, calendarEvents: true, notifications: true,
       reports: true, financialData: true, inventoryData: true, tasksData: true,
       userManagement: true, parcelOwners: true, systemData: true, communicationData: true,
-      barcodeData: true, pedigreeData: true, subscriptionData: true,
+      barcodeData: true, pedigreeData: true, subscriptionData: true, supportSettings: true,
     });
   };
 
@@ -587,7 +606,7 @@ const SystemBackupManager: React.FC = () => {
       healthRecords: false, breedingRecords: false, calendarEvents: false, notifications: false,
       reports: false, financialData: false, inventoryData: false, tasksData: false,
       userManagement: false, parcelOwners: false, systemData: false, communicationData: false,
-      barcodeData: false, pedigreeData: false, subscriptionData: false,
+      barcodeData: false, pedigreeData: false, subscriptionData: false, supportSettings: false,
     });
   };
 
