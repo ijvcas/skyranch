@@ -28,9 +28,11 @@ export interface ComprehensiveBackupData {
   users?: any[];
   animals?: any[];
   fieldReports?: any[];
+  fieldReportEntries?: any[]; // Separate entries for accurate counting
   cadastralParcels?: any[];
   healthRecords?: any[];
   breedingRecords?: any[];
+  offspring?: any[]; // Added offspring table
   calendarEvents?: any[];
   notifications?: any[];
   reports?: any[];
@@ -1057,8 +1059,11 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
   const userRolesData = await getAllUserRolesData();
   const productData = await getAllProductData();
 
+  // Calculate field report entries count
+  const fieldReportEntriesCount = fieldReports.reduce((acc, r) => acc + (r.entries?.length || 0), 0);
+
   const totalRecords = 
-    users.length + animals.length + fieldReports.length + 
+    users.length + animals.length + fieldReports.length + fieldReportEntriesCount +
     lotsData.lots.length + lotsData.polygons.length + lotsData.assignments.length + lotsData.rotations.length +
     cadastralData.parcels.length + cadastralData.properties.length +
     healthRecords.length + breedingData.breedingRecords.length + breedingData.offspring.length +
@@ -1084,7 +1089,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
   const backupData: ComprehensiveBackupData = {
     metadata: {
       exportDate: new Date().toISOString(),
-      version: '6.0.0', // Updated version with ALL tables
+      version: '6.1.0', // Fixed: now includes offspring and field_report_entries
       platform: 'ios',
       appVersion: '1.0.0',
       selectedCategories: ['all'],
@@ -1098,6 +1103,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     cadastralParcels: cadastralData.parcels,
     healthRecords,
     breedingRecords: breedingData.breedingRecords,
+    offspring: breedingData.offspring, // Include offspring data
     calendarEvents: calendarData.events,
     notifications,
     reports,

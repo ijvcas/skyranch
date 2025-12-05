@@ -294,6 +294,13 @@ const SystemBackupManager: React.FC = () => {
     return (breedingData.breedingRecords?.length || 0) + (breedingData.offspring?.length || 0);
   };
 
+  const getFieldReportsCount = () => {
+    if (!fieldReports) return 0;
+    // Count reports + all entries inside them
+    const entriesCount = fieldReports.reduce((acc, report) => acc + (report.entries?.length || 0), 0);
+    return fieldReports.length + entriesCount;
+  };
+
   const getCalendarCount = () => {
     if (!calendarData) return 0;
     return (calendarData.events?.length || 0) + (calendarData.eventNotifications?.length || 0);
@@ -365,7 +372,7 @@ const SystemBackupManager: React.FC = () => {
   const backupCategories = [
     { key: 'users', label: t('backup.categories.users', 'Users'), icon: Users, description: t('backup.descriptions.users', 'App users and permissions'), count: users.length },
     { key: 'animals', label: t('backup.categories.animals', 'Animals'), icon: Database, description: t('backup.descriptions.animals', 'All animal records'), count: animals.length },
-    { key: 'fieldReports', label: t('backup.categories.fieldReports', 'Field Reports'), icon: Clipboard, description: t('backup.descriptions.fieldReports', 'Daily field reports'), count: fieldReports.length },
+    { key: 'fieldReports', label: t('backup.categories.fieldReports', 'Field Reports'), icon: Clipboard, description: t('backup.descriptions.fieldReports', 'Reports and entries'), count: getFieldReportsCount() },
     { key: 'lots', label: t('backup.categories.lots', 'Lots'), icon: MapPin, description: t('backup.descriptions.lots', 'Lots, polygons, assignments, rotations'), count: getLotsCount() },
     { key: 'cadastralData', label: t('backup.categories.cadastralData', 'Cadastral Data'), icon: Shield, description: t('backup.descriptions.cadastralData', 'Parcels and properties'), count: getCadastralCount() },
     { key: 'healthRecords', label: t('backup.categories.healthRecords', 'Health Records'), icon: Heart, description: t('backup.descriptions.healthRecords', 'Vaccinations, treatments'), count: healthRecords.length },
@@ -419,7 +426,7 @@ const SystemBackupManager: React.FC = () => {
     let total = 0;
     if (selectedData.users) total += users.length;
     if (selectedData.animals) total += animals.length;
-    if (selectedData.fieldReports) total += fieldReports.length;
+    if (selectedData.fieldReports) total += getFieldReportsCount();
     if (selectedData.lots) total += getLotsCount();
     if (selectedData.cadastralData) total += getCadastralCount();
     if (selectedData.healthRecords) total += healthRecords.length;
@@ -457,7 +464,7 @@ const SystemBackupManager: React.FC = () => {
         const backupData: ComprehensiveBackupData = {
           metadata: {
             exportDate: new Date().toISOString(),
-            version: '6.0.0', // Updated with ALL tables
+            version: '6.1.0', // Fixed: includes offspring and field_report_entries
             platform: 'ios',
             appVersion: '1.0.0',
             selectedCategories,
@@ -472,7 +479,10 @@ const SystemBackupManager: React.FC = () => {
         if (selectedData.lots && lotsData) backupData.lotsData = lotsData;
         if (selectedData.cadastralData && cadastralData) backupData.cadastralParcels = [cadastralData];
         if (selectedData.healthRecords) backupData.healthRecords = healthRecords;
-        if (selectedData.breedingRecords && breedingData) backupData.breedingRecords = [breedingData];
+        if (selectedData.breedingRecords && breedingData) {
+          backupData.breedingRecords = breedingData.breedingRecords;
+          backupData.offspring = breedingData.offspring;
+        }
         if (selectedData.calendarEvents && calendarData) backupData.calendarEvents = [calendarData];
         if (selectedData.notifications) backupData.notifications = notifications;
         if (selectedData.reports) backupData.reports = reports;
@@ -585,8 +595,21 @@ const SystemBackupManager: React.FC = () => {
         if (backupData.healthRecords && selectedData.healthRecords) {
           totalImported += await importHealthRecords(backupData.healthRecords);
         }
-        if (backupData.breedingRecords && selectedData.breedingRecords && Array.isArray(backupData.breedingRecords) && backupData.breedingRecords.length > 0) {
-          totalImported += await importBreedingData(backupData.breedingRecords[0]);
+        // Handle breeding records - support both new and old formats
+        if (selectedData.breedingRecords) {
+          // New format: separate breedingRecords and offspring arrays
+          if (backupData.breedingRecords && Array.isArray(backupData.breedingRecords) && 
+              (backupData.breedingRecords.length === 0 || !backupData.breedingRecords[0]?.breedingRecords)) {
+            totalImported += await importBreedingData({
+              breedingRecords: backupData.breedingRecords,
+              offspring: backupData.offspring || []
+            });
+          }
+          // Old format: wrapped in array with nested structure
+          else if (backupData.breedingRecords && Array.isArray(backupData.breedingRecords) && 
+                   backupData.breedingRecords.length > 0 && backupData.breedingRecords[0]?.breedingRecords) {
+            totalImported += await importBreedingData(backupData.breedingRecords[0]);
+          }
         }
         if (backupData.calendarEvents && selectedData.calendarEvents && Array.isArray(backupData.calendarEvents) && backupData.calendarEvents.length > 0) {
           totalImported += await importCalendarData(backupData.calendarEvents[0]);
