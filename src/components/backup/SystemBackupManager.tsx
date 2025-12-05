@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3, Cloud } from 'lucide-react';
+import { Download, Upload, Database, Users, FileText, Calendar, Shield, MapPin, Heart, Clipboard, Bell, BarChart3, Cloud, DollarSign, Package, CheckSquare, UserCog, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { Capacitor } from '@capacitor/core';
@@ -24,6 +24,11 @@ import {
   getAllCalendarData, 
   getAllNotifications, 
   getAllReports,
+  getAllFinancialData,
+  getAllInventoryData,
+  getAllTasksData,
+  getAllUserManagementData,
+  getAllParcelOwners,
   importLots,
   importCadastralData,
   importHealthRecords,
@@ -31,6 +36,11 @@ import {
   importCalendarData,
   importNotifications,
   importReports,
+  importFinancialData,
+  importInventoryData,
+  importTasksData,
+  importUserManagementData,
+  importParcelOwners,
   type ComprehensiveBackupData
 } from '@/services/comprehensiveBackupService';
 
@@ -45,6 +55,12 @@ interface BackupData {
   calendarEvents: boolean;
   notifications: boolean;
   reports: boolean;
+  // NEW categories
+  financialData: boolean;
+  inventoryData: boolean;
+  tasksData: boolean;
+  userManagement: boolean;
+  parcelOwners: boolean;
 }
 
 const SystemBackupManager: React.FC = () => {
@@ -67,6 +83,12 @@ const SystemBackupManager: React.FC = () => {
     calendarEvents: true,
     notifications: true,
     reports: true,
+    // NEW categories default to true
+    financialData: true,
+    inventoryData: true,
+    tasksData: true,
+    userManagement: true,
+    parcelOwners: true,
   });
 
   // Get data for export with actual counts
@@ -82,15 +104,10 @@ const SystemBackupManager: React.FC = () => {
       console.log('🔄 Fetching optimized animals for backup...');
       const data = await getAllAnimalsForBackup(true);
       console.log(`📊 Fetched ${data.length} animals`);
-      if (data.length > 0) {
-        const sample = data[0];
-        const keys = Object.keys(sample);
-        console.log(`🔍 Sample animal fields (${keys.length} total):`, keys);
-      }
       return data;
     },
     enabled: selectedData.animals,
-    staleTime: 0, // Always fetch fresh data
+    staleTime: 0,
   });
 
   const { data: fieldReports = [] } = useQuery({
@@ -141,76 +158,170 @@ const SystemBackupManager: React.FC = () => {
     enabled: selectedData.reports,
   });
 
+  // NEW data queries
+  const { data: financialData } = useQuery({
+    queryKey: ['backup-financial'],
+    queryFn: getAllFinancialData,
+    enabled: selectedData.financialData,
+  });
+
+  const { data: inventoryData } = useQuery({
+    queryKey: ['backup-inventory'],
+    queryFn: getAllInventoryData,
+    enabled: selectedData.inventoryData,
+  });
+
+  const { data: tasksData } = useQuery({
+    queryKey: ['backup-tasks'],
+    queryFn: getAllTasksData,
+    enabled: selectedData.tasksData,
+  });
+
+  const { data: userManagementData } = useQuery({
+    queryKey: ['backup-user-management'],
+    queryFn: getAllUserManagementData,
+    enabled: selectedData.userManagement,
+  });
+
+  const { data: parcelOwners = [] } = useQuery({
+    queryKey: ['backup-parcel-owners'],
+    queryFn: getAllParcelOwners,
+    enabled: selectedData.parcelOwners,
+  });
+
+  const getFinancialCount = () => {
+    if (!financialData) return 0;
+    return (financialData.animalSales?.length || 0) + 
+           (financialData.salePayments?.length || 0) + 
+           (financialData.farmLedger?.length || 0) + 
+           (financialData.expenseCategories?.length || 0) + 
+           (financialData.financialBudgets?.length || 0);
+  };
+
+  const getInventoryCount = () => {
+    if (!inventoryData) return 0;
+    return (inventoryData.items?.length || 0) + 
+           (inventoryData.transactions?.length || 0) + 
+           (inventoryData.alerts?.length || 0);
+  };
+
+  const getTasksCount = () => {
+    if (!tasksData) return 0;
+    return tasksData.tasks?.length || 0;
+  };
+
+  const getUserManagementCount = () => {
+    if (!userManagementData) return 0;
+    return (userManagementData.userRoles?.length || 0) + 
+           (userManagementData.profiles?.length || 0);
+  };
+
   const backupCategories = [
     { 
       key: 'users', 
-      label: t('backup.categories.users'), 
+      label: t('backup.categories.users', 'Users'), 
       icon: Users, 
-      description: t('backup.descriptions.users'),
+      description: t('backup.descriptions.users', 'App users and permissions'),
       count: users.length
     },
     { 
       key: 'animals', 
-      label: t('backup.categories.animals'), 
+      label: t('backup.categories.animals', 'Animals'), 
       icon: Database, 
-      description: t('backup.descriptions.animals'),
+      description: t('backup.descriptions.animals', 'All animal records and data'),
       count: animals.length
     },
     { 
       key: 'fieldReports', 
-      label: t('backup.categories.fieldReports'), 
+      label: t('backup.categories.fieldReports', 'Field Reports'), 
       icon: Clipboard, 
-      description: t('backup.descriptions.fieldReports'),
+      description: t('backup.descriptions.fieldReports', 'Daily field reports and entries'),
       count: fieldReports.length
     },
     { 
       key: 'lots', 
-      label: t('backup.categories.lots'), 
+      label: t('backup.categories.lots', 'Lots'), 
       icon: MapPin, 
-      description: t('backup.descriptions.lots'),
+      description: t('backup.descriptions.lots', 'Lots, polygons, assignments'),
       count: lotsData ? (lotsData.lots?.length || 0) + (lotsData.polygons?.length || 0) : 0
     },
     { 
       key: 'cadastralData', 
-      label: t('backup.categories.cadastralData'), 
+      label: t('backup.categories.cadastralData', 'Cadastral Data'), 
       icon: Shield, 
-      description: t('backup.descriptions.cadastralData'),
+      description: t('backup.descriptions.cadastralData', 'Parcels and properties'),
       count: cadastralData ? (cadastralData.parcels?.length || 0) + (cadastralData.properties?.length || 0) : 0
     },
     { 
       key: 'healthRecords', 
-      label: t('backup.categories.healthRecords'), 
+      label: t('backup.categories.healthRecords', 'Health Records'), 
       icon: Heart, 
-      description: t('backup.descriptions.healthRecords'),
+      description: t('backup.descriptions.healthRecords', 'Vaccinations, treatments, checkups'),
       count: healthRecords.length
     },
     { 
       key: 'breedingRecords', 
-      label: t('backup.categories.breedingRecords'), 
+      label: t('backup.categories.breedingRecords', 'Breeding Records'), 
       icon: FileText, 
-      description: t('backup.descriptions.breedingRecords'),
+      description: t('backup.descriptions.breedingRecords', 'Breeding and offspring data'),
       count: breedingData ? (breedingData.breedingRecords?.length || 0) + (breedingData.offspring?.length || 0) : 0
     },
     { 
       key: 'calendarEvents', 
-      label: t('backup.categories.calendarEvents'), 
+      label: t('backup.categories.calendarEvents', 'Calendar Events'), 
       icon: Calendar, 
-      description: t('backup.descriptions.calendarEvents'),
+      description: t('backup.descriptions.calendarEvents', 'Scheduled events and reminders'),
       count: calendarData ? (calendarData.events?.length || 0) + (calendarData.eventNotifications?.length || 0) : 0
     },
     { 
       key: 'notifications', 
-      label: t('backup.categories.notifications'), 
+      label: t('backup.categories.notifications', 'Notifications'), 
       icon: Bell, 
-      description: t('backup.descriptions.notifications'),
+      description: t('backup.descriptions.notifications', 'System notifications'),
       count: notifications.length
     },
     { 
       key: 'reports', 
-      label: t('backup.categories.reports'), 
+      label: t('backup.categories.reports', 'Reports'), 
       icon: BarChart3, 
-      description: t('backup.descriptions.reports'),
+      description: t('backup.descriptions.reports', 'Saved reports'),
       count: reports.length
+    },
+    // NEW CATEGORIES
+    { 
+      key: 'financialData', 
+      label: t('backup.categories.financialData', 'Financial Data'), 
+      icon: DollarSign, 
+      description: t('backup.descriptions.financialData', 'Sales, payments, ledger, budgets'),
+      count: getFinancialCount()
+    },
+    { 
+      key: 'inventoryData', 
+      label: t('backup.categories.inventoryData', 'Inventory'), 
+      icon: Package, 
+      description: t('backup.descriptions.inventoryData', 'Items, transactions, alerts'),
+      count: getInventoryCount()
+    },
+    { 
+      key: 'tasksData', 
+      label: t('backup.categories.tasksData', 'Tasks'), 
+      icon: CheckSquare, 
+      description: t('backup.descriptions.tasksData', 'Task management data'),
+      count: getTasksCount()
+    },
+    { 
+      key: 'userManagement', 
+      label: t('backup.categories.userManagement', 'User Management'), 
+      icon: UserCog, 
+      description: t('backup.descriptions.userManagement', 'Roles and profiles'),
+      count: getUserManagementCount()
+    },
+    { 
+      key: 'parcelOwners', 
+      label: t('backup.categories.parcelOwners', 'Property Ownership'), 
+      icon: Home, 
+      description: t('backup.descriptions.parcelOwners', 'Parcel ownership records'),
+      count: parcelOwners.length
     },
   ];
 
@@ -266,6 +377,12 @@ const SystemBackupManager: React.FC = () => {
     }
     if (selectedData.notifications) total += notifications.length;
     if (selectedData.reports) total += reports.length;
+    // NEW categories
+    if (selectedData.financialData) total += getFinancialCount();
+    if (selectedData.inventoryData) total += getInventoryCount();
+    if (selectedData.tasksData) total += getTasksCount();
+    if (selectedData.userManagement) total += getUserManagementCount();
+    if (selectedData.parcelOwners) total += parcelOwners.length;
     return total;
   };
 
@@ -285,7 +402,7 @@ const SystemBackupManager: React.FC = () => {
         const backupData: ComprehensiveBackupData = {
           metadata: {
             exportDate: new Date().toISOString(),
-            version: '2.0.0',
+            version: '3.0.0',
             platform: 'ios',
             appVersion: '1.0.0',
             selectedCategories,
@@ -296,44 +413,64 @@ const SystemBackupManager: React.FC = () => {
         // Add selected data categories with actual data
         if (selectedData.users) {
           backupData.users = users;
-          console.log(`📦 Users: ${users.length} records, ${JSON.stringify(users).length} bytes`);
+          console.log(`📦 Users: ${users.length} records`);
         }
         if (selectedData.animals) {
           backupData.animals = animals;
-          const animalsSize = JSON.stringify(animals).length;
-          console.log(`📦 Animals: ${animals.length} records, ${(animalsSize / 1024 / 1024).toFixed(2)} MB`);
+          console.log(`📦 Animals: ${animals.length} records`);
         }
         if (selectedData.fieldReports) {
           backupData.fieldReports = fieldReports;
-          console.log(`📦 Field Reports: ${fieldReports.length} records, ${(JSON.stringify(fieldReports).length / 1024).toFixed(2)} KB`);
+          console.log(`📦 Field Reports: ${fieldReports.length} records`);
         }
         if (selectedData.lots && lotsData) {
           backupData.lots = [lotsData];
-          console.log(`📦 Lots: ${(JSON.stringify(lotsData).length / 1024).toFixed(2)} KB`);
+          console.log(`📦 Lots data included`);
         }
         if (selectedData.cadastralData && cadastralData) {
           backupData.cadastralParcels = [cadastralData];
-          console.log(`📦 Cadastral: ${(JSON.stringify(cadastralData).length / 1024).toFixed(2)} KB`);
+          console.log(`📦 Cadastral data included`);
         }
         if (selectedData.healthRecords) {
           backupData.healthRecords = healthRecords;
-          console.log(`📦 Health: ${healthRecords.length} records, ${(JSON.stringify(healthRecords).length / 1024).toFixed(2)} KB`);
+          console.log(`📦 Health: ${healthRecords.length} records`);
         }
         if (selectedData.breedingRecords && breedingData) {
           backupData.breedingRecords = [breedingData];
-          console.log(`📦 Breeding: ${(JSON.stringify(breedingData).length / 1024).toFixed(2)} KB`);
+          console.log(`📦 Breeding data included`);
         }
         if (selectedData.calendarEvents && calendarData) {
           backupData.calendarEvents = [calendarData];
-          console.log(`📦 Calendar: ${(JSON.stringify(calendarData).length / 1024).toFixed(2)} KB`);
+          console.log(`📦 Calendar data included`);
         }
         if (selectedData.notifications) {
           backupData.notifications = notifications;
-          console.log(`📦 Notifications: ${notifications.length} records, ${(JSON.stringify(notifications).length / 1024).toFixed(2)} KB`);
+          console.log(`📦 Notifications: ${notifications.length} records`);
         }
         if (selectedData.reports) {
           backupData.reports = reports;
-          console.log(`📦 Reports: ${reports.length} records, ${(JSON.stringify(reports).length / 1024).toFixed(2)} KB`);
+          console.log(`📦 Reports: ${reports.length} records`);
+        }
+        // NEW data categories
+        if (selectedData.financialData && financialData) {
+          backupData.financialData = financialData;
+          console.log(`📦 Financial: ${getFinancialCount()} records`);
+        }
+        if (selectedData.inventoryData && inventoryData) {
+          backupData.inventoryData = inventoryData;
+          console.log(`📦 Inventory: ${getInventoryCount()} records`);
+        }
+        if (selectedData.tasksData && tasksData) {
+          backupData.tasksData = tasksData;
+          console.log(`📦 Tasks: ${getTasksCount()} records`);
+        }
+        if (selectedData.userManagement && userManagementData) {
+          backupData.userManagementData = userManagementData;
+          console.log(`📦 User Management: ${getUserManagementCount()} records`);
+        }
+        if (selectedData.parcelOwners) {
+          backupData.parcelOwners = parcelOwners;
+          console.log(`📦 Parcel Owners: ${parcelOwners.length} records`);
         }
 
         const dataStr = JSON.stringify(backupData, null, 2);
@@ -357,12 +494,10 @@ const SystemBackupManager: React.FC = () => {
           });
 
           console.log('✅ Backup saved to Documents directory:', exportFileName);
-          console.log('📱 Platform:', Capacitor.getPlatform());
-          console.log('☁️ iCloud sync:', Capacitor.getPlatform() === 'ios' ? 'Will sync automatically if enabled' : 'Not applicable');
 
           toast({
             title: t('backup.messages.exportComplete'),
-            description: `${t('backup.messages.backupSaved')}: ${exportFileName}. ${Capacitor.getPlatform() === 'ios' ? t('backup.messages.iCloudSync') : ''}`,
+            description: `${t('backup.messages.backupSaved')}: ${exportFileName}`,
           });
         } else {
           // Web platform - download as file
@@ -382,8 +517,8 @@ const SystemBackupManager: React.FC = () => {
       } catch (error) {
         console.error('Error during export:', error);
         toast({
-          title: t('backup.messages.exportComplete'),
-          description: t('backup.messages.exportSuccess', { count: 0, filename: '' }),
+          title: t('backup.messages.exportError', 'Export Error'),
+          description: String(error),
           variant: "destructive"
         });
       } finally {
@@ -397,8 +532,8 @@ const SystemBackupManager: React.FC = () => {
     setNativeBackupFileName(fileName);
     
     toast({
-      title: t('backup.messages.selectFileFirst'),
-      description: `${fileName} ${t('backup.messages.selectFileDesc')}`,
+      title: t('backup.messages.fileSelected', 'File Selected'),
+      description: fileName,
     });
   };
 
@@ -443,7 +578,7 @@ const SystemBackupManager: React.FC = () => {
 
         // Validate backup structure
         if (!backupData.metadata || !backupData.metadata.version) {
-          throw new Error("Archivo de backup inválido - falta metadata");
+          throw new Error("Invalid backup file - missing metadata");
         }
 
         console.log('📦 Importing comprehensive backup data:', backupData.metadata);
@@ -499,6 +634,37 @@ const SystemBackupManager: React.FC = () => {
           console.log(`📊 Imported ${count} saved reports`);
         }
 
+        // NEW data category imports
+        if (backupData.financialData && selectedData.financialData) {
+          const count = await importFinancialData(backupData.financialData);
+          totalImported += count;
+          console.log(`💰 Imported ${count} financial records`);
+        }
+
+        if (backupData.inventoryData && selectedData.inventoryData) {
+          const count = await importInventoryData(backupData.inventoryData);
+          totalImported += count;
+          console.log(`📦 Imported ${count} inventory records`);
+        }
+
+        if (backupData.tasksData && selectedData.tasksData) {
+          const count = await importTasksData(backupData.tasksData);
+          totalImported += count;
+          console.log(`✅ Imported ${count} tasks`);
+        }
+
+        if (backupData.userManagementData && selectedData.userManagement) {
+          const count = await importUserManagementData(backupData.userManagementData);
+          totalImported += count;
+          console.log(`👤 Imported ${count} user management records`);
+        }
+
+        if (backupData.parcelOwners && selectedData.parcelOwners) {
+          const count = await importParcelOwners(backupData.parcelOwners);
+          totalImported += count;
+          console.log(`🏠 Imported ${count} parcel owners`);
+        }
+
         toast({
           title: t('backup.messages.importComplete'),
           description: t('backup.messages.importSuccess', { count: totalImported }),
@@ -507,8 +673,8 @@ const SystemBackupManager: React.FC = () => {
       } catch (error: any) {
         console.error("Error importing comprehensive backup:", error);
         toast({
-          title: t('backup.messages.importComplete'),
-          description: `${t('backup.messages.selectFileDesc')}: ${error.message}`,
+          title: t('backup.messages.importError', 'Import Error'),
+          description: error.message,
           variant: "destructive",
         });
       } finally {
@@ -540,7 +706,7 @@ const SystemBackupManager: React.FC = () => {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <Label className="text-base font-medium">{t('backup.selectData')}</Label>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground">
                 {t('backup.totalRecords', { count: getTotalSelectedRecords() })}
               </div>
             </div>
@@ -559,11 +725,11 @@ const SystemBackupManager: React.FC = () => {
                         <Icon className="w-4 h-4 flex-shrink-0" />
                         <Label htmlFor={key} className="font-medium text-sm sm:text-base">{label}</Label>
                       </div>
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded flex-shrink-0">
+                      <span className="text-xs bg-muted px-2 py-1 rounded flex-shrink-0">
                         {count}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1 hidden sm:block">{description}</p>
+                    <p className="text-xs text-muted-foreground mt-1 hidden sm:block">{description}</p>
                   </div>
                 </div>
               ))}
@@ -600,16 +766,10 @@ const SystemBackupManager: React.FC = () => {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
                 <Label className="text-base font-medium">{t('backup.export')}</Label>
-                <p className="text-sm text-gray-500">{t('backup.selectData')}</p>
+                <p className="text-sm text-muted-foreground">{t('backup.selectData')}</p>
               </div>
               <Button
-                onClick={() => {
-                  console.log('🎯 ========== BUTTON CLICKED - BEFORE handleExport ==========');
-                  console.log('🎯 Is exporting?', isExporting);
-                  console.log('🎯 Is importing?', isImporting);
-                  console.log('🎯 Selected data:', selectedData);
-                  handleExport();
-                }}
+                onClick={handleExport}
                 disabled={isExporting || isImporting || !Object.values(selectedData).some(Boolean)}
                 className="flex items-center gap-2 w-full md:w-auto flex-shrink-0"
               >
@@ -632,7 +792,7 @@ const SystemBackupManager: React.FC = () => {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-base font-medium">{t('backup.import')}</Label>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {Capacitor.isNativePlatform()
                   ? nativeBackupFileName 
                     ? `${nativeBackupFileName}` 
