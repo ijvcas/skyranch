@@ -576,8 +576,7 @@ export const getAllUserRolesData = async () => {
 
   const { data: userRoleAudit, error: auditError } = await supabase
     .from('user_role_audit')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .select('*');
   if (auditError) console.error('Error fetching user_role_audit:', auditError);
 
   return {
