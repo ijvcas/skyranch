@@ -114,6 +114,24 @@ export interface ComprehensiveBackupData {
     subscriptions: any[];
     subscriptionUsage: any[];
   };
+  
+  // Weather Data (CRITICAL - NEW)
+  weatherData?: {
+    weatherSettings: any[];
+    weatherAlerts: any[];
+    weatherAutomationRules: any[];
+  };
+  
+  // User Roles Data (CRITICAL - NEW)
+  userRolesData?: {
+    userRoles: any[];
+    userRoleAudit: any[];
+  };
+  
+  // Product Data (NEW)
+  productData?: {
+    universalProducts: any[];
+  };
 }
 
 // ==================== EXISTING DATA FETCH FUNCTIONS ====================
@@ -525,6 +543,61 @@ export const getAllSubscriptionData = async () => {
   };
 };
 
+// Weather Data (CRITICAL - user's weather location config)
+export const getAllWeatherData = async () => {
+  const { data: weatherSettings, error: settingsError } = await supabase
+    .from('weather_settings')
+    .select('*');
+  if (settingsError) console.error('Error fetching weather_settings:', settingsError);
+
+  const { data: weatherAlerts, error: alertsError } = await supabase
+    .from('weather_alerts')
+    .select('*');
+  if (alertsError) console.error('Error fetching weather_alerts:', alertsError);
+
+  const { data: weatherAutomationRules, error: rulesError } = await supabase
+    .from('weather_automation_rules')
+    .select('*');
+  if (rulesError) console.error('Error fetching weather_automation_rules:', rulesError);
+
+  return {
+    weatherSettings: weatherSettings || [],
+    weatherAlerts: weatherAlerts || [],
+    weatherAutomationRules: weatherAutomationRules || []
+  };
+};
+
+// User Roles Data (CRITICAL - permissions)
+export const getAllUserRolesData = async () => {
+  const { data: userRoles, error: rolesError } = await supabase
+    .from('user_roles')
+    .select('*');
+  if (rolesError) console.error('Error fetching user_roles:', rolesError);
+
+  const { data: userRoleAudit, error: auditError } = await supabase
+    .from('user_role_audit')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (auditError) console.error('Error fetching user_role_audit:', auditError);
+
+  return {
+    userRoles: userRoles || [],
+    userRoleAudit: userRoleAudit || []
+  };
+};
+
+// Product Data (universal product database)
+export const getAllProductData = async () => {
+  const { data: universalProducts, error: productsError } = await supabase
+    .from('universal_products')
+    .select('*');
+  if (productsError) console.error('Error fetching universal_products:', productsError);
+
+  return {
+    universalProducts: universalProducts || []
+  };
+};
+
 // ==================== IMPORT FUNCTIONS ====================
 
 export const importLots = async (lotsData: any): Promise<number> => {
@@ -876,6 +949,58 @@ export const importSubscriptionData = async (subscriptionData: any): Promise<num
   return importCount;
 };
 
+// Weather Data Import (CRITICAL)
+export const importWeatherData = async (weatherData: any): Promise<number> => {
+  let importCount = 0;
+
+  if (weatherData.weatherSettings?.length) {
+    const { error } = await supabase.from('weather_settings').upsert(weatherData.weatherSettings);
+    if (!error) importCount += weatherData.weatherSettings.length;
+    else console.error('Error importing weather_settings:', error);
+  }
+
+  if (weatherData.weatherAlerts?.length) {
+    const { error } = await supabase.from('weather_alerts').insert(weatherData.weatherAlerts);
+    if (!error) importCount += weatherData.weatherAlerts.length;
+    else console.error('Error importing weather_alerts:', error);
+  }
+
+  if (weatherData.weatherAutomationRules?.length) {
+    const { error } = await supabase.from('weather_automation_rules').insert(weatherData.weatherAutomationRules);
+    if (!error) importCount += weatherData.weatherAutomationRules.length;
+    else console.error('Error importing weather_automation_rules:', error);
+  }
+
+  return importCount;
+};
+
+// User Roles Import (CRITICAL)
+export const importUserRolesData = async (userRolesData: any): Promise<number> => {
+  let importCount = 0;
+
+  if (userRolesData.userRoles?.length) {
+    const { error } = await supabase.from('user_roles').upsert(userRolesData.userRoles);
+    if (!error) importCount += userRolesData.userRoles.length;
+    else console.error('Error importing user_roles:', error);
+  }
+
+  if (userRolesData.userRoleAudit?.length) {
+    const { error } = await supabase.from('user_role_audit').insert(userRolesData.userRoleAudit);
+    if (!error) importCount += userRolesData.userRoleAudit.length;
+    else console.error('Error importing user_role_audit:', error);
+  }
+
+  return importCount;
+};
+
+// Product Data Import
+export const importProductData = async (productData: any): Promise<number> => {
+  if (!productData.universalProducts?.length) return 0;
+  const { error } = await supabase.from('universal_products').upsert(productData.universalProducts);
+  if (error) console.error('Error importing universal_products:', error);
+  return error ? 0 : productData.universalProducts.length;
+};
+
 // ==================== HELPER FUNCTIONS ====================
 
 // Get farm profile for backup
@@ -927,6 +1052,11 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
   const pedigreeData = await getAllPedigreeData();
   const subscriptionData = await getAllSubscriptionData();
   const supportSettings = await getAllSupportSettings();
+  
+  // CRITICAL missing data categories
+  const weatherData = await getAllWeatherData();
+  const userRolesData = await getAllUserRolesData();
+  const productData = await getAllProductData();
 
   const totalRecords = 
     users.length + animals.length + fieldReports.length + 
@@ -947,12 +1077,15 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     barcodeData.barcodeRegistry.length + barcodeData.barcodeScanHistory.length +
     pedigreeData.pedigreeAnalyses.length +
     subscriptionData.subscriptions.length + subscriptionData.subscriptionUsage.length +
-    supportSettings.length;
+    supportSettings.length +
+    weatherData.weatherSettings.length + weatherData.weatherAlerts.length + weatherData.weatherAutomationRules.length +
+    userRolesData.userRoles.length + userRolesData.userRoleAudit.length +
+    productData.universalProducts.length;
 
   const backupData: ComprehensiveBackupData = {
     metadata: {
       exportDate: new Date().toISOString(),
-      version: '5.0.0',
+      version: '6.0.0', // Updated version with ALL tables
       platform: 'ios',
       appVersion: '1.0.0',
       selectedCategories: ['all'],
@@ -981,7 +1114,11 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     barcodeData,
     pedigreeData,
     subscriptionData,
-    supportSettings
+    supportSettings,
+    // CRITICAL new categories
+    weatherData,
+    userRolesData,
+    productData
   };
 
   if (storageType === 'icloud') {
