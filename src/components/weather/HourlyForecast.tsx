@@ -63,11 +63,16 @@ export default function HourlyForecast({ hourlyData, className }: HourlyForecast
             </span>
             {getWeatherIcon(hour.conditionText)}
             <span className="weather-hour-temp">
-              {Math.round(hour.temperatureC)}°
+              {hour.temperatureC.toFixed(1)}°
             </span>
             {hour.precipitationChance > 0 && (
               <small className="weather-hour-precip">
                 {hour.precipitationChance}%
+                {hour.precipitationMm > 0 && (
+                  <span style={{ display: 'block', fontSize: '9px', opacity: 0.8 }}>
+                    {hour.precipitationMm.toFixed(1)}mm
+                  </span>
+                )}
               </small>
             )}
           </div>

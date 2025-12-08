@@ -16,11 +16,19 @@ interface HourlyForecast {
   timestamp: string;
   temperatureC: number;
   temperatureF: number;
+  feelsLikeC: number;
+  feelsLikeF: number;
   conditionText: string;
+  conditionCode: string;
   windKph: number;
+  windDirection: number | null;
+  windCardinal: string | null;
+  windGustKph: number | null;
   humidity: number;
   precipitationChance: number;
   precipitationMm: number;
+  uvIndex: number | null;
+  cloudCover: number | null;
 }
 
 interface DailyForecast {
@@ -30,10 +38,12 @@ interface DailyForecast {
   maxTempF: number;
   minTempF: number;
   conditionText: string;
+  conditionCode: string;
   maxWindKph: number;
   avgHumidity: number;
   precipitationChance: number;
   totalPrecipitationMm: number;
+  uvIndex: number | null;
   sunrise: string;
   sunset: string;
 }
@@ -47,28 +57,6 @@ interface WeatherForecastResponse {
   daily: DailyForecast[];
   hourly: HourlyForecast[];
   raw?: any;
-}
-
-// Translate weather conditions to Spanish
-function translateCondition(text: string): string {
-  if (!text) return 'Desconocido';
-  
-  const lowerText = text.toLowerCase();
-  
-  if (/clear|sunny/i.test(lowerText)) return 'Despejado';
-  if (/partly cloudy|partly sunny/i.test(lowerText)) return 'Parcialmente nublado';
-  if (/cloudy|overcast/i.test(lowerText)) return 'Nublado';
-  if (/thunderstorm|storm/i.test(lowerText)) return 'Tormenta';
-  if (/heavy rain/i.test(lowerText)) return 'Lluvia intensa';
-  if (/rain|rainy|shower/i.test(lowerText)) return 'Lluvia';
-  if (/drizzle/i.test(lowerText)) return 'Llovizna';
-  if (/snow|snowy/i.test(lowerText)) return 'Nieve';
-  if (/fog|mist/i.test(lowerText)) return 'Niebla';
-  if (/wind/i.test(lowerText)) return 'Ventoso';
-  if (/hail/i.test(lowerText)) return 'Granizo';
-  if (/sleet/i.test(lowerText)) return 'Aguanieve';
-  
-  return text;
 }
 
 // Fetch current conditions from Google Weather API
@@ -122,7 +110,7 @@ async function fetchHourlyForecast(apiKey: string, lat: number, lng: number, lan
   return await response.json();
 }
 
-// Transform Google Weather API response to our format
+// Transform Google Weather API response to our format with full precision
 function transformGoogleWeatherData(
   currentData: any,
   dailyData: any,
@@ -130,45 +118,59 @@ function transformGoogleWeatherData(
   lat: number,
   lng: number
 ): WeatherForecastResponse {
-  console.log('🔄 Transforming Google Weather data');
+  console.log('🔄 Transforming Google Weather data with full precision');
   
-  // Transform hourly forecast - Google uses 'forecastHours' property
+  // Transform hourly forecast with precision
   const hourly: HourlyForecast[] = (hourlyData.forecastHours || []).map((hour: any) => {
-    const tempC = hour.temperature?.degrees || 0;
+    const tempC = hour.temperature?.degrees ?? 0;
+    const feelsLikeC = hour.feelsLike?.degrees ?? hour.apparentTemperature?.degrees ?? tempC;
+    const windVal = hour.wind?.speed?.value ?? 0;
+    const gustVal = hour.wind?.gust?.value ?? null;
+    
     return {
       timestamp: hour.interval?.startTime || new Date().toISOString(),
-      temperatureC: Math.round(tempC),
-      temperatureF: Math.round(tempC * 9/5 + 32),
-      conditionText: translateCondition(hour.weatherCondition?.description?.text || ''),
-      windKph: Math.round(hour.wind?.speed?.value || 0),
-      humidity: hour.relativeHumidity || 0,
-      precipitationChance: hour.precipitation?.probability?.percent || 0,
-      precipitationMm: hour.precipitation?.qpf?.quantity || 0
+      temperatureC: Math.round(tempC * 10) / 10,
+      temperatureF: Math.round((tempC * 9/5 + 32) * 10) / 10,
+      feelsLikeC: Math.round(feelsLikeC * 10) / 10,
+      feelsLikeF: Math.round((feelsLikeC * 9/5 + 32) * 10) / 10,
+      conditionText: hour.weatherCondition?.description?.text || '',
+      conditionCode: hour.weatherCondition?.type || '',
+      windKph: Math.round(windVal * 10) / 10,
+      windDirection: hour.wind?.direction?.degrees ?? null,
+      windCardinal: hour.wind?.direction?.cardinal ?? null,
+      windGustKph: gustVal ? Math.round(gustVal * 10) / 10 : null,
+      humidity: hour.relativeHumidity ?? 0,
+      precipitationChance: hour.precipitation?.probability?.percent ?? 0,
+      precipitationMm: Math.round((hour.precipitation?.qpf?.quantity ?? 0) * 10) / 10,
+      uvIndex: hour.uvIndex ?? null,
+      cloudCover: hour.cloudCover ?? null,
     };
   });
   
-  // Transform daily forecast - Google uses 'forecastDays' property
+  // Transform daily forecast with precision
   const daily: DailyForecast[] = (dailyData.forecastDays || []).map((day: any) => {
-    const maxTempC = day.maxTemperature?.degrees || 0;
-    const minTempC = day.minTemperature?.degrees || 0;
+    const maxTempC = day.maxTemperature?.degrees ?? 0;
+    const minTempC = day.minTemperature?.degrees ?? 0;
     
     return {
       date: day.interval?.startTime || new Date().toISOString().split('T')[0],
-      maxTempC: Math.round(maxTempC),
-      minTempC: Math.round(minTempC),
-      maxTempF: Math.round(maxTempC * 9/5 + 32),
-      minTempF: Math.round(minTempC * 9/5 + 32),
-      conditionText: translateCondition(day.daytimeForecast?.weatherCondition?.description?.text || ''),
-      maxWindKph: Math.round(day.maxWind?.speed?.value || 0),
-      avgHumidity: Math.round(day.avgRelativeHumidity || 0),
-      precipitationChance: day.precipitation?.probability?.percent || 0,
-      totalPrecipitationMm: day.precipitation?.totalQpf?.quantity || 0,
+      maxTempC: Math.round(maxTempC * 10) / 10,
+      minTempC: Math.round(minTempC * 10) / 10,
+      maxTempF: Math.round((maxTempC * 9/5 + 32) * 10) / 10,
+      minTempF: Math.round((minTempC * 9/5 + 32) * 10) / 10,
+      conditionText: day.daytimeForecast?.weatherCondition?.description?.text || '',
+      conditionCode: day.daytimeForecast?.weatherCondition?.type || '',
+      maxWindKph: Math.round((day.maxWind?.speed?.value ?? 0) * 10) / 10,
+      avgHumidity: day.avgRelativeHumidity ?? 0,
+      precipitationChance: day.precipitation?.probability?.percent ?? 0,
+      totalPrecipitationMm: Math.round((day.precipitation?.totalQpf?.quantity ?? 0) * 10) / 10,
+      uvIndex: day.uvIndex ?? null,
       sunrise: day.sunrise || '',
       sunset: day.sunset || ''
     };
   });
   
-  console.log(`✅ Transformed ${hourly.length} hourly and ${daily.length} daily forecasts`);
+  console.log(`✅ Transformed ${hourly.length} hourly and ${daily.length} daily forecasts with precision`);
   
   return {
     location: {
@@ -183,7 +185,6 @@ function transformGoogleWeatherData(
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -205,14 +206,12 @@ serve(async (req) => {
 
     console.log(`🌍 Fetching weather forecast for: ${lat}, ${lng} (${language})`);
 
-    // Fetch all data in parallel
     const [currentData, dailyData, hourlyData] = await Promise.all([
       fetchCurrentConditions(apiKey, lat, lng, language),
       fetchDailyForecast(apiKey, lat, lng, language, forecastDays),
       fetchHourlyForecast(apiKey, lat, lng, language, 48)
     ]);
 
-    // Transform and return the data
     const forecast = transformGoogleWeatherData(currentData, dailyData, hourlyData, lat, lng);
 
     return new Response(

@@ -4,10 +4,22 @@ import { supabase } from "@/integrations/supabase/client";
 export interface GoogleWeatherResponse {
   temperatureC: number | null;
   temperatureF: number | null;
+  feelsLikeC: number | null;
+  feelsLikeF: number | null;
   conditionText: string | null;
+  conditionCode: string | null;
   windKph: number | null;
+  windDirection: number | null;
+  windCardinal: string | null;
+  windGustKph: number | null;
   humidity: number | null;
   precipitationChance: number | null;
+  precipitationMm: number | null;
+  uvIndex: number | null;
+  visibilityKm: number | null;
+  pressureHpa: number | null;
+  dewPointC: number | null;
+  cloudCover: number | null;
   raw?: any;
 }
 
@@ -75,12 +87,12 @@ export const useFarmWeather = (lat?: number, lng?: number, language: string = 'e
         }
       } catch (_) {}
 
-      // 4) Return null if all else fails - let components handle the empty state
+      // 4) Return null if all else fails
       console.warn("🌤️ [useFarmWeather] no weather data available");
       return null;
     },
     enabled: typeof lat === "number" && typeof lng === "number",
-    staleTime: 10 * 60 * 1000, // 10 min
+    staleTime: 10 * 60 * 1000,
     retry: 1,
   });
 };

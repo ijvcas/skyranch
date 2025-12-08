@@ -5,11 +5,19 @@ export interface HourlyForecast {
   timestamp: string;
   temperatureC: number;
   temperatureF: number;
+  feelsLikeC: number;
+  feelsLikeF: number;
   conditionText: string;
+  conditionCode: string;
   windKph: number;
+  windDirection: number | null;
+  windCardinal: string | null;
+  windGustKph: number | null;
   humidity: number;
   precipitationChance: number;
   precipitationMm: number;
+  uvIndex: number | null;
+  cloudCover: number | null;
 }
 
 export interface DailyForecast {
@@ -19,10 +27,12 @@ export interface DailyForecast {
   maxTempF: number;
   minTempF: number;
   conditionText: string;
+  conditionCode: string;
   maxWindKph: number;
   avgHumidity: number;
   precipitationChance: number;
   totalPrecipitationMm: number;
+  uvIndex: number | null;
   sunrise: string;
   sunset: string;
 }
@@ -37,7 +47,7 @@ export interface WeatherForecastResponse {
   hourly: HourlyForecast[];
 }
 
-const CACHE_KEY = 'weather_forecast_cache_v2'; // v2: Fixed Google Weather API property names
+const CACHE_KEY = 'weather_forecast_cache_v3'; // v3: Added precision and new fields
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
 export const useWeatherForecast = (
@@ -69,7 +79,6 @@ export const useWeatherForecast = (
 
         console.log('🌤️ Fetching weather forecast from API', { lat, lng, forecastDays });
 
-        // Fetch from edge function
         const { data, error } = await supabase.functions.invoke('get-weather-forecast', {
           body: {
             lat,
@@ -83,7 +92,6 @@ export const useWeatherForecast = (
 
         if (error) {
           console.error('Weather forecast error:', error);
-          // Try to return stale cache if available
           if (cached) {
             console.log('⚠️ Using stale cache due to error');
             const { data: staleData } = JSON.parse(cached);
@@ -106,7 +114,6 @@ export const useWeatherForecast = (
 
       } catch (error) {
         console.error('Error in useWeatherForecast:', error);
-        // Try to return stale cache
         const cacheKey = `${CACHE_KEY}_${lat}_${lng}`;
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
