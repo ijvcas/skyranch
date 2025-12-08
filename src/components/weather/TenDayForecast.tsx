@@ -72,11 +72,16 @@ export default function TenDayForecast({ data }: TenDayForecastProps) {
               <div className="weather-icon-precip-group">
                 {getWeatherIcon(day.conditionText)}
                 {day.precipitationChance > 0 && (
-                  <span className="weather-precip-percent">{day.precipitationChance}%</span>
+                  <div className="weather-precip-info">
+                    <span className="weather-precip-percent">{day.precipitationChance}%</span>
+                    {day.totalPrecipitationMm > 0 && (
+                      <span className="weather-precip-mm">{day.totalPrecipitationMm.toFixed(1)}mm</span>
+                    )}
+                  </div>
                 )}
               </div>
               
-              <span className="weather-temp-low">{Math.round(day.minTempC)}°</span>
+              <span className="weather-temp-low">{day.minTempC.toFixed(1)}°</span>
               
               <div className="weather-temp-bar-container">
                 <div 
@@ -88,7 +93,7 @@ export default function TenDayForecast({ data }: TenDayForecastProps) {
                 />
               </div>
               
-              <span className="weather-temp-high">{Math.round(day.maxTempC)}°</span>
+              <span className="weather-temp-high">{day.maxTempC.toFixed(1)}°</span>
             </div>
           );
         })}
