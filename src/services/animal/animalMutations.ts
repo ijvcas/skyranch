@@ -2,15 +2,8 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Animal } from '@/stores/animalStore';
 import { mapAnimalToDatabase, createUpdateObject } from '../utils/animalDatabaseMapper';
 import { processParentId } from '../utils/animalParentProcessor';
-import { SubscriptionService } from '@/services/subscription';
 
 export const addAnimal = async (animal: Omit<Animal, 'id'>): Promise<boolean> => {
-  // Check subscription limits before adding
-  const limitCheck = await SubscriptionService.canAddAnimal();
-  if (!limitCheck.allowed) {
-    throw new Error(limitCheck.message || 'No puedes agregar más animales en tu plan actual');
-  }
-
   console.log('🔄 Adding animal with parent data:', {
     motherId: animal.motherId,
     fatherId: animal.fatherId,
@@ -113,9 +106,6 @@ export const addAnimal = async (animal: Omit<Animal, 'id'>): Promise<boolean> =>
     console.error('Error adding animal:', error);
     return false;
   }
-
-  // Update usage count after successful animal addition
-  await SubscriptionService.updateUsage();
 
   console.log('✅ Animal added successfully');
   return true;
