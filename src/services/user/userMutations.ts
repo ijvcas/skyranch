@@ -3,18 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { type AppUser } from './types';
 import { sanitizeUserInput, isValidEmail, isValidPhone, isValidName } from '@/utils/security';
 import { permissionCache } from '@/services/permissionCache';
-import { SubscriptionService } from '@/services/subscription';
 
 // Add a new user to the app_users table
 export const addUser = async (userData: Omit<AppUser, 'id' | 'created_at' | 'created_by'>): Promise<boolean> => {
   try {
     console.log('➕ Adding new user:', userData);
-
-    // Check subscription limits before adding
-    const limitCheck = await SubscriptionService.canAddUser();
-    if (!limitCheck.allowed) {
-      throw new Error(limitCheck.message || 'No puedes agregar más usuarios en tu plan actual');
-    }
 
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     
@@ -57,9 +50,6 @@ export const addUser = async (userData: Omit<AppUser, 'id' | 'created_at' | 'cre
       console.error('❌ Error adding user to app_users:', error);
       throw new Error(`Error adding user: ${error.message}`);
     }
-
-    // Update usage count after successful user addition
-    await SubscriptionService.updateUsage();
 
     console.log('✅ User added successfully:', data);
     return true;

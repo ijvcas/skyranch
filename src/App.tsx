@@ -40,7 +40,7 @@ const Lots = lazy(() => import('@/pages/Lots'));
 const HealthRecords = lazy(() => import('@/pages/HealthRecords'));
 const Notifications = lazy(() => import('@/pages/Notifications'));
 const Settings = lazy(() => import('@/pages/Settings'));
-const Pricing = lazy(() => import('@/pages/Pricing'));
+// Pricing page removed - subscription system eliminated
 const Finances = lazy(() => import('@/pages/Finances'));
 const Tasks = lazy(() => import('@/pages/Tasks'));
 const Inventory = lazy(() => import('@/pages/Inventory'));
@@ -245,11 +245,7 @@ function AppContent() {
                       <Settings />
                     </ProtectedRoute>
                   } />
-                  <Route path="/pricing" element={
-                    <ProtectedRoute>
-                      <Pricing />
-                    </ProtectedRoute>
-                  } />
+                  {/* Pricing route removed - subscription system eliminated */}
                   <Route path="/finances" element={
                     <ProtectedRoute>
                       <Finances />

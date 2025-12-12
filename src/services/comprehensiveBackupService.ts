@@ -111,11 +111,6 @@ export interface ComprehensiveBackupData {
     pedigreeAnalyses: any[];
   };
   
-  // Subscription Data (NEW)
-  subscriptionData?: {
-    subscriptions: any[];
-    subscriptionUsage: any[];
-  };
   
   // Weather Data (CRITICAL - NEW)
   weatherData?: {
@@ -527,23 +522,7 @@ export const getAllPedigreeData = async () => {
   };
 };
 
-// Subscription Data
-export const getAllSubscriptionData = async () => {
-  const { data: subscriptions, error: subsError } = await supabase
-    .from('subscriptions')
-    .select('*');
-  if (subsError) console.error('Error fetching subscriptions:', subsError);
-
-  const { data: subscriptionUsage, error: usageError } = await supabase
-    .from('subscription_usage')
-    .select('*');
-  if (usageError) console.error('Error fetching subscription_usage:', usageError);
-
-  return {
-    subscriptions: subscriptions || [],
-    subscriptionUsage: subscriptionUsage || []
-  };
-};
+// Subscription Data - REMOVED (subscription system eliminated)
 
 // Weather Data (CRITICAL - user's weather location config)
 export const getAllWeatherData = async () => {
@@ -932,23 +911,7 @@ export const importPedigreeData = async (pedigreeData: any): Promise<number> => 
   return error ? 0 : pedigreeData.pedigreeAnalyses.length;
 };
 
-export const importSubscriptionData = async (subscriptionData: any): Promise<number> => {
-  let importCount = 0;
-
-  if (subscriptionData.subscriptions?.length) {
-    const { error } = await supabase.from('subscriptions').upsert(subscriptionData.subscriptions);
-    if (!error) importCount += subscriptionData.subscriptions.length;
-    else console.error('Error importing subscriptions:', error);
-  }
-
-  if (subscriptionData.subscriptionUsage?.length) {
-    const { error } = await supabase.from('subscription_usage').upsert(subscriptionData.subscriptionUsage);
-    if (!error) importCount += subscriptionData.subscriptionUsage.length;
-    else console.error('Error importing subscription_usage:', error);
-  }
-
-  return importCount;
-};
+// Subscription Data Import - REMOVED (subscription system eliminated)
 
 // Weather Data Import (CRITICAL)
 export const importWeatherData = async (weatherData: any): Promise<number> => {
@@ -1051,7 +1014,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
   const communicationData = await getAllCommunicationData();
   const barcodeData = await getAllBarcodeData();
   const pedigreeData = await getAllPedigreeData();
-  const subscriptionData = await getAllSubscriptionData();
+  // subscriptionData removed - subscription system eliminated
   const supportSettings = await getAllSupportSettings();
   
   // CRITICAL missing data categories
@@ -1080,7 +1043,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     communicationData.chatHistory.length + communicationData.pushTokens.length + communicationData.localReminders.length + communicationData.emailAuditLog.length +
     barcodeData.barcodeRegistry.length + barcodeData.barcodeScanHistory.length +
     pedigreeData.pedigreeAnalyses.length +
-    subscriptionData.subscriptions.length + subscriptionData.subscriptionUsage.length +
+    
     supportSettings.length +
     weatherData.weatherSettings.length + weatherData.weatherAlerts.length + weatherData.weatherAutomationRules.length +
     userRolesData.userRoles.length + userRolesData.userRoleAudit.length +
@@ -1118,7 +1081,7 @@ export const createBackup = async (storageType: 'local' | 'icloud' = 'local'): P
     communicationData,
     barcodeData,
     pedigreeData,
-    subscriptionData,
+    
     supportSettings,
     // CRITICAL new categories
     weatherData,

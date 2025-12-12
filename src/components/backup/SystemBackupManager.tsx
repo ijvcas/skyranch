@@ -33,7 +33,6 @@ import {
   getAllCommunicationData,
   getAllBarcodeData,
   getAllPedigreeData,
-  getAllSubscriptionData,
   getAllWeatherData,
   getAllUserRolesData,
   getAllProductData,
@@ -53,7 +52,7 @@ import {
   importCommunicationData,
   importBarcodeData,
   importPedigreeData,
-  importSubscriptionData,
+  
   importWeatherData,
   importUserRolesData,
   importProductData,
@@ -246,11 +245,7 @@ const SystemBackupManager: React.FC = () => {
     enabled: selectedData.pedigreeData,
   });
 
-  const { data: subscriptionData } = useQuery({
-    queryKey: ['backup-subscription'],
-    queryFn: getAllSubscriptionData,
-    enabled: selectedData.subscriptionData,
-  });
+  // subscriptionData query removed - subscription system eliminated
 
   const { data: supportSettings = [] } = useQuery({
     queryKey: ['backup-support-settings'],
@@ -350,10 +345,7 @@ const SystemBackupManager: React.FC = () => {
 
   const getPedigreeCount = () => pedigreeData?.pedigreeAnalyses?.length || 0;
 
-  const getSubscriptionCount = () => {
-    if (!subscriptionData) return 0;
-    return (subscriptionData.subscriptions?.length || 0) + (subscriptionData.subscriptionUsage?.length || 0);
-  };
+  // getSubscriptionCount removed - subscription system eliminated
 
   // CRITICAL new count functions
   const getWeatherCount = () => {
@@ -390,7 +382,7 @@ const SystemBackupManager: React.FC = () => {
     { key: 'communicationData', label: t('backup.categories.communicationData', 'Communication'), icon: MessageSquare, description: t('backup.descriptions.communicationData', 'Chat, push tokens, reminders, emails'), count: getCommunicationCount() },
     { key: 'barcodeData', label: t('backup.categories.barcodeData', 'Barcode Data'), icon: Scan, description: t('backup.descriptions.barcodeData', 'Barcode registry and scan history'), count: getBarcodeCount() },
     { key: 'pedigreeData', label: t('backup.categories.pedigreeData', 'Pedigree Analysis'), icon: Dna, description: t('backup.descriptions.pedigreeData', 'Pedigree analyses'), count: getPedigreeCount() },
-    { key: 'subscriptionData', label: t('backup.categories.subscriptionData', 'Subscriptions'), icon: CreditCard, description: t('backup.descriptions.subscriptionData', 'Subscription and usage data'), count: getSubscriptionCount() },
+    // subscriptionData category removed - subscription system eliminated
     { key: 'supportSettings', label: t('backup.categories.supportSettings', 'Support Settings'), icon: LifeBuoy, description: t('backup.descriptions.supportSettings', 'Support contact information'), count: supportSettings.length },
     // CRITICAL new categories
     { key: 'weatherData', label: t('backup.categories.weatherData', 'Weather Settings'), icon: CloudSun, description: t('backup.descriptions.weatherData', 'Weather location, alerts, automation'), count: getWeatherCount() },
@@ -443,7 +435,7 @@ const SystemBackupManager: React.FC = () => {
     if (selectedData.communicationData) total += getCommunicationCount();
     if (selectedData.barcodeData) total += getBarcodeCount();
     if (selectedData.pedigreeData) total += getPedigreeCount();
-    if (selectedData.subscriptionData) total += getSubscriptionCount();
+    // subscriptionData count removed - subscription system eliminated
     if (selectedData.supportSettings) total += supportSettings.length;
     // CRITICAL new categories
     if (selectedData.weatherData) total += getWeatherCount();
@@ -496,8 +488,7 @@ const SystemBackupManager: React.FC = () => {
         if (selectedData.communicationData && communicationData) backupData.communicationData = communicationData;
         if (selectedData.barcodeData && barcodeData) backupData.barcodeData = barcodeData;
         if (selectedData.pedigreeData && pedigreeData) backupData.pedigreeData = pedigreeData;
-        if (selectedData.subscriptionData && subscriptionData) backupData.subscriptionData = subscriptionData;
-        if (selectedData.supportSettings && supportSettings) backupData.supportSettings = supportSettings;
+        // subscriptionData removed - subscription system eliminated
         // CRITICAL new categories
         if (selectedData.weatherData && weatherData) backupData.weatherData = weatherData;
         if (selectedData.userRolesData && userRolesData) backupData.userRolesData = userRolesData;
@@ -648,9 +639,7 @@ const SystemBackupManager: React.FC = () => {
         if (backupData.pedigreeData && selectedData.pedigreeData) {
           totalImported += await importPedigreeData(backupData.pedigreeData);
         }
-        if (backupData.subscriptionData && selectedData.subscriptionData) {
-          totalImported += await importSubscriptionData(backupData.subscriptionData);
-        }
+        // subscriptionData import removed - subscription system eliminated
         if (backupData.supportSettings && selectedData.supportSettings) {
           totalImported += await importSupportSettings(backupData.supportSettings);
         }
