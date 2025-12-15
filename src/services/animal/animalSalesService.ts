@@ -142,12 +142,15 @@ export const declareAnimalSold = async (animalId: string, saleData: SaleFormData
   }
 };
 
-// Get sale details
-export const getSaleDetails = async (saleId: string): Promise<AnimalSale | null> => {
+// Get sale details with animal data
+export const getSaleDetails = async (saleId: string): Promise<(AnimalSale & { animals?: any }) | null> => {
   try {
     const { data, error } = await supabase
       .from('animal_sales')
-      .select('*')
+      .select(`
+        *,
+        animals(*)
+      `)
       .eq('id', saleId)
       .single();
 
@@ -156,7 +159,7 @@ export const getSaleDetails = async (saleId: string): Promise<AnimalSale | null>
       return null;
     }
 
-    return data as AnimalSale;
+    return data as (AnimalSale & { animals?: any });
   } catch (error) {
     console.error('Error fetching sale details:', error);
     return null;

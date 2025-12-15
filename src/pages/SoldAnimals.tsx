@@ -48,10 +48,11 @@ const SoldAnimals: React.FC = () => {
   // Filter sales
   const filteredSales = useMemo(() => {
     return sales.filter(sale => {
-      // Search filter
+      // Search filter - handle animals as array or object
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        const animalName = sale.animals?.name?.toLowerCase() || '';
+        const animalData = Array.isArray(sale.animals) ? sale.animals[0] : sale.animals;
+        const animalName = animalData?.name?.toLowerCase()?.trim() || '';
         const buyerName = sale.buyer_name?.toLowerCase() || '';
         if (!animalName.includes(query) && !buyerName.includes(query)) {
           return false;
@@ -275,6 +276,9 @@ const SoldAnimals: React.FC = () => {
             <div className="space-y-4">
               {filteredSales.map((sale: any) => {
                 const pendingAmount = Number(sale.total_amount || 0) - Number(sale.amount_paid || 0);
+                // Handle animals as array or object
+                const animalData = Array.isArray(sale.animals) ? sale.animals[0] : sale.animals;
+                const animalName = animalData?.name?.trim() || 'Animal';
                 
                 return (
                   <Card 
@@ -287,7 +291,7 @@ const SoldAnimals: React.FC = () => {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <DollarSign className="w-4 h-4 text-primary flex-shrink-0" />
-                          <h3 className="text-base font-bold truncate">{sale.animals?.name || 'Animal'}</h3>
+                          <h3 className="text-base font-bold truncate">{animalName}</h3>
                           <div className="flex items-center gap-1 flex-shrink-0">
                             {getPaymentStatusBadge(sale.payment_status)}
                             {pendingAmount > 0 && (
