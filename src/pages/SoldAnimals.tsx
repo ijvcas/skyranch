@@ -13,6 +13,7 @@ import { getSalesWithAnimals, deleteSale } from '@/services/animal/animalSalesSe
 import { formatCostPerSqm } from '@/utils/financialFormatters';
 import { useToast } from '@/hooks/use-toast';
 import EditSaleDialog from '@/components/animal-sale/EditSaleDialog';
+import SaleDetailsDialog from '@/components/dialogs/SaleDetailsDialog';
 
 const SoldAnimals: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const SoldAnimals: React.FC = () => {
   const [editingSale, setEditingSale] = useState<any>(null);
   const [deletingSaleId, setDeletingSaleId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [viewingSaleId, setViewingSaleId] = useState<string | null>(null);
   
   const { data: sales = [], isLoading } = useQuery({
     queryKey: ['animal-sales'],
@@ -275,10 +277,14 @@ const SoldAnimals: React.FC = () => {
                 const pendingAmount = Number(sale.total_amount || 0) - Number(sale.amount_paid || 0);
                 
                 return (
-                  <Card key={sale.id}>
+                  <Card 
+                    key={sale.id} 
+                    className="cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => setViewingSaleId(sale.id)}
+                  >
                     <CardContent className="p-4">
                       {/* Header */}
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <DollarSign className="w-4 h-4 text-primary flex-shrink-0" />
                           <h3 className="text-base font-bold truncate">{sale.animals?.name || 'Animal'}</h3>
@@ -296,7 +302,7 @@ const SoldAnimals: React.FC = () => {
                             variant="outline" 
                             size="icon" 
                             className="h-8 w-8"
-                            onClick={() => setEditingSale(sale)}
+                            onClick={(e) => { e.stopPropagation(); setEditingSale(sale); }}
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -304,59 +310,49 @@ const SoldAnimals: React.FC = () => {
                             variant="outline" 
                             size="icon" 
                             className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => setDeletingSaleId(sale.id)}
+                            onClick={(e) => { e.stopPropagation(); setDeletingSaleId(sale.id); }}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
 
-                      {/* Details Grid */}
-                      <div className="grid grid-cols-1 gap-3 text-center">
-                        {/* Sale Date */}
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-0.5">Fecha de Venta</p>
-                          <p className="font-semibold text-sm">
-                            {new Date(sale.sale_date).toLocaleDateString('es-ES', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric'
-                            })}
-                          </p>
-                        </div>
-
-                        {/* Buyer */}
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-0.5">Comprador</p>
-                          <p className="font-semibold text-sm">{sale.buyer_name}</p>
-                          {sale.buyer_contact && (
-                            <p className="text-xs text-muted-foreground">{sale.buyer_contact}</p>
-                          )}
-                        </div>
-
-                        {/* Price */}
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-0.5">Precio</p>
-                          <p className="font-semibold text-green-600 text-sm">{formatCostPerSqm(sale.total_amount)}</p>
-                          <p className="text-xs text-muted-foreground">Pagado: {formatCostPerSqm(sale.amount_paid)}</p>
-                        </div>
-
-                        {/* Payment Method */}
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-0.5">Método</p>
-                          <p className="font-semibold text-sm">{getPaymentMethodLabel(sale.payment_method)}</p>
-                          {sale.updated_at && (
-                            <p className="text-xs text-muted-foreground">
-                              Pagado: {new Date(sale.updated_at).toLocaleDateString('es-ES', {
+                      {/* Details Grid - 2 columns */}
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        {/* Left Column */}
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Fecha de Venta</p>
+                            <p className="font-medium">
+                              {new Date(sale.sale_date).toLocaleDateString('es-ES', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric'
                               })}
                             </p>
-                          )}
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Comprador</p>
+                            <p className="font-medium truncate">{sale.buyer_name}</p>
+                            {sale.buyer_contact && (
+                              <p className="text-xs text-muted-foreground truncate">{sale.buyer_contact}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Right Column */}
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Precio</p>
+                            <p className="font-medium text-green-600">{formatCostPerSqm(sale.total_amount)}</p>
+                            <p className="text-xs text-muted-foreground">Pagado: {formatCostPerSqm(sale.amount_paid)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Método</p>
+                            <p className="font-medium">{getPaymentMethodLabel(sale.payment_method)}</p>
+                          </div>
                         </div>
                       </div>
-
                     </CardContent>
                   </Card>
                 );
@@ -397,6 +393,13 @@ const SoldAnimals: React.FC = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Sale Details Dialog */}
+        <SaleDetailsDialog
+          isOpen={!!viewingSaleId}
+          onClose={() => setViewingSaleId(null)}
+          saleId={viewingSaleId || ''}
+        />
       </div>
     </PageLayout>
   );
