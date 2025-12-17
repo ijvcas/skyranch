@@ -56,7 +56,7 @@ serve(async (req) => {
       .delete()
       .eq('user_id', targetUserId)
 
-    // Add new role
+    // Add new role to user_roles table
     const { error: insertError } = await supabase
       .from('user_roles')
       .insert({
@@ -66,6 +66,16 @@ serve(async (req) => {
       })
 
     if (insertError) throw insertError
+
+    // Also update app_users.role for consistency
+    const { error: updateError } = await supabase
+      .from('app_users')
+      .update({ role: newRole })
+      .eq('id', targetUserId)
+
+    if (updateError) {
+      console.error('Error updating app_users role:', updateError)
+    }
 
     // Log the role change
     console.log(`Role changed: ${targetUserId} -> ${newRole} by ${user.id}`)
