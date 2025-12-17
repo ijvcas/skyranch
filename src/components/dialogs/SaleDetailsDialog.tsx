@@ -239,13 +239,10 @@ const SaleDetailsDialog: React.FC<SaleDetailsDialogProps> = ({
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 h-auto">
+          <TabsList className="grid w-full grid-cols-3 h-auto gap-1">
             <TabsTrigger value="sale">Venta</TabsTrigger>
             <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="health">
-              <Activity className="w-4 h-4 mr-1" />
-              Salud
-            </TabsTrigger>
+            <TabsTrigger value="health">Salud</TabsTrigger>
             <TabsTrigger value="pedigree">Pedigrí</TabsTrigger>
             <TabsTrigger value="documents">Documentos</TabsTrigger>
             <TabsTrigger value="history">Historial</TabsTrigger>
