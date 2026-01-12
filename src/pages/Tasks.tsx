@@ -108,7 +108,7 @@ export default function Tasks() {
                           {t(`priority.${task.priority}`)}
                         </span>
                         <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                          {t(`type.${task.type}`)}
+                          {t(`type.${task.task_type}`)}
                         </span>
                       </div>
                     </div>
@@ -177,7 +177,7 @@ export default function Tasks() {
                       )}
                     </div>
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded ml-4">
-                      {task.type}
+                      {t(`type.${task.task_type}`)}
                     </span>
                   </div>
                 </div>

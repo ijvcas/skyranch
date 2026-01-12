@@ -8,18 +8,20 @@ export interface Task {
   user_id: string;
   title: string;
   description?: string;
-  type: 'feeding' | 'health' | 'maintenance' | 'breeding' | 'veterinary' | 'pregnancy' | 'infrastructure' | 'general' | 'custom';
+  task_type: 'feeding' | 'health' | 'maintenance' | 'breeding' | 'veterinary' | 'pregnancy' | 'infrastructure' | 'general' | 'custom';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   due_date?: string;
   assigned_to?: string;
-  animal_id?: string;
+  animal_ids?: string[];
   lot_id?: string;
-  notes?: string;
+  recurring?: boolean;
+  recurrence_pattern?: string;
   completed_at?: string;
+  completed_by?: string;
   created_at: string;
   updated_at: string;
-  // New fields from field reports integration
+  metadata?: Record<string, any>;
   weather_conditions?: string;
   temperature?: number | null;
   location_coordinates?: string;

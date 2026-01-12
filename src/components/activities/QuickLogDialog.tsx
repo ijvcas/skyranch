@@ -10,14 +10,17 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTasks, type Task } from '@/hooks/useTasks';
+import { useAppUsers } from '@/hooks/useAppUsers';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useFarmWeather } from '@/hooks/useFarmWeather';
 
 const quickLogSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  type: z.string().min(1, 'Type is required'),
+  task_type: z.string().min(1, 'Type is required'),
   description: z.string().optional(),
+  assigned_to: z.string().optional(),
+  due_date: z.string().optional(),
   completion_notes: z.string().optional(),
   cost: z.string().optional(),
 });
@@ -32,6 +35,7 @@ interface QuickLogDialogProps {
 const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) => {
   const { t } = useTranslation('tasks');
   const { createTask } = useTasks();
+  const { data: appUsers = [] } = useAppUsers();
   const { data: currentWeather } = useFarmWeather();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,8 +43,10 @@ const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) =
     resolver: zodResolver(quickLogSchema),
     defaultValues: {
       title: '',
-      type: 'general',
+      task_type: 'general',
       description: '',
+      assigned_to: '',
+      due_date: '',
       completion_notes: '',
       cost: '',
     },
@@ -51,23 +57,24 @@ const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) =
     try {
       await createTask({
         title: data.title,
-        type: data.type as Task['type'],
+        task_type: data.task_type as Task['task_type'],
         description: data.description || '',
-        status: 'completed',
+        status: 'pending',
         priority: 'medium',
+        assigned_to: data.assigned_to || undefined,
+        due_date: data.due_date || undefined,
         completion_notes: data.completion_notes || '',
-        actual_completion_date: new Date().toISOString(),
         weather_conditions: currentWeather?.conditionText || '',
         temperature: currentWeather?.temperatureC || null,
         cost: data.cost ? parseFloat(data.cost) : null,
       });
       
-      toast.success(t('messages.quickLogSuccess'));
+      toast.success(t('messages.created'));
       form.reset();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error creating quick log:', error);
-      toast.error('Error logging work');
+      console.error('Error creating task:', error);
+      toast.error('Error creating task');
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +84,7 @@ const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) =
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t('quickLog')}</DialogTitle>
+          <DialogTitle>{t('newTask')}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -89,35 +96,76 @@ const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) =
                 <FormItem>
                   <FormLabel>{t('fields.title')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="What did you do?" {...field} />
+                    <Input placeholder="Task title..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="task_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('fields.type')}</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="general">{t('type.general')}</SelectItem>
+                        <SelectItem value="feeding">{t('type.feeding')}</SelectItem>
+                        <SelectItem value="health">{t('type.health')}</SelectItem>
+                        <SelectItem value="veterinary">{t('type.veterinary')}</SelectItem>
+                        <SelectItem value="breeding">{t('type.breeding')}</SelectItem>
+                        <SelectItem value="maintenance">{t('type.maintenance')}</SelectItem>
+                        <SelectItem value="infrastructure">{t('type.infrastructure')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="assigned_to"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('fields.assignedTo')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select user..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {appUsers.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
-              name="type"
+              name="due_date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('fields.type')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="general">{t('type.general')}</SelectItem>
-                      <SelectItem value="feeding">{t('type.feeding')}</SelectItem>
-                      <SelectItem value="health">{t('type.health')}</SelectItem>
-                      <SelectItem value="veterinary">{t('type.veterinary')}</SelectItem>
-                      <SelectItem value="breeding">{t('type.breeding')}</SelectItem>
-                      <SelectItem value="maintenance">{t('type.maintenance')}</SelectItem>
-                      <SelectItem value="infrastructure">{t('type.infrastructure')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>{t('fields.dueDate')}</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -142,11 +190,11 @@ const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) =
               name="completion_notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('fields.completionNotes')}</FormLabel>
+                  <FormLabel>{t('fields.notes')}</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Detailed notes, observations, issues found..." 
-                      rows={4} 
+                      placeholder="Additional notes..." 
+                      rows={3} 
                       {...field} 
                     />
                   </FormControl>
@@ -188,7 +236,7 @@ const QuickLogDialog: React.FC<QuickLogDialogProps> = ({ open, onOpenChange }) =
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('quickLog')}
+                {t('create')}
               </Button>
             </div>
           </form>

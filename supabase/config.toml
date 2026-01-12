@@ -72,3 +72,6 @@ verify_jwt = false
 [functions.daily-grazing-notifications]
 verify_jwt = false
 
+[functions.daily-task-notifications]
+verify_jwt = false
+
