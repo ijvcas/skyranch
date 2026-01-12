@@ -2344,6 +2344,7 @@ export type Database = {
           completed_by: string | null
           completion_notes: string | null
           completion_photos: string[] | null
+          cost: number | null
           created_at: string | null
           description: string | null
           due_date: string
@@ -2372,6 +2373,7 @@ export type Database = {
           completed_by?: string | null
           completion_notes?: string | null
           completion_photos?: string[] | null
+          cost?: number | null
           created_at?: string | null
           description?: string | null
           due_date: string
@@ -2400,6 +2402,7 @@ export type Database = {
           completed_by?: string | null
           completion_notes?: string | null
           completion_photos?: string[] | null
+          cost?: number | null
           created_at?: string | null
           description?: string | null
           due_date?: string

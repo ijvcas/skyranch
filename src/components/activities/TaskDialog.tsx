@@ -28,15 +28,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import type { Task } from '@/hooks/useTasks';
+import { useAppUsers } from '@/hooks/useAppUsers';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
-  type: z.enum(['feeding', 'health', 'maintenance', 'breeding', 'veterinary', 'pregnancy', 'infrastructure', 'general', 'custom']),
+  task_type: z.enum(['feeding', 'health', 'maintenance', 'breeding', 'veterinary', 'pregnancy', 'infrastructure', 'general', 'custom']),
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
   status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
   due_date: z.string().optional(),
-  notes: z.string().optional(),
+  assigned_to: z.string().optional(),
+  completion_notes: z.string().optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -50,17 +52,19 @@ interface TaskDialogProps {
 
 export default function TaskDialog({ open, onOpenChange, task, onSave }: TaskDialogProps) {
   const { t } = useTranslation('tasks');
+  const { data: appUsers = [] } = useAppUsers();
 
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
-      type: task?.type || 'general',
+      task_type: task?.task_type || 'general',
       priority: task?.priority || 'medium',
       status: task?.status || 'pending',
-      due_date: task?.due_date || '',
-      notes: task?.notes || '',
+      due_date: task?.due_date ? task.due_date.split('T')[0] : '',
+      assigned_to: task?.assigned_to || '',
+      completion_notes: task?.completion_notes || '',
     },
   });
 
@@ -114,7 +118,7 @@ export default function TaskDialog({ open, onOpenChange, task, onSave }: TaskDia
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="type"
+                name="task_type"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('fields.type')}</FormLabel>
@@ -206,7 +210,32 @@ export default function TaskDialog({ open, onOpenChange, task, onSave }: TaskDia
 
             <FormField
               control={form.control}
-              name="notes"
+              name="assigned_to"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('fields.assignedTo')}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select user..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {appUsers.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="completion_notes"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('fields.notes')}</FormLabel>
